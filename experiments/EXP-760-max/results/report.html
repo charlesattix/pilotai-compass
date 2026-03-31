@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EXP-760-max: ML Filter + Regime Sizing</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+         margin:0; padding:2em 3em; background:#f8fafc; color:#1e293b; }
+  h1 { color:#0f172a; border-bottom:2px solid #e2e8f0; padding-bottom:0.4em; }
+  h2 { color:#334155; margin-top:2em; }
+  .meta { color:#64748b; font-size:0.9em; margin-bottom:1.5em; }
+  .good { color:#16a34a; font-weight:600; } .bad { color:#dc2626; font-weight:600; }
+  .kpi-row { display:flex; gap:1.2em; flex-wrap:wrap; margin:1.5em 0; }
+  .kpi { background:#fff; border:1px solid #e2e8f0; border-radius:8px;
+          padding:1em 1.5em; min-width:130px; flex:1; text-align:center; }
+  .kpi .value { font-size:1.5em; font-weight:700; }
+  .kpi .label { font-size:0.75em; color:#64748b; margin-top:0.2em; }
+  table { border-collapse:collapse; width:100%; margin:1em 0; font-size:0.88em; }
+  th { background:#f1f5f9; padding:8px 10px; text-align:left;
+       border-bottom:2px solid #cbd5e1; font-weight:600; }
+  td { padding:6px 10px; border-bottom:1px solid #e2e8f0; text-align:right; }
+  .chart { background:#fff; border:1px solid #e2e8f0; border-radius:8px;
+            padding:1em; margin:1.5em 0; text-align:center; }
+  footer { margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0;
+            font-size:0.8em; color:#94a3b8; }
+</style>
+</head>
+<body>
+
+<h1>EXP-760-max: ML Filter + Dynamic Regime Sizing</h1>
+<div class="meta">ML threshold P≥0.6 &middot; 7 configs tested &middot; 192 trades &middot; Generated 2026-03-31 03:56</div>
+
+<div class="kpi-row">
+  <div class="kpi"><div class="value good">moderate</div><div class="label">Optimal Config</div></div>
+  <div class="kpi"><div class="value">9.79</div><div class="label">Sharpe</div></div>
+  <div class="kpi"><div class="value good">85%</div><div class="label">Win Rate</div></div>
+  <div class="kpi"><div class="value">-6.7%</div><div class="label">Max DD</div></div>
+  <div class="kpi"><div class="value">$+258,116</div><div class="label">Total P&L</div></div>
+  <div class="kpi"><div class="value good">$+83,806</div><div class="label">vs No Sizing</div></div>
+</div>
+
+<h2>1. Configuration Comparison</h2>
+<div class="chart"><svg width="600" height="260" xmlns="http://www.w3.org/2000/svg"><rect x="110" y="25" width="192" height="22" fill="#16a34a" opacity="0.8" rx="2"/><text x="105" y="40" text-anchor="end" font-size="10" fill="#334155">baseline</text><text x="307" y="40" font-size="9" fill="#16a34a">$+174,310 (S=9.7)</text><rect x="110" y="56" width="238" height="22" fill="#16a34a" opacity="0.8" rx="2"/><text x="105" y="71" text-anchor="end" font-size="10" fill="#334155">conservative</text><text x="353" y="71" font-size="9" fill="#16a34a">$+216,213 (S=9.8)</text><rect x="110" y="86" width="285" height="22" fill="#0f766e" opacity="0.8" rx="2"/><text x="105" y="101" text-anchor="end" font-size="10" fill="#334155">moderate</text><text x="400" y="101" font-size="9" fill="#0f766e">$+258,116 (S=9.8)</text><rect x="110" y="117" width="377" height="22" fill="#16a34a" opacity="0.8" rx="2"/><text x="105" y="132" text-anchor="end" font-size="10" fill="#334155">aggressive</text><text x="492" y="132" font-size="9" fill="#16a34a">$+342,157 (S=9.7)</text><rect x="110" y="148" width="470" height="22" fill="#16a34a" opacity="0.8" rx="2"/><text x="105" y="163" text-anchor="end" font-size="10" fill="#334155">very_aggressive</text><text x="585" y="163" font-size="9" fill="#16a34a">$+426,104 (S=9.7)</text><rect x="110" y="179" width="374" height="22" fill="#16a34a" opacity="0.8" rx="2"/><text x="105" y="194" text-anchor="end" font-size="10" fill="#334155">bull_only</text><text x="489" y="194" font-size="9" fill="#16a34a">$+339,160 (S=9.7)</text><rect x="110" y="209" width="285" height="22" fill="#16a34a" opacity="0.8" rx="2"/><text x="105" y="224" text-anchor="end" font-size="10" fill="#334155">bear_hedge</text><text x="400" y="224" font-size="9" fill="#16a34a">$+258,234 (S=9.8)</text></svg></div>
+<table>
+<thead><tr><th>Config</th><th>Trades</th><th>Win Rate</th><th>Total P&L</th>
+<th>Ann Return</th><th>Max DD</th><th>Sharpe</th><th>PF</th><th>P&L Improvement</th></tr></thead>
+<tbody><tr><td style="text-align:left">baseline</td><td>192</td><td>85.4%</td><td>$+174,310</td><td>+16.0%</td><td>-5.0%</td><td>9.72</td><td>3.68</td><td>$+0</td></tr>
+<tr><td style="text-align:left">conservative</td><td>192</td><td>85.4%</td><td>$+216,213</td><td>+18.5%</td><td>-5.9%</td><td>9.79</td><td>3.76</td><td>$+41,903</td></tr>
+<tr style="background:#f0fdf4;font-weight:600"><td style="text-align:left">moderate</td><td>192</td><td>85.4%</td><td>$+258,116</td><td>+20.8%</td><td>-6.7%</td><td>9.79</td><td>3.82</td><td>$+83,806</td></tr>
+<tr><td style="text-align:left">aggressive</td><td>192</td><td>85.4%</td><td>$+342,157</td><td>+24.8%</td><td>-7.5%</td><td>9.74</td><td>3.83</td><td>$+167,847</td></tr>
+<tr><td style="text-align:left">very_aggressive</td><td>192</td><td>85.4%</td><td>$+426,104</td><td>+28.2%</td><td>-8.2%</td><td>9.71</td><td>3.86</td><td>$+251,794</td></tr>
+<tr><td style="text-align:left">bull_only</td><td>192</td><td>85.4%</td><td>$+339,160</td><td>+24.7%</td><td>-7.7%</td><td>9.65</td><td>3.84</td><td>$+164,850</td></tr>
+<tr><td style="text-align:left">bear_hedge</td><td>192</td><td>85.4%</td><td>$+258,234</td><td>+20.8%</td><td>-6.5%</td><td>9.77</td><td>3.78</td><td>$+83,924</td></tr>
+</tbody>
+</table>
+
+<h2>2. Optimal Config Regime Breakdown</h2>
+<div class="chart"><svg width="500" height="200" xmlns="http://www.w3.org/2000/svg"><line x1="280.0" y1="25" x2="280.0" y2="180" stroke="#cbd5e1" stroke-dasharray="3"/><rect x="280" y="25" width="0" height="36" fill="#dc2626" opacity="0.8" rx="2"/><text x="75" y="50" text-anchor="end" font-size="10" fill="#334155">bear (0.5x)</text><rect x="280" y="77" width="200" height="36" fill="#16a34a" opacity="0.8" rx="2"/><text x="75" y="102" text-anchor="end" font-size="10" fill="#334155">bull (1.5x)</text><rect x="280" y="128" width="5" height="36" fill="#3b82f6" opacity="0.8" rx="2"/><text x="75" y="154" text-anchor="end" font-size="10" fill="#334155">low_vol (1.0x)</text></svg></div>
+<table>
+<thead><tr><th>Regime</th><th>Multiplier</th><th>Trades</th><th>Win Rate</th><th>P&L</th><th>Avg P&L</th></tr></thead>
+<tbody><tr><td style="text-align:left">bear</td><td>0.50x</td><td>12</td><td>75%</td><td>$+235</td><td>$+20</td></tr>
+<tr><td style="text-align:left">bull</td><td>1.50x</td><td>174</td><td>86%</td><td>$+252,122</td><td>$+1,449</td></tr>
+<tr><td style="text-align:left">low_vol</td><td>1.00x</td><td>6</td><td>100%</td><td>$+5,760</td><td>$+960</td></tr>
+</tbody>
+</table>
+
+<h2>3. vs EXP-710 (ML Filter Only, P≥0.60)</h2>
+<table>
+<thead><tr><th>Metric</th><th>EXP-710 (P≥0.60)</th><th>EXP-760 (moderate)</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td style="text-align:left">Win Rate</td><td>85.4%</td><td>85.4%</td><td>+0.0pp</td></tr>
+<tr><td style="text-align:left">Sharpe</td><td>9.72</td><td>9.79</td><td class="good">+0.08</td></tr>
+<tr><td style="text-align:left">Max DD</td><td>-5.0%</td><td>-6.7%</td><td>-1.7pp</td></tr>
+<tr><td style="text-align:left">Total P&L</td><td>$+174,310</td><td>$+258,116</td><td class="good">$+83,806</td></tr>
+</tbody>
+</table>
+
+<footer>Generated by <code>EXP-760-max/backtest.py</code></footer>
+</body></html>
