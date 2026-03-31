@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>EXP-731-max: Short DTE High Frequency</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,sans-serif;background:#0f172a;color:#e2e8f0;padding:24px}
+h1{font-size:1.8rem;margin-bottom:4px}
+h2{font-size:1.1rem;color:#38bdf8;margin:20px 0 10px}
+.sub{color:#94a3b8;font-size:.85rem;margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-bottom:28px}
+.card{background:#1e293b;border-radius:10px;padding:18px}
+.card .lbl{font-size:.75rem;color:#94a3b8;text-transform:uppercase}
+.card .val{font-size:1.4rem;font-weight:700;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:20px}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #334155}
+th{color:#94a3b8}
+.pos{color:#4ade80}.neg{color:#f87171}
+svg{display:block;margin:0 auto 20px}
+</style>
+</head>
+<body>
+<h1>EXP-731-max: Short DTE High Frequency</h1>
+<p class="sub">2020-01-02 to 2025-12-31 &middot; 347 trades &middot; Starting: $100,000</p>
+
+<div class="grid">
+<div class="card"><div class="lbl">Ending Capital</div><div class="val neg">$77,333</div></div>
+<div class="card"><div class="lbl">Total Return</div><div class="val neg">-22.67%</div></div>
+<div class="card"><div class="lbl">CAGR</div><div class="val">-4.2%</div></div>
+<div class="card"><div class="lbl">Sharpe</div><div class="val">-3.11</div></div>
+<div class="card"><div class="lbl">Max DD</div><div class="val neg">24.31%</div></div>
+<div class="card"><div class="lbl">Win Rate</div><div class="val">46.11%</div></div>
+<div class="card"><div class="lbl">Profit Factor</div><div class="val">0.66</div></div>
+<div class="card"><div class="lbl">Avg Hold</div><div class="val">3.0d</div></div>
+<div class="card"><div class="lbl">Avg DTE</div><div class="val">3.5d</div></div>
+<div class="card"><div class="lbl">Calmar</div><div class="val">-0.17</div></div>
+</div>
+
+<h2>Equity Curve</h2>
+<svg viewBox="0 0 700 250" width="700" xmlns="http://www.w3.org/2000/svg"><polyline points="70,37 72,36 74,39 75,38 77,36 79,33 81,32 83,31 85,30 86,32 88,35 90,34 92,33 94,30 95,33 97,37 99,34 101,37 103,40 104,44 106,47 108,44 110,40 112,37 114,33 115,36 117,31 119,30 121,33 123,30 124,29 126,28 128,31 130,34 132,34 134,33 135,31 137,28 139,32 141,31 143,27 144,31 146,33 148,36 150,40 152,42 154,45 155,49 157,48 159,46 161,48 163,51 164,46 166,44 168,47 170,50 172,47 173,50 175,53 177,56 179,54 181,53 183,56 184,59 186,61 188,63 190,63 192,60 193,63 195,66 197,61 199,65 201,62 203,60 204,59 206,55 208,54 210,49 212,51 213,50 215,54 217,57 219,60 221,57 223,60 224,63 226,66 228,69 230,72 232,71 233,70 235,67 237,66 239,69 241,66 242,65 244,68 246,71 248,68 250,71 252,67 253,66 255,69 257,67 259,66 261,69 262,66 264,68 266,70 268,74 270,77 272,80 273,82 275,85 277,80 279,78 281,81 282,79 284,81 286,84 288,87 290,90 291,92 293,91 295,90 297,87 299,83 301,86 302,90 304,89 306,88 308,87 310,86 311,83 313,81 315,79 317,77 319,75 321,72 322,69 324,67 326,64 328,63 330,60 331,60 333,55 335,53 337,50 339,46 341,44 342,42 344,39 346,36 348,34 350,31 351,29 353,27 355,26 357,24 359,22 360,20 362,24 364,21 366,24 368,23 370,22 371,22 373,25 375,22 377,25 379,27 380,30 382,33 384,35 386,38 388,40 390,43 391,47 393,49 395,46 397,45 399,48 400,51 402,50 404,48 406,51 408,54 410,52 411,50 413,45 415,43 417,45 419,44 420,47 422,44 424,41 426,44 428,40 429,43 431,46 433,48 435,48 437,51 439,50 440,53 442,51 444,50 446,52 448,55 449,58 451,54 453,57 455,57 457,55 459,59 460,54 462,52 464,49 466,52 468,51 469,50 471,53 473,50 475,48 477,51 479,54 480,57 482,57 484,52 486,55 488,58 489,60 491,62 493,66 495,69 497,71 498,66 500,69 502,73 504,71 506,69 508,68 509,71 511,73 513,77 515,81 517,84 518,82 520,84 522,87 524,85 526,85 528,87 529,91 531,95 533,93 535,97 537,94 538,97 540,99 542,101 544,103 546,106 547,103 549,105 551,107 553,105 555,104 557,102 558,105 560,107 562,110 564,107 566,105 567,107 569,110 571,114 573,117 575,119 577,123 578,126 580,128 582,130 584,127 586,126 587,129 589,132 591,135 593,137 595,134 597,137 598,135 600,139 602,141 604,139 606,143 607,146 609,144 611,141 613,139 615,141 616,139 618,142 620,141 622,144 624,147 626,146 627,148 629,151 631,153 633,156 635,154 636,156 638,159 640,161 642,159 644,162 646,164 647,166 649,164 651,166 653,168 655,170 656,172 658,174 660,174 662,177 664,180 666,183 667,187 669,190 671,193 673,196 675,198 676,201 678,199 680,202 682,204 684,206 685,209 687,205 689,209 691,207 693,205 695,208 696,210 698,213 700,215" fill="none" stroke="#4ade80" stroke-width="2"/><text x="65" y="24" text-anchor="end" font-size="10" fill="#94a3b8">$102,169</text><text x="65" y="215" text-anchor="end" font-size="10" fill="#94a3b8">$77,333</text><line x1="70" y1="215" x2="700" y2="215" stroke="#475569" stroke-width="1"/></svg>
+
+<h2>Success Criteria</h2>
+<table><thead><tr><th>Criterion</th><th>Status</th></tr></thead><tbody><tr><td>annual returns gt 40</td><td class="neg">FAIL</td></tr><tr><td>max dd lt 15</td><td class="neg">FAIL</td></tr><tr><td>win rate gt 70</td><td class="neg">FAIL</td></tr><tr><td>avg hold lt 5</td><td class="pos">PASS</td></tr><tr><td>sharpe gt 2 5</td><td class="neg">FAIL</td></tr></tbody></table>
+
+<h2>Yearly Breakdown</h2>
+<table><thead><tr><th>Year</th><th>Trades</th><th>P&L</th><th>Win Rate</th><th>Return</th></tr></thead><tbody><tr><td>2020</td><td>71</td><td class="neg">$-3,506</td><td>49.3%</td><td>-3.5%</td></tr><tr><td>2021</td><td>57</td><td class="neg">$-3,196</td><td>47.4%</td><td>-3.2%</td></tr><tr><td>2022</td><td>65</td><td class="pos">$5,469</td><td>70.8%</td><td>5.5%</td></tr><tr><td>2023</td><td>56</td><td class="neg">$-5,160</td><td>41.1%</td><td>-5.2%</td></tr><tr><td>2024</td><td>53</td><td class="neg">$-7,037</td><td>35.8%</td><td>-7.0%</td></tr><tr><td>2025</td><td>45</td><td class="neg">$-9,238</td><td>22.2%</td><td>-9.2%</td></tr></tbody></table>
+
+<h2>Exit Reasons</h2>
+<table><thead><tr><th>Reason</th><th>Count</th></tr></thead><tbody><tr><td>profit_target</td><td>162</td></tr><tr><td>strike_breach</td><td>185</td></tr></tbody></table>
+
+<h2>Regime Performance</h2>
+<table><thead><tr><th>Regime</th><th>Trades</th><th>P&L</th><th>Win Rate</th></tr></thead><tbody><tr><td>bear</td><td>41</td><td class="neg">$-2,779</td><td>51.2%</td></tr><tr><td>bull</td><td>120</td><td class="neg">$-2,355</td><td>52.5%</td></tr><tr><td>high_vol</td><td>33</td><td class="neg">$-1,532</td><td>54.5%</td></tr><tr><td>low_vol</td><td>153</td><td class="neg">$-16,000</td><td>37.9%</td></tr></tbody></table>
+
+</body>
+</html>
