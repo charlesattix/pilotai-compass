@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Paper Trading Dashboard</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         margin: 0; padding: 2em 3em; background: #f8fafc; color: #1e293b; }
+  h1 { color: #0f172a; margin-bottom: 0.3em; }
+  h2 { color: #334155; margin-top: 2.5em; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.3em; }
+  h3 { color: #1e293b; margin-bottom: 0.3em; }
+  .meta { color: #64748b; font-size: 0.9em; margin-bottom: 1.5em; }
+  .muted { color: #94a3b8; }
+  .description { color: #64748b; font-size: 0.88em; margin: 0.3em 0 1em; }
+  .good { color: #16a34a; }
+  .bad { color: #dc2626; }
+  .empty { color: #94a3b8; text-align: center; font-style: italic; padding: 2em; }
+  .kpi-row { display: flex; gap: 1em; flex-wrap: wrap; margin: 1em 0; }
+  .kpi { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
+          padding: 0.8em 1.2em; min-width: 100px; flex: 1; text-align: center; }
+  .kpi .value { font-size: 1.4em; font-weight: 700; }
+  .kpi .label { font-size: 0.75em; color: #64748b; margin-top: 0.2em; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px;
+            font-size: 0.75em; font-weight: 600; }
+  .badge.active { background: #dcfce7; color: #166534; }
+  .badge.early { background: #fef3c7; color: #92400e; }
+  .badge.pending { background: #dbeafe; color: #1e40af; }
+  .badge.waiting { background: #f1f5f9; color: #64748b; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.88em; }
+  th { background: #f1f5f9; padding: 8px 10px; text-align: left;
+       border-bottom: 2px solid #cbd5e1; font-weight: 600; font-size: 0.85em; }
+  td { padding: 6px 10px; border-bottom: 1px solid #e2e8f0; }
+  tr:hover { background: #f8fafc; }
+  .trades-table { font-size: 0.82em; }
+  .trades-table td { padding: 4px 8px; }
+  code { font-size: 0.85em; color: #64748b; }
+  .experiment-detail { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
+                        padding: 1.5em; margin: 1.5em 0; }
+  .summary-kpi { display: flex; gap: 1.5em; margin: 1.5em 0; }
+  .summary-kpi .kpi { min-width: 140px; }
+  .summary-kpi .kpi .value { font-size: 1.6em; }
+  footer { margin-top: 3em; padding-top: 1em; border-top: 1px solid #e2e8f0;
+            font-size: 0.8em; color: #94a3b8; }
+</style>
+</head>
+<body>
+
+<h1>Paper Trading Dashboard</h1>
+<div class="meta">
+  <strong>4</strong> active experiments &middot;
+  <strong>32</strong> total trades &middot;
+  Generated 2026-03-29 10:02
+</div>
+
+<div class="summary-kpi">
+  <div class="kpi"><div class="value">4</div><div class="label">Active Experiments</div></div>
+  <div class="kpi"><div class="value">32</div><div class="label">Total Trades</div></div>
+  <div class="kpi"><div class="value ">$0.00</div><div class="label">Combined P&L</div></div>
+</div>
+
+<h2>Experiment Comparison</h2>
+<table>
+<thead>
+<tr>
+  <th>Experiment</th><th>Ticker</th><th>Live Since</th><th>Status</th>
+  <th>Trades</th><th>With P&L</th><th>Win Rate</th><th>Total P&L</th>
+  <th>Cumul Return</th><th>Sharpe</th><th>Max DD</th><th>Current DD</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><strong>EXP-400</strong><br><small class="muted">The Champion</small></td><td>SPY</td><td>2026-03-15</td><td><span class="badge waiting">Awaiting Data</span></td><td>1</td><td>0</td><td>—</td><td class="">$0.00</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td><strong>EXP-401</strong><br><small class="muted">The Blend</small></td><td>SPY</td><td>2026-03-15</td><td><span class="badge pending">Pending</span></td><td>1</td><td>0</td><td>—</td><td class="">$0.00</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td><strong>EXP-503</strong><br><small class="muted">ML V2 Aggressive</small></td><td>SPY</td><td>2026-03-22</td><td><span class="badge waiting">Awaiting Data</span></td><td>0</td><td>0</td><td>—</td><td class="">$0.00</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td><strong>EXP-600</strong><br><small class="muted">IBIT Adaptive</small></td><td>IBIT</td><td>2026-03-22</td><td><span class="badge waiting">Awaiting Data</span></td><td>0</td><td>0</td><td>—</td><td class="">$0.00</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+
+</tbody>
+</table>
+
+<h2>Experiment Details</h2>
+
+        <div class="experiment-detail" id="EXP-400">
+          <h3>EXP-400: The Champion <small class="muted">(SPY)</small></h3>
+          <p class="description">Regime-adaptive credit spreads & iron condors on SPY. Switches between bull puts and bear calls based on trend detection (MA crossovers). No ML. Robustness score: 0.870.</p>
+          <div class="kpi-row">
+            <div class="kpi"><div class="value">1</div><div class="label">Total Trades</div></div>
+            <div class="kpi"><div class="value">0</div><div class="label">Open</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Win Rate</div></div>
+            <div class="kpi"><div class="value ">$0.00</div><div class="label">Total P&L</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Avg P&L</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Sharpe</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Max DD</div></div>
+            <div class="kpi"><div class="value">3.0</div><div class="label">Avg Hold (d)</div></div>
+          </div>
+          <table class="trades-table">
+            <thead>
+              <tr><th>ID</th><th>Ticker</th><th>Strategy</th><th>Status</th>
+              <th>Entry</th><th>Exit</th><th>Credit</th><th>Contracts</th>
+              <th>P&L</th><th>Exit Reason</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>t1</code></td><td>SPY</td><td>bull_put</td><td>closed_external</td><td>2026-03-24T17:34:40</td><td>2026-03-28T17:02:24</td><td>$1.00</td><td>1</td><td class="">—</td><td>closed_external</td></tr>
+
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="experiment-detail" id="EXP-401">
+          <h3>EXP-401: The Blend <small class="muted">(SPY)</small></h3>
+          <p class="description">Blended strategy combining credit spreads with straddles/strangles on SPY. Uses volatility regime detection to select optimal structure. No ML. Walk-forward validated (3/3 passed).</p>
+          <div class="kpi-row">
+            <div class="kpi"><div class="value">1</div><div class="label">Total Trades</div></div>
+            <div class="kpi"><div class="value">1</div><div class="label">Open</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Win Rate</div></div>
+            <div class="kpi"><div class="value ">$0.00</div><div class="label">Total P&L</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Avg P&L</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Sharpe</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Max DD</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Avg Hold (d)</div></div>
+          </div>
+          <table class="trades-table">
+            <thead>
+              <tr><th>ID</th><th>Ticker</th><th>Strategy</th><th>Status</th>
+              <th>Entry</th><th>Exit</th><th>Credit</th><th>Contracts</th>
+              <th>P&L</th><th>Exit Reason</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>cs-cba3f19eac66c910</code></td><td>SPY</td><td>bear_call</td><td>open</td><td>2026-03-27T18:00:01</td><td>—</td><td>$3.84</td><td>14</td><td class="">—</td><td>None</td></tr>
+
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="experiment-detail" id="EXP-503">
+          <h3>EXP-503: ML V2 Aggressive <small class="muted">(SPY)</small></h3>
+          <p class="description">Machine learning-driven credit spreads on SPY. XGBoost regime classifier routes trades through ML-optimized position sizing. Aggressive Kelly sizing with model confidence weighting.</p>
+          <div class="kpi-row">
+            <div class="kpi"><div class="value">0</div><div class="label">Total Trades</div></div>
+            <div class="kpi"><div class="value">0</div><div class="label">Open</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Win Rate</div></div>
+            <div class="kpi"><div class="value ">$0.00</div><div class="label">Total P&L</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Avg P&L</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Sharpe</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Max DD</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Avg Hold (d)</div></div>
+          </div>
+          <table class="trades-table">
+            <thead>
+              <tr><th>ID</th><th>Ticker</th><th>Strategy</th><th>Status</th>
+              <th>Entry</th><th>Exit</th><th>Credit</th><th>Contracts</th>
+              <th>P&L</th><th>Exit Reason</th></tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="10" class="empty">No trades recorded yet</td></tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="experiment-detail" id="EXP-600">
+          <h3>EXP-600: IBIT Adaptive <small class="muted">(IBIT)</small></h3>
+          <p class="description">Direction-adaptive credit spreads on IBIT (Bitcoin ETF). MA50-based trend detection, 14 DTE, 10% OTM. No ML. Optimized via mega parameter sweep (139% avg annual backtest).</p>
+          <div class="kpi-row">
+            <div class="kpi"><div class="value">0</div><div class="label">Total Trades</div></div>
+            <div class="kpi"><div class="value">0</div><div class="label">Open</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Win Rate</div></div>
+            <div class="kpi"><div class="value ">$0.00</div><div class="label">Total P&L</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Avg P&L</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Sharpe</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Max DD</div></div>
+            <div class="kpi"><div class="value">—</div><div class="label">Avg Hold (d)</div></div>
+          </div>
+          <table class="trades-table">
+            <thead>
+              <tr><th>ID</th><th>Ticker</th><th>Strategy</th><th>Status</th>
+              <th>Entry</th><th>Exit</th><th>Credit</th><th>Contracts</th>
+              <th>P&L</th><th>Exit Reason</th></tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="10" class="empty">No trades recorded yet</td></tr>
+            </tbody>
+          </table>
+        </div>
+        
+
+<footer>
+  Generated by <code>compass/paper_tracker.py</code> &middot; READ-ONLY reporting — no broker connections
+</footer>
+
+</body>
+</html>

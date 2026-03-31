@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portfolio Simulation Report</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+background:#f8fafc;color:#1e293b;line-height:1.5;padding:24px;max-width:1300px;margin:0 auto}
+h1{font-size:1.6em;font-weight:700;margin-bottom:4px}
+h2{font-size:1.15em;font-weight:600;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid #e2e8f0}
+.sub{color:#64748b;font-size:0.9em;margin-bottom:20px}
+.cards{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px 18px;min-width:130px;flex:1}
+.ct{font-size:0.75em;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+.cv{font-size:1.4em;font-weight:700}
+table{border-collapse:collapse;width:100%;font-size:0.85em;margin-bottom:16px}
+th{background:#f1f5f9;padding:6px 8px;text-align:center;font-weight:600;border-bottom:2px solid #e2e8f0}
+td{padding:5px 8px;border-bottom:1px solid #f1f5f9;text-align:center}
+hr{margin:28px 0;border:none;border-top:1px solid #e2e8f0}
+</style></head><body>
+
+<h1>Portfolio Simulation Report</h1>
+<p class="sub">2 experiments &middot; 661 trades &middot; 2026-03-29 17:25 UTC</p>
+<div class="cards"><div class="card"><div class="ct">Return</div><div class="cv">+60.0%</div></div><div class="card"><div class="ct">Sharpe</div><div class="cv">0.690</div></div><div class="card"><div class="ct">Sortino</div><div class="cv">0.328</div></div><div class="card"><div class="ct">Calmar</div><div class="cv">0.272</div></div><div class="card"><div class="ct">Max DD</div><div class="cv">-28.9%</div></div><div class="card"><div class="ct">Trades</div><div class="cv">661</div></div></div>
+
+<h2>Per-Experiment Contribution</h2>
+<table><thead><tr><th>Experiment</th><th>Weight</th><th>PnL</th><th>% of Portfolio</th><th>Trades</th><th>WR</th><th>Sharpe</th></tr></thead><tbody><tr><td style="font-weight:600">EXP-400</td><td>60%</td><td style="color:#16a34a">$+26,776</td><td>+45%</td><td>246</td><td>82%</td><td>1.222</td></tr><tr><td style="font-weight:600">EXP-401</td><td>40%</td><td style="color:#16a34a">$+33,171</td><td>+55%</td><td>415</td><td>58%</td><td>0.351</td></tr></tbody></table>
+
+<h2>Portfolio vs Individual Experiments</h2>
+<table><thead><tr><th>Strategy</th><th>Return</th><th>Sharpe</th><th>Sortino</th><th>Max DD</th><th>Vol</th></tr></thead><tbody><tr style="font-weight:700"><td>Portfolio</td><td>+60.0%</td><td>0.690</td><td>0.328</td><td>-28.9%</td><td>14.0%</td></tr><tr style=""><td>EXP-400</td><td>+123.3%</td><td>1.222</td><td>0.315</td><td>-29.4%</td><td>16.3%</td></tr><tr style=""><td>EXP-401</td><td>+30.7%</td><td>0.351</td><td>0.343</td><td>-30.6%</td><td>14.1%</td></tr></tbody></table>
+
+<h2>Equity Curve</h2>
+<table><thead><tr><th>Date</th><th>Equity</th><th>Regime</th></tr></thead><tbody><tr><td>2020-01-08</td><td>$99,541</td><td>bull</td></tr><tr><td>2020-04-03</td><td>$94,689</td><td>high_vol</td></tr><tr><td>2020-06-30</td><td>$71,080</td><td>high_vol</td></tr><tr><td>2020-09-24</td><td>$76,350</td><td>bull</td></tr><tr><td>2020-12-21</td><td>$80,274</td><td>bull</td></tr><tr><td>2021-03-17</td><td>$81,098</td><td>bull</td></tr><tr><td>2021-06-11</td><td>$85,827</td><td>bull</td></tr><tr><td>2021-09-07</td><td>$135,846</td><td>bull</td></tr><tr><td>2021-12-02</td><td>$155,757</td><td>high_vol</td></tr><tr><td>2022-02-28</td><td>$157,708</td><td>high_vol</td></tr><tr><td>2022-05-25</td><td>$153,897</td><td>bear</td></tr><tr><td>2022-08-19</td><td>$143,836</td><td>bull</td></tr><tr><td>2022-11-15</td><td>$136,875</td><td>bear</td></tr><tr><td>2023-02-09</td><td>$134,955</td><td>bull</td></tr><tr><td>2023-05-08</td><td>$131,130</td><td>bull</td></tr><tr><td>2023-08-02</td><td>$134,672</td><td>bull</td></tr><tr><td>2023-10-27</td><td>$133,644</td><td>bull</td></tr><tr><td>2024-01-23</td><td>$146,797</td><td>bull</td></tr><tr><td>2024-04-18</td><td>$146,595</td><td>bull</td></tr><tr><td>2024-07-15</td><td>$154,949</td><td>bull</td></tr><tr><td>2024-10-09</td><td>$153,838</td><td>bull</td></tr><tr><td>2025-01-03</td><td>$157,831</td><td>low_vol</td></tr><tr><td>2025-04-01</td><td>$157,291</td><td>bear</td></tr><tr><td>2025-06-26</td><td>$145,307</td><td>bull</td></tr><tr><td>2025-09-22</td><td>$157,434</td><td>bull</td></tr><tr><td>2025-12-17</td><td>$157,095</td><td>bull</td></tr><tr><td>2025-12-31</td><td>$159,947</td><td>bull</td></tr></tbody></table>
+
+<h2>Rebalance Log (Last 15)</h2>
+<table><thead><tr><th>Date</th><th>Regime</th><th>Event Scale</th><th>Weights</th></tr></thead><tbody><tr><td>2025-09-24</td><td>bull</td><td>100%</td><td style="font-size:0.82em">EXP-400=42%, EXP-401=52%</td></tr><tr><td>2025-10-01</td><td>bull</td><td>70%</td><td style="font-size:0.82em">EXP-400=29%, EXP-401=36%</td></tr><tr><td>2025-10-08</td><td>bull</td><td>100%</td><td style="font-size:0.82em">EXP-400=42%, EXP-401=52%</td></tr><tr><td>2025-10-15</td><td>bull</td><td>70%</td><td style="font-size:0.82em">EXP-400=29%, EXP-401=36%</td></tr><tr><td>2025-10-22</td><td>bull</td><td>100%</td><td style="font-size:0.82em">EXP-400=42%, EXP-401=52%</td></tr><tr><td>2025-10-29</td><td>bull</td><td>100%</td><td style="font-size:0.82em">EXP-400=42%, EXP-401=52%</td></tr><tr><td>2025-11-05</td><td>bull</td><td>100%</td><td style="font-size:0.82em">EXP-400=42%, EXP-401=52%</td></tr><tr><td>2025-11-12</td><td>bull</td><td>70%</td><td style="font-size:0.82em">EXP-400=29%, EXP-401=36%</td></tr><tr><td>2025-11-19</td><td>bull</td><td>100%</td><td style="font-size:0.82em">EXP-400=42%, EXP-401=52%</td></tr><tr><td>2025-11-26</td><td>bull</td><td>100%</td><td style="font-size:0.82em">EXP-400=42%, EXP-401=52%</td></tr><tr><td>2025-12-03</td><td>bull</td><td>70%</td><td style="font-size:0.82em">EXP-400=29%, EXP-401=36%</td></tr><tr><td>2025-12-10</td><td>bull</td><td>100%</td><td style="font-size:0.82em">EXP-400=42%, EXP-401=52%</td></tr><tr><td>2025-12-17</td><td>bull</td><td>100%</td><td style="font-size:0.82em">EXP-400=42%, EXP-401=52%</td></tr><tr><td>2025-12-24</td><td>bull</td><td>100%</td><td style="font-size:0.82em">EXP-400=42%, EXP-401=52%</td></tr><tr><td>2025-12-31</td><td>bull</td><td>100%</td><td style="font-size:0.82em">EXP-400=42%, EXP-401=52%</td></tr></tbody></table>
+
+<hr><p style="font-size:0.75em;color:#94a3b8">Generated by <code>compass/portfolio_simulator.py</code></p>
+</body></html>

@@ -1,0 +1,109 @@
+# Tier 1 Feature Benchmark: Original vs Original + Tier 1
+**Date:** 2026-03-28
+**Training set:** 428 trades, 2020-01-02 – 2025-12-26
+**Feature sets compared:** original (20 features) vs tier1 (26 features)
+
+---
+
+## 1. Dataset Augmentation
+
+| Feature | Non-null | Fill % | Min | Median | Max |
+|---------|---------|--------|-----|--------|-----|
+| `vix_contango_ratio` | 428 | 100.0% | 0.758 | 1.151 | 1.307 |
+| `spy_tlt_corr_20d` | 428 | 100.0% | -0.830 | -0.019 | 0.858 |
+| `hyg_lqd_ratio` | 428 | 100.0% | 0.548 | 0.657 | 0.736 |
+| `hyg_lqd_ratio_5d_chg` | 428 | 100.0% | -2.759 | 0.097 | 4.715 |
+| `days_to_opex` | 428 | 100.0% | 1.000 | 16.000 | 35.000 |
+| `opening_gap_pct` | 428 | 100.0% | -6.692 | 0.130 | 3.944 |
+
+---
+
+## 2. Overall Walk-Forward Results
+
+| Model | Feature Set | N OOS | AUC | Accuracy | Base WR | ML WR | Lift |
+|-------|-------------|-------|-----|----------|---------|-------|------|
+| xgboost | original | 368 | 0.8213 | 0.7690 | 0.5951 | 0.8160 | 0.2209 |
+| ensemble | original | 368 | 0.8059 | 0.7989 | 0.5951 | 0.8372 | 0.2421 |
+| xgboost | tier1 | 368 | 0.8061 | 0.7609 | 0.5951 | 0.7860 | 0.1909 |
+| ensemble | tier1 | 368 | 0.7991 | 0.7989 | 0.5951 | 0.8372 | 0.2421 |
+
+## 3. Tier 1 Delta vs Original
+
+| Model | ΔAUC | ΔAccuracy | ΔWR Lift | Original AUC | Tier1 AUC |
+|-------|------|-----------|----------|-------------|-----------|
+| xgboost | ▼ 0.0152 | ▼ 0.0081 | ▼ 0.0300 | 0.8213 | 0.8061 |
+| ensemble | ▼ 0.0068 | – 0.0000 | – 0.0000 | 0.8059 | 0.7991 |
+
+---
+
+## 4. Per-Year Breakdown
+
+| Year | Model | Feat Set | N | AUC | Accuracy | Lift |
+|------|-------|----------|---|-----|----------|------|
+| 2021 | xgboost | original | 101 | 0.8149 | 0.8416 | 0.1871 |
+| 2021 | xgboost | tier1 | 101 | 0.8458 | 0.8416 | 0.1871 |
+| 2021 | ensemble | original | 101 | 0.8659 | 0.8416 | 0.1871 |
+| 2021 | ensemble | tier1 | 101 | 0.8439 | 0.8416 | 0.1871 |
+| 2022 | xgboost | original | 59 | 0.6963 | 0.6441 | 0.1816 |
+| 2022 | xgboost | tier1 | 59 | 0.6618 | 0.6271 | 0.1287 |
+| 2022 | ensemble | original | 59 | 0.7053 | 0.7119 | 0.2173 |
+| 2022 | ensemble | tier1 | 59 | 0.6727 | 0.7119 | 0.2173 |
+| 2023 | xgboost | original | 69 | 0.8615 | 0.8406 | 0.3005 |
+| 2023 | xgboost | tier1 | 69 | 0.8467 | 0.8406 | 0.3005 |
+| 2023 | ensemble | original | 69 | 0.8650 | 0.8406 | 0.3005 |
+| 2023 | ensemble | tier1 | 69 | 0.8484 | 0.8406 | 0.3005 |
+| 2024 | xgboost | original | 69 | 0.8229 | 0.7246 | 0.1377 |
+| 2024 | xgboost | tier1 | 69 | 0.8050 | 0.6957 | 0.0968 |
+| 2024 | ensemble | original | 69 | 0.8274 | 0.7536 | 0.2018 |
+| 2024 | ensemble | tier1 | 69 | 0.8157 | 0.7536 | 0.2018 |
+| 2025 | xgboost | original | 70 | 0.8275 | 0.7429 | 0.1786 |
+| 2025 | xgboost | tier1 | 70 | 0.8208 | 0.7429 | 0.1786 |
+| 2025 | ensemble | original | 70 | 0.8750 | 0.8143 | 0.2747 |
+| 2025 | ensemble | tier1 | 70 | 0.8692 | 0.8143 | 0.2747 |
+
+---
+
+## 5. Per-Regime Breakdown
+
+| Regime | Model | Feat Set | N | AUC | Accuracy | Lift |
+|--------|-------|----------|---|-----|----------|------|
+| bear | xgboost | original | 39 | 0.7541 | 0.6667 | 0.2564 |
+| bear | xgboost | tier1 | 39 | 0.7228 | 0.6667 | 0.1687 |
+| bear | ensemble | original | 39 | 0.7554 | 0.7692 | 0.2564 |
+| bear | ensemble | tier1 | 39 | 0.7609 | 0.7692 | 0.2564 |
+| bull | xgboost | original | 309 | 0.8260 | 0.7896 | 0.2053 |
+| bull | xgboost | tier1 | 309 | 0.8073 | 0.7767 | 0.1854 |
+| bull | ensemble | original | 309 | 0.8083 | 0.8026 | 0.2302 |
+| bull | ensemble | tier1 | 309 | 0.8024 | 0.8026 | 0.2302 |
+| high_vol | xgboost | original | 9 | 0.5556 | 0.5556 | -0.3333 |
+| high_vol | xgboost | tier1 | 9 | 0.5000 | 0.5556 | 0.0000 |
+| high_vol | ensemble | original | 9 | 0.7778 | 0.6667 | 0.1667 |
+| high_vol | ensemble | tier1 | 9 | 0.5556 | 0.6667 | 0.1667 |
+| low_vol | xgboost | original | 10 | 1.0000 | 0.8000 | 0.1500 |
+| low_vol | xgboost | tier1 | 10 | 1.0000 | 0.9000 | 0.2571 |
+| low_vol | ensemble | original | 10 | 1.0000 | 1.0000 | 0.4000 |
+| low_vol | ensemble | tier1 | 10 | 1.0000 | 1.0000 | 0.4000 |
+
+---
+
+## 6. Interpretation
+
+- XGBoost: Tier 1 ΔAUC = -0.0152 → **degraded** (features may be noisy)
+- Ensemble: Tier 1 ΔAUC = -0.0068 → **degraded** (features may be noisy)
+
+**Best combination: xgboost + original features (AUC = 0.8213)**
+
+### What each Tier 1 feature adds
+
+| Feature | Signal | Prior expected impact |
+|---------|--------|----------------------|
+| `vix_contango_ratio` | VIX term structure (VRP proxy) | High — directly prices the option-selling edge |
+| `spy_tlt_corr_20d` | Equity-bond correlation regime | Medium — identifies 2022-style joint-selloff regime |
+| `hyg_lqd_ratio` | Credit stress level | Medium-High — leads equity vol by 2-5 days |
+| `hyg_lqd_ratio_5d_chg` | Credit stress direction | Medium — rate of change more actionable than level |
+| `days_to_opex` | Gamma proximity to OPEX | Medium — replaces binary is_opex_week |
+| `opening_gap_pct` | Overnight sentiment | Low-Medium — daily signal, high noise |
+
+---
+
+*Generated by compass/benchmark_tier1_features.py — 2026-03-28 17:33*

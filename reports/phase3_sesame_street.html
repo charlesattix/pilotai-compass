@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 3 — Sesame Street Edition 🍪</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #fff;
+    color: #2d2d2d;
+    line-height: 1.7;
+    padding: 30px 20px;
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #feca57 25%, #48dbfb 50%, #ff9ff3 75%, #54a0ff 100%);
+    border-radius: 24px;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '🌈';
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 40px;
+  }
+  .header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 32px;
+    color: #fff;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.15);
+    margin-bottom: 4px;
+  }
+  .header .subtitle {
+    font-size: 18px;
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+  }
+  .header .brought {
+    font-size: 14px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  /* Episode blocks */
+  .episode {
+    background: #fff;
+    border: 4px solid;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 36px;
+    position: relative;
+  }
+  .episode.red { border-color: #ff6b6b; }
+  .episode.blue { border-color: #54a0ff; }
+  .episode.yellow { border-color: #feca57; }
+  .episode.green { border-color: #1dd1a1; }
+  .episode.purple { border-color: #c56cf0; }
+
+  .episode-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .episode-emoji {
+    font-size: 48px;
+    line-height: 1;
+  }
+  .episode-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 22px;
+  }
+  .episode-number {
+    font-size: 13px;
+    color: #999;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Character speech */
+  .speech {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    position: relative;
+    font-size: 16px;
+  }
+  .speech::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 30px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid #f8f9fa;
+  }
+  .speech .who {
+    font-weight: 800;
+    margin-bottom: 4px;
+    font-size: 15px;
+  }
+  .speech.cookie { background: #fff3e0; }
+  .speech.cookie::before { border-bottom-color: #fff3e0; }
+  .speech.count { background: #ede7f6; }
+  .speech.count::before { border-bottom-color: #ede7f6; }
+  .speech.elmo { background: #ffebee; }
+  .speech.elmo::before { border-bottom-color: #ffebee; }
+  .speech.oscar { background: #e8f5e9; }
+  .speech.oscar::before { border-bottom-color: #e8f5e9; }
+  .speech.bert { background: #fff9c4; }
+  .speech.bert::before { border-bottom-color: #fff9c4; }
+  .speech.grover { background: #e3f2fd; }
+  .speech.grover::before { border-bottom-color: #e3f2fd; }
+  .speech.bigbird { background: #fffde7; }
+  .speech.bigbird::before { border-bottom-color: #fffde7; }
+
+  /* Score cards — cookie jars */
+  .jars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .jar {
+    text-align: center;
+    padding: 20px 16px;
+    border-radius: 16px;
+    border: 3px solid;
+  }
+  .jar .icon { font-size: 36px; margin-bottom: 4px; }
+  .jar .label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #888; }
+  .jar .val { font-family: 'Fredoka One', cursive; font-size: 30px; margin: 4px 0 2px; }
+  .jar .note { font-size: 12px; color: #999; }
+  .jar.good { border-color: #1dd1a1; background: #f0fff4; }
+  .jar.good .val { color: #10ac84; }
+  .jar.bad { border-color: #ff6b6b; background: #fff5f5; }
+  .jar.bad .val { color: #ee5a24; }
+  .jar.mid { border-color: #feca57; background: #fffef5; }
+  .jar.mid .val { color: #f79f1f; }
+  .jar.cool { border-color: #54a0ff; background: #f0f7ff; }
+  .jar.cool .val { color: #2e86de; }
+
+  /* Simple bar */
+  .bar-fight { margin: 16px 0 20px; }
+  .bar-row { display: flex; align-items: center; margin-bottom: 10px; }
+  .bar-who { width: 110px; font-weight: 800; font-size: 14px; text-align: right; padding-right: 12px; }
+  .bar-track { flex: 1; height: 36px; background: #f0f0f0; border-radius: 18px; overflow: hidden; position: relative; }
+  .bar-fill {
+    height: 100%;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    color: #fff;
+  }
+  .bar-fill.ens { background: linear-gradient(90deg, #54a0ff, #2e86de); }
+  .bar-fill.xgb { background: linear-gradient(90deg, #c8d6e5, #8395a7); }
+
+  /* Table — but fun */
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 16px 0;
+    font-size: 14px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid #e5e5e5;
+  }
+  th {
+    background: #f8f9fa;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 800;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #666;
+  }
+  td { padding: 11px 14px; border-top: 1px solid #f0f0f0; }
+  tr:hover td { background: #fafafa; }
+  .gold { color: #f79f1f; font-weight: 800; }
+  .red { color: #ee5a24; font-weight: 800; }
+  .green { color: #10ac84; font-weight: 800; }
+  .meh { color: #aaa; }
+
+  /* Lesson box */
+  .lesson {
+    border-radius: 16px;
+    padding: 24px;
+    margin: 20px 0;
+  }
+  .lesson.yay { background: #f0fff4; border: 3px solid #1dd1a1; }
+  .lesson.yay h3 { color: #10ac84; }
+  .lesson.hmm { background: #fffef5; border: 3px solid #feca57; }
+  .lesson.hmm h3 { color: #f79f1f; }
+  .lesson h3 { font-family: 'Fredoka One', cursive; font-size: 17px; margin-bottom: 8px; }
+  .lesson p { font-size: 15px; color: #444; }
+
+  /* Regime pills */
+  .pill { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 800; }
+  .pill-bull { background: #d5f5e3; color: #10ac84; }
+  .pill-bear { background: #fadbd8; color: #e74c3c; }
+  .pill-hv { background: #fdebd0; color: #e67e22; }
+  .pill-lv { background: #d6eaf8; color: #2980b9; }
+
+  /* Separator */
+  .sep {
+    text-align: center;
+    font-size: 32px;
+    margin: 10px 0;
+    letter-spacing: 10px;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 30px 0 10px;
+    font-size: 14px;
+    color: #999;
+  }
+  .footer .big { font-family: 'Fredoka One', cursive; font-size: 20px; color: #54a0ff; margin-bottom: 4px; }
+
+  /* Fun callout */
+  .fun-fact {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin: 12px 0;
+  }
+  .fun-fact .ff-icon { font-size: 28px; flex-shrink: 0; }
+  .fun-fact .ff-text { font-size: 14px; color: #555; }
+  .fun-fact .ff-text strong { color: #2d2d2d; }
+</style>
+</head>
+<body>
+
+<!-- ============================== HEADER ============================== -->
+<div class="header">
+  <h1>🍪 Today's Episode: The Model Showdown!</h1>
+  <div class="subtitle">Can Ensemble and XGBoost tell good trades from bad trades?</div>
+  <div class="brought">Brought to you by the number <strong>428</strong> and the letters <strong>M</strong> and <strong>L</strong></div>
+</div>
+
+<!-- ============================== INTRO ============================== -->
+<div class="episode blue">
+  <div class="episode-header">
+    <div class="episode-emoji">🧮</div>
+    <div>
+      <div class="episode-number">Before We Start</div>
+      <div class="episode-title">What Are We Even Doing?</div>
+    </div>
+  </div>
+
+  <div class="speech grover">
+    <div class="who">🔵 Grover says:</div>
+    "We have <strong>two helpers</strong> — like two friends trying to guess which cookies are yummy and which are yucky BEFORE you bite them."
+  </div>
+
+  <div class="speech cookie">
+    <div class="who">🍪 Cookie Monster says:</div>
+    "One helper is called <strong>XGBoost</strong> — him smart, but sometimes him PANIC when things get scary. Other helper is <strong>Ensemble</strong> — him is actually THREE friends working together. Three heads better than one! Om nom nom."
+  </div>
+
+  <div class="speech elmo">
+    <div class="who">🔴 Elmo says:</div>
+    "We gave them <strong>428 real trades</strong> from <strong>6 years</strong> (2020–2025). Each year, they only got to look at the PAST to guess the FUTURE. No peeking! That's the rule!"
+  </div>
+</div>
+
+<div class="sep">🌟 🌟 🌟</div>
+
+<!-- ============================== EPISODE 1 ============================== -->
+<div class="episode red">
+  <div class="episode-header">
+    <div class="episode-emoji">🏆</div>
+    <div>
+      <div class="episode-number">Episode 1</div>
+      <div class="episode-title">The Big Contest — All 428 Trades!</div>
+    </div>
+  </div>
+
+  <div class="speech count">
+    <div class="who">🧛 The Count says:</div>
+    "Let me count! <strong>428</strong> trades! Ah ah ah! Credit spreads, straddles, iron condors — ALL of them! Let us see who guesses better!"
+  </div>
+
+  <h3 style="font-family:'Fredoka One'; font-size:18px; margin: 20px 0 10px;">🎯 AUC Score — "How good are you at telling yummy from yucky?"</h3>
+  <p style="font-size:14px; color:#888; margin-bottom:14px;">1.0 = perfect guesser · 0.5 = just flipping a coin · Higher = better!</p>
+
+  <div class="bar-fight">
+    <div class="bar-row">
+      <div class="bar-who">🔵 Ensemble</div>
+      <div class="bar-track">
+        <div class="bar-fill ens" style="width: 82.8%;">0.828 ✨</div>
+      </div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-who">⚪ XGBoost</div>
+      <div class="bar-track">
+        <div class="bar-fill xgb" style="width: 80.3%;">0.803</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="jars">
+    <div class="jar cool">
+      <div class="icon">🏅</div>
+      <div class="label">Winner</div>
+      <div class="val">Ensemble</div>
+      <div class="note">Wins every year!</div>
+    </div>
+    <div class="jar good">
+      <div class="icon">🎯</div>
+      <div class="label">Accuracy</div>
+      <div class="val">79.2%</div>
+      <div class="note">vs XGBoost 76.5%</div>
+    </div>
+    <div class="jar good">
+      <div class="icon">🔍</div>
+      <div class="label">Recall</div>
+      <div class="val">80.7%</div>
+      <div class="note">vs XGBoost 69.7%</div>
+    </div>
+    <div class="jar mid">
+      <div class="icon">⏱️</div>
+      <div class="label">Speed</div>
+      <div class="val">6.6s</div>
+      <div class="note">vs XGBoost 0.2s</div>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Fredoka One'; font-size:17px; margin: 20px 0 10px;">📅 Year-by-Year Report Card</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Year</th>
+        <th>Trades</th>
+        <th>XGBoost Score</th>
+        <th>Ensemble Score</th>
+        <th>🏆</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>2021</strong> 📈</td>
+        <td>101</td>
+        <td>0.815</td>
+        <td class="green">0.866</td>
+        <td>🔵</td>
+      </tr>
+      <tr>
+        <td><strong>2022</strong> 😱</td>
+        <td>59</td>
+        <td class="meh">0.673</td>
+        <td class="green">0.705</td>
+        <td>🔵</td>
+      </tr>
+      <tr>
+        <td><strong>2023</strong> 🙂</td>
+        <td>69</td>
+        <td>0.852</td>
+        <td class="green">0.865</td>
+        <td>🔵</td>
+      </tr>
+      <tr>
+        <td><strong>2024</strong> 🙂</td>
+        <td>69</td>
+        <td>0.814</td>
+        <td class="green">0.827</td>
+        <td>🔵</td>
+      </tr>
+      <tr>
+        <td><strong>2025</strong> 📈</td>
+        <td>70</td>
+        <td>0.858</td>
+        <td class="green">0.875</td>
+        <td>🔵</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="speech elmo">
+    <div class="who">🔴 Elmo says:</div>
+    "Elmo noticed something VERY important about 2022! XGBoost only found <strong>26%</strong> of the winners — he missed almost ALL of them! But Ensemble found <strong>74%</strong>! When things got scary, XGBoost hid under the bed. Ensemble kept looking for cookies!"
+  </div>
+
+  <div class="lesson yay">
+    <h3>✅ Today's Lesson: Ensemble wins 5 out of 5!</h3>
+    <p>When the market is happy, both do fine. But when the market gets grumpy (like 2022), Ensemble stays brave while XGBoost runs away. <strong>Three friends working together really IS better than one friend alone!</strong></p>
+  </div>
+</div>
+
+<div class="sep">🍪 🍪 🍪</div>
+
+<!-- ============================== EPISODE 2 ============================== -->
+<div class="episode yellow">
+  <div class="episode-header">
+    <div class="episode-emoji">🤔</div>
+    <div>
+      <div class="episode-number">Episode 2</div>
+      <div class="episode-title">The Credit Spread Mystery — Can ML Help?</div>
+    </div>
+  </div>
+
+  <div class="speech bert">
+    <div class="who">🟡 Bert says:</div>
+    "Now wait. Credit spreads ALREADY win <strong>84 out of 100 times</strong>. That's like a cookie jar where 84 cookies are chocolate chip and only 16 are oatmeal raisin. Do we even NEED a helper to pick cookies from THIS jar?"
+  </div>
+
+  <div class="jars">
+    <div class="jar good">
+      <div class="icon">🍪</div>
+      <div class="label">Base Win Rate</div>
+      <div class="val">84%</div>
+      <div class="note">Already really good!</div>
+    </div>
+    <div class="jar bad">
+      <div class="icon">⚪</div>
+      <div class="label">XGBoost AUC</div>
+      <div class="val">0.559</div>
+      <div class="note">Basically guessing 😬</div>
+    </div>
+    <div class="jar mid">
+      <div class="icon">🔵</div>
+      <div class="label">Ensemble AUC</div>
+      <div class="val">0.713</div>
+      <div class="note">OK but can't filter</div>
+    </div>
+    <div class="jar bad">
+      <div class="icon">🚫</div>
+      <div class="label">Trades Skipped</div>
+      <div class="val">~0</div>
+      <div class="note">Both say "take everything"</div>
+    </div>
+  </div>
+
+  <div class="speech cookie">
+    <div class="who">🍪 Cookie Monster says:</div>
+    "Wait wait wait. So BOTH helpers just say 'EAT ALL COOKIES'?! They don't skip ANY?!"
+  </div>
+
+  <div class="speech bert">
+    <div class="who">🟡 Bert says:</div>
+    "Exactly, Cookie Monster. When 84% of cookies are already good, the helpers learned that the safest thing is to just say YES to everything. They can't tell which 16% are bad because the bad ones don't look very different from the good ones."
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Year</th>
+        <th>CS Trades</th>
+        <th>Win Rate</th>
+        <th>XGBoost Help?</th>
+        <th>Ensemble Help?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>2021</strong></td>
+        <td>70</td>
+        <td class="green">90%</td>
+        <td>Nope (0.0%)</td>
+        <td>Nope (0.0%)</td>
+      </tr>
+      <tr>
+        <td><strong>2022</strong> 😱</td>
+        <td>20</td>
+        <td class="red">60%</td>
+        <td>Nope (0.0%)</td>
+        <td>Nope (0.0%)</td>
+      </tr>
+      <tr>
+        <td><strong>2023</strong></td>
+        <td>38</td>
+        <td class="green">89.5%</td>
+        <td>Nope (-0.3%)</td>
+        <td>Nope (0.0%)</td>
+      </tr>
+      <tr>
+        <td><strong>2024</strong></td>
+        <td>39</td>
+        <td>82.1%</td>
+        <td>Tiny (+3.7%)</td>
+        <td>Nope (0.0%)</td>
+      </tr>
+      <tr>
+        <td><strong>2025</strong></td>
+        <td>38</td>
+        <td class="green">86.8%</td>
+        <td>Nope (-0.3%)</td>
+        <td>Nope (0.0%)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="speech oscar">
+    <div class="who">🟢 Oscar says:</div>
+    "Heh heh heh! So all that fancy machine learning and NEITHER of them can pick better cookies? What a BEAUTIFUL disaster!"
+  </div>
+
+  <div class="speech grover">
+    <div class="who">🔵 Grover says:</div>
+    "But wait! There IS something ML can do! It cannot pick which cookies to eat... but it CAN tell you <strong>when to STOP eating cookies entirely</strong> (like in 2022 when the market was scary) and <strong>how MANY cookies to eat</strong> (eat more when confident, fewer when nervous)!"
+  </div>
+
+  <div class="lesson hmm">
+    <h3>⚠️ Today's Lesson: You can't improve on 84%!</h3>
+    <p>When the cookie jar is already 84% chocolate chip, no helper can meaningfully improve your picks. <strong>The 2022 problem (60% WR) isn't about picking wrong cookies — it's about the whole jar being bad.</strong> ML should be the lookout who says "DON'T OPEN THAT JAR" — not the one picking cookies inside it.</p>
+  </div>
+</div>
+
+<div class="sep">🌈 🌈 🌈</div>
+
+<!-- ============================== EPISODE 3 ============================== -->
+<div class="episode green">
+  <div class="episode-header">
+    <div class="episode-emoji">🌦️</div>
+    <div>
+      <div class="episode-number">Episode 3</div>
+      <div class="episode-title">The Weather Report — Which Market Moods Matter?</div>
+    </div>
+  </div>
+
+  <div class="speech bigbird">
+    <div class="who">🐥 Big Bird says:</div>
+    "The market has moods, just like the weather on Sesame Street! Sometimes it's <span class="pill pill-bull">☀️ Sunny (Bull)</span>, sometimes <span class="pill pill-bear">🌧️ Rainy (Bear)</span>, sometimes <span class="pill pill-hv">⛈️ Stormy (High Vol)</span>, and sometimes <span class="pill pill-lv">😌 Calm (Low Vol)</span>. Let's see how our helpers do in each weather!"
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Market Weather</th>
+        <th>Trades</th>
+        <th>XGBoost</th>
+        <th>Ensemble</th>
+        <th>Who's Better?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="pill pill-bull">☀️ Sunny (Bull)</span></td>
+        <td>309</td>
+        <td>79.0%</td>
+        <td>80.3%</td>
+        <td>🤝 About the same</td>
+      </tr>
+      <tr>
+        <td><span class="pill pill-bear">🌧️ Rainy (Bear)</span></td>
+        <td>39</td>
+        <td class="red">66.7%</td>
+        <td class="green">76.9%</td>
+        <td>🔵 Ensemble by a LOT</td>
+      </tr>
+      <tr>
+        <td><span class="pill pill-hv">⛈️ Stormy (High Vol)</span></td>
+        <td>9</td>
+        <td class="red">55.6%</td>
+        <td class="green">66.7%</td>
+        <td>🔵 Ensemble (big gap!)</td>
+      </tr>
+      <tr>
+        <td><span class="pill pill-lv">😌 Calm (Low Vol)</span></td>
+        <td>10</td>
+        <td>80.0%</td>
+        <td class="green">100%!</td>
+        <td>🔵 Ensemble (perfect!)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="fun-fact">
+    <div class="ff-icon">⛈️</div>
+    <div class="ff-text"><strong>Stormy weather is the big story!</strong> In high-vol markets, XGBoost was basically flipping a coin (AUC 0.556). Ensemble kept its cool (AUC 0.778). That's a HUGE difference when the market is going crazy.</div>
+  </div>
+
+  <div class="fun-fact">
+    <div class="ff-icon">🌧️</div>
+    <div class="ff-text"><strong>Rainy days too!</strong> In bear markets, XGBoost only caught 37.5% of winners (missed almost TWO-THIRDS!). Ensemble caught 87.5%. It's like XGBoost puts on a blindfold when it rains, while Ensemble grabs an umbrella.</div>
+  </div>
+
+  <div class="speech elmo">
+    <div class="who">🔴 Elmo says:</div>
+    "Oh! So when everything is sunny and happy, both friends do good! But when it gets rainy and stormy — THAT'S when Ensemble is really really really helpful! Ensemble is the friend who still plays outside in the rain!"
+  </div>
+
+  <div class="lesson yay">
+    <h3>✅ Today's Lesson: You need friends most when it's stormy!</h3>
+    <p>In sunny bull markets, any model works. <strong>The Ensemble proves its value when things get tough</strong> — bear markets and high volatility. That's exactly when you need a good friend the most. 🌧️→☂️</p>
+  </div>
+</div>
+
+<div class="sep">⭐ ⭐ ⭐</div>
+
+<!-- ============================== FINAL LESSON ============================== -->
+<div class="episode purple">
+  <div class="episode-header">
+    <div class="episode-emoji">📝</div>
+    <div>
+      <div class="episode-number">Today's Big Takeaways</div>
+      <div class="episode-title">What Did We Learn Today?</div>
+    </div>
+  </div>
+
+  <div style="margin: 16px 0;">
+
+    <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:20px;">
+      <div style="font-size:32px; flex-shrink:0;">✅</div>
+      <div>
+        <div style="font-family:'Fredoka One'; font-size:16px;">Use Ensemble, not XGBoost alone</div>
+        <div style="font-size:14px; color:#666; margin-top:4px;">Three friends working together > one friend. It wins on AUC every single year and doesn't panic when markets get scary. It takes 6 seconds instead of 0.2 seconds — but that's a tiny price for a much better helper.</div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:20px;">
+      <div style="font-size:32px; flex-shrink:0;">🚫</div>
+      <div>
+        <div style="font-family:'Fredoka One'; font-size:16px;">Don't use ML to pick credit spread trades</div>
+        <div style="font-size:14px; color:#666; margin-top:4px;">The cookie jar is already 84% good cookies. Both models just say "eat everything." Neither can tell the bad 16% apart. The strategy rules already do the picking — ML can't improve on that.</div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:20px;">
+      <div style="font-size:32px; flex-shrink:0;">🚦</div>
+      <div>
+        <div style="font-family:'Fredoka One'; font-size:16px;">Use ML as a traffic light for CS instead</div>
+        <div style="font-size:14px; color:#666; margin-top:4px;"><strong>Green light:</strong> Bull market? Trade normally, maybe trade MORE (scale 3→7 contracts). <strong>Red light:</strong> Bear market detected? STOP trading credit spreads until it's sunny again. This would've saved 2022.</div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:20px;">
+      <div style="font-size:32px; flex-shrink:0;">🌧️</div>
+      <div>
+        <div style="font-family:'Fredoka One'; font-size:16px;">ML earns its keep when the weather is bad</div>
+        <div style="font-size:14px; color:#666; margin-top:4px;">Sunny bull markets? Both models work. Stormy, scary markets? That's where Ensemble is worth its weight in gold. Build the system to lean on ML MORE when things get rough.</div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:14px; align-items:flex-start;">
+      <div style="font-size:32px; flex-shrink:0;">🍪</div>
+      <div>
+        <div style="font-family:'Fredoka One'; font-size:16px;">For mixed strategies, ML filtering actually works!</div>
+        <div style="font-size:14px; color:#666; margin-top:4px;">When you include straddles and iron condors (riskier cookies), the Ensemble lifts win rate from 59.5% to 83.7%. That's a +24 percentage point improvement! ML shines when there are more bad cookies to avoid.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================== FOOTER ============================== -->
+<div class="footer">
+  <div class="big">🍪 That's the end of today's episode! 🍪</div>
+  <p>Brought to you by the number <strong>428</strong>, the letters <strong>M</strong> and <strong>L</strong>,<br>and by ⚡ Maximus · Phase 3 Benchmark · March 26, 2026</p>
+  <p style="margin-top:8px; font-size:12px; color:#bbb;">428 trades · 6 years · 5 walk-forward folds · zero peeking at the future</p>
+</div>
+
+</body>
+</html>

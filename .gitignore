@@ -1,0 +1,96 @@
+
+!data/.gitkeep
+!output/.gitkeep
+!output/*.json
+!output/*.md
+!output/*.html
+!tests/fixtures/*.json
+!web/package-lock.json
+!web/package.json
+!web/tsconfig.json
+# Config with sensitive data
+# Data and output
+# IDE
+# Keep example files
+# Logs
+# ML model artifacts
+# OS
+# Python
+# SQLite databases
+# Temporary files
+# Test artifacts
+# Virtual environments
+*$py.class
+*.bak
+*.csv
+*.db
+*.db-shm
+*.db-wal
+*.egg
+*.egg-info/
+*.joblib
+*.json
+*.log
+*.pickle
+*.pkl
+*.py[cod]
+*.pyc
+*.so
+*.swo
+*.swp
+*.tmp
+*~
+.DS_Store
+.Python
+.coverage
+.eggs/
+.env
+.env.local
+.env.exp*
+.hypothesis/
+.idea/
+.installed.cfg
+.next/
+.pytest_cache/
+.venv
+.vscode/
+/build/
+/lib/
+/lib64/
+CLAUDE-LOCAL.md
+ENV/
+MASTERPLAN-ALERTS.md
+Thumbs.db
+__pycache__/
+config.local.yaml
+config.yaml
+data/
+develop-eggs/
+dist/
+downloads/
+eggs/
+env/
+logs/
+ml/models/*.joblib
+ml/models/*.pickle
+ml/models/*.pkl
+node_modules/
+output/*.log
+output/*.txt
+output/*.csv
+output/html_reports/
+output/html_reports_v2/
+output/backtest_reports/
+output/historical_snapshots/
+output/data/
+parts/
+sdist/
+secrets.yaml
+tasks/
+var/
+venv/
+wheels/
+.env.*          # SECURITY AUDIT #15: covers .env.champion, .env.sync, etc.
+!experiments/registry.json
+!experiments/approvals.log
+!railway.json

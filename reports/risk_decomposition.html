@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Portfolio Risk Decomposition</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         margin: 0; padding: 2em 3em; background: #f8fafc; color: #1e293b; }
+  h1 { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.4em; }
+  h2 { color: #334155; margin-top: 2em; }
+  .meta { color: #64748b; font-size: 0.9em; margin-bottom: 1.5em; }
+  .kpi-row { display: flex; gap: 1.2em; flex-wrap: wrap; margin: 1.5em 0; }
+  .kpi { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
+          padding: 1em 1.5em; min-width: 130px; flex: 1; text-align: center; }
+  .kpi .value { font-size: 1.5em; font-weight: 700; }
+  .kpi .label { font-size: 0.75em; color: #64748b; margin-top: 0.2em; }
+  .good { color: #16a34a; }
+  .bad { color: #dc2626; }
+  .warn { color: #d97706; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.88em; }
+  th { background: #f1f5f9; padding: 8px 10px; text-align: left;
+       border-bottom: 2px solid #cbd5e1; font-weight: 600; }
+  td { padding: 6px 10px; border-bottom: 1px solid #e2e8f0; }
+  .chart-container { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
+                      padding: 1.5em; margin: 1.5em 0; }
+  .section { margin-bottom: 2.5em; }
+  .legend { display: flex; gap: 1.5em; margin-top: 0.5em; font-size: 0.85em; }
+  .legend-item { display: flex; align-items: center; gap: 0.3em; }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<h1>Portfolio Risk Decomposition</h1>
+<div class="meta">Generated: 2026-03-29 14:46 | 4 experiments | 252 periods</div>
+
+<div class="kpi-row">
+  <div class="kpi">
+    <div class="value">14.7%</div>
+    <div class="label">Annualized Vol</div>
+  </div>
+  <div class="kpi">
+    <div class="value">Market</div>
+    <div class="label">Dominant Factor</div>
+  </div>
+  <div class="kpi">
+    <div class="value bad">3</div>
+    <div class="label">Budget Breaches</div>
+  </div>
+  <div class="kpi">
+    <div class="value">70.2%</div>
+    <div class="label">Avg Market Factor</div>
+  </div>
+</div>
+
+<div class="section">
+<h2>Factor Risk Contributions</h2>
+<div class="chart-container">
+<svg width="620" height="170" xmlns="http://www.w3.org/2000/svg">
+<text x="92" y="29.0" text-anchor="end" font-size="12" fill="#334155">EXP-400</text>
+<rect x="100.0" y="10" width="397.3" height="30" fill="#3b82f6" rx="2"/>
+<rect x="497.3" y="10" width="1.0" height="30" fill="#f59e0b" rx="2"/>
+<rect x="498.4" y="10" width="101.6" height="30" fill="#94a3b8" rx="2"/>
+<text x="92" y="69.0" text-anchor="end" font-size="12" fill="#334155">EXP-401</text>
+<rect x="100.0" y="50" width="305.0" height="30" fill="#3b82f6" rx="2"/>
+<rect x="405.0" y="50" width="1.9" height="30" fill="#8b5cf6" rx="2"/>
+<rect x="406.9" y="50" width="193.1" height="30" fill="#94a3b8" rx="2"/>
+<text x="92" y="109.0" text-anchor="end" font-size="12" fill="#334155">EXP-503</text>
+<rect x="100.0" y="90" width="477.5" height="30" fill="#3b82f6" rx="2"/>
+<rect x="577.9" y="90" width="22.1" height="30" fill="#94a3b8" rx="2"/>
+<text x="92" y="149.0" text-anchor="end" font-size="12" fill="#334155">EXP-600</text>
+<rect x="100.0" y="130" width="223.4" height="30" fill="#3b82f6" rx="2"/>
+<rect x="323.7" y="130" width="3.1" height="30" fill="#8b5cf6" rx="2"/>
+<rect x="326.8" y="130" width="273.2" height="30" fill="#94a3b8" rx="2"/>
+</svg>
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch" style="background:#3b82f6"></div>Market</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#f59e0b"></div>Volatility</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#8b5cf6"></div>Regime</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#94a3b8"></div>Idiosyncratic</div>
+</div>
+</div>
+<table>
+<thead><tr><th>Experiment</th><th>Market</th><th>Volatility</th><th>Regime</th><th>Idiosyncratic</th></tr></thead>
+<tbody><tr><td>EXP-400</td><td>79.5%</td><td>0.2%</td><td>0.0%</td><td>20.3%</td></tr>
+<tr><td>EXP-401</td><td>61.0%</td><td>0.0%</td><td>0.4%</td><td>38.6%</td></tr>
+<tr><td>EXP-503</td><td>95.5%</td><td>0.0%</td><td>0.1%</td><td>4.4%</td></tr>
+<tr><td>EXP-600</td><td>44.7%</td><td>0.1%</td><td>0.6%</td><td>54.6%</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="section">
+<h2>Marginal Risk Contributions</h2>
+<div class="chart-container">
+<svg width="400" height="250" xmlns="http://www.w3.org/2000/svg">
+<line x1="40" y1="0" x2="40" y2="200" stroke="#cbd5e1" stroke-width="1"/>
+<line x1="40" y1="200" x2="400" y2="200" stroke="#cbd5e1" stroke-width="1"/>
+<rect x="60" y="20.0" width="60" height="180.0" fill="#3b82f6" rx="3"/>
+<text x="90.0" y="15.0" text-anchor="middle" font-size="11" fill="#334155">39%</text>
+<text x="90.0" y="218" text-anchor="middle" font-size="10" fill="#64748b">EXP-400</text>
+<rect x="140" y="122.5" width="60" height="77.5" fill="#3b82f6" rx="3"/>
+<text x="170.0" y="117.45121643622022" text-anchor="middle" font-size="11" fill="#334155">17%</text>
+<text x="170.0" y="218" text-anchor="middle" font-size="10" fill="#64748b">EXP-401</text>
+<rect x="220" y="26.0" width="60" height="174.0" fill="#3b82f6" rx="3"/>
+<text x="250.0" y="21.003989819082335" text-anchor="middle" font-size="11" fill="#334155">38%</text>
+<text x="250.0" y="218" text-anchor="middle" font-size="10" fill="#64748b">EXP-503</text>
+<rect x="300" y="172.9" width="60" height="27.1" fill="#3b82f6" rx="3"/>
+<text x="330.0" y="167.9453578225677" text-anchor="middle" font-size="11" fill="#334155">6%</text>
+<text x="330.0" y="218" text-anchor="middle" font-size="10" fill="#64748b">EXP-600</text>
+</svg>
+</div>
+<table>
+<thead><tr><th>Experiment</th><th>Marginal Vol</th><th>Risk Contribution</th><th>% of Portfolio</th></tr></thead>
+<tbody><tr><td>EXP-400</td><td>0.1650</td><td>0.0577</td><td>39.2%</td></tr>
+<tr><td>EXP-401</td><td>0.0995</td><td>0.0249</td><td>16.9%</td></tr>
+<tr><td>EXP-503</td><td>0.2233</td><td>0.0558</td><td>37.9%</td></tr>
+<tr><td>EXP-600</td><td>0.0579</td><td>0.0087</td><td>5.9%</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="section">
+<h2>Value-at-Risk &amp; CVaR</h2>
+<table>
+<thead><tr><th>Confidence</th><th>Horizon</th><th>VaR</th><th>CVaR (ES)</th></tr></thead>
+<tbody><tr><td>95%</td><td>1d</td><td class='bad'>1.3463%</td><td class='bad'>1.7063%</td></tr>
+<tr><td>99%</td><td>1d</td><td class='bad'>1.9402%</td><td class='bad'>2.2942%</td></tr>
+<tr><td>95%</td><td>5d</td><td class='bad'>2.6262%</td><td class='bad'>3.0257%</td></tr>
+<tr><td>99%</td><td>5d</td><td class='bad'>3.2989%</td><td class='bad'>3.5722%</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="section">
+<h2>Risk Budget Status</h2>
+<table>
+<thead><tr><th>Experiment</th><th>Target</th><th>Actual</th><th>Deviation</th><th>Status</th></tr></thead>
+<tbody><tr><td>EXP-400</td><td>25.0%</td><td>39.2%</td><td>+14.2%</td><td class='bad'>BREACH</td></tr>
+<tr><td>EXP-401</td><td>25.0%</td><td>16.9%</td><td>-8.1%</td><td class='good'>OK</td></tr>
+<tr><td>EXP-503</td><td>25.0%</td><td>37.9%</td><td>+12.9%</td><td class='bad'>BREACH</td></tr>
+<tr><td>EXP-600</td><td>25.0%</td><td>5.9%</td><td>-19.1%</td><td class='bad'>BREACH</td></tr>
+</tbody>
+</table>
+</div>
+
+</body>
+</html>

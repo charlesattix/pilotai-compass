@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Execution Quality Report</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+background:#f8fafc;color:#1e293b;line-height:1.5;padding:24px;max-width:1200px;margin:0 auto}
+h1{font-size:1.6em;font-weight:700;margin-bottom:4px}
+h2{font-size:1.15em;font-weight:600;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid #e2e8f0}
+.sub{color:#64748b;font-size:0.9em;margin-bottom:20px}
+.cards{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;
+min-width:160px;flex:1;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.ct{font-size:0.78em;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+.cv{font-size:1.5em;font-weight:700}
+table{border-collapse:collapse;width:100%;font-size:0.88em;margin-bottom:16px}
+th{background:#f1f5f9;padding:7px 10px;text-align:left;font-weight:600;border-bottom:2px solid #e2e8f0}
+td{padding:6px 10px;border-bottom:1px solid #f1f5f9}
+.bar{background:#3b82f6;height:16px;border-radius:2px;display:inline-block;vertical-align:middle}
+pre{background:#f1f5f9;padding:12px;border-radius:6px;font-size:0.82em;overflow-x:auto}
+hr{margin:28px 0;border:none;border-top:1px solid #e2e8f0}
+</style>
+</head>
+<body>
+
+<h1>Execution Quality Report</h1>
+<p class="sub">661 trades analysed &middot; Generated 2026-03-29 13:37 UTC</p>
+
+<div class="cards"><div class="card"><div class="ct">Total Trades</div><div class="cv">661</div></div><div class="card"><div class="ct">Mean Slippage</div><div class="cv">22.9 bps</div></div><div class="card"><div class="ct">P95 Slippage</div><div class="cv">37.9 bps</div></div><div class="card"><div class="ct">Fill Rate</div><div class="cv">100%</div></div></div>
+
+<h2>Cost Attribution</h2>
+<p style="font-size:0.85em;color:#64748b;margin-bottom:8px">
+Average execution cost breakdown per trade (basis points of spread notional).
+</p>
+<table><thead><tr><th>Component</th><th>Avg (bps)</th><th>% of Total</th></tr></thead><tbody><tr><td>Bid-Ask Spread</td><td>10.1</td><td>44%</td></tr><tr><td>Timing Cost</td><td>2.0</td><td>9%</td></tr><tr><td>Market Impact</td><td>10.8</td><td>47%</td></tr><tr style="font-weight:700;border-top:2px solid #1e293b"><td>Total</td><td>22.9</td><td>100%</td></tr></tbody></table>
+
+<h2>Slippage Distribution</h2>
+<table><thead><tr><th>Range</th><th>Count</th><th>%</th><th></th></tr></thead><tbody><tr><td>0-10 bps</td><td>182</td><td>28%</td><td><div class="bar" style="width:122.55892255892256px"></div></td></tr><tr><td>10-20 bps</td><td>0</td><td>0%</td><td><div class="bar" style="width:0.0px"></div></td></tr><tr><td>20-30 bps</td><td>167</td><td>25%</td><td><div class="bar" style="width:112.45791245791246px"></div></td></tr><tr><td>30-40 bps</td><td>297</td><td>45%</td><td><div class="bar" style="width:200.0px"></div></td></tr><tr><td>40-50 bps</td><td>14</td><td>2%</td><td><div class="bar" style="width:9.427609427609427px"></div></td></tr><tr><td>50-75 bps</td><td>1</td><td>0%</td><td><div class="bar" style="width:0.6734006734006733px"></div></td></tr><tr><td>75-100 bps</td><td>0</td><td>0%</td><td><div class="bar" style="width:0.0px"></div></td></tr><tr><td>100-200 bps</td><td>0</td><td>0%</td><td><div class="bar" style="width:0.0px"></div></td></tr></tbody></table>
+
+<h2>Execution by Day of Week</h2>
+<p style="font-size:0.85em;color:#64748b;margin-bottom:8px">
+Slippage and trade volume by entry day. Lower slippage = better execution.
+</p>
+<table><thead><tr><th>Day</th><th>Trades</th><th>Avg Slippage</th><th>Volume</th></tr></thead><tbody><tr><td style="font-weight:600">Mon</td><td>142</td><td style="color:#16a34a">21.6 bps</td><td><div class="bar" style="width:129.8780487804878px"></div></td></tr><tr><td style="font-weight:600">Tue</td><td>112</td><td style="color:#16a34a">21.5 bps</td><td><div class="bar" style="width:102.43902439024392px"></div></td></tr><tr><td style="font-weight:600">Wed</td><td>164</td><td style="color:#16a34a">18.1 bps</td><td><div class="bar" style="width:150.0px"></div></td></tr><tr><td style="font-weight:600">Thu</td><td>96</td><td style="color:#f59e0b">23.8 bps</td><td><div class="bar" style="width:87.80487804878048px"></div></td></tr><tr><td style="font-weight:600">Fri</td><td>147</td><td style="color:#f59e0b">29.8 bps</td><td><div class="bar" style="width:134.45121951219514px"></div></td></tr></tbody></table>
+
+<h2>Regime-Conditioned Execution</h2>
+<p style="font-size:0.85em;color:#64748b;margin-bottom:8px">
+Execution quality varies by market regime. High-vol and crash regimes have wider spreads.
+</p>
+<table><thead><tr><th>Regime</th><th>Trades</th><th>Slippage (bps)</th><th>Spread Cost</th><th>Impact</th><th>Optimal Timing</th></tr></thead><tbody><tr><td style="font-weight:600">bear</td><td>58</td><td>24.2</td><td>13.6</td><td>7.9</td><td style="font-size:0.85em">10:30-11:30 ET — wait for initial volatility to subside</td></tr><tr><td style="font-weight:600">bull</td><td>562</td><td>23.3</td><td>9.9</td><td>11.4</td><td style="font-size:0.85em">10:00-11:00 ET — post-open stabilisation, tightest spreads</td></tr><tr><td style="font-weight:600">crash</td><td>4</td><td>0.0</td><td>0.0</td><td>0.0</td><td style="font-size:0.85em">Avoid first 30 min; use limit orders only, 11:00+ ET</td></tr><tr><td style="font-weight:600">high_vol</td><td>21</td><td>14.4</td><td>9.1</td><td>3.5</td><td style="font-size:0.85em">11:00-13:00 ET — midday lull offers better fills</td></tr><tr><td style="font-weight:600">low_vol</td><td>16</td><td>21.4</td><td>8.5</td><td>11.2</td><td style="font-size:0.85em">09:45-10:30 ET — early session has most liquidity</td></tr></tbody></table>
+
+<hr>
+<p style="font-size:0.75em;color:#94a3b8">
+Generated by <code>compass/execution_quality.py</code>
+</p>
+</body>
+</html>

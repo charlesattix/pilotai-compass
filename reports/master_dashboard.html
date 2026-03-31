@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>COMPASS Master Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+background:#f8fafc;color:#1e293b;line-height:1.5;padding:24px;max-width:1280px;margin:0 auto}
+h1{font-size:1.6em;font-weight:700;margin-bottom:4px}
+h2{font-size:1.15em;font-weight:600;margin:28px 0 12px;padding-bottom:6px;border-bottom:2px solid #e2e8f0}
+.subtitle{color:#64748b;font-size:0.9em;margin-bottom:20px}
+.cards{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;
+min-width:170px;flex:1;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card-title{font-size:0.78em;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.card-value{font-size:1.5em;font-weight:700}
+.card-sub{font-size:0.8em;color:#94a3b8;margin-top:2px}
+table{border-collapse:collapse;width:100%;font-size:0.88em;margin-bottom:16px}
+th{background:#f1f5f9;padding:8px 10px;text-align:left;font-weight:600;border-bottom:2px solid #e2e8f0}
+td{padding:7px 10px;border-bottom:1px solid #e2e8f0}
+tr:hover{background:#f8fafc}
+code{font-family:monospace;background:#f1f5f9;padding:1px 5px;border-radius:3px;font-size:0.88em}
+.cols-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.feature-list{columns:2;font-size:0.85em;list-style:none;padding:0}
+.feature-list li{padding:2px 0}
+.feature-list li code{background:#f0fdf4;color:#166534}
+.removed-list li code{background:#fef2f2;color:#991b1b;text-decoration:line-through}
+@media(max-width:800px){.cards{flex-direction:column}.cols-2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<h1>COMPASS Master Dashboard</h1>
+<p class="subtitle">PilotAI Credit Spreads &mdash; Generated 2026-03-29 10:29 UTC</p>
+
+<div class="cards"><div class="card"><div class="card-title">Active Experiments</div><div class="card-value" style="color:#1e293b">7</div><div class=card-sub>4 paper trading</div></div><div class="card"><div class="card-title">Ensemble AUC</div><div class="card-value" style="color:#16a34a">0.8961</div><div class=card-sub>Production model (pruned 21 feat)</div></div><div class="card"><div class="card-title">WF XGBoost AUC</div><div class="card-value" style="color:#1e293b">0.8077</div><div class=card-sub>5-fold walk-forward (21 features)</div></div><div class="card"><div class="card-title">Best Hedged Sharpe</div><div class="card-value" style="color:#1e293b">3.242</div><div class=card-sub>VIX-adaptive crisis hedge</div></div><div class="card"><div class="card-title">Best Hedged P5 DD</div><div class="card-value" style="color:#1e293b">7.4%</div><div class=card-sub>&lt;span style="color:#16a34a;font-weight:700"&gt;PASS&lt;/span&gt; target: &amp;le;30%</div></div><div class="card"><div class="card-title">Feature Count</div><div class="card-value" style="color:#1e293b">21</div><div class=card-sub>31 &amp;rarr; 21 (post-ablation)</div></div></div>
+
+<h2>Experiment Registry</h2>
+<table>
+<thead><tr><th>ID</th><th>Name</th><th>Ticker</th><th>Status</th><th>Live Since</th><th>Description</th></tr></thead>
+<tbody><tr><td><strong>EXP-400</strong></td><td>The Champion</td><td>SPY</td><td><span style="background:#d4edda;color:#155724;padding:2px 8px;border-radius:3px;font-size:0.8em;font-weight:600">Paper Trading</span></td><td>2026-03-15</td><td style="font-size:0.85em;color:#666;max-width:300px">Regime-adaptive credit spreads &amp; iron condors on SPY. Switches between bull puts and bear calls based on trend detection</td></tr><tr><td><strong>EXP-401</strong></td><td>The Blend</td><td>SPY</td><td><span style="background:#d4edda;color:#155724;padding:2px 8px;border-radius:3px;font-size:0.8em;font-weight:600">Paper Trading</span></td><td>2026-03-15</td><td style="font-size:0.85em;color:#666;max-width:300px">Blended strategy combining credit spreads with straddles/strangles on SPY. Uses volatility regime detection to select op</td></tr><tr><td><strong>EXP-500</strong></td><td>ML Champion</td><td>SPY</td><td><span style="background:#fff3cd;color:#856404;padding:2px 8px;border-radius:3px;font-size:0.8em;font-weight:600">In Development</span></td><td>-</td><td style="font-size:0.85em;color:#666;max-width:300px"></td></tr><tr><td><strong>EXP-501</strong></td><td>ML Blend</td><td>SPY</td><td><span style="background:#fff3cd;color:#856404;padding:2px 8px;border-radius:3px;font-size:0.8em;font-weight:600">In Development</span></td><td>-</td><td style="font-size:0.85em;color:#666;max-width:300px"></td></tr><tr><td><strong>EXP-503</strong></td><td>ML V2 Aggressive</td><td>SPY</td><td><span style="background:#d4edda;color:#155724;padding:2px 8px;border-radius:3px;font-size:0.8em;font-weight:600">Paper Trading</span></td><td>2026-03-22</td><td style="font-size:0.85em;color:#666;max-width:300px">Machine learning-driven credit spreads on SPY. XGBoost regime classifier routes trades through ML-optimized position siz</td></tr><tr><td><strong>EXP-600</strong></td><td>IBIT Adaptive</td><td>IBIT</td><td><span style="background:#d4edda;color:#155724;padding:2px 8px;border-radius:3px;font-size:0.8em;font-weight:600">Paper Trading</span></td><td>2026-03-22</td><td style="font-size:0.85em;color:#666;max-width:300px">Direction-adaptive credit spreads on IBIT (Bitcoin ETF). MA50-based trend detection, 14 DTE, 10% OTM. No ML. Optimized v</td></tr><tr><td><strong>EXP-601</strong></td><td>IBIT ML Signal Filter</td><td>IBIT</td><td><span style="background:#fff3cd;color:#856404;padding:2px 8px;border-radius:3px;font-size:0.8em;font-weight:600">In Development</span></td><td>None</td><td style="font-size:0.85em;color:#666;max-width:300px"></td></tr></tbody>
+</table>
+
+<h2>Stress Test &amp; Hedge Impact</h2>
+<p style="font-size:0.85em;color:#64748b;margin-bottom:8px">
+10,000 MC block-bootstrap paths. Crisis hedge: VIX-adaptive position sizing + stop tightening.
+Target: hedged MC P5 DD &le; 30%.
+</p>
+<table>
+<thead><tr>
+<th>Experiment</th><th>Unhedged Sharpe</th><th>Hedged Sharpe</th>
+<th>Unhedged P5 DD</th><th>Hedged P5 DD</th>
+<th>Unhedged Crisis DD</th><th>Hedged Crisis DD</th>
+</tr></thead>
+<tbody><tr><td><strong>EXP-400</strong></td><td>1.236</td><td style="font-weight:600;color:#16a34a">3.242</td><td>45.0%</td><td style="font-weight:600">7.4% <span style="color:#16a34a;font-weight:700">PASS</span></td><td>51.8%</td><td>51.8%</td></tr><tr><td><strong>EXP-401</strong></td><td>0.350</td><td style="font-weight:600;color:#16a34a">0.912</td><td>51.2%</td><td style="font-weight:600">27.6% <span style="color:#16a34a;font-weight:700">PASS</span></td><td>51.8%</td><td>51.8%</td></tr></tbody>
+</table>
+
+<h2>Hedge Configuration</h2>
+<table>
+<thead><tr>
+<th>Experiment</th><th>VIX Floor</th><th>VIX Ceiling</th>
+<th>Base Stop</th><th>Min Stop</th><th>HV Scale</th><th>Backwd. Penalty</th>
+</tr></thead>
+<tbody><tr><td><strong>EXP-400</strong></td><td>12.0</td><td>35.0</td><td>3.5x</td><td>1.5x</td><td>0.25</td><td>0.25</td></tr><tr><td><strong>EXP-401</strong></td><td>14.0</td><td>35.0</td><td>2.0x</td><td>1.0x</td><td>0.1</td><td>0.5</td></tr></tbody>
+</table>
+
+<h2>Model Diagnostics</h2>
+
+<h3 style="font-size:0.95em;margin:16px 0 8px">Production Models</h3>
+<table>
+<thead><tr><th>Model</th><th>Test AUC</th><th>Features</th><th>Train / Test Split</th><th>Trained</th></tr></thead>
+<tbody><tr><td>EnsembleSignalModel</td><td>0.8961</td><td>21</td><td>273 / 86</td><td>2026-03-29</td></tr><tr><td>SignalModel</td><td>0.8622</td><td>21</td><td>204 / 86</td><td>-</td></tr></tbody>
+</table>
+
+<h3 style="font-size:0.95em;margin:16px 0 8px">Model Files</h3>
+<table>
+<thead><tr><th>File</th><th>Size</th><th>Last Modified</th></tr></thead>
+<tbody><tr><td><code>ensemble_model_20260329.joblib</code></td><td>1071.3 KB</td><td>2026-03-29 09:59 UTC</td></tr><tr><td><code>signal_model_20260329.joblib</code></td><td>176.3 KB</td><td>2026-03-29 09:59 UTC</td></tr></tbody>
+</table>
+
+<h3 style="font-size:0.95em;margin:16px 0 8px">Pruned vs Full Feature Benchmark (5-Fold Walk-Forward)</h3>
+<table>
+<thead><tr>
+<th>Metric</th>
+<th>XGB Full</th><th>XGB Pruned</th><th>XGB &Delta;</th>
+<th>Ens Full</th><th>Ens Pruned</th><th>Ens &Delta;</th>
+</tr></thead>
+<tbody><tr><td>AUC</td><td>0.8025</td><td>0.8077</td><td style="color:#16a34a;font-weight:600">+0.0052</td><td>0.8277</td><td>0.8318</td><td style="color:#16a34a;font-weight:600">+0.0041</td></tr><tr><td>Accuracy</td><td>0.7645</td><td>0.7680</td><td style="color:#16a34a;font-weight:600">+0.0035</td><td>0.7924</td><td>0.7890</td><td style=";font-weight:600">-0.0034</td></tr><tr><td>Precision</td><td>0.8024</td><td>0.7932</td><td style=";font-weight:600">-0.0092</td><td>0.8146</td><td>0.8117</td><td style=";font-weight:600">-0.0029</td></tr><tr><td>Recall</td><td>0.6966</td><td>0.7367</td><td style="color:#16a34a;font-weight:600">+0.0401</td><td>0.8072</td><td>0.7985</td><td style=";font-weight:600">-0.0087</td></tr><tr><td>Brier Score</td><td>0.1682</td><td>0.1666</td><td style="color:#16a34a;font-weight:600">-0.0016</td><td>0.1753</td><td>0.1751</td><td style=";font-weight:600">-0.0002</td></tr></tbody>
+</table>
+
+<h3 style="font-size:0.95em;margin:16px 0 8px">Walk-Forward Folds (XGBoost, 21 Pruned Features)</h3>
+<table>
+<thead><tr><th>Fold</th><th>Test Period</th><th>Train N</th><th>Test N</th><th>AUC</th><th>Accuracy</th></tr></thead>
+<tbody><tr><td>Fold 0</td><td>2021-01-11 → 2021-12-27</td><td>60</td><td>101</td><td style="font-weight:600">0.8089</td><td>0.8416</td></tr><tr><td>Fold 1</td><td>2022-01-05 → 2022-12-21</td><td>161</td><td>59</td><td style="font-weight:600">0.6987</td><td>0.6610</td></tr><tr><td>Fold 2</td><td>2023-01-04 → 2023-12-27</td><td>220</td><td>69</td><td style="font-weight:600">0.8493</td><td>0.8261</td></tr><tr><td>Fold 3</td><td>2024-01-03 → 2024-12-23</td><td>289</td><td>69</td><td style="font-weight:600">0.8408</td><td>0.7826</td></tr><tr><td>Fold 4</td><td>2025-01-02 → 2025-12-26</td><td>358</td><td>70</td><td style="font-weight:600">0.8408</td><td>0.7286</td></tr></tbody>
+</table>
+
+<h2>Feature Set (21 Pruned)</h2>
+<div class="cols-2">
+<div>
+<h3 style="font-size:0.9em;color:#166534;margin-bottom:6px">Kept (21)</h3>
+<ul class="feature-list"><li><code>days_since_last_trade</code></li><li><code>rsi_14</code></li><li><code>momentum_5d_pct</code></li><li><code>momentum_10d_pct</code></li><li><code>vix_zscore</code></li><li><code>vix_change_5d_pct</code></li><li><code>vix_percentile_50d</code></li><li><code>vix_percentile_100d</code></li><li><code>iv_rank</code></li><li><code>spy_price_zscore</code></li><li><code>dist_from_ma20_pct</code></li><li><code>dist_from_ma50_pct</code></li><li><code>dist_from_ma80_pct</code></li><li><code>dist_from_ma200_pct</code></li><li><code>ma50_slope_ann_pct</code></li><li><code>realized_vol_atr20</code></li><li><code>realized_vol_20d</code></li><li><code>credit_to_width</code></li><li><code>loss_to_width</code></li><li><code>strategy_type_CS</code></li><li><code>spread_type_bull_put</code></li></ul>
+</div>
+<div>
+<h3 style="font-size:0.9em;color:#991b1b;margin-bottom:6px">Removed (10)</h3>
+<ul class="feature-list removed-list"><li><code>contracts_log</code></li><li><code>regime_bear</code></li><li><code>regime_bull</code></li><li><code>regime_crash</code></li><li><code>regime_high_vol</code></li><li><code>regime_low_vol</code></li><li><code>strategy_type_IC</code></li><li><code>strategy_type_SS</code></li><li><code>spread_type_bear_call</code></li><li><code>spread_type_unknown</code></li></ul>
+</div>
+</div>
+
+<h2>Phase Milestones</h2>
+<table>
+<thead><tr><th>Commit</th><th>Date</th><th>Message</th></tr></thead>
+<tbody><tr style="font-weight:600"><td><code>04e5a26</code></td><td>2026-03-29</td><td>Add paper trading performance tracker and dashboard</td></tr><tr style="font-weight:600"><td><code>3d6df49</code></td><td>2026-03-29</td><td>Deploy pruned 21-feature set as production default</td></tr><tr style="font-weight:600"><td><code>c743767</code></td><td>2026-03-29</td><td>Benchmark pruned feature set: AUC improves for both XGBoost and Ensemble</td></tr><tr style="font-weight:600"><td><code>471e2ee</code></td><td>2026-03-29</td><td>Add model diagnostics dashboard with embedded walk-forward charts</td></tr><tr style="color:#666"><td><code>86b5214</code></td><td>2026-03-29</td><td>Apply sweep-optimal hedge defaults and add experiment config system</td></tr><tr style="font-weight:600"><td><code>22ba9b3</code></td><td>2026-03-29</td><td>Add walk-forward feature importance analysis for ML signal model</td></tr><tr style="color:#666"><td><code>8728674</code></td><td>2026-03-29</td><td>Run hedge parameter sweep and document optimal configs</td></tr><tr style="font-weight:600"><td><code>62cb628</code></td><td>2026-03-29</td><td>Add EXP-601 IBIT crypto-native feature engineering and training data collector</td></tr><tr style="color:#666"><td><code>874452a</code></td><td>2026-03-29</td><td>Improve test coverage across compass modules</td></tr><tr style="font-weight:600"><td><code>a7310ae</code></td><td>2026-03-29</td><td>Add hedge parameter sweep grid search</td></tr><tr style="font-weight:600"><td><code>ec363cd</code></td><td>2026-03-29</td><td>Phase 4 deploy: wire SLOT_RETRAIN + RetrainScheduler into main.py scan loop</td></tr><tr style="font-weight:600"><td><code>979f2cd</code></td><td>2026-03-28</td><td>Optimize crisis hedge for EXP-401 straddle/strangle exposure</td></tr><tr style="font-weight:600"><td><code>039dd39</code></td><td>2026-03-28</td><td>Add experiment pipeline for batch experiment automation</td></tr><tr style="color:#666"><td><code>f55de68</code></td><td>2026-03-28</td><td>Generate full stress test report with hedged crisis scenarios</td></tr><tr style="font-weight:600"><td><code>520da6f</code></td><td>2026-03-28</td><td>Integrate CrisisHedgeController into StressTester.run_crisis_scenarios()</td></tr><tr style="font-weight:600"><td><code>83710a8</code></td><td>2026-03-28</td><td>Phase 5: Crisis hedge controller — VIX-adaptive position sizing + stop tightening</td></tr><tr style="font-weight:600"><td><code>140d558</code></td><td>2026-03-28</td><td>Benchmark: Tier 1 features walk-forward validation (428 trades, 2021-2025)</td></tr><tr style="color:#666"><td><code>69f8c47</code></td><td>2026-03-28</td><td>Research: crisis drawdown mitigation design for credit spread portfolio</td></tr><tr style="font-weight:600"><td><code>05c533c</code></td><td>2026-03-28</td><td>Add Tier 1 alpha features (VIX TS, HYG/LQD, SPY/TLT corr, OPEX, gap)</td></tr><tr style="font-weight:600"><td><code>fa0f707</code></td><td>2026-03-28</td><td>Phase 6: Stress test runner + HTML report (EXP-400 / EXP-401 / Blended)</td></tr><tr style="color:#666"><td><code>ffb2276</code></td><td>2026-03-28</td><td>Research: new alpha sources for credit spread ensemble model</td></tr><tr style="font-weight:600"><td><code>86f722c</code></td><td>2026-03-28</td><td>Phase 4B: Add SLOT_RETRAIN to scheduler, create RetrainScheduler with Telegram alerts</td></tr><tr style="font-weight:600"><td><code>c8a84b5</code></td><td>2026-03-28</td><td>Phase 4A: Wire ShadowEnsemble into RegimeModelRouter + paper_exp503</td></tr><tr style="font-weight:600"><td><code>90b1065</code></td><td>2026-03-28</td><td>Phase 4B: Fix GAP-6/7/8 ensemble model integration</td></tr><tr style="color:#666"><td><code>3bcaa5b</code></td><td>2026-03-28</td><td>Fix online_retrain.py: GAP-3, GAP-4, GAP-5 for EnsembleSignalModel support</td></tr></tbody>
+</table>
+
+<hr style="margin:28px 0;border:none;border-top:1px solid #e2e8f0">
+<p style="font-size:0.75em;color:#94a3b8">
+Generated by <code>compass/master_dashboard.py</code> &mdash; 2026-03-29 10:29 UTC
+</p>
+</body>
+</html>
