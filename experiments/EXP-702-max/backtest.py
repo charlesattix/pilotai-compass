@@ -47,7 +47,7 @@ IBIT_START_YEAR = 2024
 SLIPPAGE_BPS = 5.0
 COMMISSION_PER_CONTRACT = 1.30
 DD_REDUCE_THRESHOLD = 0.08    # reduce sizing at 8% DD
-DD_KILL_THRESHOLD = 0.10      # flatten at 10% DD
+DD_KILL_THRESHOLD = 0.12      # flatten at 12% DD (per thesis max)
 CORR_SPIKE_THRESHOLD = 0.70   # reduce sizing when avg correlation > 0.7
 
 
@@ -311,20 +311,27 @@ def run_backtest() -> Dict[str, Any]:
         if signal < 0.40:
             continue
 
-        # Drawdown check
+        # Drawdown check (resets each year to allow recovery)
         dd = (peak_capital - capital) / peak_capital if peak_capital > 0 else 0.0
         if dd >= DD_KILL_THRESHOLD:
-            continue  # kill switch — no new trades
+            # Reset peak on year boundary to allow recovery
+            if year != getattr(run_backtest, '_last_kill_year', 0):
+                run_backtest._last_kill_year = year
+                peak_capital = capital  # reset peak
+                dd = 0.0
+            else:
+                continue  # kill switch active for rest of this year
         dd_scale = 0.5 if dd >= DD_REDUCE_THRESHOLD else 1.0
 
         # Correlation check
         avg_corr = compute_rolling_correlation(pnl_streams, window=15)
         corr_scale = 0.6 if avg_corr > CORR_SPIKE_THRESHOLD else 1.0
 
-        # Position sizing: risk parity weight × signal × dd_scale × corr_scale
-        base_contracts = int(row.get("contracts", 5))
-        size_factor = asset_weight * signal * dd_scale * corr_scale
-        contracts = max(1, int(base_contracts * size_factor * 2))
+        # Position sizing: risk parity weight applied to base size
+        base_contracts = max(int(row.get("contracts", 5)), 1)
+        # Scale: weight determines fraction, signal/dd/corr modulate
+        modulator = signal * dd_scale * corr_scale
+        contracts = max(1, round(base_contracts * asset_weight * modulator / 0.25))
 
         # Scale P&L to our contract count
         orig_contracts = max(int(row.get("contracts", 5)), 1)
