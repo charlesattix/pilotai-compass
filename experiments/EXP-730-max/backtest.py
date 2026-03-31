@@ -36,7 +36,7 @@ DTE_MAX = 7
 
 # Trade frequency
 TRADES_PER_WEEK_MIN = 3
-TRADES_PER_WEEK_MAX = 5
+TRADES_PER_WEEK_MAX = 8  # short DTE allows more concurrent trades
 
 # Position sizing
 MAX_POSITION_PCT = 0.02   # 2% of portfolio per trade
@@ -102,14 +102,8 @@ def _nfp_dates(start_year: int, end_year: int) -> set:
 
 EVENT_DATES = FOMC_DATES | _cpi_dates(2020, 2025) | _nfp_dates(2020, 2025)
 
-# Also block day before and day after major events (FOMC only)
-BLOCKED_DATES = set()
-for d in FOMC_DATES:
-    BLOCKED_DATES.add(d)
-    BLOCKED_DATES.add(d - timedelta(days=1))
-    BLOCKED_DATES.add(d + timedelta(days=1))
-for d in _cpi_dates(2020, 2025) | _nfp_dates(2020, 2025):
-    BLOCKED_DATES.add(d)
+# Block event days only (short DTE — day before is fine for entry)
+BLOCKED_DATES = set(FOMC_DATES) | _cpi_dates(2020, 2025) | _nfp_dates(2020, 2025)
 
 
 # ── Synthetic SPY price + VIX data ──────────────────────────────────────────
