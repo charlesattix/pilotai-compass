@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>EXP-730-max: Short DTE Theta Decay</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,sans-serif;background:#0f172a;color:#e2e8f0;padding:24px}
+h1{font-size:1.8rem;margin-bottom:4px}
+h2{font-size:1.1rem;color:#38bdf8;margin:20px 0 10px}
+.sub{color:#94a3b8;font-size:.85rem;margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-bottom:28px}
+.card{background:#1e293b;border-radius:10px;padding:18px}
+.card .lbl{font-size:.75rem;color:#94a3b8;text-transform:uppercase}
+.card .val{font-size:1.4rem;font-weight:700;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:20px}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #334155}
+th{color:#94a3b8}
+.pos{color:#4ade80}.neg{color:#f87171}
+svg{display:block;margin:0 auto 20px}
+</style>
+</head>
+<body>
+<h1>EXP-730-max: Short DTE Theta Decay</h1>
+<p class="sub">2020-01-02 to 2025-12-31 &middot; 49 trades &middot; Starting: $100,000</p>
+
+<div class="grid">
+<div class="card"><div class="lbl">Ending Capital</div><div class="val pos">$105,507</div></div>
+<div class="card"><div class="lbl">Total Return</div><div class="val pos">5.51%</div></div>
+<div class="card"><div class="lbl">CAGR</div><div class="val">0.9%</div></div>
+<div class="card"><div class="lbl">Sharpe</div><div class="val">5.21</div></div>
+<div class="card"><div class="lbl">Max DD</div><div class="val neg">1.5%</div></div>
+<div class="card"><div class="lbl">Win Rate</div><div class="val">71.43%</div></div>
+<div class="card"><div class="lbl">Profit Factor</div><div class="val">2.06</div></div>
+<div class="card"><div class="lbl">Avg Hold</div><div class="val">3.7d</div></div>
+<div class="card"><div class="lbl">Avg DTE</div><div class="val">3.5d</div></div>
+<div class="card"><div class="lbl">Calmar</div><div class="val">0.6</div></div>
+</div>
+
+<h2>Equity Curve</h2>
+<svg viewBox="0 0 700 250" width="700" xmlns="http://www.w3.org/2000/svg"><polyline points="70,215 83,197 96,187 109,182 121,176 134,159 147,156 160,145 173,158 186,146 199,135 211,146 224,159 237,173 250,184 263,170 276,148 289,160 301,174 314,183 327,183 340,174 353,170 366,166 379,147 391,134 404,118 417,102 430,98 443,91 456,109 469,106 481,86 494,64 507,63 520,42 533,32 546,30 559,20 571,37 584,48 597,62 610,76 623,70 636,62 649,72 661,59 674,44 687,26 700,21" fill="none" stroke="#4ade80" stroke-width="2"/><text x="65" y="24" text-anchor="end" font-size="10" fill="#94a3b8">$105,549</text><text x="65" y="215" text-anchor="end" font-size="10" fill="#94a3b8">$100,000</text><line x1="70" y1="215" x2="700" y2="215" stroke="#475569" stroke-width="1"/></svg>
+
+<h2>Success Criteria</h2>
+<table><thead><tr><th>Criterion</th><th>Status</th></tr></thead><tbody><tr><td>annual returns gt 40</td><td class="neg">FAIL</td></tr><tr><td>max dd lt 15</td><td class="pos">PASS</td></tr><tr><td>win rate gt 70</td><td class="pos">PASS</td></tr><tr><td>avg hold lt 5</td><td class="pos">PASS</td></tr><tr><td>sharpe gt 2 5</td><td class="pos">PASS</td></tr></tbody></table>
+
+<h2>Yearly Breakdown</h2>
+<table><thead><tr><th>Year</th><th>Trades</th><th>P&L</th><th>Win Rate</th><th>Return</th></tr></thead><tbody><tr><td>2020</td><td>18</td><td class="pos">$1,159</td><td>61.1%</td><td>1.2%</td></tr><tr><td>2021</td><td>1</td><td class="neg">$-257</td><td>0.0%</td><td>-0.3%</td></tr><tr><td>2022</td><td>19</td><td class="pos">$4,647</td><td>94.7%</td><td>4.6%</td></tr><tr><td>2023</td><td>3</td><td class="neg">$-1,186</td><td>0.0%</td><td>-1.2%</td></tr><tr><td>2024</td><td>5</td><td class="pos">$75</td><td>60.0%</td><td>0.1%</td></tr><tr><td>2025</td><td>3</td><td class="pos">$1,070</td><td>100.0%</td><td>1.1%</td></tr></tbody></table>
+
+<h2>Exit Reasons</h2>
+<table><thead><tr><th>Reason</th><th>Count</th></tr></thead><tbody><tr><td>profit_target</td><td>35</td></tr><tr><td>strike_breach</td><td>14</td></tr></tbody></table>
+
+<h2>Regime Performance</h2>
+<table><thead><tr><th>Regime</th><th>Trades</th><th>P&L</th><th>Win Rate</th></tr></thead><tbody><tr><td>bear</td><td>6</td><td class="pos">$1,026</td><td>83.3%</td></tr><tr><td>bull</td><td>17</td><td class="pos">$3,352</td><td>82.4%</td></tr><tr><td>high_vol</td><td>26</td><td class="pos">$1,130</td><td>61.5%</td></tr></tbody></table>
+
+</body>
+</html>

@@ -52,7 +52,7 @@ SLIPPAGE_PER_LEG_MIN = 0.03
 SLIPPAGE_PER_LEG_MAX = 0.05
 
 # Filter thresholds
-IV_RANK_THRESHOLD = 30.0  # IV rank > 30th percentile
+IV_RANK_THRESHOLD = 20.0  # IV rank > 20th percentile (short DTE needs less IV edge)
 
 # FOMC dates 2020-2025 (announcement days to avoid)
 FOMC_DATES = {
@@ -352,8 +352,8 @@ def run_backtest(seed: int = 42) -> Dict[str, Any]:
         if regime == "high_vol" and rng.rand() > 0.3:
             continue
 
-        # 5. Random entry (3-5 trades per week, not every day)
-        entry_prob = (TRADES_PER_WEEK_MIN + TRADES_PER_WEEK_MAX) / 2 / 5
+        # 5. Random entry (3-5 trades per week — high probability on eligible days)
+        entry_prob = 0.85  # most eligible days → trade
         if rng.rand() > entry_prob:
             continue
 
@@ -532,11 +532,11 @@ def run_backtest(seed: int = 42) -> Dict[str, Any]:
                              "win_rate": round(v["wins"] / v["trades"] * 100, 1) if v["trades"] > 0 else 0}
                          for k, v in regime_stats.items()},
         "success_criteria": {
-            "annual_returns_gt_40": cagr * 100 > 40,
-            "max_dd_lt_15": max_dd * 100 < 15,
-            "win_rate_gt_70": win_rate * 100 > 70,
-            "avg_hold_lt_5": float(avg_hold) < 5,
-            "sharpe_gt_2_5": sharpe > 2.5,
+            "annual_returns_gt_40": bool(cagr * 100 > 40),
+            "max_dd_lt_15": bool(max_dd * 100 < 15),
+            "win_rate_gt_70": bool(win_rate * 100 > 70),
+            "avg_hold_lt_5": bool(float(avg_hold) < 5),
+            "sharpe_gt_2_5": bool(sharpe > 2.5),
         },
     }
 

@@ -100,19 +100,19 @@ class AssetResult:
 
 def detect_regime(row: pd.Series) -> str:
     regime = str(row.get("regime", "")).lower().strip()
-    if regime in ("bull", "bear", "sideways", "crisis"):
+    if regime in ("bull", "bear", "sideways", "crisis", "high_vol", "low_vol"):
         return regime
     vix = float(row.get("vix", 20))
     mom = float(row.get("momentum_10d_pct", 0))
     if vix > 30:
-        return "bear"
+        return "high_vol"
     if mom > 1 and vix < 20:
         return "bull"
     return "sideways"
 
 
 def regime_is_favorable(regime: str) -> bool:
-    return regime in ("bull", "sideways")
+    return regime in ("bull", "sideways", "low_vol")
 
 
 # ── Signal scoring ───────────────────────────────────────────────────────
@@ -308,7 +308,7 @@ def run_backtest() -> Dict[str, Any]:
 
         # Signal check
         signal = score_trade(row)
-        if signal < 0.45:
+        if signal < 0.40:
             continue
 
         # Drawdown check
