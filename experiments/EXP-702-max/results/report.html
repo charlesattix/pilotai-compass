@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/><title>EXP-702-max Results</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:1100px;margin:0 auto;padding:20px;background:#0d1117;color:#c9d1d9}
+h1,h2{color:#58a6ff}.meta{color:#8b949e}
+.hero{background:#161b22;border:2px solid #f85149;border-radius:12px;padding:24px;text-align:center;margin:20px 0}
+.hero .big{font-size:2.5em;font-weight:800;color:#f85149}.hero .sub{color:#8b949e}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:20px 0}
+.c{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:10px;text-align:center}
+.c .l{color:#8b949e;font-size:.8em}.c .v{color:#f0f6fc;font-weight:600;font-size:1.1em}
+table{width:100%;border-collapse:collapse;margin:12px 0}
+th,td{padding:6px 10px;text-align:right;border-bottom:1px solid #21262d}
+th{color:#8b949e;background:#161b22}
+.chart{width:100%;max-width:750px;margin:16px auto;display:block}
+.st{fill:#58a6ff;font-size:13px}
+</style></head><body>
+<h1>EXP-702-max: Multi-Asset Portfolio</h1>
+<div class="hero">
+<div class="big">CRITERIA NOT MET</div>
+<div class="sub">25 trades &middot; 1 years &middot; 4 assets &middot; Risk Parity</div>
+</div>
+<div class="cards">
+<div class="c"><div class="l">Ann. Return</div><div class="v">-9.9%</div></div>
+<div class="c"><div class="l">Sharpe</div><div class="v">-8.29</div></div>
+<div class="c"><div class="l">Sortino</div><div class="v">-6.65</div></div>
+<div class="c"><div class="l">Max DD</div><div class="v">10.2%</div></div>
+<div class="c"><div class="l">Win Rate</div><div class="v">28.0%</div></div>
+<div class="c"><div class="l">Profit Factor</div><div class="v">0.24</div></div>
+<div class="c"><div class="l">Total PnL</div><div class="v">$-9,854.40</div></div>
+<div class="c"><div class="l">Final Capital</div><div class="v">$90,145.60</div></div>
+<div class="c"><div class="l">SPY-Only Sharpe</div><div class="v">-10.67</div></div>
+<div class="c"><div class="l">Sharpe Lift</div><div class="v">2.37</div></div>
+</div>
+<h2>Equity Curve</h2><svg viewBox="0 0 700 200" class="chart"><text x="350" y="20" text-anchor="middle" class="st">Equity Curve ($)</text><path d="M55.0,39.8 L78.6,42.9 L102.2,51.3 L125.8,44.9 L149.4,43.1 L173.0,39.7 L196.6,35.0 L220.2,37.9 L243.8,39.9 L267.4,40.2 L291.0,44.7 L314.6,52.2 L338.2,56.1 L361.8,70.5 L385.4,80.1 L409.0,95.4 L432.6,88.0 L456.2,80.8 L479.8,71.0 L503.4,79.3 L527.0,87.1 L550.6,117.1 L574.2,121.5 L597.8,150.1 L621.4,159.1 L645.0,170.0" fill="none" stroke="#3fb950" stroke-width="2"/></svg>
+<h2>Success Criteria</h2>
+<table><tr><th style="text-align:left">Criterion</th><th>Target</th><th>Actual</th><th>Met</th></tr><tr><td style='text-align:left'>sharpe_improvement_over_spy</td><td>1.0</td><td>2.37</td><td><span style="color:#3fb950">&#10003;</span></td></tr><tr><td style='text-align:left'>max_dd_under_12pct</td><td>12.0</td><td>10.18</td><td><span style="color:#3fb950">&#10003;</span></td></tr><tr><td style='text-align:left'>all_years_profitable</td><td>True</td><td>False</td><td><span style="color:#f85149">&#10007;</span></td></tr><tr><td style='text-align:left'>positive_in_3_of_4_assets</td><td>3</td><td>0</td><td><span style="color:#f85149">&#10007;</span></td></tr></table>
+<h2>Per-Year Performance</h2>
+<table><tr><th>Year</th><th>Trades</th><th>Return</th><th>Sharpe</th><th>Max DD</th><th>Win Rate</th><th>PnL</th><th>Profitable</th></tr><tr><td>2020</td><td>25</td><td>-9.9%</td><td>-8.29</td><td>10.2%</td><td>28.0%</td><td>$-9,854.40</td><td><span style="color:#f85149">&#10007;</span></td></tr></table>
+<h2>Per-Asset Breakdown</h2>
+<table><tr><th style="text-align:left">Asset</th><th>Weight</th><th>Trades</th><th>PnL</th><th>Sharpe</th><th>Win Rate</th></tr><tr><td style='text-align:left'>SPY</td><td>0.23</td><td>9</td><td>$-4,917.69</td><td>-10.67</td><td>22.2%</td></tr><tr><td style='text-align:left'>QQQ</td><td>0.30</td><td>8</td><td>$-4,026.94</td><td>-9.82</td><td>25.0%</td></tr><tr><td style='text-align:left'>IWM</td><td>0.34</td><td>8</td><td>$-909.77</td><td>-2.85</td><td>37.5%</td></tr></table>
+</body></html>
