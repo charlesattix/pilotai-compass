@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>EXP-2900 — v8a Consistency Audit</title>
+<style>
+body { font-family:-apple-system,sans-serif;max-width:1200px;margin:0 auto;padding:28px;background:#fff;color:#1e293b; }
+h1 { font-size:1.8em;color:#0f172a; }
+h2 { margin-top:2em;border-bottom:2px solid #e2e8f0;padding-bottom:8px;color:#334155; }
+.verdict { background:#fff;border:2px solid #f59e0b;border-radius:10px;padding:18px;margin:16px 0; }
+.verdict h3 { margin-top:0;color:#f59e0b; }
+table { width:100%;border-collapse:collapse;margin:12px 0;font-size:0.86em; }
+th { background:#f1f5f9;padding:9px 11px;text-align:left;border-bottom:2px solid #cbd5e1;font-size:0.74em;text-transform:uppercase; }
+td { padding:8px 11px;border-bottom:1px solid #e2e8f0;vertical-align:top; }
+td:nth-child(2) { white-space:nowrap; }
+.totals { display:flex;gap:20px;font-size:1.1em;margin:12px 0; }
+.totals span { padding:8px 14px;border-radius:6px; }
+</style></head><body>
+
+<h1>EXP-2900 — v8a Portfolio Consistency Audit</h1>
+<p style="color:#64748b">Systematic end-to-end audit of the 8-stream North
+Star v8a architecture · 2026-04-08 15:08</p>
+
+<div class="verdict">
+<h3>Verdict: WARN</h3>
+No hard failures but 3 soft findings. Document the warnings; deployment can proceed.
+<div class="totals">
+<span style="background:#ecfdf5;color:#16a34a">PASS 36</span>
+<span style="background:#fefce8;color:#b45309">WARN 3</span>
+<span style="background:#fef2f2;color:#991b1b">FAIL 0</span>
+<span style="background:#f1f5f9">TOTAL 39</span>
+</div>
+</div>
+
+
+<h2>A. Stream module discovery</h2>
+<table>
+<thead><tr><th>Check</th><th>Status</th><th>Detail</th></tr></thead>
+<tbody><tr><td>import_exp1220</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>compass.exp1220_standalone imported</td></tr><tr><td>import_xlf_cs</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>compass.exp2160_high_capacity_alts imported</td></tr><tr><td>import_xli_cs</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>compass.exp2160_high_capacity_alts imported</td></tr><tr><td>import_qqq_cs</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>compass.exp2240_qqq_iwm_credit_spreads imported</td></tr><tr><td>import_gld_cal</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>compass.exp1770_commodity_calendars imported</td></tr><tr><td>import_slv_cal</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>compass.exp1770_commodity_calendars imported</td></tr><tr><td>import_vol_arb</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>compass.exp2020_cross_vol_arb imported</td></tr><tr><td>import_v5_hedge</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>compass.crisis_alpha_v5 imported</td></tr></tbody>
+</table>
+
+<h2>B. Signal generator sanity</h2>
+<table>
+<thead><tr><th>Check</th><th>Status</th><th>Detail</th></tr></thead>
+<tbody><tr><td>registry_coverage</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>all 8 streams registered (extras: none)</td></tr><tr><td>signal_exp1220</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>1 signal(s), actions: OPEN</td></tr><tr><td>signal_xlf_cs</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>1 signal(s), actions: OPEN</td></tr><tr><td>signal_xli_cs</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>1 signal(s), actions: OPEN</td></tr><tr><td>signal_qqq_cs</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>1 signal(s), actions: OPEN</td></tr><tr><td>signal_gld_cal</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>1 signal(s), actions: HOLD</td></tr><tr><td>signal_slv_cal</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>1 signal(s), actions: NONE</td></tr><tr><td>signal_vol_arb</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>1 signal(s), actions: OPEN</td></tr><tr><td>signal_v5_hedge</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>1 signal(s), actions: HOLD</td></tr></tbody>
+</table>
+
+<h2>C. Cube build reproducibility</h2>
+<table>
+<thead><tr><th>Check</th><th>Status</th><th>Detail</th></tr></thead>
+<tbody><tr><td>sparse_7stream_build</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>EXP-2450 base: shape (1566, 7), 2020-01-01→2025-12-31</td></tr><tr><td>qqq_cache</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>85 cached QQQ trades</td></tr><tr><td>v8a_build</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>v8a shape (1566, 8), 8 streams</td></tr></tbody>
+</table>
+
+<h2>D. Pipeline reproduction vs published</h2>
+<table>
+<thead><tr><th>Check</th><th>Status</th><th>Detail</th></tr></thead>
+<tbody><tr><td>exp2450_ledoit_only</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>measured SR 6.865 vs published 6.87 (Δ -0.005)</td></tr><tr><td>exp2600_v8a_vt12_net</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>measured SR 6.164 vs published 6.164 (Δ +0.000)</td></tr></tbody>
+</table>
+
+<h2>E. VIX ladder integration</h2>
+<table>
+<thead><tr><th>Check</th><th>Status</th><th>Detail</th></tr></thead>
+<tbody><tr><td>module_import</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>compass.vix_ladder imported</td></tr><tr><td>self_test</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>all point checks pass</td></tr><tr><td>default_breakpoints</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>matches EXP-2820 winner</td></tr><tr><td>exposure_points</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>all 9 breakpoint evaluations exact (max Δ 0.00e+00)</td></tr><tr><td>interpolation</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>VIX 27.5 → 0.825 (expected 0.825)</td></tr><tr><td>exp2850_integration</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>EXP-2850 integration module imports</td></tr></tbody>
+</table>
+
+<h2>F. MASTERPLAN cross-check</h2>
+<table>
+<thead><tr><th>Check</th><th>Status</th><th>Detail</th></tr></thead>
+<tbody><tr><td>masterplan_exists</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>29 KB</td></tr><tr><td>gross_sharpe_6_87</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>gross Sharpe 6.87 cited (matches EXP-2450)</td></tr><tr><td>net_sharpe_6_00</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>net Alpaca 6.00 cited (matches EXP-2570 target)</td></tr><tr><td>8_streams_claim</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>8-stream architecture documented</td></tr><tr><td>rule_zero</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>Rule Zero referenced</td></tr><tr><td>weight_convention_warning</td><td style='color:#f59e0b;font-weight:700;text-align:center'>~ WARN</td><td>MASTERPLAN quotes MANUAL weights (35/15/10/10/10/5/10/5); EXP-2600 production uses LW risk-parity weights that differ. This is a documentation inconsistency, not a runtime bug.</td></tr></tbody>
+</table>
+
+<h2>G. Naming consistency</h2>
+<table>
+<thead><tr><th>Check</th><th>Status</th><th>Detail</th></tr></thead>
+<tbody><tr><td>cross_vol_vs_vol_arb</td><td style='color:#f59e0b;font-weight:700;text-align:center'>~ WARN</td><td>cube uses 'cross_vol' but signal registry uses 'vol_arb'. Same strategy, two names. Consider unifying.</td></tr><tr><td>masterplan_naming</td><td style='color:#f59e0b;font-weight:700;text-align:center'>~ WARN</td><td>MASTERPLAN uses BOTH 'cross_vol' and 'vol_arb' — ambiguous</td></tr></tbody>
+</table>
+
+<h2>H. Test suite sanity</h2>
+<table>
+<thead><tr><th>Check</th><th>Status</th><th>Detail</th></tr></thead>
+<tbody><tr><td>vix_ladder_selftest</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>module self-test passes</td></tr><tr><td>exp2690_smoke</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>all 8 signal generators produce output</td></tr><tr><td>daily_driver_e2e</td><td style='color:#16a34a;font-weight:700;text-align:center'>✓ PASS</td><td>generate_daily_signals.py end-to-end OK</td></tr></tbody>
+</table>
+
+
+<p style="margin-top:3em;color:#94a3b8;font-size:0.78em;text-align:center">
+compass/exp2900_v8a_consistency_audit.py · Rule Zero · read-only audit
+</p>
+</body></html>

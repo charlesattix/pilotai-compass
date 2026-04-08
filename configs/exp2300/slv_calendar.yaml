@@ -1,0 +1,46 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EXP-2300 sleeve 6 — SLV roll-yield harvest (1.20% weight)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Reference: compass.exp1770_commodity_calendars walk-forward SLV − SI=F
+# Validated: trade Sharpe 2.27, yearly corr to EXP-1220 = −0.23
+# Weight: 1.20% (equal_risk_15% from EXP-2200)
+# Mode: SIGNAL_ONLY (futures execution required, same as GLD)
+# ═══════════════════════════════════════════════════════════════════════════
+
+sleeve_id: slv_calendar
+portfolio_weight: 0.0120
+mode: signal_only
+
+strategy:
+  module: compass.exp1770_commodity_calendars
+  runner: live_signal
+  description: "SLV ETF − SI=F front futures roll-yield harvest"
+
+pair:
+  etf: SLV
+  future: SI=F
+  signal_window: 60
+  z_entry: 1.0
+  z_exit: 0.0
+
+cadence:
+  rebalance_frequency_days: 1
+  scan_time: "09:35 ET"
+
+execution:
+  requires_futures_broker: true
+  broker_status: NOT_CONFIGURED
+  action_on_signal: "log + telegram alert"
+
+data:
+  underlying_source: yahoo
+  futures_source: yahoo
+
+logging:
+  level: INFO
+  file: logs/exp2300/sleeve_slv_calendar.log
+  journal: logs/exp2300/journal_slv_calendar.csv
+
+deployment_notes: |
+  Same upgrade path as gld_calendar: add futures broker, flip to live.

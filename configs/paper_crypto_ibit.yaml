@@ -1,0 +1,192 @@
+# ============================================================================
+# paper_crypto_ibit.yaml — IBIT Credit Spread Paper Trading Config
+# ============================================================================
+# Strategy: Regime-adaptive credit spreads on IBIT (iShares Bitcoin Trust ETF)
+# Status:   PLACEHOLDER — params to be tuned via backtest sweep
+#
+# IBIT characteristics (vs SPY):
+#   - Higher vol: ~50-80% annualized vs SPY ~15-20%
+#   - Wider OTM required: 5% OTM vs 2-3% for SPY
+#   - Wider spreads needed to capture meaningful credit
+#   - Shorter effective DTE due to rapid premium decay
+#   - No iron condor until data history warrants (launched July 2024)
+#
+# Usage:
+#   python main.py scheduler --config configs/paper_crypto_ibit.yaml \
+#                            --env-file .env
+#
+# Required env vars:
+#   ALPACA_API_KEY         — Alpaca paper trading API key
+#   ALPACA_API_SECRET      — Alpaca paper trading API secret
+#   POLYGON_API_KEY        — Polygon.io API key (options chain data)
+#   TELEGRAM_BOT_TOKEN     — (optional) Telegram alert bot token
+#   TELEGRAM_CHAT_ID       — (optional) Telegram chat ID for alerts
+# ============================================================================
+
+# --- Paper trading safety flags ---
+paper_mode: true
+db_path: "data/pilotai_ibit.db"
+experiment_id: "EXP-IBIT-001"
+created_by: "maximus"     # Attribution: experiment creator
+
+# Tickers
+tickers:
+  - IBIT
+
+# ============================================================================
+# Credit Spread Strategy (placeholder — tune via backtest)
+# ============================================================================
+strategy:
+  # --- DTE: shorter due to high vol premium decay ---
+  min_dte: 21
+  max_dte: 35
+  target_dte: 28
+
+  manage_dte: 0           # Matches backtester default (no early DTE exit)
+
+  # --- Direction: regime-adaptive via crypto regime score ---
+  direction: both
+
+  # --- Strike selection: wider OTM for high-vol underlying ---
+  otm_pct: 0.05           # 5% OTM (vs 2% for SPY) — placeholder
+  use_delta_selection: false
+  target_delta: 0.10
+  min_delta: 0.06
+  max_delta: 0.15
+
+  # --- Spread construction: wider width for meaningful credit ---
+  spread_width: 5           # $5 wide (placeholder — backtest to tune)
+  spread_width_high_iv: 7
+  spread_width_low_iv: 3
+
+  # --- IV filters: require elevated IV for crypto spreads ---
+  min_iv_rank: 20           # Lower threshold since crypto IV is structurally high
+  min_iv_percentile: 20
+
+  # --- Iron Condor: DISABLED until 2+ years of IBIT data available ---
+  iron_condor:
+    enabled: false
+
+  # --- Technical filters ---
+  technical:
+    use_trend_filter: true
+    use_rsi_filter: false
+    use_support_resistance: false
+    fast_ma: 20
+    slow_ma: 50             # Shorter MA for crypto (faster moving)
+    rsi_period: 14
+    rsi_oversold: 30
+    rsi_overbought: 70
+
+  # --- Regime detection ---
+  regime_mode: combo
+  regime_config:
+    signals:
+      - price_vs_ma200
+      - rsi_momentum
+      - vix_structure
+    ma_slow_period: 50      # Use MA50 for crypto (MA200 too slow for 2024-only data)
+    ma200_neutral_band_pct: 1.0   # Wider neutral band for crypto vol
+
+# ============================================================================
+# Risk Management (conservative placeholder — tune via backtest)
+# ============================================================================
+risk:
+  account_size: 100000
+
+  # Small risk per trade: crypto is high vol, start conservative
+  max_risk_per_trade: 3.0   # 3% risk per trade (vs 8.5% for SPY) — placeholder
+
+  # Sizing: flat for honest P&L tracking in paper phase
+  sizing_mode: flat
+  compound: false
+
+  # Contract limits
+  min_contracts: 1
+  max_contracts: 10         # Lower max due to high per-contract risk
+
+  # Position limits
+  max_positions: 5          # Fewer positions: high correlation within crypto
+  max_positions_per_ticker: 2
+
+  scan_days: [0, 1, 2, 3, 4]   # Monday-Friday
+
+  # Credit spread exit rules (tighter for crypto)
+  profit_target: 50          # 50% of credit received
+  stop_loss_multiplier: 2.0  # 2x credit (tighter than SPY 1.25x due to vol)
+  stop_loss_pct_of_width: 85
+
+  # Momentum filter: larger threshold for crypto
+  momentum_filter_pct: 5.0
+
+  # Portfolio-level risk limits
+  portfolio_risk:
+    max_portfolio_risk_pct: 20   # Lower portfolio heat for crypto (high vol)
+    max_single_ticker_pct: 20
+    max_same_expiration: 2
+
+  # Drawdown circuit breaker: tighter for crypto
+  drawdown_cb_pct: 30        # 30% (vs 40% for SPY)
+  cooldown_bars: 5
+
+  # No rolling
+  enable_rolling: false
+  max_rolls_per_position: 0
+
+# ============================================================================
+# Alpaca Paper Trading
+# ============================================================================
+alpaca:
+  enabled: true
+  paper: true
+  base_url: "https://paper-api.alpaca.markets"
+  api_key: "${ALPACA_API_KEY}"
+  api_secret: "${ALPACA_API_SECRET}"
+
+# ============================================================================
+# Alerts
+# ============================================================================
+alerts:
+  output_json: true
+  output_text: true
+  output_csv: true
+  json_file: "alerts_ibit.json"
+  text_file: "alerts_ibit.txt"
+  csv_file: "alerts_ibit.csv"
+
+  telegram:
+    enabled: true
+    bot_token: "${TELEGRAM_BOT_TOKEN}"
+    chat_id: "${TELEGRAM_CHAT_ID}"
+
+# ============================================================================
+# Logging
+# ============================================================================
+logging:
+  level: "INFO"
+  file: "logs/paper_ibit.log"
+  console: true
+
+# ============================================================================
+# Data
+# ============================================================================
+data:
+  provider: polygon
+  cache_dir: "data/options_cache"
+
+# ============================================================================
+# Backtest reference targets (to be updated after sweep)
+# ============================================================================
+backtest:
+  starting_capital: 100000
+  commission_per_contract: 0.65
+  slippage: 0.10          # Higher slippage for crypto ETF (wider bid/ask)
+  exit_slippage: 0.20
+  score_threshold: 25
+  generate_reports: true
+  report_dir: "output/backtest_reports"
+
+  # NOTE: IBIT options data only available from ~July 2024.
+  # Backtest range: 2024-07-01 to present.
+  # Short history means results are less statistically robust.
+  # Minimum viable sweep: 6+ months of data before trusting results.

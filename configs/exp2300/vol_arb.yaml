@@ -1,0 +1,64 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EXP-2300 sleeve 4 — Cross-Vol Arbitrage (18.68% weight)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Reference: compass.exp2020_cross_vol_arb
+# Validated: 271 trades, WR 65.7%, trade Sharpe 2.28, ~45 trades/year
+# Weight: 18.68% (equal_risk_15% from EXP-2200)
+# Mode: LIVE (tradeable via ATM straddle pair on weekly signal)
+#
+# Strategy: weekly IV − RV spread across SPY/QQQ/IWM/EEM universe.
+# Go LONG the narrowest spread (IV cheap vs RV), SHORT the widest
+# (IV rich vs RV), both as ATM straddles. Hold 21 trading days to
+# capture the settlement forward RV.
+# ═══════════════════════════════════════════════════════════════════════════
+
+sleeve_id: vol_arb
+portfolio_weight: 0.1868
+mode: signal_only                 # Phase 2: promote to 'live' once a
+                                   # run_live_cycle wrapper is written for
+                                   # compass.exp2020_cross_vol_arb. The
+                                   # current module builds the full tape
+                                   # in one pass (main) — it needs a
+                                   # per-week dispatch function for live
+                                   # paper trading.
+
+strategy:
+  module: compass.exp2020_cross_vol_arb
+  runner: build_trades            # existing function; the runner layer
+                                   # calls this weekly during phase 2
+  description: "Cross-sectional IV−RV long/short vol arb, 21d holds"
+
+universe:
+  tickers:
+    - SPY
+    - QQQ
+    - IWM
+    - EEM
+
+cadence:
+  entry_frequency_days: 7         # weekly rebalance
+  scan_window: "monday 10:00-10:30 ET"
+  max_concurrent_pairs: 1         # one long/short pair at a time
+
+signal:
+  rv_lookback_days: 20
+  iv_target_dte: 30
+  holding_days: 21
+  min_spread_gap: 0.02            # require ≥2 vol-point gap between narrow and wide
+
+execution:
+  leg_type: atm_straddle
+  vega_notional_per_leg: 10000    # $10K vega per leg
+  risk_budget_per_pair: 3000      # max $3K loss per pair
+
+data:
+  options_source: ironvault
+  options_db: data/options_cache.db
+  underlying_source: yahoo
+  forward_rv_source: yahoo
+
+logging:
+  level: INFO
+  file: logs/exp2300/sleeve_vol_arb.log
+  journal: logs/exp2300/journal_vol_arb.csv

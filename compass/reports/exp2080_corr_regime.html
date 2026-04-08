@@ -1,0 +1,57 @@
+<!DOCTYPE html><html><head><meta charset='UTF-8'>
+<title>EXP-2080 Correlation Regime Switching</title>
+<style>
+body{font-family:-apple-system,sans-serif;margin:0;padding:24px;background:#fff;color:#1e293b;max-width:1100px}
+h1{font-size:1.5rem;color:#0f172a} h2{font-size:1.05rem;color:#334155;border-bottom:1px solid #e2e8f0;padding-bottom:4px;margin-top:1.6rem}
+.meta{color:#64748b;font-size:0.82rem;margin-bottom:18px}
+.headline{background:#f0fdf4;border-left:4px solid #16a34a;padding:14px;border-radius:6px;margin:14px 0;font-size:0.95rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:14px 0}
+.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;text-align:center}
+.card .l{font-size:0.65rem;color:#64748b;text-transform:uppercase} .card .v{font-size:1.15rem;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:0.83rem;margin:10px 0}
+th{background:#f1f5f9;padding:6px 8px;text-align:right;font-size:0.7rem;color:#64748b;text-transform:uppercase;border-bottom:2px solid #e2e8f0}
+th:first-child{text-align:left} td{padding:5px 8px;text-align:right;border-bottom:1px solid #f1f5f9} td:first-child{text-align:left}
+</style></head><body>
+<h1>EXP-2080 — Correlation Regime Switching</h1>
+<p class='meta'>5 streams: exp1220 · v5_hedge · gld_cal · slv_cal · cross_vol · all REAL.
+Walk-forward 252/63 with rolling-60d mean off-diagonal pairwise corr regime detector.</p>
+
+<div class='headline'><strong>Pooled OOS:</strong>
+&nbsp;Static  Sharpe <strong>5.24</strong>  CAGR <strong>+33.00%</strong>  DD <strong>2.60%</strong>
+&nbsp;|&nbsp; Dynamic Sharpe <strong>5.19</strong>  CAGR <strong>+34.55%</strong>  DD <strong>2.97%</strong>
+&nbsp; (✅ TARGET MET (DD < 12% and Sharpe ≥ 4.0))</div>
+
+<div class='grid'>
+  <div class='card'><div class='l'>% Normal</div><div class='v'>88%</div></div>
+  <div class='card'><div class='l'>% Stress</div><div class='v'>0%</div></div>
+  <div class='card'><div class='l'>% Decorr</div><div class='v'>12%</div></div>
+  <div class='card'><div class='l'>Mean lev</div><div class='v'>1.04x</div></div>
+  <div class='card'><div class='l'>Static vol</div><div class='v'>5.5%</div></div>
+  <div class='card'><div class='l'>Dyn vol</div><div class='v'>5.8%</div></div>
+</div>
+
+<h2>Walk-Forward Folds</h2>
+<table><tr><th>Test start</th><th>Test end</th>
+<th>Mean ρ</th><th>Static Sh</th><th>Dyn Sh</th><th>Δ Sh</th>
+<th>Static DD</th><th>Dyn DD</th><th>Regime mix</th></tr>
+<tr><td>2020-12-18</td><td>2021-03-16</td><td>+0.05</td><td>5.47</td><td>5.47</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>0.6%</td><td>0.6%</td><td style='font-size:0.78rem'>n=100%</td></tr><tr><td>2021-03-17</td><td>2021-06-11</td><td>+0.05</td><td>6.56</td><td>6.56</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>0.7%</td><td>0.7%</td><td style='font-size:0.78rem'>n=100%</td></tr><tr><td>2021-06-14</td><td>2021-09-08</td><td>+0.05</td><td>7.45</td><td>7.45</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>0.6%</td><td>0.6%</td><td style='font-size:0.78rem'>n=100%</td></tr><tr><td>2021-09-09</td><td>2021-12-06</td><td>+0.06</td><td>8.38</td><td>8.38</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>0.4%</td><td>0.4%</td><td style='font-size:0.78rem'>n=100%</td></tr><tr><td>2021-12-07</td><td>2022-03-03</td><td>+0.03</td><td>6.90</td><td>6.90</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>0.5%</td><td>0.5%</td><td style='font-size:0.78rem'>n=100%</td></tr><tr><td>2022-03-04</td><td>2022-05-31</td><td>+0.07</td><td>5.28</td><td>5.28</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>1.2%</td><td>1.2%</td><td style='font-size:0.78rem'>n=100%</td></tr><tr><td>2022-06-01</td><td>2022-08-26</td><td>-0.03</td><td>3.02</td><td>3.42</td><td style='color:#16a34a;font-weight:700'>+0.40</td><td>1.6%</td><td>1.6%</td><td style='font-size:0.78rem'>n=51% d=49%</td></tr><tr><td>2022-08-29</td><td>2022-11-23</td><td>+0.00</td><td>4.13</td><td>4.13</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>0.7%</td><td>0.7%</td><td style='font-size:0.78rem'>n=100%</td></tr><tr><td>2022-11-24</td><td>2023-02-20</td><td>-0.06</td><td>2.12</td><td>2.48</td><td style='color:#16a34a;font-weight:700'>+0.36</td><td>2.6%</td><td>3.0%</td><td style='font-size:0.78rem'>d=59% n=41%</td></tr><tr><td>2023-02-21</td><td>2023-05-18</td><td>+0.02</td><td>4.51</td><td>4.51</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>1.7%</td><td>1.7%</td><td style='font-size:0.78rem'>n=100%</td></tr><tr><td>2023-05-19</td><td>2023-08-15</td><td>+0.02</td><td>4.41</td><td>4.41</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>1.4%</td><td>1.4%</td><td style='font-size:0.78rem'>n=100%</td></tr><tr><td>2023-08-16</td><td>2023-11-10</td><td>-0.00</td><td>4.26</td><td>4.25</td><td style='color:#dc2626;font-weight:700'>-0.02</td><td>1.3%</td><td>1.3%</td><td style='font-size:0.78rem'>n=86% d=14%</td></tr><tr><td>2023-11-13</td><td>2024-02-07</td><td>+0.03</td><td>6.57</td><td>6.57</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>1.1%</td><td>1.1%</td><td style='font-size:0.78rem'>n=100%</td></tr><tr><td>2024-02-08</td><td>2024-05-06</td><td>+0.04</td><td>6.75</td><td>6.75</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>0.6%</td><td>0.6%</td><td style='font-size:0.78rem'>n=100%</td></tr><tr><td>2024-05-07</td><td>2024-08-01</td><td>+0.02</td><td>6.54</td><td>6.54</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>0.9%</td><td>0.9%</td><td style='font-size:0.78rem'>n=100%</td></tr><tr><td>2024-08-02</td><td>2024-10-29</td><td>+0.03</td><td>6.96</td><td>6.96</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>0.6%</td><td>0.6%</td><td style='font-size:0.78rem'>n=100%</td></tr><tr><td>2024-10-30</td><td>2025-01-24</td><td>+0.14</td><td>5.25</td><td>5.25</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>0.7%</td><td>0.7%</td><td style='font-size:0.78rem'>n=100%</td></tr><tr><td>2025-01-27</td><td>2025-04-23</td><td>+0.09</td><td>2.42</td><td>2.42</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>1.3%</td><td>1.3%</td><td style='font-size:0.78rem'>n=100%</td></tr><tr><td>2025-04-24</td><td>2025-07-21</td><td>-0.03</td><td>7.39</td><td>7.48</td><td style='color:#16a34a;font-weight:700'>+0.09</td><td>0.6%</td><td>0.6%</td><td style='font-size:0.78rem'>n=73% d=27%</td></tr><tr><td>2025-07-22</td><td>2025-10-16</td><td>-0.07</td><td>5.67</td><td>5.62</td><td style='color:#dc2626;font-weight:700'>-0.05</td><td>0.9%</td><td>1.1%</td><td style='font-size:0.78rem'>d=90% n=10%</td></tr></table>
+
+<h2>Method</h2>
+<ul>
+<li>Streams: exp1220 + v5_hedge from cached EXP-1850 pickle; gld_cal /
+   slv_cal from compass.exp1770 walk_forward; cross_vol from
+   compass.exp2020 build_trades (exit-date PnL → daily series).</li>
+<li>Regime: rolling-60d mean off-diagonal pairwise correlation across
+   all 5 streams. STRESS if ≥ +0.50, DECORRELATION if ≤ -0.05, NORMAL
+   otherwise. (Causal: row k uses rows [k-59..k] only.)</li>
+<li>Static schedule: exp1220 0.40 / gld_cal 0.20 / slv_cal 0.20 /
+   cross_vol 0.15 / v5_hedge 0.05.</li>
+<li>Stress schedule: exp1220 0.20 / gld_cal 0.20 / slv_cal 0.15 /
+   cross_vol 0.15 / v5_hedge 0.30 (cut equity-heavy, lift hedge).</li>
+<li>Decorrelation: keep static weights, lift leverage 1.0x → 1.30x.</li>
+<li>Walk-forward 252/63, dynamic vs static measured on the same OOS days.</li>
+<li>Target: max DD &lt; 12% AND Sharpe ≥ 4.0.</li>
+</ul>
+<div style='color:#94a3b8;font-size:0.75rem;margin-top:1.6rem;border-top:1px solid #e2e8f0;padding-top:8px'>
+compass/exp2080_corr_regime.py · ALL REAL DATA</div>
+</body></html>

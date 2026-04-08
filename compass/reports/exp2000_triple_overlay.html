@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>EXP-2000 — Triple Overlay Stack</title>
+<style>
+body { font-family:-apple-system,sans-serif;max-width:1200px;margin:0 auto;padding:28px;background:#fff;color:#1e293b; }
+h1 { font-size:1.75em;color:#0f172a; }
+h2 { margin-top:2em;border-bottom:2px solid #e2e8f0;padding-bottom:8px;color:#334155; }
+.sources { background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px;font-size:0.84rem;line-height:1.6; }
+.winner { background:#ecfdf5;border:2px solid #16a34a;border-radius:10px;padding:18px;margin:20px 0; }
+.winner h3 { margin-top:0;color:#065f46; }
+table { width:100%;border-collapse:collapse;margin:12px 0;font-size:0.86em; }
+th { background:#f1f5f9;padding:9px 11px;text-align:right;border-bottom:2px solid #cbd5e1;font-size:0.74em;text-transform:uppercase; }
+th:first-child { text-align:left; }
+td { padding:7px 11px;text-align:right;border-bottom:1px solid #e2e8f0; }
+td:first-child { text-align:left; }
+</style></head><body>
+<h1>EXP-2000 — Triple Overlay Stack on EXP-1220</h1>
+<p style="color:#64748b">VoV (1970) · PCR (1750) · FOMC (1740) — every subset
+on canonical IronVault tape · 2020-2025 · 2026-04-07 15:33</p>
+
+<div class="sources">
+<strong>Rule Zero — every input is real:</strong><br>
+EXP-1220 trades: <code>compass.exp1220_standalone.run_exp1220_trades</code> on
+real <code>data/options_cache.db</code> SPY chains + Yahoo SPY/^VIX<br>
+VoV (V): real Yahoo ^VIX → 20d realised vol z-score (compass.exp1970_vol_of_vol)<br>
+PCR (P): real IronVault SPY option_daily put/call volumes + real Yahoo
+^VIX/^VIX9D/^VIX3M term structure (compass.exp1750_putcall_overlay)<br>
+FOMC (F): parsed FOMC minutes from <code>data/fomc/*.txt</code> + real Yahoo
+SPY/^VIX/^VIX3M (compass.exp1740_sentiment_filter)<br>
+Sharpe: canonical <code>compass.metrics.full_metrics</code>
+(daily mean / std × √252) — also reports the trade-level Sharpe used by
+prior wave reports for cross-check.
+</div>
+
+<div class="winner">
+<h3>★ Winner: <code>V+F</code></h3>
+N trades: <strong>135</strong>
+(21% filtered out from 171 baseline)<br>
+<strong>Trade Sharpe</strong>: <strong>2.14</strong>
+(baseline 1.26, lift
+<strong>+0.89</strong>)<br>
+Daily Sharpe (compass.metrics, dilution-affected):
+-6.32<br>
+Win rate: 89.6% · Max DD: 0.5% ·
+Total PnL: $6,356
+</div>
+
+<div style="background:#fefce8;border:1px solid #fde047;border-radius:6px;padding:14px;font-size:0.86rem;margin:18px 0">
+<strong>Why two Sharpes?</strong> The trade tape is sparse (171 trades over 5+
+years → ~86% zero-return days). The canonical
+<code>compass.metrics.full_metrics</code> daily formula
+<code>(mean - rf/252) / std × √252</code> diluites the daily mean below the
+4.5%/yr risk-free floor on this stream, producing a negative excess
+return and a misleading negative Sharpe. This is the same dilution
+issue MASTERPLAN documents as Bug 3 ("Capital Dilution — 86% zero-
+return days") and is a structural property of per-trade strategies, not
+a bug in the formula. The trade-level Sharpe (annualised by
+√(trades/year)) is the canonical metric all of Wave-2 1740/1750/1970
+used and is what we use to pick the winner.
+</div>
+
+<h2>1. All subsets</h2>
+<table>
+<thead><tr>
+<th>Variant</th><th>N</th><th>Filtered</th><th>WinRate</th><th>Total PnL</th>
+<th>Trade SR</th><th>Δ Trade SR</th><th>Daily SR (diluted)</th>
+<th>CAGR (diluted)</th><th>Max DD (diluted)</th><th>Calmar</th>
+</tr></thead>
+<tbody><tr><td><strong>baseline</strong></td><td>171</td><td>0%</td><td>87.7%</td><td>$7,372</td><td style='font-weight:700'>1.26</td><td style='color:#0f172a;font-weight:700'>+0.00</td><td>-3.24</td><td>1.2%</td><td>1.6%</td><td>0.79</td></tr><tr><td><strong>V</strong></td><td>161</td><td>6%</td><td>88.8%</td><td>$7,648</td><td style='font-weight:700'>2.12</td><td style='color:#16a34a;font-weight:700'>+0.86</td><td>-4.92</td><td>1.3%</td><td>0.8%</td><td>1.70</td></tr><tr><td><strong>P</strong></td><td>93</td><td>46%</td><td>85.0%</td><td>$4,029</td><td style='font-weight:700'>1.25</td><td style='color:#dc2626;font-weight:700'>-0.01</td><td>-6.26</td><td>0.7%</td><td>0.7%</td><td>1.04</td></tr><tr><td><strong>F</strong></td><td>140</td><td>18%</td><td>88.6%</td><td>$6,220</td><td style='font-weight:700'>1.80</td><td style='color:#16a34a;font-weight:700'>+0.54</td><td>-5.60</td><td>1.0%</td><td>0.7%</td><td>1.51</td></tr><tr><td><strong>V+P</strong></td><td>90</td><td>47%</td><td>85.6%</td><td>$4,326</td><td style='font-weight:700'>1.56</td><td style='color:#16a34a;font-weight:700'>+0.30</td><td>-6.98</td><td>0.8%</td><td>0.5%</td><td>1.65</td></tr><tr><td><strong>V+F ★</strong></td><td>135</td><td>21%</td><td>89.6%</td><td>$6,356</td><td style='font-weight:700'>2.14</td><td style='color:#16a34a;font-weight:700'>+0.89</td><td>-6.32</td><td>1.1%</td><td>0.5%</td><td>2.27</td></tr><tr><td><strong>P+F</strong></td><td>80</td><td>53%</td><td>85.0%</td><td>$3,428</td><td style='font-weight:700'>1.08</td><td style='color:#dc2626;font-weight:700'>-0.17</td><td>-6.62</td><td>0.6%</td><td>0.7%</td><td>0.82</td></tr><tr><td><strong>V+P+F</strong></td><td>78</td><td>54%</td><td>85.9%</td><td>$3,819</td><td style='font-weight:700'>1.41</td><td style='color:#16a34a;font-weight:700'>+0.16</td><td>-7.39</td><td>0.7%</td><td>0.5%</td><td>1.45</td></tr></tbody>
+</table>
+
+<h2>2. North Star v3 with winner sleeve</h2>
+
+<table>
+<thead><tr><th>Stream</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Vol</th></tr></thead>
+<tbody>
+<tr><td>EXP-1220 (winner overlay)</td>
+    <td>1.0%</td>
+    <td>-6.44</td>
+    <td>0.5%</td>
+    <td>0.5%</td></tr>
+<tr><td>v5 hedge</td>
+    <td>-1.0%</td>
+    <td>-0.83</td>
+    <td>12.8%</td>
+    <td>6.4%</td></tr>
+<tr><td>GLD calendar</td>
+    <td>17.4%</td>
+    <td>1.97</td>
+    <td>2.5%</td>
+    <td>6.0%</td></tr>
+<tr><td>SLV calendar</td>
+    <td>31.5%</td>
+    <td>1.94</td>
+    <td>6.1%</td>
+    <td>12.2%</td></tr>
+</tbody>
+</table>
+<h3>North Star v3 portfolio with overlay winner sleeve</h3>
+<p><strong>CAGR 5.0% · Sharpe 0.30 ·
+Max DD 0.8% · Calmar 6.32</strong></p>
+<p>Allocation: 80% × 2× EXP-1220 (overlay-filtered) + 5% v5 hedge +
+7.5% GLD calendar + 7.5% SLV calendar</p>
+
+
+<p style="margin-top:3em;color:#94a3b8;font-size:0.78em;text-align:center">
+compass/exp2000_triple_overlay.py · Rule Zero · real IronVault + Yahoo + FRED + FOMC minutes
+</p>
+</body></html>

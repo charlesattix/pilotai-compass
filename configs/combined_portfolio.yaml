@@ -1,0 +1,216 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Combined Portfolio Configuration — EXP-1220 + EXP-1780 + EXP-1820 + EXP-1660
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Based on North Star v2 regime-switching portfolio (commit 55aa09f).
+# Expected full-period metrics (real data, yearly granularity):
+#   CAGR:        +101.6%
+#   Sharpe:      4.48
+#   IS/OOS:      107% / 96% (OOS > IS — no curve fit)
+#
+# Rule Zero: this config uses ONLY real-data-validated experiments.
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: "Combined Portfolio — Regime-Switching"
+version: "1.0.0"
+mode: paper                      # paper | live
+created: "2026-04-06"
+source_commits: ["55aa09f", "c593cb5"]
+
+# ─── Account ───────────────────────────────────────────────────────────────
+account:
+  broker: alpaca
+  environment: paper             # Alpaca paper account
+  starting_capital: 100000
+  currency: USD
+  margin_type: reg_t
+
+# ─── Strategy roster ───────────────────────────────────────────────────────
+# Each entry defines a strategy's role and per-strategy config path.
+# "autonomous" strategies have their own live runner and trade directly.
+# "advisory" strategies only produce signals for Charles to review.
+strategies:
+
+  EXP-1220:
+    name: "Credit Spread 1.5x (Core Alpha)"
+    role: core
+    execution: autonomous
+    runner: "scripts/run_exp1220.py"
+    config: "configs/deploy_exp1220_1.5x.yaml"
+    ticker: SPY
+    validated_cagr_pct: 99.0
+    validated_sharpe: 5.68
+    notes: |
+      Sole autonomous strategy in this package. Uses its own standalone
+      runner. All capital allocated to EXP-1220 is managed by that
+      scanner on its own Monday-entry schedule.
+
+  EXP-1780:
+    name: "Crisis Alpha (CTA Trend Following)"
+    role: hedge
+    execution: advisory
+    module: "compass.crisis_alpha_v3"
+    config_preset: "v2_round"
+    vol_target: 0.10
+    leverage: 2.5
+    ticker: multi_asset          # 13-asset universe
+    validated_cagr_pct: 12.2
+    validated_dd_period_corr: -0.449
+    notes: |
+      Advisory signal only. The combined runner produces daily target
+      weights across TLT/GLD/USO/EFA/EEM/etc which Charles reviews and
+      executes manually in Alpaca paper. No autonomous execution until
+      a live runner is built (backlog).
+
+  EXP-1820:
+    name: "Dispersion Trading (IV vs RV)"
+    role: overlay
+    execution: advisory
+    ticker: SPY
+    validated_sharpe: 1.94
+    validated_is_oos: [1.89, 1.88]
+    notes: |
+      Advisory signal. When rolling 20d IV > rolling 20d RV by z > 1.0,
+      recommend short straddle. Charles reviews and executes manually.
+      Small overlay: max 5% of capital.
+
+  EXP-1660:
+    name: "VRP (SPY Mid/High Vol)"
+    role: overlay
+    execution: advisory
+    ticker: SPY
+    validated_trade_sharpe: 1.23  # IS arithmetic sharpe
+    filter: "mid_vol+high_vol"
+    notes: |
+      Advisory signal. Only fires during mid/high VIX regimes.
+      Small overlay: max 5-20% of capital, regime-dependent.
+
+# ─── Regime detection ──────────────────────────────────────────────────────
+regime_detector:
+  source: "compass.regime.RegimeClassifier"
+  vix_source: yahoo              # real-time VIX from Yahoo (free, 15min delay OK)
+  spy_source: yahoo              # real-time SPY for trend
+  trend_window: 50               # days
+  trend_threshold: 5.0           # annualized %
+
+  regimes:
+    BULL:
+      description: "SPY trending up, VIX < 20"
+      condition: "vix < 20 AND spy_ma50_slope > 0"
+    NEUTRAL:
+      description: "Range-bound, moderate vol"
+      condition: "20 <= vix < 25"
+    BEAR:
+      description: "SPY downtrend, VIX 20-30"
+      condition: "vix < 30 AND spy_ma50_slope < 0"
+    HIGH_VOL:
+      description: "Crisis, VIX >= 30"
+      condition: "vix >= 30"
+
+# ─── Regime-conditional allocations ────────────────────────────────────────
+# Weights sum to 1.0 per regime. Cash is the remainder.
+# Rebalance frequency: daily check, execute only if regime changes or
+# weekly on Mondays.
+allocations:
+
+  BULL:
+    EXP-1220: 0.90
+    EXP-1780: 0.00
+    EXP-1820: 0.00
+    EXP-1660: 0.00
+    cash: 0.10
+    notes: "Maximum alpha capture in benign markets."
+
+  NEUTRAL:
+    EXP-1220: 0.80
+    EXP-1780: 0.00
+    EXP-1820: 0.10
+    EXP-1660: 0.00
+    cash: 0.10
+    notes: "Add dispersion overlay when IV/RV divergence opportunities exist."
+
+  BEAR:
+    EXP-1220: 0.50
+    EXP-1780: 0.30
+    EXP-1820: 0.00
+    EXP-1660: 0.00
+    cash: 0.20
+    notes: "Reduce credit spread exposure, activate crisis alpha hedge."
+
+  HIGH_VOL:
+    EXP-1220: 0.40
+    EXP-1780: 0.30
+    EXP-1820: 0.00
+    EXP-1660: 0.20
+    cash: 0.10
+    notes: "Maximum defense. VRP fires on rich short-dated premium."
+
+# ─── Rebalance schedule ────────────────────────────────────────────────────
+rebalance:
+  frequency: weekly              # check weekly, execute on regime change
+  day_of_week: monday
+  time_et: "09:40"               # 10 min after open
+  min_regime_stability_days: 3   # don't rebalance on single-day regime flip
+  drift_trigger_pct: 0.05        # force rebalance if weight drifts >5%
+
+# ─── Risk limits ───────────────────────────────────────────────────────────
+risk:
+  # Portfolio-level hard stops
+  max_daily_loss_pct: 3.0        # halt trading if daily loss > 3%
+  max_weekly_loss_pct: 5.0       # halt trading if weekly loss > 5%
+  max_drawdown_halt_pct: 10.0    # halt ALL trading if DD > 10%
+  drawdown_recovery_pct: 5.0     # resume when DD recovers to -5%
+
+  # Per-strategy limits (on top of individual strategy's own limits)
+  max_position_count: 20
+  max_portfolio_risk_pct: 15.0   # hard cap on sum of open position max_loss
+
+  # Capital preservation
+  min_cash_reserve_pct: 5.0      # always keep 5% in cash
+
+# ─── Monitoring & alerts ───────────────────────────────────────────────────
+monitoring:
+  check_interval_minutes: 15     # check positions every 15 min during market hours
+  daily_report_time: "16:05"     # generate daily P&L report 5 min after close
+  weekly_report_day: monday      # weekly summary every Monday
+  weekly_report_time: "08:00"
+
+  # Telegram alerts (requires TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID env vars)
+  telegram:
+    enabled: true
+    alerts:
+      regime_change: true        # notify on regime transition
+      rebalance_executed: true
+      position_opened: true
+      position_closed: true
+      drawdown_warning_pct: 5.0  # alert when DD > 5%
+      drawdown_critical_pct: 8.0 # urgent alert when DD > 8%
+      daily_loss_warning_pct: 2.0
+      vix_spike_above: 30
+      strategy_error: true       # alert on any strategy exception
+
+# ─── Data sources ──────────────────────────────────────────────────────────
+data:
+  price_source: alpaca           # real-time quotes from Alpaca
+  vix_source: yahoo              # VIX from Yahoo Finance
+  options_source: alpaca
+  historical_cache: data/options_cache.db
+
+# ─── Logging ───────────────────────────────────────────────────────────────
+logging:
+  level: INFO
+  file: logs/combined_portfolio.log
+  max_size_mb: 50
+  backup_count: 5
+  pnl_journal: logs/combined_pnl_journal.csv  # daily P&L every day
+  state_file: logs/combined_state.json        # current regime + allocations
+  health_file: logs/combined_health.json      # health status for monitoring
+
+# ─── Rule Zero ─────────────────────────────────────────────────────────────
+rule_zero:
+  enforced: true
+  statement: |
+    ZERO SYNTHETIC DATA. Every price, signal, and P&L value traces to a
+    real market data source (Alpaca live quotes, Yahoo Finance, or
+    IronVault historical cache). No np.random, no Black-Scholes as
+    primary pricing, no fabricated trades.

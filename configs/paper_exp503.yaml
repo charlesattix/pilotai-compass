@@ -1,0 +1,224 @@
+# ============================================================================
+# paper_exp503.yaml — EXP-503 ML V2 Aggressive Paper Trading Config
+# ============================================================================
+# Strategy: ML V2 Aggressive — CreditSpreadStrategy wrapped with
+#           RegimeModelRouter for regime-aware position sizing.
+#
+# Sizing profile:
+#   bull     → 1.50× (lean in hard)
+#   neutral  → 1.00× (normal sizing)
+#   low_vol  → 1.20× (calm markets, slightly more)
+#   high_vol → 0.10× (near-flat, defensive)
+#   bear     → 0.10× (near-flat, defensive)
+#   crash    → 0.00× (no new trades)
+#
+# Account: PA3Z9PLVYUL5 (Alpaca paper, FRESH — no prior trades)
+# Validation baseline: EXP-401 (same credit spread core, no ML sizing)
+#
+# Usage:
+#   python main.py scheduler --config configs/paper_exp503.yaml \
+#                            --env-file .env.exp503
+#
+# Required env vars (in .env.exp503):
+#   ALPACA_API_KEY       — Alpaca paper trading API key
+#   ALPACA_API_SECRET    — Alpaca paper trading API secret
+#   POLYGON_API_KEY      — Polygon.io API key
+#   TELEGRAM_BOT_TOKEN   — (optional) Telegram alerts
+#   TELEGRAM_CHAT_ID     — (optional) Telegram chat ID
+# ============================================================================
+
+paper_mode: true
+db_path: "data/exp503/pilotai_exp503.db"
+experiment_id: "EXP-503"
+created_by: "maximus"     # Attribution: experiment creator
+
+tickers:
+  - SPY
+
+# ============================================================================
+# Strategy — Credit Spread with ML V2 Aggressive sizing overlay
+# ============================================================================
+strategy:
+  # --- DTE (matches EXP-401 core) ---
+  min_dte: 15
+  max_dte: 25
+  target_dte: 15
+
+  manage_dte: 0
+
+  # --- Direction: regime-adaptive ---
+  direction: both
+
+  # --- Strike selection ---
+  otm_pct: 0.02
+  use_delta_selection: false
+  target_delta: 0.12
+  min_delta: 0.08
+  max_delta: 0.18
+
+  # --- Spread construction ---
+  spread_width: 12
+
+  # --- IV filters ---
+  min_iv_rank: 0
+  min_iv_percentile: 0
+
+  # --- Iron condor: disabled for EXP-503 (cleaner ML signal baseline) ---
+  iron_condor:
+    enabled: false
+
+  # --- Straddle/strangle: disabled for EXP-503 (cleaner ML signal baseline) ---
+  straddle_strangle:
+    enabled: false
+
+  # --- Technical filters ---
+  technical:
+    use_trend_filter: true
+    use_rsi_filter: false
+    use_support_resistance: false
+    fast_ma: 50
+    slow_ma: 80
+    rsi_period: 14
+    rsi_oversold: 30
+    rsi_overbought: 70
+
+  # --- Regime detection ---
+  regime_mode: combo
+  regime_config:
+    signals:
+      - price_vs_ma200
+      - rsi_momentum
+      - vix_structure
+    ma_slow_period: 80
+    ma200_neutral_band_pct: 0.5
+
+  # ── ML V2 Aggressive sizing overlay ─────────────────────────────────────
+  ml_enhanced:
+    enabled: true
+
+    # Multipliers per regime
+    min_mult: 0.10          # bear / high_vol — near-flat
+    max_mult: 1.50          # bull — lean in hard
+    neutral_mult: 1.00      # neutral — normal
+    low_vol_mult: 1.20      # low_vol — calm markets, slightly more
+    crash_mult: 0.00        # crash — no new trades
+
+    # regime_gate=true: suppress signal generation entirely in defensive regimes
+    # (bear/high_vol). Signals that don't fire save on slippage and commissions.
+    regime_gate: true
+
+    # Pre-trained signal model for ML confidence blending
+    use_signal_model: true
+    ml_blend_weight: 0.25   # 25% ML blend, 75% pure regime table
+
+    # Shadow mode: run EnsembleSignalModel in parallel for comparison logging.
+    # Primary (signal_model_*.joblib) controls all live decisions.
+    # Shadow predictions are logged to compass/shadow_log.csv only.
+    shadow_ensemble: true
+
+    # Signals below this score (after regime scaling) are dropped
+    min_score_threshold: 30.0
+
+# ============================================================================
+# Risk Management
+# ============================================================================
+risk:
+  account_size: 100000
+
+  # Base credit spread risk per trade (before ML multiplier)
+  max_risk_per_trade: 12.0
+
+  # Sizing: flat (ML multiplier applied at strategy layer)
+  sizing_mode: flat
+  compound: false
+
+  # Contract limits
+  min_contracts: 1
+  max_contracts: 25
+
+  # Position limits
+  max_positions: 12
+  max_positions_per_ticker: 3
+
+  scan_days: [0, 1, 2, 3, 4]
+
+  # Exit rules
+  profit_target: 55
+  stop_loss_multiplier: 1.25
+  stop_loss_pct_of_width: 90
+
+  delta_threshold: 0.30
+  min_credit_pct: 5
+  momentum_filter_pct: 2.0
+
+  portfolio_risk:
+    max_portfolio_risk_pct: 40
+    max_single_ticker_pct: 40
+    max_same_expiration: 4
+
+  drawdown_cb_pct: 40
+  cooldown_bars: 3
+
+  enable_rolling: false
+  max_rolls_per_position: 0
+
+  # Regime scales for the wrapped CreditSpreadStrategy's base scoring
+  # (ML multiplier applied on top of these)
+  regime_scale_bull: 1.0
+  regime_scale_bear: 0.3
+  regime_scale_high_vol: 0.3
+  regime_scale_low_vol: 0.8
+  regime_scale_crash: 0.0
+
+# ============================================================================
+# Alpaca Paper Trading
+# ============================================================================
+alpaca:
+  enabled: true
+  paper: true
+  base_url: "https://paper-api.alpaca.markets"
+  api_key: "${ALPACA_API_KEY}"
+  api_secret: "${ALPACA_API_SECRET}"
+
+# ============================================================================
+# Alerts
+# ============================================================================
+alerts:
+  output_json: true
+  output_text: true
+  output_csv: true
+  json_file: "alerts_exp503.json"
+  text_file: "alerts_exp503.txt"
+  csv_file: "alerts_exp503.csv"
+
+  telegram:
+    enabled: true
+    bot_token: "${TELEGRAM_BOT_TOKEN}"
+    chat_id: "${TELEGRAM_CHAT_ID}"
+
+# ============================================================================
+# Logging
+# ============================================================================
+logging:
+  level: "INFO"
+  file: "logs/paper_exp503.log"
+  console: true
+
+# ============================================================================
+# Data
+# ============================================================================
+data:
+  provider: polygon
+  cache_dir: "data/options_cache"
+
+# ============================================================================
+# Backtester Reference (for compare_experiments tooling)
+# ============================================================================
+backtest:
+  starting_capital: 100000
+  commission_per_contract: 0.65
+  slippage: 0.05
+  exit_slippage: 0.10
+  score_threshold: 25
+  generate_reports: true
+  report_dir: "output/backtest_reports"

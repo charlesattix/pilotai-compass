@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EXP-1860 — North Star Portfolio v3</title>
+<style>
+* { box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+       max-width:1200px;margin:0 auto;padding:28px;background:#fff;color:#1e293b;line-height:1.5; }
+h1 { font-size:1.85em;color:#0f172a;margin-bottom:4px; }
+h2 { color:#334155;margin-top:2.4em;padding-bottom:8px;border-bottom:2px solid #e2e8f0; }
+.subtitle { color:#64748b;font-size:0.92rem;margin-bottom:24px; }
+.sources { background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:16px;margin:16px 0;font-size:0.84rem;line-height:1.7; }
+.verdict { background:#ecfdf5;border:2px solid #16a34a;border-radius:10px;padding:20px;margin:24px 0; }
+.verdict h3 { margin-top:0;color:#065f46; }
+.kpi-row { display:flex;gap:14px;flex-wrap:wrap;margin:18px 0; }
+.kpi { background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;text-align:center;flex:1;min-width:120px; }
+.kpi .value { font-size:1.5em;font-weight:800;color:#0f172a; }
+.kpi .label { font-size:0.72em;color:#64748b;margin-top:4px;text-transform:uppercase; }
+table { width:100%;border-collapse:collapse;margin:14px 0;font-size:0.86em; }
+th { background:#f1f5f9;padding:10px 12px;text-align:right;font-weight:600;color:#475569;
+     border-bottom:2px solid #cbd5e1;font-size:0.74em;text-transform:uppercase; }
+th:first-child { text-align:left; }
+td { padding:8px 12px;text-align:right;border-bottom:1px solid #e2e8f0; }
+td:first-child { text-align:left; }
+tr:hover { background:#f8fafc; }
+.note { background:#fefce8;border:1px solid #fde047;border-radius:6px;padding:12px 16px;font-size:0.86rem;margin:12px 0; }
+.footer { margin-top:3em;padding-top:1em;border-top:1px solid #e2e8f0;font-size:0.78em;color:#94a3b8;text-align:center; }
+</style></head><body>
+
+<h1>EXP-1860 — North Star Portfolio v3</h1>
+<div class="subtitle">Wave 1+2 winners combined · 4 streams + 2 overlays ·
+walk-forward 2020–2025 · 2026-04-07 13:02</div>
+
+<div class="sources">
+<strong>Rule Zero — every input traces to real data:</strong><br>
+<code>exp1220</code>: scripts.ultimate_portfolio.load_exp1220_dynamic
+(real Yahoo SPY+^VIX+^VIX3M, TailRiskProtector dynamic leverage)<br>
+<code>v5_hedge</code>: compass.crisis_alpha_v5 frozen best config (real Yahoo 13-ETF)<br>
+<code>gld_calendar</code>: compass.exp1770_commodity_calendars walk-forward GLD−GC=F
+(real Yahoo daily close, EXP-1770 published Sharpe 2.70 / corr -0.61 yearly)<br>
+<code>slv_calendar</code>: same module SLV−SI=F (Sharpe 2.27 / corr -0.23)<br>
+<code>EXP-1740 overlay</code>: FOMC sentiment filter on EXP-1220, Sharpe lift +0.60<br>
+<code>EXP-1750 overlay</code>: put/call + VIX TS gate on EXP-1220, Sharpe lift +0.78<br>
+Overlays applied as a multiplicative factor on the EXP-1220 mean
+return (vol unchanged) using the documented Sharpe lifts × 0.70
+composition discount. NOT a synthetic series — the underlying daily
+return data is the same.
+</div>
+
+<div class="verdict">
+<h3>Targets vs measured (with overlays)</h3>
+CAGR / Sharpe / Max DD: <span style='color:#16a34a;font-weight:700'>166.03 ✓ (target ≥ 100.0)</span> · <span style='color:#dc2626;font-weight:700'>3.97 ✗ (target ≥ 6.0)</span> · <span style='color:#dc2626;font-weight:700'>14.55 ✗ (target ≤ 12.0)</span><br>
+Without overlays: CAGR 119.9%, Sharpe 3.96, Max DD 11.6%
+</div>
+
+<h2>1. Component allocation (fixed, Wave 1+2 evidence-based)</h2>
+<table>
+<thead><tr><th>Component</th><th>Weight</th><th>Leverage</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>EXP-1220 credit spreads</td><td>80.0%</td><td>2.0×</td>
+    <td>Base alpha; 99% CAGR / Sharpe 3.83 standalone (1.5× walk-forward)</td></tr>
+<tr><td>Crisis Alpha v5 hedge</td><td>5.0%</td><td>1.0×</td>
+    <td>Negative SPY-stress correlation (frozen best config)</td></tr>
+<tr><td>GLD calendar</td><td>7.5%</td><td>1.0×</td>
+    <td>Sharpe 2.70 / yearly corr -0.61 vs EXP-1220 (EXP-1770)</td></tr>
+<tr><td>SLV calendar</td><td>7.5%</td><td>1.0×</td>
+    <td>Sharpe 2.27 / yearly corr -0.23 vs EXP-1220 (EXP-1770)</td></tr>
+</tbody>
+</table>
+
+<h2>2. Stream-level metrics (standalone, full sample)</h2>
+<table>
+<thead><tr><th>Stream</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Vol</th><th>Days</th></tr></thead>
+<tbody><tr><td style='font-weight:700'>exp1220</td><td>58.8%</td><td>3.70</td><td>7.6%</td><td>11.5%</td><td>1508</td></tr><tr><td style='font-weight:700'>v5_hedge</td><td>-1.1%</td><td>-0.82</td><td>12.8%</td><td>6.5%</td><td>1508</td></tr><tr><td style='font-weight:700'>gld_calendar</td><td>18.1%</td><td>2.03</td><td>2.5%</td><td>6.1%</td><td>1508</td></tr><tr><td style='font-weight:700'>slv_calendar</td><td>32.9%</td><td>1.99</td><td>6.1%</td><td>12.4%</td><td>1508</td></tr></tbody>
+</table>
+
+<h2>3. Stream correlation matrix (daily)</h2>
+<table>
+<thead><tr><th></th><th>exp1220</th><th>v5_hedge</th><th>gld_calendar</th><th>slv_calendar</th></tr></thead>
+<tbody><tr><td style='font-weight:700'>exp1220</td><td style='color:#dc2626'>+1.000</td><td style='color:#16a34a'>-0.151</td><td style='color:#0f172a'>+0.001</td><td style='color:#16a34a'>-0.024</td></tr><tr><td style='font-weight:700'>v5_hedge</td><td style='color:#16a34a'>-0.151</td><td style='color:#dc2626'>+1.000</td><td style='color:#16a34a'>-0.049</td><td style='color:#16a34a'>-0.018</td></tr><tr><td style='font-weight:700'>gld_calendar</td><td style='color:#0f172a'>+0.001</td><td style='color:#16a34a'>-0.049</td><td style='color:#dc2626'>+1.000</td><td style='color:#0f172a'>+0.255</td></tr><tr><td style='font-weight:700'>slv_calendar</td><td style='color:#16a34a'>-0.024</td><td style='color:#16a34a'>-0.018</td><td style='color:#0f172a'>+0.255</td><td style='color:#dc2626'>+1.000</td></tr></tbody>
+</table>
+<div class="note">
+Daily correlations are typically lower than the headline yearly numbers
+in the EXP-1770 report (Sharpe is built from daily noise, while corr
+on n=6 years is dominated by direction). Both views matter — the daily
+matrix sets portfolio vol; yearly correlation sets diversification of
+the 4-year compounding window.
+</div>
+
+<h2>4. Portfolio walk-forward results</h2>
+<div class="kpi-row">
+<div class="kpi"><div class="value">166%</div><div class="label">CAGR (with overlays)</div></div>
+<div class="kpi"><div class="value">3.97</div><div class="label">Sharpe</div></div>
+<div class="kpi"><div class="value">14.6%</div><div class="label">Max DD</div></div>
+<div class="kpi"><div class="value">11.41</div><div class="label">Calmar</div></div>
+<div class="kpi"><div class="value">24.3%</div><div class="label">Vol</div></div>
+<div class="kpi"><div class="value">1256</div><div class="label">OOS days</div></div>
+</div>
+<div class="kpi-row">
+<div class="kpi"><div class="value">120%</div><div class="label">CAGR (no overlays)</div></div>
+<div class="kpi"><div class="value">3.96</div><div class="label">Sharpe</div></div>
+<div class="kpi"><div class="value">11.6%</div><div class="label">Max DD</div></div>
+<div class="kpi"><div class="value">10.30</div><div class="label">Calmar</div></div>
+<div class="kpi"><div class="value">19.3%</div><div class="label">Vol</div></div>
+<div class="kpi"><div class="value">1256</div><div class="label">OOS days</div></div>
+</div>
+
+<h2>5. Year-by-year breakdown</h2>
+<table>
+<thead>
+<tr><th rowspan='2'>Year</th>
+<th colspan='3'>base (4 streams)</th>
+<th colspan='3'>with overlays (1740+1750)</th>
+</tr><tr>
+<th>CAGR</th><th>Sharpe</th><th>DD</th>
+<th>CAGR</th><th>Sharpe</th><th>DD</th>
+</tr></thead>
+<tbody><tr><td style='font-weight:700'>2021</td><td style='color:#16a34a'>175%</td><td>5.68</td><td>2.9%</td><td style='color:#16a34a'>252%</td><td>5.69</td><td>3.6%</td></tr><tr><td style='font-weight:700'>2022</td><td style='color:#16a34a'>42%</td><td>1.64</td><td>11.6%</td><td style='color:#16a34a'>53%</td><td>1.63</td><td>14.6%</td></tr><tr><td style='font-weight:700'>2023</td><td style='color:#16a34a'>153%</td><td>3.73</td><td>6.9%</td><td style='color:#16a34a'>217%</td><td>3.74</td><td>8.7%</td></tr><tr><td style='font-weight:700'>2024</td><td style='color:#16a34a'>125%</td><td>4.85</td><td>2.7%</td><td style='color:#16a34a'>173%</td><td>4.86</td><td>3.4%</td></tr><tr><td style='font-weight:700'>2025</td><td style='color:#16a34a'>130%</td><td>4.73</td><td>4.2%</td><td style='color:#16a34a'>184%</td><td>4.78</td><td>5.3%</td></tr></tbody>
+</table>
+
+<h2>6. Overlay scaling audit</h2>
+<table>
+<thead><tr><th>Field</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>EXP-1220 base Sharpe</td><td>3.700</td></tr>
+<tr><td>EXP-1740 published lift</td><td>+0.60</td></tr>
+<tr><td>EXP-1750 published lift</td><td>+0.78</td></tr>
+<tr><td>Composition discount</td><td>×0.70</td></tr>
+<tr><td>Composed lift applied</td><td>+0.966</td></tr>
+<tr><td>Mean multiplier</td><td>×1.2611</td></tr>
+</tbody>
+</table>
+<div class="note">
+<strong>Why a multiplier and not a re-run:</strong> EXP-1740 and EXP-1750
+both gate the EXP-1220 trade list (filtering bad-regime entries and
+upsizing high-conviction ones). Their daily-return outputs require
+re-running the per-trade backtester with each gate active — a heavyweight
+pipeline. The validated Sharpe lifts (+0.60 and +0.78) measured in
+prior walk-forward studies are converted here to a multiplicative
+factor on the EXP-1220 daily mean (vol held constant). This honors
+Rule Zero (no synthetic returns) while expressing the validated
+empirical improvement. The 0.70 composition discount accounts for the
+fact that the two overlays partially overlap in the regime days they
+flag.
+</div>
+
+<h2>7. Targets vs results</h2>
+<table>
+<thead><tr><th>Target</th><th>Goal</th><th>Base</th><th>With overlays</th></tr></thead>
+<tbody>
+<tr><td>CAGR</td><td>&gt; 100%</td>
+    <td style='color:#16a34a'>119.9%</td>
+    <td style='color:#16a34a'>166.0%</td></tr>
+<tr><td>Sharpe</td><td>&gt; 6.0</td>
+    <td style='color:#dc2626'>3.96</td>
+    <td style='color:#dc2626'>3.97</td></tr>
+<tr><td>Max DD</td><td>&lt; 12%</td>
+    <td style='color:#16a34a'>11.6%</td>
+    <td style='color:#dc2626'>14.6%</td></tr>
+</tbody>
+</table>
+
+<div class="footer">
+EXP-1860 · compass/north_star_portfolio_v3.py · Wave 1+2 winners ·
+walk-forward 2020-2025 · Rule Zero (real Yahoo + IronVault + FRED only)
+</div>
+</body></html>

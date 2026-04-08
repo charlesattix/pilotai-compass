@@ -1,0 +1,36 @@
+<!doctype html><html><head><meta charset='utf-8'>
+<title>EXP-2170 — Weight Optimisation</title>
+<style>
+ body{font-family:-apple-system,Segoe UI,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;color:#1a1a1a;line-height:1.5}
+ h1{border-bottom:2px solid #222;padding-bottom:.3em} h2{margin-top:1.6em;border-bottom:1px solid #ccc}
+ table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.93em}
+ th,td{border:1px solid #bbb;padding:5px 8px;text-align:left} th{background:#f0f0f0}
+ .ok{color:#0a7a0a;font-weight:600} .warn{color:#b86b00;font-weight:600} .bad{color:#b80000;font-weight:600}
+ .small{color:#555;font-size:.88em}
+</style></head><body>
+<h1>EXP-2170 — Weight Optimisation Bake-off</h1>
+<p class='small'>Generated 2026-04-07T17:03:24 · 5 streams · 1566 days
+ · Walk-forward 252d→63d
+ · 20 folds · leverage 3.0× · Rule Zero clean.</p>
+
+<h2>Pooled OOS ranking</h2>
+<table>
+<tr><th>#</th><th>Allocator</th><th>Sharpe</th><th>CAGR</th><th>Max DD</th><th>Vol</th><th>Calmar</th></tr>
+<tr><td>1</td><td>min_variance</td><td>5.47</td><td>79.89%</td><td>4.20%</td><td>10.86%</td><td>19.02</td></tr><tr><td>2</td><td>mv_shrink_floor05</td><td>5.41</td><td>89.17%</td><td>4.34%</td><td>11.94%</td><td>20.53</td></tr><tr><td>3</td><td>mv_sample</td><td>5.39</td><td>89.32%</td><td>4.40%</td><td>11.98%</td><td>20.32</td></tr><tr><td>4</td><td>mv_shrink</td><td>5.39</td><td>92.31%</td><td>4.37%</td><td>12.29%</td><td>21.13</td></tr><tr><td>5</td><td>equal_weight</td><td>5.34</td><td>79.64%</td><td>4.20%</td><td>11.10%</td><td>18.96</td></tr><tr><td>6</td><td>static_prod</td><td>5.24</td><td>132.97%</td><td>7.67%</td><td>16.44%</td><td>17.34</td></tr><tr><td>7</td><td>inv_vol</td><td>4.54</td><td>42.27%</td><td>4.54%</td><td>7.84%</td><td>9.30</td></tr>
+</table>
+
+<h2>Best allocator: min_variance</h2>
+<p>Sharpe <b>5.47</b>
+ · Δ vs static_prod +0.23
+ · Headroom to target 6.00: <b>+0.53</b>
+ · Target 6.00: <span class='warn'>NOT MET</span></p>
+
+<h2>Average weights across folds</h2>
+<table>
+<tr><th>Allocator</th><th>exp1220</th><th>v5_hedge</th><th>gld_cal</th><th>slv_cal</th><th>cross_vol</th></tr>
+<tr><td>equal_weight</td><td>0.200</td><td>0.200</td><td>0.200</td><td>0.200</td><td>0.200</td></tr><tr><td>static_prod</td><td>0.400</td><td>0.050</td><td>0.200</td><td>0.200</td><td>0.150</td></tr><tr><td>inv_vol</td><td>0.092</td><td>0.331</td><td>0.168</td><td>0.084</td><td>0.325</td></tr><tr><td>min_variance</td><td>0.204</td><td>0.203</td><td>0.203</td><td>0.184</td><td>0.206</td></tr><tr><td>mv_sample</td><td>0.244</td><td>0.058</td><td>0.228</td><td>0.109</td><td>0.361</td></tr><tr><td>mv_shrink</td><td>0.241</td><td>0.044</td><td>0.251</td><td>0.117</td><td>0.346</td></tr><tr><td>mv_shrink_floor05</td><td>0.235</td><td>0.070</td><td>0.243</td><td>0.117</td><td>0.336</td></tr>
+</table>
+
+<h2>Honest note</h2>
+<p>Pooled OOS Sharpe across the same daily cube is upper-bounded by the orthogonal alpha contained in the streams themselves. If the best allocator does not clear 6.0, the gap closes by adding new uncorrelated streams (EXP-2020, EXP-2070 already exist), not by re-weighting the existing five.</p>
+</body></html>

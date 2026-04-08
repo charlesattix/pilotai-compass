@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PilotAI — Credit Spread Dashboard</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0d14;
+    --surface: #111520;
+    --surface2: #161c2d;
+    --border: #1e2740;
+    --border2: #252e47;
+    --text: #e2e8f8;
+    --muted: #7889a8;
+    --faint: #3a4560;
+
+    --green: #00d48c;
+    --green-dim: #00d48c22;
+    --red: #ff4757;
+    --red-dim: #ff475722;
+    --purple: #9f7aea;
+    --purple-dim: #9f7aea22;
+    --blue: #4fa3f7;
+    --blue-dim: #4fa3f722;
+    --amber: #f59e0b;
+    --amber-dim: #f59e0b22;
+
+    --bull: #00d48c;
+    --bull-dim: #00d48c18;
+    --bear: #ff4757;
+    --bear-dim: #ff475718;
+    --neutral: #9f7aea;
+    --neutral-dim: #9f7aea18;
+
+    --spy: #4fa3f7;
+    --qqq: #f59e0b;
+    --iwm: #a78bfa;
+
+    --radius: 12px;
+    --radius-sm: 7px;
+    --shadow: 0 4px 24px rgba(0,0,0,.45);
+    --glow-green: 0 0 20px rgba(0,212,140,.12);
+    --glow-red: 0 0 20px rgba(255,71,87,.12);
+    --glow-purple: 0 0 20px rgba(159,122,234,.12);
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* ── Marquee ── */
+  .marquee-wrap {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    height: 36px;
+    display: flex;
+    align-items: center;
+  }
+  .marquee-track {
+    display: flex;
+    gap: 0;
+    animation: marquee 30s linear infinite;
+    white-space: nowrap;
+    width: max-content;
+  }
+  .marquee-track:hover { animation-play-state: paused; }
+  @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+  .marquee-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 28px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .03em;
+    border-right: 1px solid var(--border);
+  }
+  .marquee-item .tick { color: var(--muted); font-weight: 700; letter-spacing: .05em; }
+  .marquee-item .price { color: var(--text); }
+  .marquee-item .chg.up { color: var(--green); }
+  .marquee-item .chg.dn { color: var(--red); }
+  .marquee-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── Topbar ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -.02em;
+  }
+  .logo-icon {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, #4fa3f7, #9f7aea);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .logo span { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 4px; }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .live-dot {
+    display: flex; align-items: center; gap: 5px;
+    color: var(--green); font-weight: 600;
+    font-size: 11px; letter-spacing: .04em;
+  }
+  .live-dot::before {
+    content: '';
+    width: 7px; height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse-live 2s ease-in-out infinite;
+  }
+  @keyframes pulse-live {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .5; transform: scale(.85); }
+  }
+
+  /* ── Stats Bar ── */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-cell {
+    background: var(--surface);
+    padding: 14px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; }
+  .stat-value { font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
+  .stat-value.pos { color: var(--green); }
+  .stat-value.neg { color: var(--red); }
+  .stat-value.neu { color: var(--text); }
+  .stat-sub { font-size: 11px; color: var(--muted); }
+
+  /* ── Main Layout ── */
+  .main { padding: 24px 28px; max-width: 1600px; margin: 0 auto; }
+
+  /* ── Section Title ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before { content: ''; width: 3px; height: 14px; background: var(--blue); border-radius: 2px; }
+  .count-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 2px 9px;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  /* ── Filters ── */
+  .filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 14px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+  }
+  .filter-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
+  .filter-sep { width: 1px; height: 20px; background: var(--border2); margin: 0 4px; }
+  .filter-btn {
+    padding: 5px 13px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+    font-family: inherit;
+    letter-spacing: .01em;
+  }
+  .filter-btn:hover { border-color: var(--blue); color: var(--text); }
+  .filter-btn.active { border-color: var(--blue); background: var(--blue-dim); color: var(--blue); }
+  .filter-btn.spy.active { border-color: var(--spy); background: rgba(79,163,247,.15); color: var(--spy); }
+  .filter-btn.qqq.active { border-color: var(--qqq); background: rgba(245,158,11,.15); color: var(--qqq); }
+  .filter-btn.iwm.active { border-color: var(--iwm); background: rgba(167,139,250,.15); color: var(--iwm); }
+  .filter-btn.bull.active { border-color: var(--bull); background: var(--bull-dim); color: var(--bull); }
+  .filter-btn.bear.active { border-color: var(--bear); background: var(--bear-dim); color: var(--bear); }
+  .filter-btn.neu.active { border-color: var(--neutral); background: var(--neutral-dim); color: var(--neutral); }
+  .filter-search {
+    margin-left: auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .filter-search input {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 5px 12px 5px 30px;
+    color: var(--text);
+    font-size: 12px;
+    font-family: inherit;
+    outline: none;
+    width: 180px;
+    transition: border-color .15s;
+  }
+  .filter-search input:focus { border-color: var(--blue); }
+  .filter-search input::placeholder { color: var(--faint); }
+  .filter-search .icon { position: absolute; left: 10px; color: var(--faint); font-size: 13px; pointer-events: none; }
+
+  /* ── Cards Grid ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 14px;
+  }
+
+  /* ── Alert Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: transform .15s, box-shadow .15s, border-color .15s;
+    cursor: default;
+    position: relative;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    border-color: var(--border2);
+  }
+  .card.bull { border-top: 2px solid var(--bull); }
+  .card.bull:hover { box-shadow: var(--shadow), var(--glow-green); }
+  .card.bear { border-top: 2px solid var(--bear); }
+  .card.bear:hover { box-shadow: var(--shadow), var(--glow-red); }
+  .card.neutral { border-top: 2px solid var(--neutral); }
+  .card.neutral:hover { box-shadow: var(--shadow), var(--glow-purple); }
+
+  /* Status ribbon */
+  .card.status-open {}
+  .card.status-closed { opacity: .72; }
+  .card.status-closed::after {
+    content: 'CLOSED';
+    position: absolute;
+    top: 12px; right: 12px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: var(--red);
+    background: var(--red-dim);
+    border: 1px solid var(--red);
+    border-radius: 4px;
+    padding: 2px 6px;
+  }
+  .card.status-stale::after {
+    content: 'STALE';
+    position: absolute;
+    top: 12px; right: 12px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: var(--muted);
+    background: rgba(120,137,168,.1);
+    border: 1px solid var(--faint);
+    border-radius: 4px;
+    padding: 2px 6px;
+  }
+
+  /* Card header */
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 14px 10px;
+    flex-wrap: wrap;
+  }
+  .ticker-badge {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .04em;
+    padding: 3px 9px;
+    border-radius: 5px;
+  }
+  .ticker-badge.SPY { background: rgba(79,163,247,.18); color: var(--spy); border: 1px solid rgba(79,163,247,.3); }
+  .ticker-badge.QQQ { background: rgba(245,158,11,.18); color: var(--qqq); border: 1px solid rgba(245,158,11,.3); }
+  .ticker-badge.IWM { background: rgba(167,139,250,.18); color: var(--iwm); border: 1px solid rgba(167,139,250,.3); }
+
+  .strategy-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    padding: 3px 8px;
+    border-radius: 5px;
+    text-transform: uppercase;
+  }
+  .strategy-badge.bull_put_spread { background: var(--bull-dim); color: var(--bull); border: 1px solid rgba(0,212,140,.25); }
+  .strategy-badge.bear_call_spread { background: var(--bear-dim); color: var(--bear); border: 1px solid rgba(255,71,87,.25); }
+  .strategy-badge.iron_condor { background: var(--neutral-dim); color: var(--neutral); border: 1px solid rgba(159,122,234,.25); }
+
+  .sentiment-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    padding: 3px 8px;
+    border-radius: 5px;
+    text-transform: uppercase;
+  }
+  .sentiment-tag.Bullish { background: var(--bull-dim); color: var(--bull); }
+  .sentiment-tag.Bearish { background: var(--bear-dim); color: var(--red); }
+  .sentiment-tag.Neutral { background: var(--neutral-dim); color: var(--neutral); }
+
+  .card-time { margin-left: auto; font-size: 10px; color: var(--faint); font-weight: 500; }
+
+  /* Strike display */
+  .card-strikes {
+    padding: 4px 14px 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .strike-val {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+  .strike-sep {
+    color: var(--faint);
+    font-size: 13px;
+    font-weight: 300;
+  }
+  .strike-sub {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 500;
+    margin-left: 2px;
+    margin-top: 6px;
+    letter-spacing: .02em;
+  }
+  .credit-pill {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+  }
+  .credit-amount {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--green);
+  }
+  .credit-label { font-size: 10px; color: var(--muted); letter-spacing: .03em; }
+
+  /* Divider */
+  .card-divider { height: 1px; background: var(--border); margin: 0 14px; }
+
+  /* PoP bar */
+  .pop-section { padding: 10px 14px 8px; }
+  .pop-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .pop-label { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+  .pop-value { font-size: 13px; font-weight: 700; }
+  .pop-bar-track {
+    height: 5px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .pop-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width .6s cubic-bezier(.22,1,.36,1);
+  }
+  .pop-fill-high { background: linear-gradient(90deg, var(--green), #00ff9d); }
+  .pop-fill-mid  { background: linear-gradient(90deg, var(--amber), #fbbf24); }
+  .pop-fill-low  { background: linear-gradient(90deg, var(--red), #ff6b7a); }
+
+  /* Confidence dots */
+  .confidence-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 14px 10px;
+  }
+  .conf-label { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
+  .conf-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border2);
+    background: var(--surface2);
+    transition: background .2s, border-color .2s;
+  }
+  .conf-dot.lit { background: var(--blue); border-color: var(--blue); box-shadow: 0 0 5px var(--blue); }
+  .conf-dot.lit.c4 { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 5px var(--amber); }
+  .conf-dot.lit.c5 { background: var(--green); border-color: var(--green); box-shadow: 0 0 5px var(--green); }
+  .conf-score { margin-left: auto; font-size: 11px; color: var(--muted); font-weight: 600; }
+  .conf-score span { color: var(--text); }
+
+  /* Metrics grid */
+  .card-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+  }
+  .metric-cell {
+    background: var(--surface);
+    padding: 9px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .metric-cell:first-child { border-radius: 0; }
+  .metric-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; }
+  .metric-value { font-size: 13px; font-weight: 700; }
+  .metric-value.green { color: var(--green); }
+  .metric-value.red { color: var(--red); }
+  .metric-value.amber { color: var(--amber); }
+  .metric-value.blue { color: var(--blue); }
+  .metric-value.muted { color: var(--muted); }
+
+  /* Risk badge */
+  .risk-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .risk-badge.low { background: var(--green-dim); color: var(--green); }
+  .risk-badge.medium { background: var(--amber-dim); color: var(--amber); }
+  .risk-badge.high { background: var(--red-dim); color: var(--red); }
+
+  /* Card footer */
+  .card-foot {
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .foot-item { display: flex; flex-direction: column; gap: 1px; }
+  .foot-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; }
+  .foot-value { font-size: 12px; font-weight: 600; }
+  .foot-value.green { color: var(--green); }
+  .foot-value.red { color: var(--red); }
+
+  /* DTE pill */
+  .dte-pill {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 5px;
+    padding: 4px 9px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .dte-pill .dte-num { font-size: 15px; }
+  .dte-pill .dte-lbl { font-size: 9px; color: var(--muted); letter-spacing: .04em; }
+
+  /* PnL badge for closed */
+  .pnl-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+  }
+  .pnl-badge.pos { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,212,140,.3); }
+  .pnl-badge.neg { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,71,87,.3); }
+  .pnl-badge.zero { background: var(--surface2); color: var(--muted); border: 1px solid var(--border2); }
+
+  /* Backtest section */
+  .bt-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .bt-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .bt-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  }
+  .bt-card.y2024::before { background: linear-gradient(90deg, #4fa3f7, #9f7aea); }
+  .bt-card.y2025::before { background: linear-gradient(90deg, #00d48c, #4fa3f7); }
+  .bt-card.y2026::before { background: linear-gradient(90deg, #f59e0b, #ff4757); }
+  .bt-card.paper::before { background: linear-gradient(90deg, #9f7aea, #ff4757); }
+  .bt-year { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+  .bt-return { font-size: 28px; font-weight: 800; letter-spacing: -.04em; line-height: 1; margin-bottom: 8px; }
+  .bt-return.pos { color: var(--green); }
+  .bt-return.neg { color: var(--red); }
+  .bt-rows { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+  .bt-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+  .bt-row-label { color: var(--muted); }
+  .bt-row-val { font-weight: 600; }
+  .bt-row-val.pos { color: var(--green); }
+  .bt-row-val.neg { color: var(--red); }
+  .bt-divider { height: 1px; background: var(--border); margin: 8px 0; }
+
+  /* Empty state */
+  .empty-state {
+    grid-column: 1 / -1;
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; opacity: .4; }
+  .empty-state .msg { font-size: 14px; }
+
+  /* Tooltip */
+  [data-tip] { position: relative; }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%; transform: translateX(-50%);
+    background: #1e2740;
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 5px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .15s;
+    z-index: 200;
+  }
+  [data-tip]:hover::after { opacity: 1; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .topbar { padding: 12px 16px; }
+    .main { padding: 16px; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .stats-bar { grid-template-columns: repeat(3, 1fr); }
+    .bt-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Ticker Marquee ── -->
+<div class="marquee-wrap" aria-label="Market ticker">
+  <div class="marquee-track" id="marqueeTrack"><!-- filled by JS --></div>
+</div>
+
+<!-- ── Topbar ── -->
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-icon">✈</div>
+    PilotAI <span>/ Credit Spread Monitor</span>
+  </div>
+  <div class="topbar-right">
+    <div class="live-dot">PAPER TRADING</div>
+    <span id="clockDisplay" style="color:var(--muted);font-size:12px;">Feb 25, 2026</span>
+  </div>
+</header>
+
+<!-- ── Stats Bar ── -->
+<div class="stats-bar" id="statsBar"><!-- filled by JS --></div>
+
+<!-- ── Main ── -->
+<main class="main">
+
+  <!-- Backtest Summary -->
+  <div class="section-header" style="margin-bottom:14px;">
+    <div class="section-title">Backtest Performance</div>
+  </div>
+  <div class="bt-grid" id="btGrid"><!-- filled by JS --></div>
+
+  <!-- Alerts / Positions -->
+  <div class="section-header">
+    <div class="section-title">Alert Cards <span class="count-badge" id="cardCount">0</span></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters" id="filterBar">
+    <span class="filter-label">Ticker</span>
+    <button class="filter-btn active" data-group="ticker" data-val="ALL">All</button>
+    <button class="filter-btn spy" data-group="ticker" data-val="SPY">SPY</button>
+    <button class="filter-btn qqq" data-group="ticker" data-val="QQQ">QQQ</button>
+    <button class="filter-btn iwm" data-group="ticker" data-val="IWM">IWM</button>
+
+    <div class="filter-sep"></div>
+    <span class="filter-label">Strategy</span>
+    <button class="filter-btn active" data-group="strategy" data-val="ALL">All</button>
+    <button class="filter-btn bull" data-group="strategy" data-val="bull_put_spread">Bull Put</button>
+    <button class="filter-btn bear" data-group="strategy" data-val="bear_call_spread">Bear Call</button>
+    <button class="filter-btn neu" data-group="strategy" data-val="iron_condor">Iron Condor</button>
+
+    <div class="filter-sep"></div>
+    <span class="filter-label">Status</span>
+    <button class="filter-btn active" data-group="status" data-val="ALL">All</button>
+    <button class="filter-btn" data-group="status" data-val="open">Open</button>
+    <button class="filter-btn" data-group="status" data-val="closed">Closed</button>
+    <button class="filter-btn" data-group="status" data-val="closed_manual">Stale</button>
+
+    <div class="filter-search">
+      <span class="icon">⌕</span>
+      <input type="text" id="searchInput" placeholder="Search ticker, strike…">
+    </div>
+  </div>
+
+  <div class="cards-grid" id="cardsGrid"><!-- filled by JS --></div>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// DATA — embedded from pilotai.db + alerts.csv
+// ══════════════════════════════════════════════════════════
+
+const TRADES = [
+  {"id":"PT-b122c4ec03a0","ticker":"QQQ","strategy_type":"bull_put_spread","status":"open","short_strike":593.0,"long_strike":588.0,"expiration":"2026-03-31","credit":0.92,"contracts":4,"entry_date":"2026-02-25 18:30","exit_date":"","exit_reason":null,"pnl":null,"dte":33,"total_credit":368.0,"profit_target":184.0,"stop_loss_amount":920.0,"max_loss":4.08,"entry_price":615.4,"score":44.92,"pop":71.99,"delta":0.28},
+  {"id":"PT-a220550344de","ticker":"QQQ","strategy_type":"bull_put_spread","status":"open","short_strike":594.0,"long_strike":589.0,"expiration":"2026-03-31","credit":0.94,"contracts":4,"entry_date":"2026-02-25 18:30","exit_date":"","exit_reason":null,"pnl":null,"dte":33,"total_credit":376.0,"profit_target":188.0,"stop_loss_amount":940.0,"max_loss":4.06,"entry_price":615.4,"score":44.92,"pop":71.3,"delta":0.287},
+  {"id":"PT-255e65e030d2","ticker":"QQQ","strategy_type":"bull_put_spread","status":"open","short_strike":592.0,"long_strike":587.0,"expiration":"2026-03-31","credit":0.9,"contracts":4,"entry_date":"2026-02-25 18:30","exit_date":"","exit_reason":null,"pnl":null,"dte":33,"total_credit":360.0,"profit_target":180.0,"stop_loss_amount":900.0,"max_loss":4.1,"entry_price":615.4,"score":44.84,"pop":72.67,"delta":0.273},
+  {"id":"PT-569bba308d59","ticker":"QQQ","strategy_type":"bull_put_spread","status":"open","short_strike":591.0,"long_strike":586.0,"expiration":"2026-03-31","credit":0.87,"contracts":4,"entry_date":"2026-02-25 18:30","exit_date":"","exit_reason":null,"pnl":null,"dte":33,"total_credit":348.0,"profit_target":174.0,"stop_loss_amount":870.0,"max_loss":4.13,"entry_price":615.4,"score":44.65,"pop":73.32,"delta":0.267},
+  {"id":"PT-1284d7b4ccde","ticker":"SPY","strategy_type":"bull_put_spread","status":"open","short_strike":665.0,"long_strike":660.0,"expiration":"2026-03-31","credit":1.02,"contracts":4,"entry_date":"2026-02-25 14:15","exit_date":"","exit_reason":null,"pnl":null,"dte":33,"total_credit":408.0,"profit_target":204.0,"stop_loss_amount":1020.0,"max_loss":3.98,"entry_price":687.35,"score":46.22,"pop":73.91,"delta":0.261},
+  {"id":"PT-9f9c489f1d07","ticker":"SPY","strategy_type":"bull_put_spread","status":"open","short_strike":666.0,"long_strike":661.0,"expiration":"2026-03-31","credit":0.97,"contracts":4,"entry_date":"2026-02-25 14:15","exit_date":"","exit_reason":null,"pnl":null,"dte":33,"total_credit":388.0,"profit_target":194.0,"stop_loss_amount":970.0,"max_loss":4.03,"entry_price":687.35,"score":45.37,"pop":73.26,"delta":0.267},
+  {"id":"PT-365172416400","ticker":"QQQ","strategy_type":"bear_call_spread","status":"closed","short_strike":635.0,"long_strike":640.0,"expiration":"2026-03-31","credit":1.18,"contracts":4,"entry_date":"2026-02-24 19:00","exit_date":"2026-02-24 19:30","exit_reason":"stop_loss","pnl":-1386.4,"dte":34,"total_credit":472.0,"profit_target":236.0,"stop_loss_amount":1180.0,"max_loss":3.82,"entry_price":607.84,"score":55.0,"pop":78.2,"delta":0.218},
+  {"id":"PT-ca9bc88a7e52","ticker":"QQQ","strategy_type":"bear_call_spread","status":"closed","short_strike":636.0,"long_strike":641.0,"expiration":"2026-03-31","credit":1.14,"contracts":4,"entry_date":"2026-02-24 18:00","exit_date":"2026-02-24 18:30","exit_reason":"stop_loss","pnl":-1407.2,"dte":34,"total_credit":456.0,"profit_target":228.0,"stop_loss_amount":1140.0,"max_loss":3.86,"entry_price":608.2,"score":54.77,"pop":78.81,"delta":0.212},
+  {"id":"PT-941174d18c66","ticker":"SPY","strategy_type":"bull_put_spread","status":"closed_manual","short_strike":668.0,"long_strike":663.0,"expiration":"2026-04-02","credit":1.2,"contracts":5,"entry_date":"2026-02-25 14:15","exit_date":"2026-02-25 15:30","exit_reason":"stale_order","pnl":0.0,"dte":35,"total_credit":600.0,"profit_target":300.0,"stop_loss_amount":1500.0,"max_loss":3.8,"entry_price":687.35,"score":47.77,"pop":71.43,"delta":0.286},
+  {"id":"PT-4caae7e254da","ticker":"SPY","strategy_type":"bull_put_spread","status":"closed_manual","short_strike":664.0,"long_strike":659.0,"expiration":"2026-03-31","credit":1.07,"contracts":4,"entry_date":"2026-02-25 14:15","exit_date":"2026-02-25 15:30","exit_reason":"stale_order","pnl":0.0,"dte":33,"total_credit":428.0,"profit_target":214.0,"stop_loss_amount":1070.0,"max_loss":3.93,"entry_price":687.35,"score":46.99,"pop":74.54,"delta":0.255},
+  {"id":"PT-30e9f2168aad","ticker":"SPY","strategy_type":"bull_put_spread","status":"closed_manual","short_strike":667.0,"long_strike":662.0,"expiration":"2026-04-02","credit":1.2,"contracts":5,"entry_date":"2026-02-25 14:15","exit_date":"2026-02-25 15:30","exit_reason":"stale_order","pnl":0.0,"dte":35,"total_credit":600.0,"profit_target":300.0,"stop_loss_amount":1500.0,"max_loss":3.8,"entry_price":687.35,"score":47.97,"pop":72.11,"delta":0.279},
+  {"id":"PT-006ac5e3f588","ticker":"SPY","strategy_type":"iron_condor","status":"closed_manual","short_strike":667.0,"long_strike":662.0,"expiration":"2026-03-27","credit":2.36,"contracts":7,"entry_date":"2026-02-24 19:30","exit_date":"2026-02-25 14:15","exit_reason":"stale_order","pnl":0.0,"dte":30,"total_credit":1652.0,"profit_target":826.0,"stop_loss_amount":4130.0,"max_loss":2.64,"entry_price":686.89,"score":61.98,"pop":45.26,"delta":0.274},
+  {"id":"PT-752c11acc45b","ticker":"SPY","strategy_type":"iron_condor","status":"closed_manual","short_strike":666.0,"long_strike":661.0,"expiration":"2026-03-27","credit":2.33,"contracts":7,"entry_date":"2026-02-24 19:30","exit_date":"2026-02-25 14:15","exit_reason":"stale_order","pnl":0.0,"dte":30,"total_credit":1631.0,"profit_target":815.5,"stop_loss_amount":4077.5,"max_loss":2.67,"entry_price":686.89,"score":61.74,"pop":46.01,"delta":0.27},
+  {"id":"PT-559a558f8adc","ticker":"SPY","strategy_type":"iron_condor","status":"closed_manual","short_strike":667.0,"long_strike":662.0,"expiration":"2026-04-02","credit":2.12,"contracts":6,"entry_date":"2026-02-24 19:30","exit_date":"2026-02-25 14:15","exit_reason":"stale_order","pnl":0.0,"dte":36,"total_credit":1272.0,"profit_target":636.0,"stop_loss_amount":3180.0,"max_loss":2.88,"entry_price":686.89,"score":59.27,"pop":48.27,"delta":0.259},
+  {"id":"PT-0f1e75cf10b1","ticker":"SPY","strategy_type":"bear_call_spread","status":"closed_manual","short_strike":704.0,"long_strike":709.0,"expiration":"2026-03-31","credit":1.69,"contracts":5,"entry_date":"2026-02-24 18:00","exit_date":"2026-02-24 19:30","exit_reason":"stale_order","pnl":0.0,"dte":34,"total_credit":845.0,"profit_target":422.5,"stop_loss_amount":2112.5,"max_loss":3.31,"entry_price":687.38,"score":54.68,"pop":70.28,"delta":0.297},
+  {"id":"PT-48486bb7b9c8","ticker":"SPY","strategy_type":"iron_condor","status":"closed_manual","short_strike":667.0,"long_strike":662.0,"expiration":"2026-04-02","credit":2.15,"contracts":7,"entry_date":"2026-02-24 18:00","exit_date":"2026-02-24 19:30","exit_reason":"stale_order","pnl":0.0,"dte":36,"total_credit":1505.0,"profit_target":752.5,"stop_loss_amount":3762.5,"max_loss":2.85,"entry_price":687.38,"score":59.71,"pop":48.2,"delta":0.259},
+  {"id":"PT-30d6d7760c33","ticker":"SPY","strategy_type":"bear_call_spread","status":"closed_manual","short_strike":703.0,"long_strike":708.0,"expiration":"2026-03-27","credit":1.7,"contracts":5,"entry_date":"2026-02-24 18:00","exit_date":"2026-02-24 19:30","exit_reason":"stale_order","pnl":0.0,"dte":30,"total_credit":850.0,"profit_target":425.0,"stop_loss_amount":2125.0,"max_loss":3.3,"entry_price":687.38,"score":54.78,"pop":70.01,"delta":0.3},
+  {"id":"PT-b9e2fb895e2c","ticker":"IWM","strategy_type":"iron_condor","status":"closed_manual","short_strike":250.0,"long_strike":245.0,"expiration":"2026-04-02","credit":2.13,"contracts":6,"entry_date":"2026-02-24 16:30","exit_date":"2026-02-24 18:00","exit_reason":"stale_order","pnl":0.0,"dte":36,"total_credit":1278.0,"profit_target":639.0,"stop_loss_amount":3195.0,"max_loss":2.87,"entry_price":262.56,"score":59.9,"pop":46.75,"delta":0.266},
+  {"id":"PT-3734ab438b40","ticker":"IWM","strategy_type":"iron_condor","status":"closed_manual","short_strike":252.0,"long_strike":247.0,"expiration":"2026-04-02","credit":2.13,"contracts":6,"entry_date":"2026-02-24 16:30","exit_date":"2026-02-24 18:00","exit_reason":"stale_order","pnl":0.0,"dte":36,"total_credit":1278.0,"profit_target":639.0,"stop_loss_amount":3195.0,"max_loss":2.87,"entry_price":262.56,"score":59.64,"pop":45.87,"delta":0.271},
+  {"id":"PT-b0ef04af6cb7","ticker":"IWM","strategy_type":"iron_condor","status":"closed_manual","short_strike":250.0,"long_strike":245.0,"expiration":"2026-03-31","credit":2.08,"contracts":6,"entry_date":"2026-02-24 16:30","exit_date":"2026-02-24 18:00","exit_reason":"stale_order","pnl":0.0,"dte":34,"total_credit":1248.0,"profit_target":624.0,"stop_loss_amount":3120.0,"max_loss":2.92,"entry_price":262.56,"score":59.61,"pop":48.3,"delta":0.259},
+  {"id":"PT-96af96937984","ticker":"IWM","strategy_type":"iron_condor","status":"closed_manual","short_strike":253.0,"long_strike":248.0,"expiration":"2026-03-27","credit":2.13,"contracts":6,"entry_date":"2026-02-24 16:30","exit_date":"2026-02-24 18:00","exit_reason":"stale_order","pnl":0.0,"dte":30,"total_credit":1278.0,"profit_target":639.0,"stop_loss_amount":3195.0,"max_loss":2.87,"entry_price":262.56,"score":59.54,"pop":45.54,"delta":0.272},
+  {"id":"PT-ec76c3338e2c","ticker":"SPY","strategy_type":"iron_condor","status":"closed_manual","short_strike":661.0,"long_strike":651.0,"expiration":"2026-03-31","credit":4.65,"contracts":10,"entry_date":"2026-02-23 16:35","exit_date":"2026-02-24 16:30","exit_reason":"stale_order","pnl":0.0,"dte":35,"total_credit":4650.0,"profit_target":2325.0,"stop_loss_amount":11625.0,"max_loss":5.35,"entry_price":682.66,"score":61.22,"pop":42.89,"delta":0.286},
+  {"id":"PT-87073a9e0ad4","ticker":"QQQ","strategy_type":"iron_condor","status":"closed_manual","short_strike":581.0,"long_strike":571.0,"expiration":"2026-03-31","credit":4.99,"contracts":10,"entry_date":"2026-02-23 14:27","exit_date":"2026-02-24 16:30","exit_reason":"stale_order","pnl":0.0,"dte":35,"total_credit":4990.0,"profit_target":2495.0,"stop_loss_amount":12475.0,"max_loss":5.01,"entry_price":608.81,"score":54.17,"pop":44.36,"delta":0.278},
+  {"id":"PT-5e39af7fd7e9","ticker":"QQQ","strategy_type":"iron_condor","status":"closed_manual","short_strike":581.0,"long_strike":571.0,"expiration":"2026-03-31","credit":4.84,"contracts":10,"entry_date":"2026-02-23 14:27","exit_date":"2026-02-24 16:30","exit_reason":"stale_order","pnl":0.0,"dte":35,"total_credit":4840.0,"profit_target":2420.0,"stop_loss_amount":12100.0,"max_loss":5.16,"entry_price":608.81,"score":53.59,"pop":46.56,"delta":0.267}
+];
+
+const ALERTS = [
+  {"timestamp":"2026-02-25T19:00:15+00:00","ticker":"QQQ","type":"bull_put_spread","expiration":"2026-03-31","dte":33,"short_strike":596.0,"long_strike":591.0,"short_delta":0.298,"credit":0.98,"max_profit":0.98,"max_loss":4.02,"profit_target":0.49,"stop_loss":2.45,"risk_reward":0.24,"pop":70.17,"score":45.29,"current_price":615.75,"distance_to_short":19.75},
+  {"timestamp":"2026-02-25T19:00:15+00:00","ticker":"QQQ","type":"bull_put_spread","expiration":"2026-03-31","dte":33,"short_strike":594.0,"long_strike":589.0,"short_delta":0.284,"credit":0.93,"max_profit":0.93,"max_loss":4.07,"profit_target":0.47,"stop_loss":2.33,"risk_reward":0.23,"pop":71.59,"score":45.13,"current_price":615.75,"distance_to_short":21.75},
+  {"timestamp":"2026-02-25T19:00:15+00:00","ticker":"QQQ","type":"bull_put_spread","expiration":"2026-03-31","dte":33,"short_strike":592.0,"long_strike":587.0,"short_delta":0.271,"credit":0.88,"max_profit":0.88,"max_loss":4.12,"profit_target":0.44,"stop_loss":2.20,"risk_reward":0.21,"pop":72.95,"score":44.87,"current_price":615.75,"distance_to_short":23.75},
+  {"timestamp":"2026-02-25T19:00:15+00:00","ticker":"QQQ","type":"bull_put_spread","expiration":"2026-03-31","dte":33,"short_strike":591.0,"long_strike":586.0,"short_delta":0.264,"credit":0.86,"max_profit":0.86,"max_loss":4.14,"profit_target":0.43,"stop_loss":2.15,"risk_reward":0.21,"pop":73.60,"score":44.86,"current_price":615.75,"distance_to_short":24.75},
+  {"timestamp":"2026-02-25T19:00:15+00:00","ticker":"QQQ","type":"bull_put_spread","expiration":"2026-03-31","dte":33,"short_strike":593.0,"long_strike":588.0,"short_delta":0.277,"credit":0.89,"max_profit":0.89,"max_loss":4.11,"profit_target":0.44,"stop_loss":2.22,"risk_reward":0.22,"pop":72.28,"score":44.85,"current_price":615.75,"distance_to_short":22.75}
+];
+
+const BACKTEST = {
+  y2024: { trades:150, win_rate:86.7, pnl:26743, return_pct:26.6, dd:-32.0, sharpe:0.66, period:"Jan–Dec 2024" },
+  y2025: { trades:239, win_rate:86.6, pnl:48478, return_pct:48.2, dd:-19.2, sharpe:0.99, period:"Jan–Dec 2025" },
+  y2026: { trades:6,   win_rate:83.3, pnl:112,   return_pct:0.10, dd:-0.32, sharpe:0.84, period:"Jan 5–Feb 9, 2026" },
+  paper: { trades:42,  open:6, stops:2, stale:34, real_pnl:-2793.6, period:"Feb 23–25, 2026" }
+};
+
+const TICKER_DATA = [
+  { sym:"SPY",  price:658.72, chg:+0.34, pct:"+0.05%", color:"var(--spy)" },
+  { sym:"QQQ",  price:615.75, chg:-1.20, pct:"-0.19%", color:"var(--qqq)" },
+  { sym:"IWM",  price:210.34, chg:-0.87, pct:"-0.41%", color:"var(--iwm)" },
+  { sym:"VIX",  price:23.14,  chg:+0.92, pct:"+4.14%", color:"var(--red)" },
+  { sym:"SPX",  price:5512.1, chg:+3.2,  pct:"+0.06%", color:"var(--spy)" },
+  { sym:"NDX",  price:19283,  chg:-28.5, pct:"-0.15%", color:"var(--qqq)" },
+];
+
+// ══════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════
+
+function fmt$  (v, dec=0) { return '$' + Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
+function fmtPct(v, dec=1) { return (v>=0?'+':'') + v.toFixed(dec) + '%'; }
+function fmtNum(v, dec=2) { return v.toFixed(dec); }
+
+function getSentiment(type) {
+  if (type === 'bull_put_spread') return 'Bullish';
+  if (type === 'bear_call_spread') return 'Bearish';
+  return 'Neutral';
+}
+function getSentimentClass(type) {
+  if (type === 'bull_put_spread') return 'bull';
+  if (type === 'bear_call_spread') return 'bear';
+  return 'neutral';
+}
+function getStrategyLabel(type) {
+  if (type === 'bull_put_spread') return 'Bull Put';
+  if (type === 'bear_call_spread') return 'Bear Call';
+  return 'Iron Condor';
+}
+function getRisk(pop) {
+  if (pop >= 75) return {label:'Low', cls:'low'};
+  if (pop >= 60) return {label:'Med', cls:'medium'};
+  return {label:'High', cls:'high'};
+}
+function getPopClass(pop) {
+  if (pop >= 70) return 'pop-fill-high';
+  if (pop >= 55) return 'pop-fill-mid';
+  return 'pop-fill-low';
+}
+function getConfLevel(score) {
+  if (score >= 60) return 5;
+  if (score >= 52) return 4;
+  if (score >= 45) return 3;
+  if (score >= 38) return 2;
+  return 1;
+}
+function confDots(score) {
+  const n = getConfLevel(score);
+  let html = '';
+  for (let i=1; i<=5; i++) {
+    const litCls = i <= n ? ` lit c${n}` : '';
+    html += `<div class="conf-dot${litCls}"></div>`;
+  }
+  return html;
+}
+function formatTime(dtStr) {
+  if (!dtStr) return '—';
+  const d = new Date(dtStr.replace(' ', 'T'));
+  if (isNaN(d)) return dtStr.slice(0,16);
+  return d.toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
+}
+function getStatusInfo(status, exit_reason) {
+  if (status === 'open') return { cls:'status-open', badge:'' };
+  if (status === 'closed') return { cls:'status-closed', badge:'' };
+  return { cls:'status-stale', badge:'' };
+}
+
+// ══════════════════════════════════════════════════════════
+// MARQUEE
+// ══════════════════════════════════════════════════════════
+
+function buildMarquee() {
+  const track = document.getElementById('marqueeTrack');
+  const items = [...TICKER_DATA, ...TICKER_DATA]; // doubled for seamless loop
+  track.innerHTML = items.map(t => {
+    const isUp = t.chg >= 0;
+    return `
+      <div class="marquee-item">
+        <div class="marquee-dot" style="background:${t.color}"></div>
+        <span class="tick">${t.sym}</span>
+        <span class="price">${t.price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+        <span class="chg ${isUp?'up':'dn'}">${isUp?'▲':'▼'} ${t.pct}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// STATS BAR
+// ══════════════════════════════════════════════════════════
+
+function buildStatsBar() {
+  const bar = document.getElementById('statsBar');
+  const openTrades = TRADES.filter(t => t.status === 'open');
+  const closedTrades = TRADES.filter(t => t.status === 'closed');
+  const realizedPnl = closedTrades.reduce((s,t) => s + (t.pnl||0), 0);
+  const totalCredit = openTrades.reduce((s,t) => s + (t.total_credit||0), 0);
+  const avgPop = openTrades.length ? openTrades.reduce((s,t) => s + t.pop, 0) / openTrades.length : 0;
+
+  bar.innerHTML = [
+    { label:'Open Positions', val: openTrades.length, cls:'neu', sub:'Active paper trades' },
+    { label:'Total Credit Open', val: fmt$(totalCredit,0), cls:'pos', sub:'Across all open legs' },
+    { label:'Realized P&L', val: (realizedPnl>=0?'+':'-') + fmt$(Math.abs(realizedPnl),0), cls: realizedPnl>=0?'pos':'neg', sub:'Closed positions only' },
+    { label:'Avg PoP (Open)', val: avgPop.toFixed(1) + '%', cls:'neu', sub:'Prob of profit' },
+    { label:'2024 Backtest', val: '+26.6%', cls:'pos', sub:'86.7% win rate' },
+    { label:'2025 Backtest', val: '+48.2%', cls:'pos', sub:'86.6% win rate' },
+    { label:'2026 YTD (BT)', val: '+0.10%', cls:'pos', sub:'83.3% win rate' },
+    { label:'Market Regime', val: 'CHOPPY', cls:'neu', sub:'As of Feb 18, 2026' },
+  ].map(s => `
+    <div class="stat-cell">
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-value ${s.cls}">${s.val}</div>
+      <div class="stat-sub">${s.sub}</div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// BACKTEST CARDS
+// ══════════════════════════════════════════════════════════
+
+function buildBacktest() {
+  const grid = document.getElementById('btGrid');
+  const bt = BACKTEST;
+
+  function btCard(cls, yearLabel, d, isPaper=false) {
+    if (isPaper) {
+      return `
+        <div class="bt-card ${cls}">
+          <div class="bt-year">Paper Trading (Live)</div>
+          <div class="bt-return neg">−$${Math.abs(d.real_pnl).toFixed(0)}</div>
+          <div class="stat-sub" style="color:var(--muted);font-size:10px;margin-bottom:4px;">${d.period}</div>
+          <div class="bt-divider"></div>
+          <div class="bt-rows">
+            <div class="bt-row"><span class="bt-row-label">Positions Opened</span><span class="bt-row-val">${d.trades}</span></div>
+            <div class="bt-row"><span class="bt-row-label">Currently Open</span><span class="bt-row-val blue">${d.open}</span></div>
+            <div class="bt-row"><span class="bt-row-label">Stop-Loss Exits</span><span class="bt-row-val neg">${d.stops}</span></div>
+            <div class="bt-row"><span class="bt-row-label">Stale Exits</span><span class="bt-row-val muted">${d.stale}</span></div>
+            <div class="bt-row"><span class="bt-row-label">Realized P&L</span><span class="bt-row-val neg">−$${Math.abs(d.real_pnl).toLocaleString()}</span></div>
+          </div>
+        </div>`;
+    }
+    const retCls = d.return_pct >= 0 ? 'pos' : 'neg';
+    const retStr = (d.return_pct>=0?'+':'') + d.return_pct.toFixed(1) + '%';
+    return `
+      <div class="bt-card ${cls}">
+        <div class="bt-year">${yearLabel}</div>
+        <div class="bt-return ${retCls}">${retStr}</div>
+        <div class="stat-sub" style="color:var(--muted);font-size:10px;margin-bottom:4px;">${d.period}</div>
+        <div class="bt-divider"></div>
+        <div class="bt-rows">
+          <div class="bt-row"><span class="bt-row-label">Trades</span><span class="bt-row-val">${d.trades}</span></div>
+          <div class="bt-row"><span class="bt-row-label">Win Rate</span><span class="bt-row-val ${retCls}">${d.win_rate}%</span></div>
+          <div class="bt-row"><span class="bt-row-label">Net P&L</span><span class="bt-row-val ${retCls}">${d.pnl>=0?'+':'-'}$${Math.abs(d.pnl).toLocaleString()}</span></div>
+          <div class="bt-row"><span class="bt-row-label">Max Drawdown</span><span class="bt-row-val neg">${d.dd}%</span></div>
+          <div class="bt-row"><span class="bt-row-label">Sharpe</span><span class="bt-row-val">${d.sharpe}</span></div>
+        </div>
+      </div>`;
+  }
+
+  grid.innerHTML =
+    btCard('y2024','Full-Year 2024',bt.y2024) +
+    btCard('y2025','Full-Year 2025',bt.y2025) +
+    btCard('y2026','2026 YTD (Real Data)',bt.y2026) +
+    btCard('paper','',bt.paper,true);
+}
+
+// ══════════════════════════════════════════════════════════
+// CARD BUILDER
+// ══════════════════════════════════════════════════════════
+
+function buildCard(t, isAlert=false) {
+  const type = isAlert ? t.type : t.strategy_type;
+  const sentiment = getSentiment(type);
+  const sentCls = getSentimentClass(type);
+  const risk = getRisk(t.pop);
+  const {cls: statusCls} = getStatusInfo(t.status, t.exit_reason);
+  const popFillCls = getPopClass(t.pop);
+  const credit = t.credit || 0;
+  const stopAmt = isAlert ? t.stop_loss : (t.stop_loss_amount / (t.contracts * 100) || credit * 2.5);
+  const profTgt = isAlert ? t.profit_target : (t.profit_target / (t.contracts * 100) || credit * 0.5);
+  const entryTime = isAlert ? formatTime(t.timestamp) : formatTime(t.entry_date);
+  const exitTime = t.exit_date ? formatTime(t.exit_date) : null;
+
+  const pnlVal = t.pnl;
+  let pnlHtml = '';
+  if (t.status === 'closed') {
+    const pnlCls = pnlVal >= 0 ? 'pos' : 'neg';
+    pnlHtml = `<div class="pnl-badge ${pnlCls}">${pnlVal>=0?'+':''}$${Math.abs(pnlVal).toFixed(0)}</div>`;
+  } else if (t.status === 'closed_manual') {
+    pnlHtml = `<div class="pnl-badge zero">Stale</div>`;
+  } else if (isAlert) {
+    pnlHtml = `<div class="dte-pill"><span class="dte-num">${t.dte}</span><span class="dte-lbl">DTE</span></div>`;
+  } else {
+    pnlHtml = `<div class="dte-pill"><span class="dte-num">${t.dte}</span><span class="dte-lbl">DTE</span></div>`;
+  }
+
+  const distStr = isAlert ? `${t.distance_to_short.toFixed(1)} pts OTM` : '';
+
+  return `
+    <div class="card ${sentCls} ${statusCls}" data-ticker="${t.ticker}" data-strategy="${type}" data-status="${t.status||'alert'}">
+      <div class="card-head">
+        <span class="ticker-badge ${t.ticker}">${t.ticker}</span>
+        <span class="strategy-badge ${type}">${getStrategyLabel(type)}</span>
+        <span class="sentiment-tag ${sentiment}">${sentiment}</span>
+        ${isAlert ? '<span style="background:rgba(0,212,140,.1);color:var(--green);border:1px solid rgba(0,212,140,.25);font-size:9px;font-weight:700;letter-spacing:.06em;padding:3px 7px;border-radius:4px;text-transform:uppercase;">SIGNAL</span>' : ''}
+        <span class="card-time">${entryTime}</span>
+      </div>
+
+      <div class="card-strikes">
+        <span class="strike-val">${t.short_strike}</span>
+        <span class="strike-sep">╱</span>
+        <span class="strike-val" style="color:var(--muted)">${t.long_strike}</span>
+        <span class="strike-sub">
+          ${type === 'bull_put_spread' ? 'PUTS' : type === 'bear_call_spread' ? 'CALLS' : 'IC'}<br>
+          Exp ${t.expiration}
+        </span>
+        <div class="credit-pill">
+          <span class="credit-amount">$${credit.toFixed(2)}</span>
+          <span class="credit-label">CREDIT / SPREAD</span>
+        </div>
+      </div>
+
+      <div class="card-divider"></div>
+
+      <div class="pop-section">
+        <div class="pop-header">
+          <span class="pop-label" data-tip="Probability of expiring out-of-the-money">Prob of Profit</span>
+          <span class="pop-value" style="color:${t.pop>=70?'var(--green)':t.pop>=55?'var(--amber)':'var(--red)'}">${t.pop.toFixed(1)}%</span>
+        </div>
+        <div class="pop-bar-track">
+          <div class="pop-bar-fill ${popFillCls}" style="width:${Math.min(t.pop,100)}%"></div>
+        </div>
+      </div>
+
+      <div class="confidence-row">
+        <span class="conf-label" data-tip="Signal confidence based on composite score">Confidence</span>
+        ${confDots(t.score)}
+        <span class="conf-score">Score <span>${t.score.toFixed(1)}</span></span>
+      </div>
+
+      <div class="card-divider"></div>
+
+      <div class="card-metrics">
+        <div class="metric-cell">
+          <span class="metric-label">Target Profit</span>
+          <span class="metric-value green">+$${profTgt.toFixed(2)}</span>
+        </div>
+        <div class="metric-cell">
+          <span class="metric-label">Stop Loss</span>
+          <span class="metric-value red">−$${stopAmt.toFixed(2)}</span>
+        </div>
+        <div class="metric-cell">
+          <span class="metric-label">Risk Level</span>
+          <span class="metric-value">
+            <span class="risk-badge ${risk.cls}">${risk.label}</span>
+          </span>
+        </div>
+        <div class="metric-cell">
+          <span class="metric-label">Delta</span>
+          <span class="metric-value blue">${(t.delta||t.short_delta||0).toFixed(3)}</span>
+        </div>
+        <div class="metric-cell">
+          <span class="metric-label">Contracts</span>
+          <span class="metric-value neu">${t.contracts || '—'}</span>
+        </div>
+        <div class="metric-cell">
+          <span class="metric-label">Max Loss</span>
+          <span class="metric-value amber">$${(t.max_loss||0).toFixed(2)}</span>
+        </div>
+      </div>
+
+      <div class="card-divider"></div>
+
+      <div class="card-foot">
+        ${pnlHtml}
+        ${exitTime ? `<div class="foot-item"><span class="foot-label">Closed</span><span class="foot-value" style="color:var(--muted)">${exitTime}</span></div>` : ''}
+        ${t.exit_reason === 'stop_loss' ? `<span style="background:var(--red-dim);color:var(--red);border:1px solid var(--red);font-size:9px;font-weight:700;letter-spacing:.06em;padding:3px 7px;border-radius:4px;text-transform:uppercase;">STOP HIT</span>` : ''}
+        ${isAlert && distStr ? `<div class="foot-item"><span class="foot-label">Distance</span><span class="foot-value">${distStr}</span></div>` : ''}
+        ${isAlert && t.current_price ? `<div class="foot-item"><span class="foot-label">Underlying</span><span class="foot-value">${t.current_price.toFixed(2)}</span></div>` : ''}
+        ${!isAlert && t.entry_price ? `<div class="foot-item"><span class="foot-label">Entry Price</span><span class="foot-value">${t.entry_price.toFixed(2)}</span></div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════════
+// FILTERS
+// ══════════════════════════════════════════════════════════
+
+const filters = { ticker:'ALL', strategy:'ALL', status:'ALL', search:'' };
+
+function applyFilters() {
+  const grid = document.getElementById('cardsGrid');
+  const allCards = grid.querySelectorAll('.card');
+  let visible = 0;
+
+  allCards.forEach(card => {
+    const ticker   = card.dataset.ticker;
+    const strategy = card.dataset.strategy;
+    const status   = card.dataset.status;
+    const text     = card.textContent.toLowerCase();
+
+    const tOk = filters.ticker   === 'ALL' || ticker   === filters.ticker;
+    const sOk = filters.strategy === 'ALL' || strategy === filters.strategy;
+    const stOk= filters.status   === 'ALL' ||
+                (filters.status === 'open'         && status === 'open') ||
+                (filters.status === 'closed'        && status === 'closed') ||
+                (filters.status === 'closed_manual' && status === 'closed_manual') ||
+                (filters.status === 'alert'         && status === 'alert');
+    const qOk = !filters.search  || text.includes(filters.search);
+
+    const show = tOk && sOk && stOk && qOk;
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+
+  document.getElementById('cardCount').textContent = visible;
+}
+
+document.getElementById('filterBar').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  const group = btn.dataset.group;
+  const val   = btn.dataset.val;
+  filters[group] = val;
+
+  // Update active state within group
+  document.querySelectorAll(`[data-group="${group}"]`).forEach(b => {
+    b.classList.toggle('active', b.dataset.val === val);
+    // Re-apply color classes
+    if (b.dataset.val === 'SPY') { b.classList.toggle('spy', b.dataset.val === val); }
+    if (b.dataset.val === 'QQQ') { b.classList.toggle('qqq', b.dataset.val === val); }
+    if (b.dataset.val === 'IWM') { b.classList.toggle('iwm', b.dataset.val === val); }
+    if (b.dataset.val === 'bull_put_spread') { b.classList.toggle('bull', b.dataset.val === val); }
+    if (b.dataset.val === 'bear_call_spread') { b.classList.toggle('bear', b.dataset.val === val); }
+    if (b.dataset.val === 'iron_condor') { b.classList.toggle('neu', b.dataset.val === val); }
+  });
+  applyFilters();
+});
+
+document.getElementById('searchInput').addEventListener('input', e => {
+  filters.search = e.target.value.trim().toLowerCase();
+  applyFilters();
+});
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+
+function init() {
+  buildMarquee();
+  buildStatsBar();
+  buildBacktest();
+
+  const grid = document.getElementById('cardsGrid');
+
+  // Alerts section first (most recent signals)
+  let html = '';
+  ALERTS.forEach(a => { html += buildCard(a, true); });
+  // Then open trades
+  TRADES.filter(t => t.status === 'open').forEach(t => { html += buildCard(t, false); });
+  // Then closed with PnL
+  TRADES.filter(t => t.status === 'closed').forEach(t => { html += buildCard(t, false); });
+  // Then stale
+  TRADES.filter(t => t.status === 'closed_manual').forEach(t => { html += buildCard(t, false); });
+
+  grid.innerHTML = html;
+
+  // Mark alert cards as 'alert' status for filter purposes
+  grid.querySelectorAll('.card').forEach((card, i) => {
+    if (i < ALERTS.length) card.dataset.status = 'alert';
+  });
+
+  applyFilters();
+
+  // Clock
+  const clockEl = document.getElementById('clockDisplay');
+  function updateClock() {
+    const now = new Date();
+    clockEl.textContent = now.toLocaleString('en-US',{
+      month:'short', day:'numeric', year:'numeric',
+      hour:'2-digit', minute:'2-digit', second:'2-digit',
+      hour12:false, timeZone:'America/New_York'
+    }) + ' ET';
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Animate PoP bars in on load
+  setTimeout(() => {
+    document.querySelectorAll('.pop-bar-fill').forEach(el => {
+      el.style.width = el.style.width; // trigger reflow
+    });
+  }, 100);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

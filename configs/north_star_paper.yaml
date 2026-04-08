@@ -1,0 +1,349 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EXP-1900 — North Star Paper Trading Deployment
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Combined-portfolio paper deployment of every validated strategy that
+# survives the OOS Integrity Audit (Grade A/B+) plus the two production
+# overlays (FOMC event gates + put/call sentiment overlay).
+#
+# Components:
+#   1. EXP-1220 SPY put-credit-spreads at 2× static leverage  (60% capital)
+#   2. GLD put-credit-spreads (EXP-1630 family)               (15% capital)
+#   3. SLV put-credit-spreads                                  (10% capital)
+#   4. Crisis Alpha v5 long-vol hedge sleeve                   (5% capital)
+#   5. Cash buffer (overnight T-bill / Alpaca interest)        (10% capital)
+#
+# Overlays (always-on):
+#   • FOMC / CPI / NFP event gate         → 0.5× sizing on event days
+#   • Put/Call sentiment overlay (EXP-1750) → ENTRY GATE + sizing modifier
+#
+# Risk limits track compass/risk_overlay.py (the canonical risk overlay
+# that wraps every paper deployment). Limits selected to be tighter than
+# any individual sleeve so the portfolio is the binding constraint.
+#
+# Execution: Alpaca paper API (live quotes, simulated fills).
+# Telemetry: Telegram via shared.telegram_alerts → compass.telegram_alerter.
+#
+# Validated reference numbers (as-of 2026-04-06, real IronVault data):
+#   EXP-1220 1.5× WF Sharpe 3.83 / CAGR 99% / DD 11.2%
+#   EXP-1220 2.0× extrapolated CAGR ~130% / DD ~15% (paper validation in flight)
+#   EXP-1630 GLD/TLT relval Grade A
+#   Crisis Alpha v5 hedge-optimized objective
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: "EXP-1900 — North Star Paper Trading"
+experiment_id: EXP-1900
+version: "1.0.0"
+mode: paper
+created: "2026-04-06"
+description: |
+  Combined paper deployment of EXP-1220 2×, GLD spreads, SLV spreads, and
+  Crisis Alpha 5% sleeve, both overlays enabled (FOMC + put/call), risk
+  limits matching compass/risk_overlay.py, Alpaca paper trading, Telegram
+  alerting for every trade and the daily P&L summary.
+
+# ─── Account ─────────────────────────────────────────────────────────────
+account:
+  broker: alpaca
+  environment: paper
+  starting_capital: 100000
+  currency: USD
+  margin_type: reg_t
+  api:
+    base_url: "https://paper-api.alpaca.markets"
+    data_url: "https://data.alpaca.markets"
+    key_env: ALPACA_API_KEY_PAPER
+    secret_env: ALPACA_API_SECRET_PAPER
+    feed: iex          # 'sip' if subscribed
+    api_version: v2
+
+# ─── Strategy components ─────────────────────────────────────────────────
+strategies:
+
+  # --- 1. EXP-1220 SPY 2× ----------------------------------------------
+  - id: exp1220_spy_2x
+    enabled: true
+    weight: 0.60
+    module: compass.tail_risk_hedge
+    entrypoint: run_paper
+    instrument:
+      ticker: SPY
+      asset_class: options
+      strategy_type: bull_put_spread
+    leverage:
+      mode: static
+      multiplier: 2.0
+    cadence:
+      frequency: 7d
+      scan_day: monday
+      scan_time: "09:35"
+      max_concurrent: 5
+    spread:
+      width: 5.0
+      target_dte: 30
+      min_dte: 21
+      max_dte: 45
+      otm_pct: 0.05
+      min_credit: 0.30
+      min_credit_pct: 0.06
+    sizing:
+      base_risk_pct: 1.0
+      leveraged_risk_pct: 2.0
+      max_contracts: 15
+      min_contracts: 1
+    exits:
+      profit_target_pct: 50
+      stop_loss_multiplier: 2.0
+      max_hold_days: 21
+      dte_exit: 5
+    journal: logs/north_star/exp1220_2x_trade_journal.csv
+
+  # --- 2. GLD put-credit-spreads (EXP-1630 family) ---------------------
+  - id: gld_credit_spreads
+    enabled: true
+    weight: 0.15
+    module: compass.gld_tlt_relval
+    entrypoint: run_paper
+    instrument:
+      ticker: GLD
+      asset_class: options
+      strategy_type: bull_put_spread
+    leverage:
+      mode: static
+      multiplier: 1.0
+    cadence:
+      frequency: 14d
+      scan_day: tuesday
+      scan_time: "10:00"
+      max_concurrent: 3
+    spread:
+      width: 2.0
+      target_dte: 35
+      min_dte: 25
+      max_dte: 50
+      otm_pct: 0.04
+      min_credit: 0.18
+      min_credit_pct: 0.09
+    sizing:
+      base_risk_pct: 0.75
+      leveraged_risk_pct: 0.75
+      max_contracts: 10
+      min_contracts: 1
+    exits:
+      profit_target_pct: 50
+      stop_loss_multiplier: 2.0
+      max_hold_days: 28
+      dte_exit: 5
+    journal: logs/north_star/gld_trade_journal.csv
+
+  # --- 3. SLV put-credit-spreads ---------------------------------------
+  - id: slv_credit_spreads
+    enabled: true
+    weight: 0.10
+    module: compass.tail_risk_hedge   # generic credit-spread engine
+    entrypoint: run_paper
+    instrument:
+      ticker: SLV
+      asset_class: options
+      strategy_type: bull_put_spread
+    leverage:
+      mode: static
+      multiplier: 1.0
+    cadence:
+      frequency: 14d
+      scan_day: wednesday
+      scan_time: "10:05"
+      max_concurrent: 2
+    spread:
+      width: 1.0
+      target_dte: 35
+      min_dte: 25
+      max_dte: 50
+      otm_pct: 0.05
+      min_credit: 0.10
+      min_credit_pct: 0.10
+    sizing:
+      base_risk_pct: 0.50
+      leveraged_risk_pct: 0.50
+      max_contracts: 8
+      min_contracts: 1
+    exits:
+      profit_target_pct: 50
+      stop_loss_multiplier: 2.0
+      max_hold_days: 28
+      dte_exit: 5
+    journal: logs/north_star/slv_trade_journal.csv
+
+  # --- 4. Crisis Alpha v5 long-vol hedge sleeve ------------------------
+  - id: crisis_alpha_v5
+    enabled: true
+    weight: 0.05
+    module: compass.crisis_alpha_v5
+    entrypoint: run_paper
+    instrument:
+      ticker: SPY        # uses SPY puts + VIX calls
+      asset_class: options
+      strategy_type: long_put_plus_vix_call
+    cadence:
+      frequency: 5d
+      scan_day: monday
+      scan_time: "09:45"
+      max_concurrent: 3
+    sizing:
+      premium_budget_pct: 5.0          # cap at 5% of equity per cycle
+      put_otm_pct: 0.05
+      put_target_dte: 60
+      vix_call_target_dte: 45
+      vix_call_strike_offset: 5.0
+    exits:
+      profit_target_pct: 200            # let winners run
+      stop_loss_pct: 100                # premium write-off
+      crisis_unwind_score: 0.60         # unwind below this crisis-score level
+      max_hold_days: 60
+    journal: logs/north_star/crisis_alpha_trade_journal.csv
+
+  # --- 5. Cash buffer (Alpaca cash interest) ---------------------------
+  - id: cash_buffer
+    enabled: true
+    weight: 0.10
+    module: passive
+    instrument:
+      ticker: CASH
+      asset_class: cash
+
+# ─── Overlays (always on) ────────────────────────────────────────────────
+overlays:
+
+  fomc_event_gate:
+    enabled: true
+    module: compass.risk_overlay
+    config:
+      enable_event_gates: true
+      pre_event_days: 1                # gate the day before
+      post_event_days: 0
+      event_sizing_multiplier: 0.5     # halve sizing on event days
+      events:
+        - FOMC
+        - CPI
+        - NFP
+        - PCE
+      block_new_entries_on_event: false
+      block_exits_on_event: false
+
+  put_call_sentiment:
+    enabled: true
+    module: compass.exp1750_putcall_overlay
+    config:
+      pcr_lookback_days: 60
+      pcr_skip_quartile_low: true       # skip when PCR in bottom quartile (complacency)
+      pcr_size_quartile_high: true      # 1.0×–1.5× when PCR top quartile (fear premium)
+      pcr_size_high_multiplier: 1.5
+      vix_term_inversion_block: true    # no entry when ^VIX > ^VIX3M
+      unusual_put_zscore_warn: 2.0
+      data_source: ironvault            # SPY option_daily volume
+
+# ─── Risk limits (mirrors compass/risk_overlay.py) ───────────────────────
+risk:
+  enable_dynamic_leverage: false        # static 2× per sleeve already
+  enable_tail_hedge: true               # crisis_alpha_v5 sleeve handles it
+  enable_event_gates: true              # via fomc_event_gate overlay
+  enable_position_stops: true
+  enable_dd_circuit_breaker: true
+
+  # Per-trade
+  max_risk_per_trade_pct: 2.0
+  min_contracts: 1
+  max_contracts: 15
+
+  # Daily / weekly loss limits
+  max_daily_loss_pct: 4.0
+  max_weekly_loss_pct: 7.0
+
+  # Portfolio drawdown circuit breaker (mirrors RiskOverlayConfig defaults)
+  max_drawdown_halt_pct: 13.0
+  drawdown_recovery_pct: 6.5
+  recovery_leverage: 0.5
+
+  # Per-strategy concentration
+  max_strategy_weight_pct: 65.0         # no single sleeve > 65% of equity
+  max_open_positions_total: 18
+  max_open_positions_per_strategy: 8
+
+  # Correlation guardrail
+  correlation_check: true
+  max_pairwise_correlation: 0.85
+
+  # VIX kill-switch (matches RiskOverlayConfig.vix_crisis)
+  vix_crisis_block: 35.0
+  vix_emergency_exit_all: 45.0
+
+  # Liquidity guardrails
+  min_underlying_dollar_volume: 5_000_000
+  max_bid_ask_spread_pct: 5.0
+
+# ─── Telegram alerting ───────────────────────────────────────────────────
+alerts:
+  channel: telegram
+  module: shared.telegram_alerts
+  bot_token_env: TELEGRAM_BOT_TOKEN
+  chat_id_env: TELEGRAM_CHAT_ID
+  fallback: log
+
+  # Per-event toggles
+  on_trade_entry: true
+  on_trade_exit: true
+  on_stop_loss: true
+  on_profit_target: true
+  on_overlay_block: true                # FOMC / PCR gate blocks
+  on_risk_limit_breach: true
+  on_circuit_breaker: true
+  on_vix_spike: true
+  on_daily_summary: true
+  on_weekly_summary: true
+
+  # Cooldowns (sec) per priority
+  cooldowns:
+    info: 300
+    warning: 60
+    critical: 0
+
+  # Daily P&L summary timing
+  daily_summary_time: "16:05"           # 5 min after US close
+  weekly_summary_day: friday
+  weekly_summary_time: "16:30"
+
+# ─── Monitoring ──────────────────────────────────────────────────────────
+monitoring:
+  check_interval_minutes: 5
+  monitor_script: scripts/north_star_monitor.py
+  health_file: logs/north_star/health.json
+  state_file: logs/north_star/state.json
+  pid_file: logs/north_star/north_star.pid
+  alert_on_stale_seconds: 600           # alert if no heartbeat for 10 min
+
+# ─── Data sources ────────────────────────────────────────────────────────
+data:
+  price_source: alpaca
+  options_source: alpaca
+  vix_source: yahoo
+  fomc_calendar: data/events/fomc_calendar.csv
+  econ_calendar: data/events/econ_calendar.csv
+  ironvault_db: data/options_cache.db
+
+# ─── Logging ─────────────────────────────────────────────────────────────
+logging:
+  level: INFO
+  dir: logs/north_star
+  main_log: logs/north_star/north_star.log
+  monitor_log: logs/north_star/monitor.log
+  max_size_mb: 100
+  backup_count: 7
+
+# ─── Rule Zero ───────────────────────────────────────────────────────────
+rule_zero:
+  enforced: true
+  statement: |
+    ZERO SYNTHETIC DATA. Every price and fill traces to Alpaca live quotes,
+    Yahoo Finance ^VIX/^VIX3M, or the IronVault options_cache.db. No
+    np.random. No Black-Scholes-priced fills. If the market is closed or
+    a quote is missing, the trade is skipped — never extrapolated.

@@ -1,0 +1,150 @@
+<!doctype html><html><head><meta charset='utf-8'><title>EXP-2310 AUM Scaling</title><style>
+    body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;margin:2em;max-width:1280px;color:#111}
+    h1{border-bottom:3px solid #1c3a5e}
+    h2{margin-top:2em;color:#1c3a5e}
+    h3{margin-top:1.2em;color:#444}
+    table{border-collapse:collapse;margin:1em 0;width:100%}
+    th,td{border:1px solid #ccc;padding:6px 10px;text-align:right;font-size:13px}
+    th{background:#1c3a5e;color:#fff;text-align:center}
+    td.l{text-align:left}
+    .pos{color:#0a7d1f;font-weight:600}
+    .neg{color:#c0392b;font-weight:600}
+    .muted{color:#666;font-size:12px}
+    .pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;color:#fff;background:#1c3a5e}
+    .pill.ok{background:#0a7d1f}
+    .pill.bad{background:#c0392b}
+    .pill.warn{background:#c07a1f}
+    </style></head><body><h1>EXP-2310 — AUM Scaling: Replace GLD/SLV Calendar Spreads</h1><p class='muted'>Looking for credit-spread / strangle sleeves with Sharpe &gt; 1.5, |corr vs EXP-1220| &lt; 0.30, and capacity &gt; $500M as scalable replacements for the bandwidth-constrained GLD/SLV calendar sleeves.</p><p><span class='pill'>Rule Zero ✓ real IronVault + Yahoo data only</span></p><h2>IronVault coverage audit (requested + substitutes)</h2><table><tr><th>Ticker</th><th>Role</th><th>Contracts</th><th>Trading dates with bars</th><th>Status</th></tr><tr><td class='l'><b>TLT</b></td><td class='l'>Carlos #1 (requested)</td><td>10,749</td><td>1,501</td><td><span class='pill ok'>RUN</span></td></tr><tr><td class='l'><b>GDX</b></td><td class='l'>Carlos #2 (requested)</td><td>0</td><td>0</td><td><span class='pill bad'>BLOCKED</span></td></tr><tr><td class='l'><b>EEM</b></td><td class='l'>Carlos #3 (requested)</td><td>0</td><td>0</td><td><span class='pill bad'>BLOCKED</span></td></tr><tr><td class='l'><b>DIA</b></td><td class='l'>Carlos #4 (requested)</td><td>0</td><td>0</td><td><span class='pill bad'>BLOCKED</span></td></tr><tr><td class='l'><b>SPX</b></td><td class='l'>Carlos #5 (requested)</td><td>0</td><td>0</td><td><span class='pill bad'>BLOCKED</span></td></tr><tr><td class='l'><b>QQQ</b></td><td class='l'>substitute for DIA (broad-index)</td><td>23,022</td><td>1,499</td><td><span class='pill warn'>SUBSTITUTE</span></td></tr><tr><td class='l'><b>XLK</b></td><td class='l'>substitute for SPX (tech-beta)</td><td>2,680</td><td>1,431</td><td><span class='pill warn'>SUBSTITUTE</span></td></tr><tr><td class='l'><b>XLE</b></td><td class='l'>substitute for GDX (commodity-sector)</td><td>1,757</td><td>1,359</td><td><span class='pill warn'>SUBSTITUTE</span></td></tr></table><h2>Results — Sharpe &gt; 1.5, |corr| &lt; 0.30, capacity &gt; $500M</h2><table><tr><th>Variant</th><th>n</th><th>WR</th><th>CAGR</th><th>Sharpe/trade</th><th>Max DD</th><th>Corr vs EXP-1220</th><th>Capacity</th><th>Targets</th></tr><tr><td class='l'><b>TLT_put_credit_spread</b></td><td>237</td><td>73.8%</td><td class='neg'>-4.59%</td><td>-0.74</td><td class='neg'>-41.38%</td><td>+0.68</td><td class='l'>$184k/mo</td><td><span class='pill bad'>Sh✗ ρ✗ cap✗</span></td></tr><tr><td class='l'><b>TLT_short_strangle</b></td><td>281</td><td>80.4%</td><td class='pos'>1.95%</td><td>0.29</td><td class='neg'>-28.72%</td><td>+0.41</td><td class='l'>$90k/mo</td><td><span class='pill bad'>Sh✗ ρ✗ cap✗</span></td></tr><tr><td class='l'><b>GDX_put_credit_spread</b></td><td colspan='7' class='l muted'>0 IronVault contracts. Unblock: Polygon Starter + OCC construction (same path as TLT Dec-2025 backfill)</td><td><span class='pill bad'>blocked</span></td></tr><tr><td class='l'><b>EEM_put_credit_spread</b></td><td colspan='7' class='l muted'>0 IronVault contracts. Unblock: Polygon Starter backfill</td><td><span class='pill bad'>blocked</span></td></tr><tr><td class='l'><b>DIA_put_credit_spread</b></td><td colspan='7' class='l muted'>0 IronVault contracts. Unblock: Polygon Starter backfill — DIA is a broad-index ETF, deep chains</td><td><span class='pill bad'>blocked</span></td></tr><tr><td class='l'><b>SPX_put_credit_spread</b></td><td colspan='7' class='l muted'>0 IronVault contracts — the SPX cash index (and mini-SPX XSP) are not in IronVault. Unblock: Requires a CBOE / OPRA feed; not available via Polygon Starter</td><td><span class='pill bad'>blocked</span></td></tr><tr><td class='l'><b>QQQ_put_credit_spread</b></td><td>263</td><td>90.1%</td><td class='neg'>-44.13%</td><td>-0.14</td><td class='neg'>-98.40%</td><td>+0.88</td><td class='l'>$298k/mo</td><td><span class='pill bad'>Sh✗ ρ✗ cap✗</span></td></tr><tr><td class='l'><b>XLK_put_credit_spread</b></td><td>5</td><td>80.0%</td><td class='pos'>0.16%</td><td>0.48</td><td class='neg'>0.00%</td><td>n/a</td><td class='l'>$400/mo</td><td><span class='pill bad'>Sh✗ ρ✗ cap✗</span></td></tr><tr><td class='l'><b>XLE_put_credit_spread</b></td><td>11</td><td>45.5%</td><td class='pos'>0.13%</td><td>0.51</td><td class='neg'>-0.44%</td><td>n/a</td><td class='l'>$2k/mo</td><td><span class='pill bad'>Sh✗ ρ✗ cap✗</span></td></tr></table><h3>TLT_put_credit_spread — detail</h3><pre>{
+  "metrics": {
+    "n": 237,
+    "win_rate": 0.7383966244725738,
+    "cagr": -0.04594359318007557,
+    "sharpe_per_trade": -0.7402272036227839,
+    "max_dd": -0.41376000525580037,
+    "total_return": -0.24587330592839451,
+    "avg_pnl": -0.0011426509719615903,
+    "worst_trade": -0.022437673130193906
+  },
+  "diagnostics": {
+    "n_attempted": 312,
+    "n_dropped_no_exp": 14,
+    "n_dropped_thin_chain": 0,
+    "n_real_exits": 237,
+    "n_intrinsic_exits": 0
+  },
+  "capacity": {
+    "n_observations": 237,
+    "median_daily_volume": 919.0,
+    "p5_daily_volume": 102.0,
+    "median_max_contracts_per_entry": 91,
+    "monthly_cap_contracts": 367,
+    "monthly_usd_est": 183800.0
+  },
+  "corr_vs_exp1220": 0.6763429756035464
+}</pre><h3>TLT_short_strangle — detail</h3><pre>{
+  "metrics": {
+    "n": 281,
+    "win_rate": 0.8042704626334519,
+    "cagr": 0.019460351512946117,
+    "sharpe_per_trade": 0.293355864910788,
+    "max_dd": -0.28716793098775695,
+    "total_return": 0.12259225111596539,
+    "avg_pnl": 0.0004738855639989475,
+    "worst_trade": -0.07373737373737374
+  },
+  "diagnostics": {
+    "n_attempted": 312,
+    "n_dropped_no_exp": 14,
+    "n_dropped_thin": 17
+  },
+  "capacity": {
+    "n_observations": 281,
+    "median_daily_volume": 281.0,
+    "p5_daily_volume": 15.0,
+    "median_max_contracts_per_entry": 28,
+    "monthly_cap_contracts": 112,
+    "monthly_usd_est": 89920.0
+  },
+  "corr_vs_exp1220": 0.4115785225031083
+}</pre><h3>QQQ_put_credit_spread — detail</h3><pre>{
+  "metrics": {
+    "n": 263,
+    "win_rate": 0.9011406844106464,
+    "cagr": -0.44126612892166794,
+    "sharpe_per_trade": -0.14484009435414458,
+    "max_dd": -0.9839796956198952,
+    "total_return": -0.9695750412925291,
+    "avg_pnl": -0.0013362789847534218,
+    "worst_trade": -0.9837499999999991
+  },
+  "diagnostics": {
+    "n_attempted": 312,
+    "n_dropped_no_exp": 1,
+    "n_dropped_thin_chain": 0,
+    "n_real_exits": 260,
+    "n_intrinsic_exits": 3
+  },
+  "capacity": {
+    "n_observations": 263,
+    "median_daily_volume": 1490.0,
+    "p5_daily_volume": 10.0,
+    "median_max_contracts_per_entry": 149,
+    "monthly_cap_contracts": 596,
+    "monthly_usd_est": 298000.0
+  },
+  "corr_vs_exp1220": 0.8751887178398965
+}</pre><h3>XLK_put_credit_spread — detail</h3><pre>{
+  "metrics": {
+    "n": 5,
+    "win_rate": 0.8,
+    "cagr": 0.0015761870001376188,
+    "sharpe_per_trade": 0.47591259562476435,
+    "max_dd": 0.0,
+    "total_return": 0.009494465891846549,
+    "avg_pnl": 0.0018980910465400298,
+    "worst_trade": -0.004948453608247423
+  },
+  "diagnostics": {
+    "n_attempted": 314,
+    "n_dropped_no_exp": 303,
+    "n_dropped_thin_chain": 6,
+    "n_real_exits": 5,
+    "n_intrinsic_exits": 0
+  },
+  "capacity": {
+    "n_observations": 5,
+    "median_daily_volume": 2.0,
+    "p5_daily_volume": 1.0,
+    "median_max_contracts_per_entry": 0,
+    "monthly_cap_contracts": 0,
+    "monthly_usd_est": 400.0
+  },
+  "corr_vs_exp1220": null
+}</pre><h3>XLE_put_credit_spread — detail</h3><pre>{
+  "metrics": {
+    "n": 11,
+    "win_rate": 0.45454545454545453,
+    "cagr": 0.0012724574864673155,
+    "sharpe_per_trade": 0.5131473343585351,
+    "max_dd": -0.004411686477161302,
+    "total_return": 0.007659073384912896,
+    "avg_pnl": 0.0006953957408867371,
+    "worst_trade": -0.0014285714285714281
+  },
+  "diagnostics": {
+    "n_attempted": 306,
+    "n_dropped_no_exp": 287,
+    "n_dropped_thin_chain": 7,
+    "n_real_exits": 11,
+    "n_intrinsic_exits": 0
+  },
+  "capacity": {
+    "n_observations": 11,
+    "median_daily_volume": 10.0,
+    "p5_daily_volume": 2.0,
+    "median_max_contracts_per_entry": 1,
+    "monthly_cap_contracts": 4,
+    "monthly_usd_est": 2000.0
+  },
+  "corr_vs_exp1220": null
+}</pre><h2>Recommendation</h2><ul><li><b>No candidate clears all three targets simultaneously</b> (Sharpe ≥ 1.5, |ρ| &lt; 0.30, capacity ≥ $500M).</li><li>Per-candidate partial passes:<ul><li><b>TLT_put_credit_spread</b>: Sh -0.74 ✗, ρ +0.68 ✗, cap $184k ✗</li><li><b>TLT_short_strangle</b>: Sh 0.29 ✗, ρ +0.41 ✗, cap $90k ✗</li><li><b>QQQ_put_credit_spread</b>: Sh -0.14 ✗, ρ +0.88 ✗, cap $298k ✗</li><li><b>XLK_put_credit_spread</b>: Sh 0.48 ✗, ρ n/a ✗, cap $400 ✗</li><li><b>XLE_put_credit_spread</b>: Sh 0.51 ✗, ρ n/a ✗, cap $2k ✗</li></ul></li><li><b>Carlos's requested candidates 2-5 (GDX, EEM, DIA, SPX) are BLOCKED in IronVault.</b> Unblock requires a Polygon Starter backfill via OCC symbol construction — same path as the TLT Dec-2025 backfill (<code>scripts/backfill_tlt.py</code>). SPX is harder because the cash index needs a CBOE / OPRA feed, not Polygon Starter. Until these are backfilled, only TLT is a genuine answer to the original question.</li></ul></body></html>

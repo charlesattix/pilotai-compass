@@ -1,0 +1,213 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>EXP-2590 QQQ Capacity Deep Dive</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1200px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.55; }
+  h1 { color:#0f172a; } h2 { color:#334155; margin-top:2.2em;
+         padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:16px; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:18px 0; }
+  .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;
+          padding:18px; text-align:center; flex:1; min-width:150px; }
+  .kpi .value { font-size:1.5em; font-weight:800; color:#0f172a; }
+  .kpi .label { font-size:0.72em; color:#64748b; margin-top:4px; text-transform:uppercase; }
+  .good { color:#16a34a; font-weight:700; }
+  .bad  { color:#dc2626; font-weight:700; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.85em; }
+  th { background:#f1f5f9; padding:9px 12px; text-align:right; font-weight:600;
+       color:#475569; border-bottom:2px solid #cbd5e1; font-size:0.74em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  .note { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;
+            padding:14px; margin:14px 0; font-size:0.85rem; }
+</style></head><body>
+
+<h1>EXP-2590 — QQQ Credit Spreads Capacity Deep Dive</h1>
+<div class="subtitle">Full production readiness for QQQ CS + 8-stream integration | 2026-04-08T06:05:04.170854Z</div>
+
+<div class="note">
+    <strong>Framework:</strong> EXP-1220 put-credit-spread loop (28 DTE,
+    5% OTM, 50% profit target, 2× stop). <strong>Data:</strong> 85 cached
+    real IronVault QQQ trades (EXP-2240, 2020-02 → 2025-11). Portfolio
+    stream cache from exp2280_v6_sparse.pkl. ADV pulled live from Yahoo
+    + IronVault. No synthetic data.
+</div>
+
+<h2>QQQ Standalone Metrics</h2>
+<div class="kpi-row">
+    <div class="kpi"><div class="value">85</div><div class="label">Trades</div></div>
+    <div class="kpi"><div class="value">89%</div><div class="label">Win Rate</div></div>
+    <div class="kpi"><div class="value">1.86</div><div class="label">Sharpe (per-trade)</div></div>
+    <div class="kpi"><div class="value">$9,076</div><div class="label">Total P&amp;L</div></div>
+    <div class="kpi"><div class="value">0.68%</div><div class="label">Max DD</div></div>
+</div>
+
+<h2>Year-by-Year Walk-Forward</h2>
+<table>
+    <thead><tr><th>Year</th><th>Trades</th><th>Win %</th><th>P&amp;L</th>
+    <th>CAGR</th><th>Sharpe</th><th>Max DD</th></tr></thead>
+    <tbody><tr>
+            <td>2020</td>
+            <td>19</td>
+            <td>95%</td>
+            <td>$3,100</td>
+            <td class="good">3.10%</td>
+            <td>2.70</td>
+            <td>0.54%</td>
+        </tr><tr>
+            <td>2021</td>
+            <td>15</td>
+            <td>73%</td>
+            <td>$160</td>
+            <td class="good">0.16%</td>
+            <td>0.18</td>
+            <td>0.70%</td>
+        </tr><tr>
+            <td>2022</td>
+            <td>16</td>
+            <td>88%</td>
+            <td>$2,740</td>
+            <td class="good">2.72%</td>
+            <td>2.94</td>
+            <td>0.37%</td>
+        </tr><tr>
+            <td>2023</td>
+            <td>13</td>
+            <td>100%</td>
+            <td>$1,644</td>
+            <td class="good">1.64%</td>
+            <td>6.71</td>
+            <td>-0.00%</td>
+        </tr><tr>
+            <td>2024</td>
+            <td>12</td>
+            <td>92%</td>
+            <td>$620</td>
+            <td class="good">0.62%</td>
+            <td>0.83</td>
+            <td>0.61%</td>
+        </tr><tr>
+            <td>2025</td>
+            <td>10</td>
+            <td>90%</td>
+            <td>$812</td>
+            <td class="good">0.81%</td>
+            <td>1.29</td>
+            <td>0.46%</td>
+        </tr></tbody>
+</table>
+
+<h2>QQQ Capacity</h2>
+<div class="kpi-row">
+    <div class="kpi"><div class="value">$11.09B</div><div class="label">ADV Notional</div></div>
+    <div class="kpi"><div class="value">$739.3M</div><div class="label">Soft Cap AUM</div></div>
+    <div class="kpi"><div class="value">$3.70B</div><div class="label">Hard Cap AUM</div></div>
+    <div class="kpi"><div class="value">188,429</div><div class="label">Median Vol (contracts/d)</div></div>
+    <div class="kpi"><div class="value">0</div><div class="label">Median OI (contracts)</div></div>
+</div>
+
+<h2>7-Stream vs 8-Stream Portfolio</h2>
+<div class="grid">
+  <div>
+    <h3>7-stream baseline</h3>
+    <table>
+        <thead><tr><th>Metric</th><th>Gross</th></tr></thead>
+        <tbody>
+            <tr><td>CAGR</td><td>13.08%</td></tr>
+            <tr><td>Sharpe</td><td>4.54</td></tr>
+            <tr><td>Max DD</td><td>-3.73%</td></tr>
+            <tr><td>Vol</td><td>2.72%</td></tr>
+            <tr><td>Bottleneck</td><td>slv_cal</td></tr>
+            <tr><td>Soft cap AUM</td><td>$17.7M</td></tr>
+        </tbody>
+    </table>
+  </div>
+  <div>
+    <h3>8-stream (+ QQQ)</h3>
+    <table>
+        <thead><tr><th>Metric</th><th>Gross</th></tr></thead>
+        <tbody>
+            <tr><td>CAGR</td><td>10.92%</td></tr>
+            <tr><td>Sharpe</td><td>4.94</td></tr>
+            <tr><td>Max DD</td><td>-2.65%</td></tr>
+            <tr><td>Vol</td><td>2.10%</td></tr>
+            <tr><td>Bottleneck</td><td>xli_cs</td></tr>
+            <tr><td>Soft cap AUM</td><td>$23.2M</td></tr>
+        </tbody>
+    </table>
+  </div>
+</div>
+
+<h2>Delta (8-stream − 7-stream)</h2>
+<div class="kpi-row">
+    <div class="kpi"><div class="value good">APPROVE</div><div class="label">Decision</div></div>
+    <div class="kpi"><div class="value">+0.40</div><div class="label">ΔSharpe</div></div>
+    <div class="kpi"><div class="value">-2.15%</div><div class="label">ΔCAGR</div></div>
+    <div class="kpi"><div class="value">+1.08%</div><div class="label">ΔMaxDD</div></div>
+    <div class="kpi"><div class="value">1.31×</div><div class="label">Capacity Lift</div></div>
+</div>
+
+<h2>Per-sleeve capacity (8-stream)</h2>
+<table>
+    <thead><tr><th>Sleeve</th><th>Weight</th><th>ADV $</th>
+    <th>Soft Cap AUM</th><th>Hard Cap AUM</th></tr></thead>
+    <tbody><tr>
+                <td><strong>exp1220</strong></td>
+                <td>30.0%</td>
+                <td>$152.49B</td>
+                <td>$5.08B</td>
+                <td>$25.41B</td>
+            </tr><tr>
+                <td><strong>qqq_cs</strong></td>
+                <td>15.0%</td>
+                <td>$11.09B</td>
+                <td>$739.3M</td>
+                <td>$3.70B</td>
+            </tr><tr>
+                <td><strong>xlf_cs</strong></td>
+                <td>10.0%</td>
+                <td>$508.6M</td>
+                <td>$50.9M</td>
+                <td>$254.3M</td>
+            </tr><tr>
+                <td><strong>xli_cs</strong></td>
+                <td>10.0%</td>
+                <td>$231.6M</td>
+                <td>$23.2M</td>
+                <td>$115.8M</td>
+            </tr><tr>
+                <td><strong>gld_cal</strong></td>
+                <td>10.0%</td>
+                <td>$303.8M</td>
+                <td>$30.4M</td>
+                <td>$151.9M</td>
+            </tr><tr>
+                <td><strong>slv_cal</strong></td>
+                <td>5.0%</td>
+                <td>$132.7M</td>
+                <td>$26.5M</td>
+                <td>$132.7M</td>
+            </tr><tr>
+                <td><strong>vol_arb</strong></td>
+                <td>10.0%</td>
+                <td>$10.26B</td>
+                <td>$1.03B</td>
+                <td>$5.13B</td>
+            </tr><tr>
+                <td><strong>v5_hedge</strong></td>
+                <td>10.0%</td>
+                <td>$721.5M</td>
+                <td>$72.1M</td>
+                <td>$360.7M</td>
+            </tr></tbody>
+</table>
+
+<div style="margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0;
+            font-size:0.78em; color:#94a3b8; text-align:center;">
+EXP-2590 — compass/exp2590_qqq_capacity_deep_dive.py · Real IronVault QQQ trades + live ADV
+</div>
+
+</body></html>

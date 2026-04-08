@@ -1,0 +1,50 @@
+<!doctype html><html><head><meta charset='utf-8'>
+<title>EXP-2270 — XLF/XLI Slippage Impact</title>
+<style>
+ body{font-family:-apple-system,Segoe UI,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;color:#1a1a1a;line-height:1.5}
+ h1{border-bottom:2px solid #222;padding-bottom:.3em} h2{margin-top:1.6em;border-bottom:1px solid #ccc}
+ table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.92em}
+ th,td{border:1px solid #bbb;padding:5px 8px;text-align:left} th{background:#f0f0f0}
+ .small{color:#555;font-size:.88em}
+ .callout{background:#fff8e1;border-left:4px solid #e0a500;padding:.8em 1em;margin:1em 0}
+</style></head><body>
+<h1>EXP-2270 — XLF/XLI Slippage Impact Analysis</h1>
+<p class='small'>Generated 2026-04-07T18:05:38 · Rule-Zero clean
+ (real IronVault OHLC, no fabricated quotes).</p>
+
+<div class='callout'>
+<b>Data limitation.</b> IronVault has no bid/ask quotes and no intraday rows for XLF/XLI options — only daily OHLC, volume, and open interest. Slippage is therefore swept as an exogenous parameter rather than measured directly. Empirical liquidity proxies from the real OHLC of every contract actually traded are reported alongside, so the reader can pick a defensible slippage assumption from observable data.
+</div>
+
+<h2>1. Empirical liquidity (real OHLC of contracts actually traded)</h2>
+<h3>XLF</h3><p class='small'>461 contracts, 19737 active days</p><table><tr><th>Stat</th><th>median</th><th>p25</th><th>p75</th><th>mean</th></tr><tr><td>volume / day</td><td>40.0</td><td>7.0</td><td>289.0</td><td>1102.7809</td></tr><tr><td>open interest</td><td colspan='4'>no data</td></tr><tr><td>(high-low)/close</td><td>0.1034</td><td>0.0</td><td>0.2692</td><td>0.2689</td></tr><tr><td>close premium $</td><td>0.44</td><td>0.14</td><td>1.14</td><td>0.8683</td></tr></table>
+<h3>XLI</h3><p class='small'>438 contracts, 13552 active days</p><table><tr><th>Stat</th><th>median</th><th>p25</th><th>p75</th><th>mean</th></tr><tr><td>volume / day</td><td>10.0</td><td>3.0</td><td>50.0</td><td>338.5918</td></tr><tr><td>open interest</td><td colspan='4'>no data</td></tr><tr><td>(high-low)/close</td><td>0.0412</td><td>0.0</td><td>0.1752</td><td>0.1977</td></tr><tr><td>close premium $</td><td>1.18</td><td>0.48</td><td>2.57</td><td>1.9434</td></tr></table>
+
+<h2>2. Slippage sweep — when does Sharpe break?</h2>
+<h3>XLF (248 trades)</h3><p>Sharpe break-even: 1.5 at 5.0c · 1.0 at 5.0c</p><table><tr><th>Slip</th><th>n</th><th>WR</th><th>Sharpe</th><th>CAGR</th><th>Max DD</th></tr><tr><td>0.0c</td><td>248</td><td>98.4%</td><td>11.19</td><td>17.98%</td><td>2.12%</td></tr><tr><td>1.0c</td><td>248</td><td>97.6%</td><td>8.97</td><td>14.39%</td><td>2.22%</td></tr><tr><td>2.0c</td><td>248</td><td>94.8%</td><td>6.66</td><td>10.91%</td><td>2.33%</td></tr><tr><td>3.0c</td><td>248</td><td>89.9%</td><td>4.43</td><td>7.54%</td><td>2.43%</td></tr><tr><td>5.0c</td><td>248</td><td>60.9%</td><td>0.58</td><td>1.08%</td><td>5.77%</td></tr><tr><td>7.5c</td><td>248</td><td>30.6%</td><td>-2.91</td><td>-6.47%</td><td>34.99%</td></tr><tr><td>10.0c</td><td>248</td><td>10.5%</td><td>-5.23</td><td>-13.46%</td><td>59.03%</td></tr></table>
+<h3>XLI (248 trades)</h3><p>Sharpe break-even: 1.5 at 10.0c · 1.0 at 10.0c</p><table><tr><th>Slip</th><th>n</th><th>WR</th><th>Sharpe</th><th>CAGR</th><th>Max DD</th></tr><tr><td>0.0c</td><td>248</td><td>96.8%</td><td>6.04</td><td>18.63%</td><td>3.70%</td></tr><tr><td>1.0c</td><td>248</td><td>96.0%</td><td>5.41</td><td>16.82%</td><td>3.94%</td></tr><tr><td>2.0c</td><td>248</td><td>93.5%</td><td>4.77</td><td>15.03%</td><td>4.18%</td></tr><tr><td>3.0c</td><td>248</td><td>91.9%</td><td>4.14</td><td>13.26%</td><td>4.42%</td></tr><tr><td>5.0c</td><td>248</td><td>86.7%</td><td>2.94</td><td>9.81%</td><td>4.91%</td></tr><tr><td>7.5c</td><td>248</td><td>82.3%</td><td>1.58</td><td>5.64%</td><td>6.17%</td></tr><tr><td>10.0c</td><td>248</td><td>76.6%</td><td>0.44</td><td>1.62%</td><td>11.07%</td></tr></table>
+
+<h2>3. 7-stream portfolio sensitivity</h2>
+<table>
+<tr><th>XLF/XLI slip</th><th colspan='3'>Equal-weight</th><th colspan='3'>Min-variance</th></tr>
+<tr><th></th><th>Sharpe</th><th>CAGR</th><th>DD</th><th>Sharpe</th><th>CAGR</th><th>DD</th></tr>
+<tr><td>0.0c</td><td>6.76</td><td>20.15%</td><td>0.92%</td><td>31.55</td><td>17.23%</td><td>0.47%</td></tr><tr><td>1.0c</td><td>6.52</td><td>19.38%</td><td>0.93%</td><td>28.46</td><td>14.48%</td><td>0.59%</td></tr><tr><td>2.0c</td><td>6.29</td><td>18.61%</td><td>0.94%</td><td>24.41</td><td>11.76%</td><td>0.74%</td></tr><tr><td>3.0c</td><td>6.05</td><td>17.86%</td><td>0.95%</td><td>19.59</td><td>9.12%</td><td>0.91%</td></tr><tr><td>5.0c</td><td>5.58</td><td>16.35%</td><td>0.96%</td><td>9.19</td><td>4.30%</td><td>1.78%</td></tr>
+</table>
+
+<h2>4. Trade-timing carve-outs</h2>
+<h3>XLF</h3>
+<h4>clean fills</h4><table><tr><th>Day</th><th>n</th><th>WR</th><th>Sharpe</th><th>CAGR</th><th>DD</th></tr><tr><td>Mon</td><td>223</td><td>98.2%</td><td>10.19</td><td>15.99%</td><td>2.12%</td></tr><tr><td>Tue</td><td>24</td><td>100.0%</td><td>6.52</td><td>1.95%</td><td>-0.00%</td></tr><tr><td>Thu</td><td>1</td><td>100.0%</td><td>0.00</td><td>0.48%</td><td>-0.00%</td></tr></table>
+<h4>with 3c slip</h4><table><tr><th>Day</th><th>n</th><th>WR</th><th>Sharpe</th><th>CAGR</th><th>DD</th></tr><tr><td>Mon</td><td>223</td><td>88.8%</td><td>3.94</td><td>6.63%</td><td>2.43%</td></tr><tr><td>Tue</td><td>24</td><td>100.0%</td><td>3.86</td><td>0.96%</td><td>-0.00%</td></tr><tr><td>Thu</td><td>1</td><td>100.0%</td><td>0.00</td><td>0.19%</td><td>-0.00%</td></tr></table>
+<h3>XLI</h3>
+<h4>clean fills</h4><table><tr><th>Day</th><th>n</th><th>WR</th><th>Sharpe</th><th>CAGR</th><th>DD</th></tr><tr><td>Mon</td><td>221</td><td>96.8%</td><td>5.82</td><td>16.31%</td><td>3.70%</td></tr><tr><td>Tue</td><td>27</td><td>96.3%</td><td>1.81</td><td>2.20%</td><td>1.46%</td></tr></table>
+<h4>with 3c slip</h4><table><tr><th>Day</th><th>n</th><th>WR</th><th>Sharpe</th><th>CAGR</th><th>DD</th></tr><tr><td>Mon</td><td>221</td><td>91.9%</td><td>3.98</td><td>11.74%</td><td>4.42%</td></tr><tr><td>Tue</td><td>27</td><td>92.6%</td><td>1.25</td><td>1.51%</td><td>1.75%</td></tr></table>
+
+<h2>Answers</h2>
+<ol>
+<li><b>Realistic bid-ask:</b> Cannot be measured directly — IronVault has no quotes. Industry baseline for XLF/XLI ATM-ish options at the $0.10-$2.00 premium range is roughly $0.02-$0.05 wide, i.e. one-way per-leg slippage of 1-3 cents.</li>
+<li><b>XLF break-even:</b> Sharpe 1.5 at 5.0c, Sharpe 1.0 at 5.0c.<br>
+    <b>XLI break-even:</b> Sharpe 1.5 at 10.0c, Sharpe 1.0 at 10.0c.</li>
+<li><b>7-stream Sharpe @ 0c slip:</b> 31.547 → @ 3c slip: 19.586.</li>
+<li><b>Trade-timing:</b> Per-weekday Sharpe (clean fills) is reported; if any single weekday clears 1.5 under realistic 3c slippage we have a tradable carve-out.</li>
+</ol>
+</body></html>

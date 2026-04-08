@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>EXP-2090 Calendar Seasonality Filter</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1100px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.55; }
+  h1 { color:#0f172a; } h2 { color:#334155; margin-top:2.2em;
+         padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  h3 { color:#475569; margin-top:1.4em; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:16px; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:18px 0; }
+  .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;
+          padding:18px; text-align:center; flex:1; min-width:140px; }
+  .kpi .value { font-size:1.6em; font-weight:800; color:#0f172a; }
+  .kpi .label { font-size:0.72em; color:#64748b; margin-top:4px; text-transform:uppercase; }
+  .pass { color:#16a34a; } .fail { color:#dc2626; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.86em; }
+  th { background:#f1f5f9; padding:9px 12px; text-align:right; font-weight:600;
+       color:#475569; border-bottom:2px solid #cbd5e1; font-size:0.78em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  td.good { color:#16a34a; font-weight:600; }
+  td.bad  { color:#dc2626; font-weight:600; }
+  .note { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;
+            padding:14px; margin:14px 0; font-size:0.85rem; }
+</style></head><body>
+
+<h1>EXP-2090 — GLD/SLV Calendar Seasonality Filter</h1>
+<div class="subtitle">Walk-forward: train 2015-2019, test 2020-2025 | 2026-04-07T16:01:59.365830Z</div>
+
+<div class="note">
+    <strong>Question:</strong> Do GLD/SLV calendar-spread returns exhibit
+    exploitable monthly seasonality? Sizing overlay = clip(1 + 0.5·z,
+    0.25, 1.75) where z is computed on 2015-2019 only. Filter earns
+    a slot if test-window Sharpe lifts ≥ +0.30.<br>
+    <strong>Data:</strong> Real Yahoo GLD/SLV vs GC=F/SI=F, EXP-1770
+    walk-forward OOS streams. No synthetic data.
+</div>
+
+
+        <h2>GLD (GLD − GC=F)</h2>
+        <div class="kpi-row">
+            <div class="kpi"><div class="value">16.31%</div><div class="label">Filtered CAGR</div></div>
+            <div class="kpi"><div class="value">2.35</div><div class="label">Filtered Sharpe</div></div>
+            <div class="kpi"><div class="value">-4.28%</div><div class="label">Max DD</div></div>
+            <div class="kpi"><div class="value fail">-0.42</div><div class="label">ΔSharpe vs Unfiltered</div></div>
+            <div class="kpi"><div class="value fail">REJECTED</div><div class="label">Decision</div></div>
+        </div>
+        <h3>Test-window comparison</h3>
+        <table><thead><tr><th>Variant</th><th>CAGR</th><th>Sharpe</th>
+            <th>Max DD</th><th>Vol</th><th>Hit %</th></tr></thead>
+            <tbody>
+            <tr><td>Unfiltered</td><td>18.14%</td>
+                <td>2.77</td><td>-2.50%</td>
+                <td>6.09%</td><td>83.3%</td></tr>
+            <tr><td>Filtered (seasonality)</td><td>16.31%</td>
+                <td>2.35</td><td>-4.28%</td>
+                <td>6.53%</td><td>83.3%</td></tr>
+            </tbody></table>
+        <h3>Seasonality profile (trained on 2015-2019)</h3>
+        <table><thead><tr><th>Month</th><th>Train n</th><th>Mean daily</th>
+            <th>z</th><th>Multiplier</th></tr></thead>
+            <tbody><tr><td>Jan</td>
+                <td>40</td>
+                <td>+0.1335%</td>
+                <td>+1.05</td>
+                <td class="good">1.53×</td></tr><tr><td>Feb</td>
+                <td>37</td>
+                <td>+0.0863%</td>
+                <td>+0.10</td>
+                <td class="">1.05×</td></tr><tr><td>Mar</td>
+                <td>41</td>
+                <td>+0.1001%</td>
+                <td>+0.38</td>
+                <td class="good">1.19×</td></tr><tr><td>Apr</td>
+                <td>40</td>
+                <td>+0.0347%</td>
+                <td>-0.93</td>
+                <td class="bad">0.53×</td></tr><tr><td>May</td>
+                <td>42</td>
+                <td>+0.0191%</td>
+                <td>-1.25</td>
+                <td class="bad">0.38×</td></tr><tr><td>Jun</td>
+                <td>35</td>
+                <td>+0.0701%</td>
+                <td>-0.22</td>
+                <td class="bad">0.89×</td></tr><tr><td>Jul</td>
+                <td>55</td>
+                <td>+0.1582%</td>
+                <td>+1.55</td>
+                <td class="good">1.75×</td></tr><tr><td>Aug</td>
+                <td>67</td>
+                <td>+0.1532%</td>
+                <td>+1.45</td>
+                <td class="good">1.72×</td></tr><tr><td>Sep</td>
+                <td>57</td>
+                <td>+0.1232%</td>
+                <td>+0.84</td>
+                <td class="good">1.42×</td></tr><tr><td>Oct</td>
+                <td>68</td>
+                <td>+0.0427%</td>
+                <td>-0.77</td>
+                <td class="bad">0.61×</td></tr><tr><td>Nov</td>
+                <td>58</td>
+                <td>+0.0356%</td>
+                <td>-0.92</td>
+                <td class="bad">0.54×</td></tr><tr><td>Dec</td>
+                <td>47</td>
+                <td>+0.0178%</td>
+                <td>-1.27</td>
+                <td class="bad">0.36×</td></tr></tbody></table>
+        
+        <h2>SLV (SLV − SI=F)</h2>
+        <div class="kpi-row">
+            <div class="kpi"><div class="value">31.78%</div><div class="label">Filtered CAGR</div></div>
+            <div class="kpi"><div class="value">2.06</div><div class="label">Filtered Sharpe</div></div>
+            <div class="kpi"><div class="value">-8.80%</div><div class="label">Max DD</div></div>
+            <div class="kpi"><div class="value fail">-0.29</div><div class="label">ΔSharpe vs Unfiltered</div></div>
+            <div class="kpi"><div class="value fail">REJECTED</div><div class="label">Decision</div></div>
+        </div>
+        <h3>Test-window comparison</h3>
+        <table><thead><tr><th>Variant</th><th>CAGR</th><th>Sharpe</th>
+            <th>Max DD</th><th>Vol</th><th>Hit %</th></tr></thead>
+            <tbody>
+            <tr><td>Unfiltered</td><td>32.88%</td>
+                <td>2.35</td><td>-6.08%</td>
+                <td>12.40%</td><td>85.0%</td></tr>
+            <tr><td>Filtered (seasonality)</td><td>31.78%</td>
+                <td>2.06</td><td>-8.80%</td>
+                <td>13.84%</td><td>85.0%</td></tr>
+            </tbody></table>
+        <h3>Seasonality profile (trained on 2015-2019)</h3>
+        <table><thead><tr><th>Month</th><th>Train n</th><th>Mean daily</th>
+            <th>z</th><th>Multiplier</th></tr></thead>
+            <tbody><tr><td>Jan</td>
+                <td>37</td>
+                <td>+0.2589%</td>
+                <td>+1.73</td>
+                <td class="good">1.75×</td></tr><tr><td>Feb</td>
+                <td>36</td>
+                <td>+0.2575%</td>
+                <td>+1.72</td>
+                <td class="good">1.75×</td></tr><tr><td>Mar</td>
+                <td>40</td>
+                <td>+0.1541%</td>
+                <td>+0.48</td>
+                <td class="good">1.24×</td></tr><tr><td>Apr</td>
+                <td>41</td>
+                <td>+0.0783%</td>
+                <td>-0.43</td>
+                <td class="bad">0.79×</td></tr><tr><td>May</td>
+                <td>43</td>
+                <td>+0.0060%</td>
+                <td>-1.29</td>
+                <td class="bad">0.35×</td></tr><tr><td>Jun</td>
+                <td>40</td>
+                <td>+0.0838%</td>
+                <td>-0.36</td>
+                <td class="bad">0.82×</td></tr><tr><td>Jul</td>
+                <td>57</td>
+                <td>+0.0711%</td>
+                <td>-0.51</td>
+                <td class="bad">0.74×</td></tr><tr><td>Aug</td>
+                <td>64</td>
+                <td>+0.1902%</td>
+                <td>+0.91</td>
+                <td class="good">1.46×</td></tr><tr><td>Sep</td>
+                <td>57</td>
+                <td>+0.1468%</td>
+                <td>+0.39</td>
+                <td class="good">1.20×</td></tr><tr><td>Oct</td>
+                <td>65</td>
+                <td>+0.0699%</td>
+                <td>-0.53</td>
+                <td class="bad">0.74×</td></tr><tr><td>Nov</td>
+                <td>60</td>
+                <td>+0.0381%</td>
+                <td>-0.91</td>
+                <td class="bad">0.55×</td></tr><tr><td>Dec</td>
+                <td>49</td>
+                <td>+0.0120%</td>
+                <td>-1.22</td>
+                <td class="bad">0.39×</td></tr></tbody></table>
+        
+
+<div style="margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0;
+            font-size:0.78em; color:#94a3b8; text-align:center;">
+EXP-2090 — compass/exp2090_calendar_seasonality.py · Train 2015-2019 · Test 2020-2025 · Real Yahoo data only
+</div>
+
+</body></html>

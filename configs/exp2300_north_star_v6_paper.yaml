@@ -1,0 +1,221 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EXP-2300 — North Star v6 Paper Trading (7-stream equal_risk_15%)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Production-ready paper trading deployment for Charles, Mac Studio target.
+#
+# Strategy basis: EXP-2200 winning configuration
+#   equal_risk weights × 15% annual vol target
+#   Sparse Sharpe 5.96 (honest lower bound)
+#   Smeared Sharpe 24.98 (methodology upper bound)
+#
+# Seven streams (each with its own per-sleeve YAML in configs/exp2300/):
+#   1. EXP-1220 SPY credit spreads          31.64%   LIVE (tradeable)
+#   2. XLF put credit spreads               24.52%   LIVE
+#   3. XLI put credit spreads               19.24%   LIVE
+#   4. Cross-Vol Arb (SPY/QQQ/IWM/EEM)      18.68%   SIGNAL (live-cycle wrapper TBD)
+#   5. GLD calendar (ETF - front futures)    2.44%   SIGNAL (futures exec req)
+#   6. SLV calendar (ETF - front futures)    1.20%   SIGNAL (futures exec req)
+#   7. Crisis Alpha v5 hedge                 2.28%   SIGNAL (multi-asset CTA)
+#
+# Risk layer: EXP-1890 PortfolioRiskManager (sleeve + portfolio level)
+#   - Sleeve weight drift ±2% triggers rebalance
+#   - 15% annual vol target via scale factor on all sleeves
+#   - Portfolio DD > 8% → 50% gross reduction (circuit breaker)
+#   - Portfolio DD > 12% → FULL HALT (no new entries)
+#
+# Execution: Alpaca paper (IEX feed, v2 REST, no SIP). Promotion to live
+# requires 8 weeks of paper trading with |backtest - paper| deviation
+# < 30% on each tradeable sleeve.
+#
+# Rule Zero: every strategy reference experiment was validated on real
+# IronVault + real Yahoo data. See compass/reports/exp2200_north_star_v6.json
+# for the full walk-forward results.
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: "EXP-2300 North Star v6 Paper"
+experiment_id: EXP-2300
+version: "6.0.0-paper"
+mode: paper                    # set to 'live' ONLY after 8-week paper validation
+created: "2026-04-07"
+operator: "charles"
+description: |
+  Seven-stream equal-risk-weighted paper portfolio from EXP-2200, 15%
+  annual vol target. Four tradeable sleeves (EXP-1220 / XLF / XLI /
+  cross-vol arb) and three signal-only sleeves (GLD calendar / SLV
+  calendar / Crisis Alpha v5) pending execution-path work.
+
+# ─── Account ─────────────────────────────────────────────────────────────
+account:
+  broker: alpaca
+  environment: paper
+  starting_capital: 100000
+  currency: USD
+  margin_type: reg_t
+  api:
+    base_url: "https://paper-api.alpaca.markets"
+    data_url: "https://data.alpaca.markets"
+    key_env: ALPACA_API_KEY_PAPER
+    secret_env: ALPACA_API_SECRET_PAPER
+    feed: iex                   # 'sip' if subscription available
+    api_version: v2
+
+# ─── Portfolio targets (EXP-2200 equal_risk_15%) ─────────────────────────
+portfolio:
+  target_vol_annual_pct: 15.0
+  min_gross_leverage: 0.5
+  max_gross_leverage: 3.0
+  rebalance_cadence: weekly
+  rebalance_day: monday
+  rebalance_time: "09:40"
+  weights_source: "EXP-2200 equal_risk optimizer on 2020-2025 walk-forward"
+  # These weights sum to 1.0000 from compass/reports/exp2200_north_star_v6.json
+  weights:
+    exp1220_spy:   0.3164
+    xlf_cs:        0.2452
+    xli_cs:        0.1924
+    vol_arb:       0.1868
+    gld_calendar:  0.0244
+    slv_calendar:  0.0120
+    v5_hedge:      0.0228
+
+# ─── Sleeve config references ────────────────────────────────────────────
+sleeves:
+  - id: exp1220_spy
+    config: configs/exp2300/exp1220_spy.yaml
+    mode: live
+    reference_experiment: EXP-1220
+  - id: xlf_cs
+    config: configs/exp2300/xlf_cs.yaml
+    mode: live
+    reference_experiment: EXP-2160
+  - id: xli_cs
+    config: configs/exp2300/xli_cs.yaml
+    mode: live
+    reference_experiment: EXP-2160
+  - id: vol_arb
+    config: configs/exp2300/vol_arb.yaml
+    mode: signal_only          # no live-cycle wrapper yet; phase-2 upgrade
+    reference_experiment: EXP-2020
+  - id: gld_calendar
+    config: configs/exp2300/gld_calendar.yaml
+    mode: signal_only
+    reference_experiment: EXP-1770
+  - id: slv_calendar
+    config: configs/exp2300/slv_calendar.yaml
+    mode: signal_only
+    reference_experiment: EXP-1770
+  - id: v5_hedge
+    config: configs/exp2300/v5_hedge.yaml
+    mode: signal_only
+    reference_experiment: EXP-1780
+
+# ─── Risk management (EXP-1890 PortfolioRiskManager) ────────────────────
+risk:
+  manager: compass.portfolio_risk_manager.PortfolioRiskManager
+  mode: binding                  # enforce, don't just log
+  sleeve_weight_drift_pct: 2.0   # trigger rebalance if any sleeve ±2% from target
+  correlation_warning_threshold: 0.6
+  correlation_halt_threshold: 0.85
+  drawdown:
+    soft_limit_pct: 8.0          # 50% gross reduction
+    hard_limit_pct: 12.0         # FULL HALT
+    recovery_pct: 4.0            # resume only after retrace
+  daily_loss:
+    soft_pct: 3.0
+    hard_pct: 5.0
+  weekly_loss:
+    soft_pct: 6.0
+    hard_pct: 9.0
+
+# ─── Overlays (optional; applied as entry gates + sizing multipliers) ────
+overlays:
+  fomc_event_gate:
+    enabled: true
+    source: compass.exp1740_sentiment_filter
+    size_mult_on_event_day: 0.5
+    event_buffer_days: 1
+  putcall_sentiment:
+    enabled: true
+    source: compass.exp1750_putcall_overlay
+    size_mult_on_high_pcr: 1.30
+    size_mult_on_low_pcr: 0.50
+  vov_zscore:
+    enabled: true
+    source: compass.exp1970_vol_of_vol
+    z_threshold_half: 1.0
+    z_threshold_flat: 2.0
+
+# ─── Telemetry: health checks, P&L logging, Telegram ─────────────────────
+telemetry:
+  health_check:
+    interval_seconds: 300        # 5 minutes
+    output_file: logs/exp2300/health.json
+    checks:
+      - alpaca_account_reachable
+      - ironvault_db_reachable
+      - per_sleeve_heartbeat
+      - portfolio_vol_within_bounds
+      - drawdown_within_limits
+  pnl_logging:
+    daily_csv: logs/exp2300/portfolio_pnl.csv
+    trade_log: logs/exp2300/trades.csv
+    per_sleeve_breakdown: true
+    include_greeks: true
+  telegram:
+    enabled: true
+    bot_token_env: TELEGRAM_BOT_TOKEN
+    chat_id_env: TELEGRAM_CHAT_ID
+    experiment_prefix: "[EXP-2300]"
+    events:
+      sleeve_entry: true
+      sleeve_exit: true
+      stop_loss_hit: true
+      profit_target_hit: true
+      rebalance_fired: true
+      risk_circuit_breaker: true
+      daily_summary: true
+      health_check_failure: true
+      vol_target_breach: true
+
+# ─── Operational modes (used by scripts/launch_exp2300.sh) ───────────────
+modes:
+  smoke:
+    description: "Load configs, verify data + API access, print weights, no trades"
+    duration_seconds: 30
+  dry_run:
+    description: "Compute signals and would-be orders, submit NO trades"
+    duration_seconds: 300
+  paper:
+    description: "Live paper trading on Alpaca paper endpoint"
+    run_forever: true
+
+# ─── Deployment notes for Charles ────────────────────────────────────────
+deployment:
+  target_host: "charles-mac-studio"
+  prereqs:
+    - "Python 3.11 venv active at repo root"
+    - "data/options_cache.db populated (~1GB, IronVault)"
+    - ".env.exp2300 contains ALPACA_API_KEY_PAPER + ALPACA_API_SECRET_PAPER"
+    - ".env.exp2300 contains TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID"
+    - "scripts/launch_exp2300.sh is chmod +x"
+  validation_checklist:
+    - "scripts/launch_exp2300.sh smoke → all 7 sleeves load and pass checks"
+    - "scripts/launch_exp2300.sh dry → prints plausible orders, NO trades submitted"
+    - "scripts/launch_exp2300.sh start → paper engine + monitor start in background"
+    - "scripts/launch_exp2300.sh status → shows PIDs + health.json snapshot"
+    - "scripts/launch_exp2300.sh logs → tails portfolio log + per-sleeve logs"
+  promotion_criteria:
+    min_weeks_paper: 8
+    max_backtest_paper_deviation_pct: 30.0
+    max_unexplained_sleeve_drift: 0.05
+
+# ─── Rule Zero statement ─────────────────────────────────────────────────
+rule_zero:
+  enforced: true
+  statement: |
+    ZERO SYNTHETIC DATA. Every strategy sleeve references an experiment
+    that was validated on real IronVault options + real Yahoo Finance
+    underlyings. The equal_risk weights come from EXP-2200's walk-
+    forward optimizer, not hand-tuning. All paper-to-live promotion
+    decisions must reference real P&L, not simulation.

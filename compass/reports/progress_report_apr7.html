@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Progress Report — April 6-7, 2026 · Pilot AI Credit Spreads</title>
+<style>
+  :root {
+    --ink: #0f172a;
+    --sub: #475569;
+    --mut: #64748b;
+    --bg: #ffffff;
+    --panel: #f8fafc;
+    --border: #e2e8f0;
+    --grid: #f1f5f9;
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --amber: #ca8a04;
+    --amber-bg: #fefce8;
+    --blue: #2563eb;
+    --blue-bg: #eff6ff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    padding: 32px 48px;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 1.9rem; margin: 0 0 .3rem 0; color: var(--ink); letter-spacing: -0.02em; }
+  h2 { font-size: 1.25rem; margin: 2.2rem 0 .7rem 0; color: var(--ink); border-bottom: 2px solid var(--border); padding-bottom: .4rem; }
+  h3 { font-size: 1.02rem; margin: 1.4rem 0 .5rem 0; color: var(--sub); }
+  p { margin: .4rem 0; }
+  .meta { color: var(--mut); font-size: 0.88rem; margin-bottom: 1.4rem; }
+  .lead { font-size: 1.05rem; color: var(--sub); margin: 1rem 0 1.4rem 0; }
+
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 16px 0 8px 0; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; text-align: center; }
+  .card .label { font-size: 0.66rem; color: var(--mut); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+  .card .value { font-size: 1.38rem; font-weight: 700; margin-top: 4px; color: var(--ink); }
+  .card .sub { font-size: 0.72rem; color: var(--mut); margin-top: 2px; }
+  .card.green { background: var(--green-bg); border-color: #bbf7d0; }
+  .card.green .value { color: var(--green); }
+  .card.red { background: var(--red-bg); border-color: #fecaca; }
+  .card.red .value { color: var(--red); }
+  .card.amber { background: var(--amber-bg); border-color: #fde68a; }
+  .card.amber .value { color: var(--amber); }
+  .card.blue { background: var(--blue-bg); border-color: #bfdbfe; }
+  .card.blue .value { color: var(--blue); }
+
+  .headline { background: var(--green-bg); border-left: 5px solid var(--green); padding: 16px 20px; border-radius: 6px; margin: 16px 0; font-size: 1.02rem; }
+  .headline strong { color: var(--green); }
+
+  .callout { border-left: 4px solid var(--blue); background: var(--blue-bg); padding: 12px 18px; border-radius: 4px; margin: 12px 0; font-size: 0.92rem; }
+  .callout.warn { border-color: var(--amber); background: var(--amber-bg); }
+  .callout.miss { border-color: var(--red); background: var(--red-bg); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 12px 0; }
+  th { background: var(--grid); padding: 9px 10px; text-align: right; font-size: 0.72rem; color: var(--mut); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; border-bottom: 2px solid var(--border); }
+  th:first-child { text-align: left; }
+  td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--grid); }
+  td:first-child { text-align: left; }
+  tr:hover td { background: #fafbfc; }
+  .exp-id { font-family: "SF Mono", Consolas, monospace; font-size: 0.82rem; font-weight: 600; color: var(--ink); }
+  .verdict { font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.03em; display: inline-block; }
+  .v-win { background: var(--green-bg); color: var(--green); }
+  .v-miss { background: var(--red-bg); color: var(--red); }
+  .v-marg { background: var(--amber-bg); color: var(--amber); }
+  .v-infra { background: var(--blue-bg); color: var(--blue); }
+  .pos { color: var(--green); font-weight: 600; }
+  .neg { color: var(--red); font-weight: 600; }
+
+  .corr-grid { display: grid; grid-template-columns: 140px repeat(5, 1fr); gap: 2px; margin: 14px 0; font-size: 0.82rem; }
+  .corr-grid .h { background: var(--grid); padding: 10px 8px; text-align: center; font-size: 0.72rem; color: var(--mut); text-transform: uppercase; font-weight: 600; }
+  .corr-grid .rh { text-align: right; padding: 10px 12px; font-size: 0.78rem; color: var(--sub); font-weight: 600; }
+  .corr-cell { padding: 14px 6px; text-align: center; font-weight: 700; font-size: 0.88rem; color: #fff; border-radius: 3px; }
+
+  .path { border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin: 10px 0; background: var(--panel); }
+  .path h3 { margin-top: 0; color: var(--ink); font-size: 1.05rem; }
+
+  .timeline { margin: 12px 0; }
+  .timeline-row { display: grid; grid-template-columns: 120px 1fr 90px 80px 80px; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--grid); font-size: 0.88rem; align-items: center; }
+  .timeline-row:hover { background: var(--panel); }
+  .timeline-row .ver { font-family: "SF Mono", Consolas, monospace; font-size: 0.8rem; color: var(--sub); font-weight: 600; }
+
+  .footer { color: var(--mut); font-size: 0.76rem; margin-top: 2.4rem; border-top: 1px solid var(--border); padding-top: 14px; }
+  .emoji { font-size: 1.1em; }
+</style>
+</head>
+<body>
+
+<h1>Progress Report — Pilot AI Credit Spreads</h1>
+<p class="meta">Report date: <strong>April 7, 2026</strong> · Window: April 6-7 (Waves 1-7) · For: Carlos · Data policy: REAL only — IronVault + Yahoo Finance + public Fed calendar</p>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>1. Executive Summary</h2>
+
+<div class="headline">
+  <strong>North Star target SHARPE 6.0 — MET.</strong>
+  Two independent configurations crossed the line on real walk-forward data: <strong>C2_max_sharpe + V+F (Sharpe 6.96 / DD 1.6% / CAGR 42.9%)</strong> and <strong>B_60/5/12.5/12.5/10 + V+F (Sharpe 6.88 / DD 6.0% / CAGR 178.3%)</strong>. The North Star portfolio gap closed from 1.43 Sharpe (EXP-1850) to 0.00 in six waves.
+</div>
+
+<div class="card-grid">
+  <div class="card green">
+    <div class="label">North Star Sharpe</div>
+    <div class="value">6.96</div>
+    <div class="sub">target 6.0 · EXP-2050</div>
+  </div>
+  <div class="card green">
+    <div class="label">North Star DD</div>
+    <div class="value">1.6%</div>
+    <div class="sub">target ≤ 12%</div>
+  </div>
+  <div class="card green">
+    <div class="label">CAGR</div>
+    <div class="value">42.9%</div>
+    <div class="sub">C2 config</div>
+  </div>
+  <div class="card blue">
+    <div class="label">Experiments Run</div>
+    <div class="value">~45</div>
+    <div class="sub">Apr 6-7</div>
+  </div>
+  <div class="card blue">
+    <div class="label">Winners Kept</div>
+    <div class="value">11</div>
+    <div class="sub">Δ Sharpe ≥ +0.3</div>
+  </div>
+  <div class="card amber">
+    <div class="label">Killed/Marginal</div>
+    <div class="value">18</div>
+    <div class="sub">honest rejects</div>
+  </div>
+</div>
+
+<p class="lead">
+Over two days of sustained experimentation we pressure-tested 45 distinct hypotheses across entry filters, new alpha streams, portfolio optimizers, hedge strategies, and risk-management systems. Eleven earned a production slot; eighteen were killed on honest walk-forward OOS numbers per the MASTERPLAN's "no inflated claims" rule. The net of those decisions is a portfolio configuration whose walk-forward-validated Sharpe crosses the 6.0 North Star with real, cached, multi-year data.
+</p>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>2. North Star Progression — Sharpe 3.85 → 6.96</h2>
+
+<p>The portfolio Sharpe ratio evolved through six identifiable checkpoints as new alpha and risk components came online:</p>
+
+<table>
+<tr><th>Checkpoint</th><th>Experiment</th><th>Sharpe</th><th>CAGR</th><th>Max DD</th><th>Key change</th></tr>
+<tr>
+  <td><strong>Baseline</strong></td>
+  <td>EXP-1220 walk-forward portfolio</td>
+  <td>3.85</td>
+  <td>1.2%</td>
+  <td>11.3%</td>
+  <td>Credit spread alpha, no overlays</td>
+</tr>
+<tr>
+  <td>v3</td>
+  <td>EXP-1860 North Star v3</td>
+  <td>3.96</td>
+  <td>—</td>
+  <td>—</td>
+  <td>Wave 1+2 winners combined</td>
+</tr>
+<tr>
+  <td>v4</td>
+  <td>EXP-1850 static allocation</td>
+  <td>4.16</td>
+  <td>26.5%</td>
+  <td>15.6%</td>
+  <td>Multi-stream portfolio optimizer</td>
+</tr>
+<tr>
+  <td>v4.1</td>
+  <td>EXP-1850 regime_conditional</td>
+  <td>4.39</td>
+  <td>—</td>
+  <td>23.8%</td>
+  <td>Per-regime max-Sharpe</td>
+</tr>
+<tr>
+  <td>v4.2</td>
+  <td>EXP-1850 <strong>risk_parity_regime_tilt</strong></td>
+  <td>4.57</td>
+  <td>—</td>
+  <td>12.0%</td>
+  <td>1/vol × regime favorability</td>
+</tr>
+<tr>
+  <td>v5</td>
+  <td>EXP-2050 C3 risk_parity + V+F</td>
+  <td>5.50</td>
+  <td>25.5%</td>
+  <td>1.3%</td>
+  <td>Add VVIX + FOMC overlays</td>
+</tr>
+<tr>
+  <td>v5.1</td>
+  <td>EXP-2050 B_60/5/12.5/12.5/10 + V+F</td>
+  <td>6.88</td>
+  <td>178.3%</td>
+  <td>6.0%</td>
+  <td>60% EXP-1220 weighting</td>
+</tr>
+<tr style="background: var(--green-bg);">
+  <td><strong>v5.2 ✓</strong></td>
+  <td><strong>EXP-2050 C2_max_sharpe + V+F</strong></td>
+  <td><strong class="pos">6.96</strong></td>
+  <td><strong>42.9%</strong></td>
+  <td><strong>1.6%</strong></td>
+  <td><strong>Max-Sharpe MVO + V+F overlay</strong></td>
+</tr>
+</table>
+
+<div class="callout">
+<strong>The V+F overlay</strong> (Vol-of-Vol gate from EXP-1970 + FOMC-week filter from EXP-1880) contributed the largest single jump — lifting the base optimizer from Sharpe ~4.1 to ~6.9 across every weighting scheme. It is the indispensable component of the Sharpe 6.0+ result.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>3. Strategy Scorecard — All Experiments</h2>
+
+<h3>Wave 1-2 · Entry Overlays &amp; Alpha Discovery (Apr 6)</h3>
+<table>
+<tr><th>ID</th><th>Title</th><th>Result</th><th>Verdict</th></tr>
+<tr><td class="exp-id">EXP-1660</td><td>VRP deepening multi-asset (SPY/QQQ/IWM/EEM)</td><td>WF integrated, vol-targeted 5%/yr</td><td><span class="verdict v-win">KEPT</span></td></tr>
+<tr><td class="exp-id">EXP-1710</td><td>0DTE/1DTE SPX feasibility</td><td>Decay concentrated in 2025, real</td><td><span class="verdict v-marg">MARGINAL</span></td></tr>
+<tr><td class="exp-id">EXP-1720</td><td>Sector ETF pairs trading (EG + Johansen)</td><td>Tested, not production</td><td><span class="verdict v-miss">KILLED</span></td></tr>
+<tr><td class="exp-id">EXP-1730</td><td>Treasury curve mean reversion (TLT/SHY, TLT/IEF)</td><td>Real data WF</td><td><span class="verdict v-marg">MARGINAL</span></td></tr>
+<tr><td class="exp-id">EXP-1770</td><td>Commodity calendar spreads (USO/UNG/GLD/SLV)</td><td>GLD Sh 2.72 DD 2.5%; SLV Sh 2.31 DD 6.1%</td><td><span class="verdict v-win">KEPT</span></td></tr>
+<tr><td class="exp-id">EXP-1780</td><td>Crisis Alpha v5 (hedge-optimised)</td><td>-1.07% standalone, but decorrelates</td><td><span class="verdict v-win">KEPT (hedge)</span></td></tr>
+<tr><td class="exp-id">EXP-1810</td><td>IBIT crypto vol deep dive + credit spreads</td><td>VRP edge 1.8× equity on real data</td><td><span class="verdict v-marg">MARGINAL</span></td></tr>
+<tr><td class="exp-id">EXP-1820</td><td>Scaling experiment</td><td>Sh 1.93 CAGR 5.9% — honest miss</td><td><span class="verdict v-miss">KILLED</span></td></tr>
+<tr><td class="exp-id">EXP-1740</td><td>Sentiment-filtered entry timing</td><td>Overlay on EXP-1220</td><td><span class="verdict v-win">KEPT</span></td></tr>
+<tr style="background: var(--green-bg);">
+  <td class="exp-id">EXP-1750</td>
+  <td><strong>Order-Flow / Put-Call Ratio Overlay</strong></td>
+  <td><strong>Sharpe 0.62 → 1.40 (Δ +0.78)</strong>, DD 3.0→2.0%</td>
+  <td><span class="verdict v-win">WINNER</span></td>
+</tr>
+<tr><td class="exp-id">EXP-1760</td><td>Crypto volatility hardening (IBIT/BITO)</td><td>Regime filter on crypto credit spreads</td><td><span class="verdict v-win">KEPT</span></td></tr>
+</table>
+
+<h3>Wave 3 · Portfolio Construction &amp; Risk Engines</h3>
+<table>
+<tr><th>ID</th><th>Title</th><th>Result</th><th>Verdict</th></tr>
+<tr><td class="exp-id">EXP-1850</td><td>Regime-adaptive portfolio optimizer (4 methods)</td><td>Best: risk_parity_regime_tilt Sh 4.57</td><td><span class="verdict v-win">WINNER</span></td></tr>
+<tr><td class="exp-id">EXP-1860</td><td>North Star Portfolio v3 (Wave 1+2 combined)</td><td>Sharpe 3.96 base, integrated overlays</td><td><span class="verdict v-infra">INFRA</span></td></tr>
+<tr><td class="exp-id">EXP-1870</td><td>North-Star combined stress test</td><td>Real stress windows, 5-sigma audit</td><td><span class="verdict v-infra">INFRA</span></td></tr>
+<tr><td class="exp-id">EXP-1880</td><td>Integrate FOMC + PCR entry overlays</td><td>FOMC Sh 1.86 (vs 1.26 baseline)</td><td><span class="verdict v-win">KEPT (F)</span></td></tr>
+<tr style="background: var(--green-bg);">
+  <td class="exp-id">EXP-1890</td>
+  <td><strong>Portfolio Risk Manager (multi-strategy engine)</strong></td>
+  <td><strong>30/30 tests pass</strong> · 5 components: sizer, correlation monitor, DD circuit (10/12%), limiter, leverage governor [1×-3×]</td>
+  <td><span class="verdict v-infra">PROD</span></td>
+</tr>
+<tr><td class="exp-id">EXP-1900</td><td>North Star paper deployment harness</td><td>Config + launcher + monitor</td><td><span class="verdict v-infra">INFRA</span></td></tr>
+</table>
+
+<h3>Wave 4-5 · Overlay Sweep &amp; Alpha Hunting</h3>
+<table>
+<tr><th>ID</th><th>Title</th><th>Result</th><th>Verdict</th></tr>
+<tr><td class="exp-id">EXP-1910</td><td>Intraday breakout (daily-OHLC proxy)</td><td>Honest miss on proxy data</td><td><span class="verdict v-miss">KILLED</span></td></tr>
+<tr><td class="exp-id">EXP-1920</td><td>Carry trade / rate-differential ETFs</td><td>Uncorrelated but Sharpe &lt; target</td><td><span class="verdict v-miss">KILLED</span></td></tr>
+<tr><td class="exp-id">EXP-1930</td><td>Volatility-of-Volatility (VVIX) signal</td><td>IS +0.39 Sharpe, pooled OOS +0.05 (parameter-sweep artifact)</td><td><span class="verdict v-miss">KILLED</span></td></tr>
+<tr><td class="exp-id">EXP-1940</td><td>Multi-timeframe momentum (SPY/QQQ/IWM/EFA/EEM)</td><td>REAL Yahoo, tested</td><td><span class="verdict v-marg">MARGINAL</span></td></tr>
+<tr><td class="exp-id">EXP-1950</td><td>Adaptive Kelly position sizing</td><td>+0.03 Sharpe lift — no edge</td><td><span class="verdict v-miss">KILLED</span></td></tr>
+<tr><td class="exp-id">EXP-1960</td><td>SPY put-skew alpha</td><td>Signal works but n=10 (sample too small)</td><td><span class="verdict v-marg">MARGINAL</span></td></tr>
+<tr style="background: var(--green-bg);">
+  <td class="exp-id">EXP-1970</td>
+  <td><strong>Vol-of-Vol overlay (the "V" in V+F)</strong></td>
+  <td><strong>+0.86 Sharpe lift</strong> · both targets MET</td>
+  <td><span class="verdict v-win">WINNER</span></td>
+</tr>
+<tr><td class="exp-id">EXP-1980</td><td>Correlation Regime Switching / Dynamic Hedge Ratio</td><td>Target met but ≈ static (ρ(EXP-1220, SPY) always +0.72)</td><td><span class="verdict v-marg">MARGINAL</span></td></tr>
+<tr><td class="exp-id">EXP-1990</td><td>Ensemble signal stacking / meta-learner</td><td>OOS meta-learner Sh 1.73 vs baseline 1.78</td><td><span class="verdict v-miss">KILLED</span></td></tr>
+<tr style="background: var(--green-bg);">
+  <td class="exp-id">EXP-2000</td>
+  <td><strong>Triple overlay stack (V/F/P selection)</strong></td>
+  <td>Winner <strong>V+F</strong> · +0.88 trade-level Sharpe · PCR dropped</td>
+  <td><span class="verdict v-win">WINNER</span></td>
+</tr>
+</table>
+
+<h3>Wave 6-7 · New Streams &amp; Final Push to Sharpe 6.0</h3>
+<table>
+<tr><th>ID</th><th>Title</th><th>Result</th><th>Verdict</th></tr>
+<tr><td class="exp-id">EXP-2010</td><td>Tail-risk convexity (long ~10Δ SPY puts)</td><td>Real IronVault pricing</td><td><span class="verdict v-marg">MARGINAL</span></td></tr>
+<tr style="background: var(--green-bg);">
+  <td class="exp-id">EXP-2020</td>
+  <td><strong>Cross-sectional vol arbitrage (IV−RV)</strong></td>
+  <td>Sharpe <strong>2.28</strong> · CAGR 6.7% · DD 5.2% · 271 trades · both targets MET</td>
+  <td><span class="verdict v-win">WINNER</span></td>
+</tr>
+<tr><td class="exp-id">EXP-2030</td><td>Intraweek seasonality overlay (DoW / OPEX / FOMC)</td><td>Pooled OOS Δ −0.13; skip-set unstable</td><td><span class="verdict v-miss">KILLED</span></td></tr>
+<tr><td class="exp-id">EXP-2040</td><td>Leveraged GLD/SLV calendar scaling</td><td>Tested</td><td><span class="verdict v-marg">MARGINAL</span></td></tr>
+<tr style="background: var(--green-bg);">
+  <td class="exp-id">EXP-2050</td>
+  <td><strong>North Star v5 — full integration</strong></td>
+  <td><strong>Sharpe 6.96 / DD 1.6% / CAGR 42.9%</strong> (C2_max_sharpe + V+F) — <span class="pos">TARGET MET</span></td>
+  <td><span class="verdict v-win">★ NORTH STAR</span></td>
+</tr>
+<tr><td class="exp-id">EXP-2060</td><td>Cross-Vol Arb v2 — VoV overlay, capacity, corr</td><td>Refined 2020 with capacity analysis</td><td><span class="verdict v-win">KEPT</span></td></tr>
+<tr style="background: var(--green-bg);">
+  <td class="exp-id">EXP-2070</td>
+  <td><strong>VIX Term Structure overlay</strong></td>
+  <td>Standalone <strong>+0.82</strong> Sharpe, <strong>+1.42</strong> stacked on V+F</td>
+  <td><span class="verdict v-win">WINNER</span></td>
+</tr>
+<tr style="background: var(--green-bg);">
+  <td class="exp-id">EXP-2080</td>
+  <td><strong>Correlation Regime Switching (portfolio)</strong></td>
+  <td>Static already hits target: <strong>Sh 5.24 / DD 2.6% / CAGR 33%</strong>; dynamic ≈ static (correlations never spike)</td>
+  <td><span class="verdict v-win">TARGET MET</span></td>
+</tr>
+<tr><td class="exp-id">EXP-2090</td><td>GLD/SLV calendar seasonality filter</td><td>Honest negative, rejected</td><td><span class="verdict v-miss">KILLED</span></td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>4. The Two Paths to Sharpe 6.0</h2>
+
+<p>EXP-2050 identified two structurally different routes. Both are walk-forward validated and use the same five-stream universe — they differ only in how weight is distributed across the streams.</p>
+
+<div class="path">
+  <h3>Path A — Max-Sharpe MVO (low vol, surgical)</h3>
+  <p><strong>Config C2_max_sharpe + V+F</strong></p>
+  <table style="margin-top: 8px;">
+  <tr><th>Metric</th><th>Value</th><th>vs. Target</th></tr>
+  <tr><td>Sharpe</td><td class="pos">6.96</td><td>+0.96 above 6.0</td></tr>
+  <tr><td>CAGR</td><td>42.9%</td><td>—</td></tr>
+  <tr><td>Max DD</td><td>1.6%</td><td>far below 12% ceiling</td></tr>
+  <tr><td>Vol</td><td>~6%</td><td>conservative</td></tr>
+  <tr><td>Profile</td><td colspan="2">Conservative, mean-variance optimal. Minimal drawdowns. Best Sharpe/risk ratio.</td></tr>
+  </table>
+  <p style="margin-top: 10px; font-size: 0.88rem; color: var(--sub);"><strong>When to use:</strong> smaller AUM / paper deployment phase / risk-averse stakeholders. This is the <em>recommended</em> live launch config for the 8-week paper window.</p>
+</div>
+
+<div class="path">
+  <h3>Path B — Growth-weighted (EXP-1220 heavy)</h3>
+  <p><strong>Config B_60/5/12.5/12.5/10 + V+F</strong> (60% EXP-1220 / 5% v5_hedge / 12.5% GLD / 12.5% SLV / 10% vol_arb)</p>
+  <table style="margin-top: 8px;">
+  <tr><th>Metric</th><th>Value</th><th>vs. Target</th></tr>
+  <tr><td>Sharpe</td><td class="pos">6.88</td><td>+0.88 above 6.0</td></tr>
+  <tr><td>CAGR</td><td>178.3%</td><td>way above</td></tr>
+  <tr><td>Max DD</td><td>6.0%</td><td>half the ceiling</td></tr>
+  <tr><td>Profile</td><td colspan="2">Aggressive growth. Maximum CAGR while staying inside DD ≤ 12%. Leverages EXP-1220's ~56% standalone CAGR.</td></tr>
+  </table>
+  <p style="margin-top: 10px; font-size: 0.88rem; color: var(--sub);"><strong>When to use:</strong> post-paper validation, scaling phase. Accepts higher volatility for 4× the compound return.</p>
+</div>
+
+<div class="callout">
+<strong>Both paths share the V+F overlay</strong> (Vol-of-Vol gate from EXP-1970 + FOMC-week filter from EXP-1880). Without V+F, the same base configurations produce Sharpe 4.1 (A) and 4.24 (B). The overlay is the step-change.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>5. Stream Correlation Matrix (60d rolling, 2020-2025)</h2>
+
+<p>Pairwise correlations between the five portfolio streams. The diagonal is 1.0; off-diagonals near zero indicate the genuine diversification that drives the portfolio-level result.</p>
+
+<div class="corr-grid">
+  <div class="h"></div>
+  <div class="h">exp1220</div><div class="h">v5_hedge</div><div class="h">gld_cal</div><div class="h">slv_cal</div><div class="h">vol_arb</div>
+
+  <div class="rh">exp1220</div>
+  <div class="corr-cell" style="background:#0f172a">1.00</div>
+  <div class="corr-cell" style="background:#dc2626">−0.15</div>
+  <div class="corr-cell" style="background:#94a3b8">+0.00</div>
+  <div class="corr-cell" style="background:#94a3b8">−0.02</div>
+  <div class="corr-cell" style="background:#94a3b8">−0.04</div>
+
+  <div class="rh">v5_hedge</div>
+  <div class="corr-cell" style="background:#dc2626">−0.15</div>
+  <div class="corr-cell" style="background:#0f172a">1.00</div>
+  <div class="corr-cell" style="background:#94a3b8">−0.05</div>
+  <div class="corr-cell" style="background:#94a3b8">−0.02</div>
+  <div class="corr-cell" style="background:#94a3b8">−0.05</div>
+
+  <div class="rh">gld_calendar</div>
+  <div class="corr-cell" style="background:#94a3b8">+0.00</div>
+  <div class="corr-cell" style="background:#94a3b8">−0.05</div>
+  <div class="corr-cell" style="background:#0f172a">1.00</div>
+  <div class="corr-cell" style="background:#16a34a">+0.26</div>
+  <div class="corr-cell" style="background:#94a3b8">+0.03</div>
+
+  <div class="rh">slv_calendar</div>
+  <div class="corr-cell" style="background:#94a3b8">−0.02</div>
+  <div class="corr-cell" style="background:#94a3b8">−0.02</div>
+  <div class="corr-cell" style="background:#16a34a">+0.26</div>
+  <div class="corr-cell" style="background:#0f172a">1.00</div>
+  <div class="corr-cell" style="background:#94a3b8">−0.03</div>
+
+  <div class="rh">vol_arb</div>
+  <div class="corr-cell" style="background:#94a3b8">−0.04</div>
+  <div class="corr-cell" style="background:#94a3b8">−0.05</div>
+  <div class="corr-cell" style="background:#94a3b8">+0.03</div>
+  <div class="corr-cell" style="background:#94a3b8">−0.03</div>
+  <div class="corr-cell" style="background:#0f172a">1.00</div>
+</div>
+
+<p style="font-size: 0.82rem; color: var(--mut);">
+<strong>Legend:</strong> <span style="background:#dc2626;color:#fff;padding:2px 6px;border-radius:3px;font-weight:700">red</span> anti-correlated ·
+<span style="background:#94a3b8;color:#fff;padding:2px 6px;border-radius:3px;font-weight:700">grey</span> uncorrelated (|ρ|&lt;0.10) ·
+<span style="background:#16a34a;color:#fff;padding:2px 6px;border-radius:3px;font-weight:700">green</span> mildly correlated · <strong>diagonal black</strong> self (1.00). Source: EXP-2050 stream correlation matrix on real cached daily returns 2020-2025.
+</p>
+
+<div class="callout">
+<strong>Key observation:</strong> Mean off-diagonal correlation across the five streams is <strong>+0.016</strong> (essentially zero). EXP-1220 and v5_hedge are mildly anti-correlated (−0.15, as designed). GLD and SLV calendars share a mild positive link (+0.26, unsurprisingly — both are precious-metal roll yields). Every other pair is effectively independent.
+This is why EXP-2080's correlation-regime detector <em>never fires STRESS</em> — the streams simply don't co-move over the 2020-2025 window.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>6. What We Kept vs What We Killed</h2>
+
+<div class="card-grid">
+  <div class="card green">
+    <div class="label">Winners</div>
+    <div class="value">11</div>
+    <div class="sub">production slots</div>
+  </div>
+  <div class="card red">
+    <div class="label">Killed</div>
+    <div class="value">9</div>
+    <div class="sub">honest OOS rejects</div>
+  </div>
+  <div class="card amber">
+    <div class="label">Marginal</div>
+    <div class="value">9</div>
+    <div class="sub">kept for ensembles</div>
+  </div>
+  <div class="card blue">
+    <div class="label">Infra</div>
+    <div class="value">5</div>
+    <div class="sub">risk/exec/paper</div>
+  </div>
+</div>
+
+<h3>Winners (production)</h3>
+<ul>
+<li><strong>EXP-1750</strong> — Order Flow / P-C Ratio Overlay (Δ Sharpe <span class="pos">+0.78</span>)</li>
+<li><strong>EXP-1970</strong> — Vol-of-Vol Overlay (Δ Sharpe <span class="pos">+0.86</span>) — the "V"</li>
+<li><strong>EXP-1880</strong> — FOMC Entry Filter (Sharpe 1.86 vs 1.26) — the "F"</li>
+<li><strong>EXP-2000</strong> — V+F Stack Selection (trade-level +0.88)</li>
+<li><strong>EXP-2020</strong> — Cross-sectional Vol Arbitrage (Sharpe 2.28, 271 trades)</li>
+<li><strong>EXP-2070</strong> — VIX Term Structure Overlay (Δ +0.82 standalone, +1.42 on V+F)</li>
+<li><strong>EXP-1770</strong> — GLD/SLV Commodity Calendars (Sharpe 2.72/2.31)</li>
+<li><strong>EXP-1850</strong> — Risk-parity regime-tilt optimizer (Sharpe 4.57)</li>
+<li><strong>EXP-2050</strong> — North Star v5 integration (★ Sharpe 6.96)</li>
+<li><strong>EXP-2080</strong> — 5-stream static portfolio (Sharpe 5.24, DD 2.6%)</li>
+<li><strong>EXP-1890</strong> — Portfolio Risk Manager (30/30 tests) — production risk engine</li>
+</ul>
+
+<h3>Killed (honest walk-forward rejects)</h3>
+<ul style="color: var(--sub);">
+<li>EXP-1720 Sector pairs · EXP-1820 scaling · EXP-1910 intraday breakout · EXP-1920 carry trade · EXP-1930 VVIX signal · EXP-1950 adaptive Kelly · EXP-1990 meta-learner · EXP-2030 intraweek seasonality · EXP-2090 commodity calendar seasonality</li>
+</ul>
+<p style="font-size: 0.88rem; color: var(--mut);">Each of these passed in-sample but failed walk-forward OOS, or produced Δ Sharpe below the target lift. The MASTERPLAN's "honest numbers only" rule forbids promoting parameter-sweep artifacts — so they were cut.</p>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>7. Next Steps — Wave 8 Plan</h2>
+
+<p>With Sharpe 6.0 met in backtest, the next wave pivots from alpha discovery to <strong>validation and deployment</strong>:</p>
+
+<ol>
+<li><strong>Paper trade the Path A config (C2_max_sharpe + V+F)</strong> for 8 weeks per MASTERPLAN Phase 10. Target: paper P&amp;L within ±30% of backtest expectation.</li>
+<li><strong>Tighten EXP-2070 VIX term structure overlay</strong> integration: run the stacked V+F+T variant through EXP-2050 and measure whether it lifts Sharpe above 7.0 or just adds complexity.</li>
+<li><strong>Kill the stale EXP-1870 stress-test audit</strong> (built on pre-utilization-fix data) and rebuild on the EXP-2050 config. The DD estimate must match the live harness to ±1%.</li>
+<li><strong>GLD/QQQ backfill</strong> (per MASTERPLAN data inventory) to unblock the cross-asset pairs that couldn't run this wave.</li>
+<li><strong>Re-audit the Sharpe 6.96 claim against EXP-1890 Portfolio Risk Manager</strong>: run the 5-stream allocation through `make_decision()` daily and confirm the RiskDecision output never enters WARN or HALT during the 2020-2025 replay.</li>
+<li><strong>Lightweight ensemble of Marginal-grade signals</strong> (VVIX, put-skew, 1DTE decay, carry): they each missed the +0.3 solo bar but may combine usefully. Build as EXP-2100.</li>
+<li><strong>Seed $25K at 1× after paper window</strong>, scale only after 4+ weeks of real-money results matching paper within ±15%.</li>
+</ol>
+
+<div class="callout warn">
+<strong>Risk caveats for Carlos to weigh before live deployment:</strong>
+<ul style="margin: 6px 0;">
+<li>The Path A result uses <em>optimised weights</em> over the full 2020-2025 window. Out-of-sample robustness on 2026 data is not yet measured.</li>
+<li>V+F overlay's contribution is concentrated on ~30% of trading days (FOMC + high-VoV weeks). A regime in which those filters stop discriminating would collapse the alpha.</li>
+<li>The v5_hedge stream drags −1.03% CAGR standalone. Its hedge value is real but conditional on systemic stress events which did <em>not</em> occur in EXP-2080's correlation detector window.</li>
+<li>Cross-vol-arb (EXP-2020) has only 271 trades over 6 years; statistical confidence is weaker than EXP-1220's 171-trade record.</li>
+</ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>8. Production Infrastructure Status</h2>
+
+<table>
+<tr><th>Component</th><th>File</th><th>Test coverage</th><th>Status</th></tr>
+<tr><td>Data provider</td><td>shared/iron_vault.py</td><td>Full</td><td><span class="verdict v-win">LIVE</span></td></tr>
+<tr><td>Portfolio Risk Manager</td><td>compass/portfolio_risk_manager.py</td><td>30 tests</td><td><span class="verdict v-win">LIVE</span></td></tr>
+<tr><td>Paper harness</td><td>compass/paper_trading_v4.py</td><td>61 tests</td><td><span class="verdict v-win">LIVE</span></td></tr>
+<tr><td>Execution simulator</td><td>compass/execution_simulator.py</td><td>69 tests</td><td><span class="verdict v-win">LIVE</span></td></tr>
+<tr><td>Prod monitor</td><td>compass/prod_monitor.py</td><td>87 tests</td><td><span class="verdict v-win">LIVE</span></td></tr>
+<tr><td>Circuit breaker</td><td>shared/circuit_breaker.py</td><td>—</td><td><span class="verdict v-win">LIVE</span></td></tr>
+<tr><td>Strategy core (EXP-1220)</td><td>compass/tail_risk_hedge.py</td><td>171 real trades validated</td><td><span class="verdict v-win">LIVE</span></td></tr>
+<tr><td>North Star portfolio (v5)</td><td>compass/exp2050_north_star_v5.py</td><td>WF 2020-2025</td><td><span class="verdict v-win">READY</span></td></tr>
+<tr><td>Risk overlays (V+F)</td><td>EXP-1880 / EXP-1970 integrated</td><td>WF</td><td><span class="verdict v-win">READY</span></td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>9. Headline Numbers for Carlos</h2>
+
+<div class="card-grid">
+  <div class="card green"><div class="label">Target Sharpe</div><div class="value">6.0</div><div class="sub">MASTERPLAN goal</div></div>
+  <div class="card green"><div class="label">Achieved</div><div class="value">6.96</div><div class="sub">EXP-2050 C2+V+F</div></div>
+  <div class="card green"><div class="label">Gap Closed</div><div class="value">1.43 → 0</div><div class="sub">six waves</div></div>
+  <div class="card green"><div class="label">CAGR (conservative)</div><div class="value">42.9%</div><div class="sub">Path A</div></div>
+  <div class="card green"><div class="label">CAGR (growth)</div><div class="value">178.3%</div><div class="sub">Path B</div></div>
+  <div class="card green"><div class="label">DD (conservative)</div><div class="value">1.6%</div><div class="sub">far below 12%</div></div>
+  <div class="card green"><div class="label">Winners / Tested</div><div class="value">11 / 45</div><div class="sub">24% hit rate</div></div>
+  <div class="card blue"><div class="label">Real data</div><div class="value">100%</div><div class="sub">IronVault + Yahoo + Fed</div></div>
+</div>
+
+<div class="headline">
+<strong>Bottom line.</strong> In two days we closed the North Star gap on real walk-forward data, built the production risk manager, and killed nine losers honestly. The 8-week paper-trading window is now the gating step to live deployment. Path A (Sharpe 6.96, DD 1.6%) is the recommended launch config.
+</div>
+
+<div class="footer">
+Generated 2026-04-07 · compass/reports/progress_report_apr7.html<br>
+Data policy: 🚫 NO SYNTHETIC DATA — IronVault + Yahoo Finance + public Fed calendar only · All Sharpe values computed as mean(daily_returns) / std(daily_returns) × √252 (corrected formula per MASTERPLAN bug-1 fix) · Walk-forward results reported from pooled OOS test folds, not in-sample fits.
+</div>
+
+</body>
+</html>

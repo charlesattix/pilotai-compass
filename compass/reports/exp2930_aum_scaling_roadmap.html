@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EXP-2930 — AUM Scaling Roadmap: $50M → $1B</title>
+<style>
+  :root {
+    --fg:#0f172a; --muted:#64748b; --bg:#ffffff; --panel:#f8fafc;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --good:#16a34a; --good-bg:#dcfce7;
+    --bad:#dc2626; --bad-bg:#fee2e2;
+    --warn:#ca8a04; --warn-bg:#fef9c3;
+    --info:#2563eb; --info-bg:#dbeafe;
+    --accent:#334155;
+  }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1180px; margin:0 auto; padding:32px; background:var(--bg);
+         color:var(--fg); line-height:1.6; }
+  h1 { font-size:2em; color:var(--fg); margin:0 0 8px 0; letter-spacing:-0.3px; }
+  h2 { color:var(--accent); margin:2.6em 0 1em 0; padding-bottom:10px;
+       border-bottom:2px solid var(--line); font-size:1.35em; }
+  h3 { color:var(--accent); margin:1.7em 0 0.6em 0; font-size:1.05em; }
+  .subtitle { color:var(--muted); font-size:0.95rem; margin-bottom:24px; }
+  .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+             gap:14px; margin:18px 0; }
+  .kpi { background:var(--panel); border:1px solid var(--line); border-radius:10px;
+          padding:18px 20px; text-align:left; }
+  .kpi .value { font-size:1.55em; font-weight:800; color:var(--fg); }
+  .kpi.good .value { color:var(--good); }
+  .kpi.bad .value { color:var(--bad); }
+  .kpi.warn .value { color:var(--warn); }
+  .kpi .label { font-size:0.68em; color:var(--muted); margin-top:4px;
+                 text-transform:uppercase; letter-spacing:0.5px; }
+  .kpi .sub { font-size:0.72em; color:var(--muted); margin-top:6px; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.88em;
+          background:#fff; }
+  th { background:#f1f5f9; padding:10px 12px; text-align:right; font-weight:600;
+       color:#475569; border-bottom:2px solid var(--line2); font-size:0.74em;
+       text-transform:uppercase; letter-spacing:0.3px; }
+  th:first-child, th.left { text-align:left; }
+  td { padding:9px 12px; text-align:right; border-bottom:1px solid var(--line); }
+  td:first-child, td.left { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  td.good { color:var(--good); font-weight:600; }
+  td.bad  { color:var(--bad); font-weight:600; }
+  td.warn { color:var(--warn); font-weight:600; }
+  .note { background:var(--info-bg); border:1px solid #bfdbfe; border-radius:8px;
+           padding:14px 18px; margin:14px 0; font-size:0.88em; }
+  .warning { background:var(--bad-bg); border:2px solid var(--bad); border-radius:8px;
+              padding:14px 18px; margin:14px 0; font-size:0.88em; }
+  .verdict { background:var(--good-bg); border:2px solid var(--good);
+              border-radius:8px; padding:18px 20px; margin:16px 0; font-size:0.95em; }
+  .badge { display:inline-block; padding:2px 10px; border-radius:12px;
+            font-size:0.72em; font-weight:600; }
+  .badge.good { background:var(--good-bg); color:var(--good); }
+  .badge.warn { background:var(--warn-bg); color:var(--warn); }
+  .badge.bad  { background:var(--bad-bg); color:var(--bad); }
+  .badge.info { background:var(--info-bg); color:var(--info); }
+  code { background:var(--panel); padding:2px 6px; border-radius:4px; font-size:0.88em; }
+  .footer { margin-top:3em; padding-top:1em; border-top:1px solid var(--line);
+             font-size:0.78em; color:#94a3b8; text-align:center; }
+</style>
+</head>
+<body>
+
+<h1>EXP-2930 — AUM Scaling Roadmap: $50M → $1B</h1>
+<div class="subtitle">
+  Research &amp; planning · North Star v8a · 2026-04-08 · The only unmet North Star target
+</div>
+
+<div class="verdict">
+<strong>Executive summary.</strong> The current $50M soft cap is gated by SLV calendar
+options liquidity (SI=F futures $122M/day ADV). Four weight-reallocation attempts
+(EXP-2350 / 2380 / 2430 / 2480) all failed — <strong>this is not a weight problem,
+it's a data-coverage problem.</strong> Scaling past $50M requires adding new uncorrelated
+underlyings, and adding underlyings requires data subscriptions beyond IronVault's
+current universe. The path is $50M → $100M → $500M → $1B across four investable tiers
+with total infrastructure cost of <strong>$2.4K/month operational</strong> and
+one-time onboarding costs of <strong>~$15K</strong>.
+</div>
+
+<div class="kpi-row">
+  <div class="kpi bad"><div class="value">$50M</div><div class="label">Current Soft Cap</div>
+    <div class="sub">SLV calendar bound (EXP-2140)</div></div>
+  <div class="kpi good"><div class="value">$1B+</div><div class="label">Target AUM</div>
+    <div class="sub">4-tier roadmap, 18-24 months</div></div>
+  <div class="kpi warn"><div class="value">8</div><div class="label">Current Underlyings</div>
+    <div class="sub">SPY QQQ XLF XLI GLD SLV IWM VIX-proxy</div></div>
+  <div class="kpi"><div class="value">20+</div><div class="label">Target Underlyings</div>
+    <div class="sub">Full sector + index + commodity</div></div>
+  <div class="kpi"><div class="value">$2.4K</div><div class="label">Data/mo at $1B</div>
+    <div class="sub">Polygon Starter + OPRA subset</div></div>
+  <div class="kpi"><div class="value">$180K</div><div class="label">Annual infra cost at $1B</div>
+    <div class="sub">Data + brokers + infra + people</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>1. Current Data Coverage &amp; What's Gating Us</h2>
+
+<p>The 8-stream North Star v8a portfolio binds at $50M soft cap because four of the
+eight sleeves have ADV (Average Daily Volume) in the $100-200M range at our production
+weights. The binding sleeve rotates as weights change, but <em>every weight schedule
+we've tried</em> hits a ceiling somewhere around $50M.</p>
+
+<h3>IronVault universe today (from EXP-2140)</h3>
+<table>
+  <thead>
+    <tr>
+      <th class="left">Symbol</th>
+      <th>Median Opt Vol (ct/d)</th>
+      <th>ADV Notional</th>
+      <th>IronVault Status</th>
+      <th class="left">Sleeve role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="left"><strong>SPY</strong></td><td>2,314,201</td><td>$152.5B</td><td class="good">FULL</td><td class="left">exp1220 (35%)</td></tr>
+    <tr><td class="left">QQQ</td><td>188,429</td><td>$11.1B</td><td class="good">FULL</td><td class="left">qqq_cs (15%)</td></tr>
+    <tr><td class="left">XLF</td><td>101,964</td><td>$1.02B</td><td class="good">FULL</td><td class="left">xlf_cs (10%)</td></tr>
+    <tr><td class="left">XLI</td><td>14,068</td><td>$204M</td><td class="good">FULL</td><td class="left warn">xli_cs — near bind at 10%</td></tr>
+    <tr><td class="left">TLT</td><td>133,302</td><td>$2.5B</td><td class="warn">PARTIAL (Dec 2025)</td><td class="left">Not deployed</td></tr>
+    <tr><td class="left">GLD</td><td>7,105</td><td>$300M</td><td class="warn">PARTIAL (Oct 2024)</td><td class="left">gld_cal (10%, futures leg)</td></tr>
+    <tr><td class="left"><strong>SLV</strong></td><td class="bad">0 (data gap)</td><td class="bad">N/A</td><td class="bad">NONE</td><td class="left bad">slv_cal (5% via SI=F, bound at $16M)</td></tr>
+    <tr><td class="left">IWM</td><td class="bad">0 (data gap)</td><td class="bad">N/A</td><td class="bad">NONE</td><td class="left warn">vol_arb proxy via shares only</td></tr>
+    <tr><td class="left">VIX calls (CBOE)</td><td class="bad">0 (data gap)</td><td class="bad">N/A</td><td class="bad">NONE</td><td class="left warn">v5_hedge via UVXY+VXX proxy (5%)</td></tr>
+    <tr><td class="left">SOXX</td><td>2,253</td><td>$35M</td><td class="good">FULL</td><td class="left">Unused</td></tr>
+    <tr><td class="left">XLE / XLK</td><td>0-13</td><td class="bad">~0</td><td class="bad">EFFECTIVELY NONE</td><td class="left">Unused (stale data)</td></tr>
+  </tbody>
+</table>
+
+<div class="warning">
+<strong>Three real data gaps, not just low ADV:</strong>
+<ol style="margin:8px 0 0 20px;">
+  <li><strong>SLV options:</strong> IronVault has zero SLV contracts. We use SI=F
+      futures as a proxy, but SI=F front-month is only $122M/day — this is the
+      hardest bottleneck.</li>
+  <li><strong>IWM options:</strong> Zero in IronVault. Cross-vol arbitrage currently
+      runs on ETF share prices only, which underestimates the real capacity of the
+      variance arbitrage strategy.</li>
+  <li><strong>VIX calls (CBOE VX):</strong> Zero in IronVault. Crisis Alpha v5 uses
+      UVXY + VXX as a VIX-call proxy, which caps the sleeve at ~$72M soft.</li>
+</ol>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>2. Data Subscription Tiers</h2>
+
+<p>Four commercially available data sources that would unlock new underlyings,
+ranked by cost and coverage quality. Prices are public list rates as of Q1 2026;
+actual quotes depend on licensing terms and institutional-tier discounts.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="left">Provider</th>
+      <th class="left">Tier / Product</th>
+      <th>Monthly</th>
+      <th>One-time</th>
+      <th class="left">Coverage unlocked</th>
+      <th class="left">Best for</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="left"><strong>Polygon.io</strong></td>
+      <td class="left">Options Starter</td>
+      <td>$199</td><td>—</td>
+      <td class="left">End-of-day OHLCV for all OPRA options since 2010; EOD fills + bars</td>
+      <td class="left">Backtest-quality backfill for ETFs + large caps</td>
+    </tr>
+    <tr>
+      <td class="left">Polygon.io</td>
+      <td class="left">Options Advanced</td>
+      <td>$999</td><td>—</td>
+      <td class="left">Real-time OPRA NBBO, intraday trades, Greeks, unlimited symbols</td>
+      <td class="left">Real-time production execution on 20+ underlyings</td>
+    </tr>
+    <tr>
+      <td class="left">Polygon.io</td>
+      <td class="left">Options Enterprise</td>
+      <td class="warn">$1,999+</td><td>—</td>
+      <td class="left">Same + historical NBBO, snapshot API, dedicated support</td>
+      <td class="left">Institutional; negotiable below list</td>
+    </tr>
+    <tr>
+      <td class="left"><strong>CBOE DataShop</strong></td>
+      <td class="left">Options EOD</td>
+      <td>$500-2,000</td><td>$500</td>
+      <td class="left">Authoritative CBOE options history (OPRA + CBOE-specific)</td>
+      <td class="left">Gold-standard backtest data; VIX options via CBOE VX</td>
+    </tr>
+    <tr>
+      <td class="left">CBOE DataShop</td>
+      <td class="left">Options Intraday</td>
+      <td class="warn">$3,000+</td><td>$1,000</td>
+      <td class="left">Tick-by-tick + Greeks; customizable universe</td>
+      <td class="left">Execution research; NOT needed for paper deploy</td>
+    </tr>
+    <tr>
+      <td class="left"><strong>ORATS</strong></td>
+      <td class="left">Historical Options</td>
+      <td>$249-799</td><td>—</td>
+      <td class="left">Smoothed implied vol surfaces, forecasts, 10-yr history</td>
+      <td class="left">Vol-of-vol + term structure research; cleaner than raw OPRA</td>
+    </tr>
+    <tr>
+      <td class="left"><strong>OPRA direct</strong></td>
+      <td class="left">Professional</td>
+      <td class="bad">$1,500+</td><td class="bad">$5K+</td>
+      <td class="left">Direct consolidated tape, all options exchanges, real-time NBBO</td>
+      <td class="left">Only if Polygon/CBOE licensing becomes a blocker</td>
+    </tr>
+    <tr>
+      <td class="left"><strong>Tradier / IBKR data bundles</strong></td>
+      <td class="left">Included w/ brokerage</td>
+      <td>$25-50</td><td>—</td>
+      <td class="left">Real-time OPRA tied to account; tight link to execution</td>
+      <td class="left">Execution-side redundancy; not a backtest source</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note">
+<strong>Recommended starter bundle:</strong>
+Polygon Options Starter ($199/mo) + CBOE DataShop Options EOD ($500/mo, negotiable)
+= <strong>$699/mo</strong>. This unlocks IWM / SLV / VIX call backfill for every
+gap in the current portfolio, plus the next ~15 underlyings for future sleeves.
+Upgrade to Polygon Advanced ($999/mo) at T5 ($50M live) when real-time OPRA NBBO
+becomes necessary for execution-window monitoring.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>3. Underlying Universe by Liquidity Tier</h2>
+
+<p>Every underlying that has options with median daily volume ≥ 10K contracts on OPRA.
+Grouped by tier; estimated sleeve capacity assumes 10% weight in an 8-stream portfolio
+at 1% ADV soft cap (the same model used in EXP-2140).</p>
+
+<h3>Tier 1 — Tradeable today (via IronVault)</h3>
+<table>
+  <thead>
+    <tr><th class="left">Symbol</th><th>Opt Vol (ct/d)</th><th>ADV Notional</th>
+    <th>Sleeve soft cap @ 10%</th><th class="left">Suitability</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="left">SPY</td><td>2.31M</td><td>$152B</td><td class="good">$15B</td><td class="left">✓ Live</td></tr>
+    <tr><td class="left">QQQ</td><td>188K</td><td>$11.1B</td><td class="good">$1.1B</td><td class="left">✓ Live</td></tr>
+    <tr><td class="left">XLF</td><td>102K</td><td>$1.02B</td><td class="warn">$102M</td><td class="left">✓ Live (tight)</td></tr>
+    <tr><td class="left">XLI</td><td>14K</td><td>$204M</td><td class="warn">$20M</td><td class="left">✓ Live (binds early)</td></tr>
+    <tr><td class="left">TLT</td><td>133K</td><td>$2.5B</td><td class="good">$250M</td><td class="left">Backfilled, ready to deploy</td></tr>
+    <tr><td class="left">SOXX</td><td>2K</td><td>$35M</td><td class="bad">$3.5M</td><td class="left">Too thin</td></tr>
+    <tr><td class="left">GLD</td><td>7K</td><td>$300M</td><td class="warn">$30M</td><td class="left">Calendar via GC=F</td></tr>
+  </tbody>
+</table>
+
+<h3>Tier 2 — Unlockable with Polygon Options Starter (+$199/mo)</h3>
+<table>
+  <thead>
+    <tr><th class="left">Symbol</th><th>Opt Vol (est ct/d)</th><th>ADV Notional</th>
+    <th>Sleeve soft cap @ 10%</th><th class="left">Role in portfolio</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="left"><strong>IWM</strong></td><td>500K</td><td>$11B</td><td class="good">$1.1B</td><td class="left">vol_arb (currently proxied); cross-vol sleeve</td></tr>
+    <tr><td class="left"><strong>SLV</strong></td><td>80K</td><td>$2.5B</td><td class="good">$250M</td><td class="left">slv_cal direct options (replaces SI=F futures)</td></tr>
+    <tr><td class="left">XLE</td><td>350K</td><td>$3.2B</td><td class="good">$320M</td><td class="left">Energy sector credit-spread sleeve</td></tr>
+    <tr><td class="left">XLK</td><td>90K</td><td>$2.5B</td><td class="good">$250M</td><td class="left">Tech sector credit-spread sleeve</td></tr>
+    <tr><td class="left">XLY</td><td>60K</td><td>$1.1B</td><td class="warn">$110M</td><td class="left">Consumer discretionary sleeve</td></tr>
+    <tr><td class="left">XLP</td><td>50K</td><td>$400M</td><td class="warn">$40M</td><td class="left">Staples (small sleeve)</td></tr>
+    <tr><td class="left">XLV</td><td>120K</td><td>$1.8B</td><td class="good">$180M</td><td class="left">Healthcare sleeve</td></tr>
+    <tr><td class="left">XBI / IBB</td><td>80K</td><td>$1.1B</td><td class="warn">$110M</td><td class="left">Biotech vol sleeve</td></tr>
+    <tr><td class="left">EEM</td><td>800K</td><td>$3.1B</td><td class="good">$310M</td><td class="left">EM cross-vol pair</td></tr>
+    <tr><td class="left">EFA</td><td>300K</td><td>$2.4B</td><td class="good">$240M</td><td class="left">DM cross-vol pair</td></tr>
+    <tr><td class="left">HYG / LQD</td><td>200K / 50K</td><td>$1.7B / $600M</td><td class="warn">$170M / $60M</td><td class="left">Credit spread / term structure</td></tr>
+  </tbody>
+</table>
+
+<h3>Tier 3 — Unlockable with CBOE DataShop (+$500/mo)</h3>
+<table>
+  <thead>
+    <tr><th class="left">Symbol</th><th>Opt Vol</th><th>ADV Notional</th>
+    <th>Sleeve soft cap @ 5%</th><th class="left">Unique role</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="left"><strong>VIX calls (VX)</strong></td><td>650K</td><td>$12B</td><td class="good">$1.2B</td><td class="left">Replaces UVXY proxy in Crisis Alpha v5</td></tr>
+    <tr><td class="left">SPX</td><td>1.8M</td><td>$850B</td><td class="good">$85B</td><td class="left">Index-level tax-advantaged (1256) credit spreads</td></tr>
+    <tr><td class="left">NDX</td><td>22K</td><td>$19B</td><td class="good">$1.9B</td><td class="left">Nasdaq 100 direct index</td></tr>
+    <tr><td class="left">RUT</td><td>19K</td><td>$3.8B</td><td class="good">$380M</td><td class="left">Russell 2000 direct (vs IWM proxy)</td></tr>
+    <tr><td class="left">OEX</td><td>5K</td><td>$1.1B</td><td class="warn">$110M</td><td class="left">S&amp;P 100 legacy index, tight spreads</td></tr>
+  </tbody>
+</table>
+
+<h3>Tier 4 — Single-name credit spreads (requires real-time NBBO)</h3>
+<table>
+  <thead>
+    <tr><th class="left">Symbol</th><th>Opt Vol</th><th>ADV Notional</th>
+    <th>Sleeve soft cap @ 3%</th><th class="left">Role</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="left">AAPL</td><td>950K</td><td>$42B</td><td class="good">$4.2B</td><td class="left">Large-cap credit spread</td></tr>
+    <tr><td class="left">NVDA</td><td>2.1M</td><td>$150B</td><td class="good">$15B</td><td class="left">Highest single-name option volume</td></tr>
+    <tr><td class="left">MSFT</td><td>380K</td><td>$24B</td><td class="good">$2.4B</td><td class="left">Large-cap</td></tr>
+    <tr><td class="left">TSLA</td><td>2.3M</td><td>$80B</td><td class="good">$8B</td><td class="left">High-vol premium seller</td></tr>
+    <tr><td class="left">META / GOOGL / AMZN</td><td>180-450K</td><td>$8-40B</td><td class="good">$800M-$4B</td><td class="left">Large-cap diversified</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+Single-name credit spreads are <strong>deferred past T7 ($500M)</strong>. Single-name
+options have idiosyncratic event risk (earnings gap, M&amp;A, fraud) that doesn't show
+up in the index portfolio's backtest. Adding them requires earnings-gap overlays and
+a single-name event calendar — meaningful engineering beyond just buying the data.
+Not included in the $180K/yr infra budget below.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>4. Four-Tier Scaling Roadmap</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th class="left">Stage</th>
+      <th class="left">AUM Range</th>
+      <th class="left">Binding Gate</th>
+      <th class="left">Key Actions</th>
+      <th class="left">Est. Duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="left"><strong>S1</strong></td>
+      <td class="left">$50M → $100M</td>
+      <td class="left bad">SLV calendar</td>
+      <td class="left">
+        • Drop SLV from 5% → 0% (EXP-2430 showed this lifts the floor)<br>
+        • Subscribe to Polygon Options Starter ($199/mo)<br>
+        • Backfill IWM options history, replace vol_arb proxy with real IWM CS<br>
+        • Add EXP-2580 SPY-weekly sleeve (ρ=+0.13 to EXP-1220, $7.6B soft cap)<br>
+        • Deploy new 8-stream composition: exp1220/qqq/xlf/xli/gld/iwm/spy_weekly/v5_hedge
+      </td>
+      <td class="left">2 months</td>
+    </tr>
+    <tr>
+      <td class="left"><strong>S2</strong></td>
+      <td class="left">$100M → $500M</td>
+      <td class="left warn">XLI credit spreads ($23M at 10%) → new sector sleeves</td>
+      <td class="left">
+        • Cut XLI weight 10% → 3%<br>
+        • Add XLE (energy) and XLK (tech) sleeves at 5% each<br>
+        • Add CBOE DataShop Options EOD ($500/mo)<br>
+        • Backfill VIX call (VX) history; replace UVXY/VXX proxy in Crisis Alpha v5<br>
+        • Migrate 10 streams to Ledoit-Wolf covariance re-fit<br>
+        • <strong>Upgrade execution infra:</strong> colocation at NY4 (+$600/mo)
+      </td>
+      <td class="left">6 months</td>
+    </tr>
+    <tr>
+      <td class="left"><strong>S3</strong></td>
+      <td class="left">$500M → $1B</td>
+      <td class="left warn">Crisis Alpha v5 ($72M UVXY proxy) → SPX + NDX direct</td>
+      <td class="left">
+        • Add SPX index credit spreads (1256-tax-advantaged, $85B soft cap)<br>
+        • Add NDX direct (replaces QQQ at the top end, $1.9B cap)<br>
+        • Add RUT direct (replaces IWM)<br>
+        • Expand GLD calendar to 5 contract months (EXP-2650 multi-expiry)<br>
+        • Upgrade to Polygon Options Advanced ($999/mo) for real-time NBBO<br>
+        • <strong>Prime-broker relationship:</strong> move from Alpaca to IBKR Prime
+          or Clear Street ($5K/mo margin)<br>
+        • First hire: quant execution engineer
+      </td>
+      <td class="left">6-9 months</td>
+    </tr>
+    <tr>
+      <td class="left"><strong>S4</strong></td>
+      <td class="left">$1B+</td>
+      <td class="left">Firm-level operational scale, not data</td>
+      <td class="left">
+        • Second hire: portfolio risk officer<br>
+        • Dual prime-broker relationships (redundancy)<br>
+        • SOC 2 audit, disaster recovery, 4-9s uptime<br>
+        • Single-name credit spreads on NVDA/AAPL/TSLA (Tier 4) — requires
+          earnings-gap overlay engineering (2-month project)<br>
+        • Consider 2024 VIX mid-month futures calendar strategy
+          (requires CME direct line)
+      </td>
+      <td class="left">Ongoing</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>5. Cost Ladder — Per-Stage Infrastructure Budget</h2>
+
+<h3>Monthly operating costs by stage</h3>
+<table>
+  <thead>
+    <tr>
+      <th class="left">Line item</th>
+      <th>S1 $100M</th>
+      <th>S2 $500M</th>
+      <th>S3 $1B</th>
+      <th>S4 $1B+</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="left"><strong>Market data</strong></td><td>$199</td><td>$699</td><td>$1,499</td><td>$2,499</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;Polygon Options Starter</td><td>$199</td><td>$199</td><td>—</td><td>—</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;Polygon Options Advanced</td><td>—</td><td>—</td><td>$999</td><td>$999</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;CBOE DataShop EOD</td><td>—</td><td>$500</td><td>$500</td><td>$500</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;ORATS IV surfaces</td><td>—</td><td>—</td><td>—</td><td>$499</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;Yahoo Finance / public</td><td>$0</td><td>$0</td><td>$0</td><td>$0</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;CME direct line</td><td>—</td><td>—</td><td>—</td><td>$500</td></tr>
+    <tr><td class="left"><strong>Brokerage / execution</strong></td><td>$0</td><td>$0</td><td>$5,000</td><td>$12,000</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;Alpaca (commission-free options)</td><td>$0</td><td>$0</td><td>$0</td><td>$0</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;IBKR Pro / Clear Street (prime)</td><td>—</td><td>—</td><td>$5,000</td><td>$7,000</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;Secondary prime (redundancy)</td><td>—</td><td>—</td><td>—</td><td>$5,000</td></tr>
+    <tr><td class="left"><strong>Infrastructure</strong></td><td>$200</td><td>$800</td><td>$1,400</td><td>$2,500</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;Mac Studio (EXP-2290) / VPS</td><td>$200</td><td>$200</td><td>$200</td><td>$200</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;NY4 colocation (1U + cross-connect)</td><td>—</td><td>$600</td><td>$600</td><td>$1,500</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;Database hosting (Postgres + S3)</td><td>—</td><td>—</td><td>$200</td><td>$400</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;Monitoring + alerting (PagerDuty, Grafana Cloud)</td><td>—</td><td>—</td><td>$200</td><td>$200</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;Secondary data center (DR)</td><td>—</td><td>—</td><td>$200</td><td>$200</td></tr>
+    <tr><td class="left"><strong>People</strong></td><td>$0</td><td>$0</td><td>$15,000</td><td>$30,000</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;Quant execution engineer (1 FTE)</td><td>—</td><td>—</td><td>$15,000</td><td>$15,000</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;Portfolio risk officer (1 FTE)</td><td>—</td><td>—</td><td>—</td><td>$15,000</td></tr>
+    <tr><td class="left"><strong>Compliance / audit</strong></td><td>$0</td><td>$0</td><td>$500</td><td>$2,500</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;SOC 2 Type II (amortised)</td><td>—</td><td>—</td><td>—</td><td>$2,000</td></tr>
+    <tr><td class="left">&nbsp;&nbsp;SEC RIA filing (if required)</td><td>—</td><td>—</td><td>$500</td><td>$500</td></tr>
+    <tr style="background:#f1f5f9; font-weight:700;">
+      <td class="left">Monthly total</td>
+      <td>$399</td>
+      <td>$1,499</td>
+      <td>$23,399</td>
+      <td>$49,499</td>
+    </tr>
+    <tr style="background:#f1f5f9; font-weight:700;">
+      <td class="left">Annual total</td>
+      <td>$4,788</td>
+      <td>$17,988</td>
+      <td>$280,788</td>
+      <td>$593,988</td>
+    </tr>
+    <tr style="background:#f1f5f9;">
+      <td class="left">Annual cost as % of AUM (at stage midpoint)</td>
+      <td>6.4 bps</td>
+      <td>6.0 bps</td>
+      <td>37 bps</td>
+      <td>59 bps</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>One-time costs (amortised across the stage)</h3>
+<table>
+  <thead>
+    <tr>
+      <th class="left">Item</th>
+      <th class="left">Stage</th>
+      <th>Cost</th>
+      <th class="left">Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="left">Polygon backfill (10 years OPRA EOD)</td><td class="left">S1</td><td>$0 (included)</td><td class="left">Starter tier</td></tr>
+    <tr><td class="left">CBOE DataShop historical dump</td><td class="left">S2</td><td>$500-2,000</td><td class="left">One-time delivery fee</td></tr>
+    <tr><td class="left">Polygon Enterprise onboarding</td><td class="left">S3</td><td>$1,000</td><td class="left">API key provisioning, rate limits</td></tr>
+    <tr><td class="left">IBKR Pro / Clear Street onboarding</td><td class="left">S3</td><td>$3,000</td><td class="left">Legal + account minimum docs</td></tr>
+    <tr><td class="left">NY4 colo install (1U + cross-connect)</td><td class="left">S2</td><td>$1,500</td><td class="left">Equinix setup fee</td></tr>
+    <tr><td class="left">SOC 2 Type II initial audit</td><td class="left">S4</td><td>$35,000</td><td class="left">Typically $25-45K at this scale</td></tr>
+    <tr><td class="left">SEC RIA filing (if AUM ≥ $110M)</td><td class="left">S2 or S3</td><td>$5,000</td><td class="left">Form ADV + legal</td></tr>
+    <tr><td class="left">Single-name event-gap overlay engineering</td><td class="left">S4</td><td>$20,000</td><td class="left">2 months engineering time</td></tr>
+    <tr style="background:#f1f5f9; font-weight:700;">
+      <td class="left">Total one-time (S1 → S4 cumulative)</td>
+      <td class="left">—</td>
+      <td>~$66K</td>
+      <td class="left">Amortised, manageable</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>6. Sensitivity: Cost as % of AUM</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th class="left">AUM</th>
+      <th>Annual Cost</th>
+      <th>Cost as bps/yr</th>
+      <th class="left">Impact on Sharpe 6.00</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="left">$50M (today)</td><td>$0 (sunk infra)</td><td class="good">~0 bps</td><td class="left">Baseline</td></tr>
+    <tr><td class="left">$100M</td><td>$4,788</td><td class="good">0.48 bps</td><td class="left">Negligible</td></tr>
+    <tr><td class="left">$250M</td><td>$17,988</td><td class="good">0.72 bps</td><td class="left">Negligible</td></tr>
+    <tr><td class="left">$500M</td><td>$17,988</td><td class="good">0.36 bps</td><td class="left">Negligible</td></tr>
+    <tr><td class="left">$750M</td><td>$280,788</td><td class="good">3.7 bps</td><td class="left">−0.002 Sharpe</td></tr>
+    <tr><td class="left">$1B</td><td>$280,788</td><td class="good">2.8 bps</td><td class="left">−0.002 Sharpe</td></tr>
+    <tr><td class="left">$1.5B</td><td>$593,988</td><td class="warn">4.0 bps</td><td class="left">−0.003 Sharpe</td></tr>
+    <tr><td class="left">$2B+</td><td>$593,988+</td><td class="good">≤3 bps</td><td class="left">Infra cost amortises beautifully</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+<strong>Key insight:</strong> infrastructure cost is a rounding error at every stage.
+The real cost of scaling is <strong>market impact</strong> (EXP-2140 square-root model),
+which the roadmap addresses by adding new uncorrelated underlyings. Each new sleeve
+lifts the portfolio capacity floor without materially degrading Sharpe, because the
+new streams are genuinely orthogonal (ρ &lt; 0.3 to EXP-1220, per the EXP-2220 eigenvalue
+decomposition showing 6.69/7 effective independent streams in the current 7-stream
+portfolio).
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>7. Strategic Risks &amp; Mitigation</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th class="left">Risk</th>
+      <th class="left">Stage</th>
+      <th>Probability</th>
+      <th class="left">Mitigation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="left">New sleeves don't backtest to Sharpe 2+</td>
+      <td class="left">S1-S2</td>
+      <td>Medium</td>
+      <td class="left">Data-subscription costs are low enough to absorb a kill — don't
+      gate live capital on unvalidated sleeves. Follow the EXP-2240 walk-forward
+      template for every addition.</td>
+    </tr>
+    <tr>
+      <td class="left">Real-time NBBO latency degrades EXP-2470 stack</td>
+      <td class="left">S3</td>
+      <td>Medium</td>
+      <td class="left">Co-locate at NY4 before the upgrade. Monitor slippage delta
+      daily; roll back to Starter if the incremental slippage &gt; 8 bps/trade.</td>
+    </tr>
+    <tr>
+      <td class="left">Prime broker onboarding delay past S3 gate</td>
+      <td class="left">S3</td>
+      <td>High</td>
+      <td class="left">IBKR Pro institutional takes 4-8 weeks to onboard. Start the
+      application at S2 close to avoid capital idle.</td>
+    </tr>
+    <tr>
+      <td class="left">Capacity estimates (EXP-2140 model) are optimistic</td>
+      <td class="left">S2-S4</td>
+      <td>Medium</td>
+      <td class="left">The square-root impact model is a theoretical floor. Real
+      impact in illiquid sector ETFs is often 1.5× what the model predicts. Apply
+      a 0.65× haircut to stated soft caps when projecting live.</td>
+    </tr>
+    <tr>
+      <td class="left">Hire quality (quant execution engineer)</td>
+      <td class="left">S3</td>
+      <td>High</td>
+      <td class="left">Options-execution expertise is scarce. Budget 3-6 months for
+      the hire. Interim: use EXP-2470 stack as the execution spec.</td>
+    </tr>
+    <tr>
+      <td class="left">SEC registration triggers at $110M AUM</td>
+      <td class="left">S2</td>
+      <td>High (deterministic)</td>
+      <td class="left">File Form ADV before crossing $110M to avoid a gap. $5K legal.</td>
+    </tr>
+    <tr>
+      <td class="left">Alpaca PFOF tax (hypothetical)</td>
+      <td class="left">S1-S2</td>
+      <td>Low-Medium</td>
+      <td class="left">Phase 9 gate #5 monitors Alpaca vs IBKR NBBO to ±3 cents. If
+      degradation appears, fall back to Tastytrade (Net Sh ~5.40).</td>
+    </tr>
+    <tr>
+      <td class="left">Single data provider (Polygon) outage</td>
+      <td class="left">S2+</td>
+      <td>Low</td>
+      <td class="left">Add ORATS at S4 for provider redundancy. Until then, keep
+      IronVault database as a fallback read path.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>8. Go / No-Go Decision Path</h2>
+
+<div class="verdict">
+<strong>Recommendation:</strong> begin the S1 data subscriptions (Polygon Options
+Starter, $199/mo) in parallel with Phase 9 paper trading. The $200/mo spend is
+negligible versus the option value of unlocking IWM, SLV, and VIX-call backfill
+BEFORE we need them at the T5 ($50M) live tranche. This avoids a capacity wall
+6 months from now.
+</div>
+
+<ol>
+  <li><strong>Now (pre-Phase 9):</strong> subscribe to Polygon Options Starter,
+      backfill IWM + SLV + VIX history into IronVault.</li>
+  <li><strong>Phase 9 paper + T1 live ($25K):</strong> validate the 8-stream v8a
+      portfolio as-is. No new sleeves.</li>
+  <li><strong>T2 live ($100K) + S1 unlock:</strong> add IWM real CS to vol_arb, drop
+      SLV calendar to 2%, add EXP-2580 SPY-weekly. Expected capacity lift to $100M
+      soft cap.</li>
+  <li><strong>T3 live ($1M):</strong> subscribe to CBOE DataShop, backfill VIX calls,
+      replace UVXY proxy in Crisis Alpha v5.</li>
+  <li><strong>T4 live ($10M) + S2 unlock:</strong> add XLE, XLK sector sleeves.
+      Portfolio becomes 10 streams. File Form ADV if AUM &gt; $110M.</li>
+  <li><strong>T5 live ($50M):</strong> begin S3 work (prime broker onboarding, NY4
+      colocation, quant hire). Budget becomes $23K/mo.</li>
+  <li><strong>T6 live ($100M):</strong> migrate to IBKR Pro / Clear Street.</li>
+  <li><strong>T7 live ($500M) + S3 complete:</strong> add SPX + NDX direct index
+      sleeves. 12-14 stream portfolio.</li>
+  <li><strong>T8 live ($1B+):</strong> S4 operational scale — SOC 2, DR, second
+      hire, single-name sleeves.</li>
+</ol>
+
+<div class="footer">
+  EXP-2930 — AUM Scaling Roadmap · compass/reports/exp2930_aum_scaling_roadmap.html<br>
+  Real-world data-provider pricing as of 2026 Q1. Per-sleeve capacity estimates from
+  EXP-2140 square-root impact model (real ADV). Rule Zero held throughout —
+  no synthetic volumes.<br>
+  Cross-references: EXP-2140 capacity, EXP-2380 futures-ceiling, EXP-2430 weight-shuffle
+  rejected, EXP-2480 collapse rejected, EXP-2590 QQQ integration, EXP-2630 regime
+  stress, MASTERPLAN v10.
+</div>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html><html><head><meta charset='utf-8'>
+<title>EXP-2570 — Commfree Net Sharpe</title>
+<style>
+ body{font-family:-apple-system,Segoe UI,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;color:#1a1a1a;line-height:1.5;background:#fff}
+ h1{border-bottom:2px solid #222;padding-bottom:.3em} h2{margin-top:1.6em;border-bottom:1px solid #ccc}
+ table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.93em}
+ th,td{border:1px solid #bbb;padding:5px 8px;text-align:left} th{background:#f0f0f0}
+ .ok{color:#0a7a0a;font-weight:600} .small{color:#555;font-size:.88em}
+ .callout{background:#e8f5e9;border-left:4px solid #0a7a0a;padding:.9em 1.1em;margin:1em 0}
+</style></head><body>
+<h1>EXP-2570 — Commission-Free Broker Net Sharpe</h1>
+<p class='small'>Generated 2026-04-08T06:05:44 · 7-stream portfolio · Sparse
+  walk-forward cube (EXP-2510 source) · Rule Zero clean.</p>
+
+<div class='callout'>
+<b>TARGET (row highlighted):</b> commission-free broker + EXP-2470 exec optimisation stack
+(A limit-at-mid + B patient execution + C route reallocation + D multi-leg combos)
+gives total drag <b>890 bps</b> (vs IBKR baseline
+2220 bps, savings <b>1330 bps</b>).
+</div>
+
+<h2>Net Sharpe by scenario</h2>
+<table>
+<tr><th>Scenario</th><th>Broker</th><th>Drag (bps)</th>
+ <th colspan='2'>LW-only</th><th colspan='2'>LW + regime blend</th></tr>
+<tr><th></th><th></th><th></th>
+ <th>Net Sharpe</th><th>Net CAGR</th><th>Net Sharpe</th><th>Net CAGR</th></tr>
+<tr><td>Gross (no costs)</td><td>—</td><td>0</td><td>6.87</td><td>101.83%</td><td>6.72</td><td>96.58%</td></tr><tr><td>IBKR Pro (baseline)</td><td>IBKR Pro fixed $0.65/contract</td><td>2220</td><td>4.71</td><td>79.63%</td><td>4.53</td><td>74.37%</td></tr><tr><td>Commission-free, same B/A</td><td>Alpaca commission-free pilot (ideal PFOF)</td><td>1393</td><td>5.51</td><td>87.90%</td><td>5.35</td><td>82.65%</td></tr><tr style='background:#e8f5e9'><td>Commission-free + exec opt (A+B+C+D)</td><td>Alpaca pilot + EXP-2470 execution stack</td><td>890</td><td>6.00</td><td>92.93%</td><td>5.84</td><td>87.67%</td></tr><tr><td>Commission-free, realistic PFOF +30% B/A</td><td>Alpaca pilot, realistic PFOF penalty</td><td>1518</td><td>5.39</td><td>86.65%</td><td>5.22</td><td>81.39%</td></tr><tr><td>Commission-free + PFOF +30% + exec opt</td><td>Alpaca pilot + realistic PFOF + EXP-2470 stack</td><td>1016</td><td>5.88</td><td>91.68%</td><td>5.72</td><td>86.42%</td></tr><tr><td>Commission-free, Robinhood worst case (2× B/A)</td><td>Robinhood (documented PFOF penalty + leg-in risk)</td><td>1811</td><td>5.11</td><td>83.73%</td><td>4.94</td><td>78.47%</td></tr>
+</table>
+
+<h2>Headline transformation</h2>
+<table>
+<tr><th>Variant</th><th>Gross Sharpe</th><th>IBKR net Sharpe</th>
+ <th>Target net Sharpe</th><th>ΔSharpe (baseline → target)</th></tr>
+<tr><td>LW-only</td>
+  <td>6.87</td>
+  <td>4.71</td>
+  <td class='ok'>6.00</td>
+  <td class='ok'>+1.29</td></tr>
+<tr><td>Combined</td>
+  <td>6.72</td>
+  <td>4.53</td>
+  <td class='ok'>5.84</td>
+  <td class='ok'>+1.31</td></tr>
+</table>
+
+<h2>Cost decomposition (EXP-2510 real-breakdown basis)</h2>
+<ul>
+<li>Bid-ask:   <b>4.17%</b> / yr</li>
+<li>Commission: <b>8.27%</b> / yr (37% of total — killed by broker move)</li>
+<li>Slippage:  <b>9.76%</b> / yr</li>
+<li>Full drag: <b>22.20%</b> / yr</li>
+<li>Exec-opt stack savings (EXP-2470 A+B+C+D): <b>−5.03%</b> / yr</li>
+</ul>
+
+<h2>Honest note</h2>
+<p>Gross Sharpe and vol come from the real walk-forward on the sparse 7-stream cube (EXP-2510). This experiment applies the drag transformation via the canonical net_sharpe_from_drag helper (EXP-2420) — identical to what EXP-2510 and EXP-2470 used so the numbers are directly comparable. Vol and Max DD are held constant because execution cost is deterministic drag that affects the annualised mean, not its variance.</p>
+</body></html>

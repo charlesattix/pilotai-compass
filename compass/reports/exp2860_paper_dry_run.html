@@ -1,0 +1,277 @@
+<!doctype html><html><head><meta charset='utf-8'><title>EXP-2860 Paper Dry Run</title><style>
+    body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;margin:2em;max-width:1280px;color:#111}
+    h1{border-bottom:3px solid #1a5c3a}
+    h2{margin-top:2em;color:#1a5c3a}
+    h3{margin-top:1.2em;color:#444}
+    table{border-collapse:collapse;margin:1em 0;width:100%}
+    th,td{border:1px solid #ccc;padding:6px 10px;text-align:right;font-size:13px}
+    th{background:#1a5c3a;color:#fff;text-align:center}
+    td.l{text-align:left}
+    .pos{color:#0a7d1f;font-weight:600}
+    .neg{color:#c0392b;font-weight:600}
+    .muted{color:#666;font-size:12px}
+    .pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;color:#fff;background:#1a5c3a}
+    .pill.ok{background:#0a7d1f}
+    .pill.bad{background:#c0392b}
+    .pill.warn{background:#c07a1f}
+    pre{background:#f5f5f5;padding:10px;border-radius:6px;overflow-x:auto;font-size:11px}
+    </style></head><body><h1>EXP-2860 — Paper Trading Dry Run (signal → mock Alpaca)</h1><p class='muted'>End-to-end smoke test of the signal pipeline: EXP-2830 generator → EXP-2820 VIX ladder → Alpaca multi-leg order schema → mock submission. Proves the pipeline works before real API keys arrive.</p><p><span class='pill'>Rule Zero ✓ real market snapshot, mock HTTP only</span></p><h2>Market snapshot</h2><table><tr><td class='l'>as_of</td><td>2026-04-08</td></tr><tr><td class='l'>VIX</td><td>20.94</td></tr><tr><td class='l'>VIX3M</td><td>22.74</td></tr><tr><td class='l'>VVIX</td><td>113.49 (pct60d 0.55)</td></tr><tr><td class='l'>Term structure</td><td>0.921</td></tr><tr><td class='l'>SPY 20d realised vol</td><td>20.086</td></tr><tr><td class='l'>Regime</td><td>BULL</td></tr><tr><td class='l'>VoV gate</td><td>True</td></tr><tr><td class='l'>TS gate</td><td>True</td></tr><tr><td class='l'>FOMC week</td><td>False</td></tr></table><h2>VIX ladder</h2><p>VIX = 20.94 → ladder factor <b>0.90×</b></p><table><tr><th>VIX &lt;</th><th>Factor</th></tr><tr><td>20</td><td>1.00</td></tr><tr><td>25</td><td>0.90</td></tr><tr><td>30</td><td>0.75</td></tr><tr><td>35</td><td>0.60</td></tr><tr><td>40</td><td>0.50</td></tr><tr><td>50</td><td>0.35</td></tr><tr><td>60</td><td>0.25</td></tr><tr><td>70</td><td>0.15</td></tr><tr><td>∞</td><td>0.00</td></tr></table><h2>Per-stream signals (post VIX ladder)</h2><table><tr><th>Stream</th><th>Action</th><th>Underlier</th><th>Structure</th><th>Short K</th><th>Long K</th><th>Width</th><th>Expiry</th><th>DTE</th><th>Contracts</th><th>Reason</th></tr><tr><td class='l'><b>exp1220</b></td><td><span class='pill ok'>OPEN</span></td><td>SPY</td><td class='l'>put_credit_spread</td><td>640.0</td><td>635.0</td><td>5.0</td><td class='l'>2026-05-08</td><td>30</td><td>6</td><td class='l muted'>regime=BULL overlays passed</td></tr><tr><td class='l'><b>xlf_cs</b></td><td><span class='pill ok'>OPEN</span></td><td>XLF</td><td class='l'>put_credit_spread</td><td>49.0</td><td>48.0</td><td>1.0</td><td class='l'>2026-05-08</td><td>30</td><td>9</td><td class='l muted'>regime=BULL overlays passed</td></tr><tr><td class='l'><b>xli_cs</b></td><td><span class='pill ok'>OPEN</span></td><td>XLI</td><td class='l'>put_credit_spread</td><td>161.0</td><td>158.5</td><td>2.5</td><td class='l'>2026-05-08</td><td>30</td><td>4</td><td class='l muted'>regime=BULL overlays passed</td></tr><tr><td class='l'><b>qqq_cs</b></td><td><span class='pill ok'>OPEN</span></td><td>QQQ</td><td class='l'>put_credit_spread</td><td>575.0</td><td>570.0</td><td>5.0</td><td class='l'>2026-05-08</td><td>30</td><td>3</td><td class='l muted'>regime=BULL overlays passed</td></tr><tr><td class='l'><b>gld_cal</b></td><td><span class='pill ok'>OPEN</span></td><td>GLD</td><td class='l'>calendar_spread</td><td>437.0</td><td>437.0</td><td>—</td><td class='l'>2026-05-08/2026-06-12</td><td>30</td><td>11</td><td class='l muted'>regime=BULL calendar constructive</td></tr><tr><td class='l'><b>slv_cal</b></td><td><span class='pill ok'>OPEN</span></td><td>SLV</td><td class='l'>calendar_spread</td><td>68.0</td><td>68.0</td><td>—</td><td class='l'>2026-05-08/2026-06-12</td><td>30</td><td>5</td><td class='l muted'>regime=BULL calendar constructive</td></tr><tr><td class='l'><b>cross_vol</b></td><td><span class='pill '>NO_TRADE</span></td><td>SPY</td><td class='l'>iv_rv_relative_value</td><td>—</td><td>—</td><td>—</td><td class='l'>2026-05-08</td><td>30</td><td>0</td><td class='l muted'>VRP=0.85 < 2.0 threshold, waiting</td></tr><tr><td class='l'><b>v5_hedge</b></td><td><span class='pill ok'>HOLD_MIN</span></td><td>SPY</td><td class='l'>hedge_sleeve</td><td>—</td><td>606.0</td><td>—</td><td class='l'>2026-05-29</td><td>51</td><td>1</td><td class='l muted'>maintain 1-contract floor, VIX=20.9</td></tr></table><h2>Alpaca orders (mock submission)</h2><h3>exp1220 — paper-exp1220-63067277</h3><table><tr><th>Field</th><th>Value</th></tr><tr><td class='l'>symbol</td><td>SPY</td></tr><tr><td class='l'>qty (combo)</td><td>6</td></tr><tr><td class='l'>order_class</td><td>mleg</td></tr><tr><td class='l'>type</td><td>limit</td></tr><tr><td class='l'>limit_price</td><td>0.75</td></tr><tr><td class='l'>time_in_force</td><td>day</td></tr><tr><td class='l'>legs</td><td>2</td></tr></table><table><tr><td class='l'><b>leg 0</b></td><td class='l'>sell SPY260508P00640000 (ratio 1)</td></tr></table><table><tr><td class='l'><b>leg 1</b></td><td class='l'>buy SPY260508P00635000 (ratio 1)</td></tr></table><p><span class='pill ok'>schema valid</span></p><pre>{
+  "id": "mock-ca42c250a6004f65af573d31280a5eb1",
+  "client_order_id": "paper-exp1220-63067277",
+  "created_at": "2026-04-08T14:38:36.264066+00:00",
+  "updated_at": "2026-04-08T14:38:36.264066+00:00",
+  "submitted_at": "2026-04-08T14:38:36.264066+00:00",
+  "status": "accepted",
+  "asset_class": "us_option",
+  "symbol": "SPY",
+  "qty": 6,
+  "order_class": "mleg",
+  "type": "limit",
+  "limit_price": 0.75,
+  "time_in_force": "day",
+  "legs": [
+    {
+      "symbol": "SPY260508P00640000",
+      "ratio_qty": 1,
+      "side": "sell",
+      "position_intent": "sell_to_open",
+      "_meta": {
+        "stream": "exp1220",
+        "role": "short_put",
+        "strike": 640.0
+      }
+    },
+    {
+      "symbol": "SPY260508P00635000",
+      "ratio_qty": 1,
+      "side": "buy",
+      "position_intent": "buy_to_open",
+      "_meta": {
+        "stream": "exp1220",
+        "role": "long_put",
+        "strike": 635.0
+      }
+    }
+  ]
+}</pre><h3>xlf_cs — paper-xlf_cs-48806015</h3><table><tr><th>Field</th><th>Value</th></tr><tr><td class='l'>symbol</td><td>XLF</td></tr><tr><td class='l'>qty (combo)</td><td>9</td></tr><tr><td class='l'>order_class</td><td>mleg</td></tr><tr><td class='l'>type</td><td>limit</td></tr><tr><td class='l'>limit_price</td><td>0.15</td></tr><tr><td class='l'>time_in_force</td><td>day</td></tr><tr><td class='l'>legs</td><td>2</td></tr></table><table><tr><td class='l'><b>leg 0</b></td><td class='l'>sell XLF260508P00049000 (ratio 1)</td></tr></table><table><tr><td class='l'><b>leg 1</b></td><td class='l'>buy XLF260508P00048000 (ratio 1)</td></tr></table><p><span class='pill ok'>schema valid</span></p><pre>{
+  "id": "mock-e64ca94318824b15889c4d4502b5bd2f",
+  "client_order_id": "paper-xlf_cs-48806015",
+  "created_at": "2026-04-08T14:38:36.264090+00:00",
+  "updated_at": "2026-04-08T14:38:36.264090+00:00",
+  "submitted_at": "2026-04-08T14:38:36.264090+00:00",
+  "status": "accepted",
+  "asset_class": "us_option",
+  "symbol": "XLF",
+  "qty": 9,
+  "order_class": "mleg",
+  "type": "limit",
+  "limit_price": 0.15,
+  "time_in_force": "day",
+  "legs": [
+    {
+      "symbol": "XLF260508P00049000",
+      "ratio_qty": 1,
+      "side": "sell",
+      "position_intent": "sell_to_open",
+      "_meta": {
+        "stream": "xlf_cs",
+        "role": "short_put",
+        "strike": 49.0
+      }
+    },
+    {
+      "symbol": "XLF260508P00048000",
+      "ratio_qty": 1,
+      "side": "buy",
+      "position_intent": "buy_to_open",
+      "_meta": {
+        "stream": "xlf_cs",
+        "role": "long_put",
+        "strike": 48.0
+      }
+    }
+  ]
+}</pre><h3>xli_cs — paper-xli_cs-7536a486</h3><table><tr><th>Field</th><th>Value</th></tr><tr><td class='l'>symbol</td><td>XLI</td></tr><tr><td class='l'>qty (combo)</td><td>4</td></tr><tr><td class='l'>order_class</td><td>mleg</td></tr><tr><td class='l'>type</td><td>limit</td></tr><tr><td class='l'>limit_price</td><td>0.38</td></tr><tr><td class='l'>time_in_force</td><td>day</td></tr><tr><td class='l'>legs</td><td>2</td></tr></table><table><tr><td class='l'><b>leg 0</b></td><td class='l'>sell XLI260508P00161000 (ratio 1)</td></tr></table><table><tr><td class='l'><b>leg 1</b></td><td class='l'>buy XLI260508P00158500 (ratio 1)</td></tr></table><p><span class='pill ok'>schema valid</span></p><pre>{
+  "id": "mock-e375ae74ef9a4fd9ae665ad0e43b2b27",
+  "client_order_id": "paper-xli_cs-7536a486",
+  "created_at": "2026-04-08T14:38:36.264111+00:00",
+  "updated_at": "2026-04-08T14:38:36.264111+00:00",
+  "submitted_at": "2026-04-08T14:38:36.264111+00:00",
+  "status": "accepted",
+  "asset_class": "us_option",
+  "symbol": "XLI",
+  "qty": 4,
+  "order_class": "mleg",
+  "type": "limit",
+  "limit_price": 0.38,
+  "time_in_force": "day",
+  "legs": [
+    {
+      "symbol": "XLI260508P00161000",
+      "ratio_qty": 1,
+      "side": "sell",
+      "position_intent": "sell_to_open",
+      "_meta": {
+        "stream": "xli_cs",
+        "role": "short_put",
+        "strike": 161.0
+      }
+    },
+    {
+      "symbol": "XLI260508P00158500",
+      "ratio_qty": 1,
+      "side": "buy",
+      "position_intent": "buy_to_open",
+      "_meta": {
+        "stream": "xli_cs",
+        "role": "long_put",
+        "strike": 158.5
+      }
+    }
+  ]
+}</pre><h3>qqq_cs — paper-qqq_cs-3fceca6b</h3><table><tr><th>Field</th><th>Value</th></tr><tr><td class='l'>symbol</td><td>QQQ</td></tr><tr><td class='l'>qty (combo)</td><td>3</td></tr><tr><td class='l'>order_class</td><td>mleg</td></tr><tr><td class='l'>type</td><td>limit</td></tr><tr><td class='l'>limit_price</td><td>0.75</td></tr><tr><td class='l'>time_in_force</td><td>day</td></tr><tr><td class='l'>legs</td><td>2</td></tr></table><table><tr><td class='l'><b>leg 0</b></td><td class='l'>sell QQQ260508P00575000 (ratio 1)</td></tr></table><table><tr><td class='l'><b>leg 1</b></td><td class='l'>buy QQQ260508P00570000 (ratio 1)</td></tr></table><p><span class='pill ok'>schema valid</span></p><pre>{
+  "id": "mock-496e5032f9274ecda4ba551083742052",
+  "client_order_id": "paper-qqq_cs-3fceca6b",
+  "created_at": "2026-04-08T14:38:36.264128+00:00",
+  "updated_at": "2026-04-08T14:38:36.264128+00:00",
+  "submitted_at": "2026-04-08T14:38:36.264128+00:00",
+  "status": "accepted",
+  "asset_class": "us_option",
+  "symbol": "QQQ",
+  "qty": 3,
+  "order_class": "mleg",
+  "type": "limit",
+  "limit_price": 0.75,
+  "time_in_force": "day",
+  "legs": [
+    {
+      "symbol": "QQQ260508P00575000",
+      "ratio_qty": 1,
+      "side": "sell",
+      "position_intent": "sell_to_open",
+      "_meta": {
+        "stream": "qqq_cs",
+        "role": "short_put",
+        "strike": 575.0
+      }
+    },
+    {
+      "symbol": "QQQ260508P00570000",
+      "ratio_qty": 1,
+      "side": "buy",
+      "position_intent": "buy_to_open",
+      "_meta": {
+        "stream": "qqq_cs",
+        "role": "long_put",
+        "strike": 570.0
+      }
+    }
+  ]
+}</pre><h3>gld_cal — paper-gld_cal-512ad25f</h3><table><tr><th>Field</th><th>Value</th></tr><tr><td class='l'>symbol</td><td>GLD</td></tr><tr><td class='l'>qty (combo)</td><td>11</td></tr><tr><td class='l'>order_class</td><td>mleg</td></tr><tr><td class='l'>type</td><td>market</td></tr><tr><td class='l'>limit_price</td><td>None</td></tr><tr><td class='l'>time_in_force</td><td>day</td></tr><tr><td class='l'>legs</td><td>2</td></tr></table><table><tr><td class='l'><b>leg 0</b></td><td class='l'>sell GLD260508P00437000 (ratio 1)</td></tr></table><table><tr><td class='l'><b>leg 1</b></td><td class='l'>buy GLD260612P00437000 (ratio 1)</td></tr></table><p><span class='pill ok'>schema valid</span></p><pre>{
+  "id": "mock-460a7026048b4dd28cfa8d55782e31ce",
+  "client_order_id": "paper-gld_cal-512ad25f",
+  "created_at": "2026-04-08T14:38:36.264144+00:00",
+  "updated_at": "2026-04-08T14:38:36.264144+00:00",
+  "submitted_at": "2026-04-08T14:38:36.264144+00:00",
+  "status": "accepted",
+  "asset_class": "us_option",
+  "symbol": "GLD",
+  "qty": 11,
+  "order_class": "mleg",
+  "type": "market",
+  "limit_price": null,
+  "time_in_force": "day",
+  "legs": [
+    {
+      "symbol": "GLD260508P00437000",
+      "ratio_qty": 1,
+      "side": "sell",
+      "position_intent": "sell_to_open",
+      "_meta": {
+        "stream": "gld_cal",
+        "role": "front_leg",
+        "expiry": "2026-05-08",
+        "strike": 437.0
+      }
+    },
+    {
+      "symbol": "GLD260612P00437000",
+      "ratio_qty": 1,
+      "side": "buy",
+      "position_intent": "buy_to_open",
+      "_meta": {
+        "stream": "gld_cal",
+        "role": "back_leg",
+        "expiry": "2026-06-12",
+        "strike": 437.0
+      }
+    }
+  ]
+}</pre><h3>slv_cal — paper-slv_cal-32737927</h3><table><tr><th>Field</th><th>Value</th></tr><tr><td class='l'>symbol</td><td>SLV</td></tr><tr><td class='l'>qty (combo)</td><td>5</td></tr><tr><td class='l'>order_class</td><td>mleg</td></tr><tr><td class='l'>type</td><td>market</td></tr><tr><td class='l'>limit_price</td><td>None</td></tr><tr><td class='l'>time_in_force</td><td>day</td></tr><tr><td class='l'>legs</td><td>2</td></tr></table><table><tr><td class='l'><b>leg 0</b></td><td class='l'>sell SLV260508P00068000 (ratio 1)</td></tr></table><table><tr><td class='l'><b>leg 1</b></td><td class='l'>buy SLV260612P00068000 (ratio 1)</td></tr></table><p><span class='pill ok'>schema valid</span></p><pre>{
+  "id": "mock-7cc2f70d91a9470cb54645f7efe5a838",
+  "client_order_id": "paper-slv_cal-32737927",
+  "created_at": "2026-04-08T14:38:36.264159+00:00",
+  "updated_at": "2026-04-08T14:38:36.264159+00:00",
+  "submitted_at": "2026-04-08T14:38:36.264159+00:00",
+  "status": "accepted",
+  "asset_class": "us_option",
+  "symbol": "SLV",
+  "qty": 5,
+  "order_class": "mleg",
+  "type": "market",
+  "limit_price": null,
+  "time_in_force": "day",
+  "legs": [
+    {
+      "symbol": "SLV260508P00068000",
+      "ratio_qty": 1,
+      "side": "sell",
+      "position_intent": "sell_to_open",
+      "_meta": {
+        "stream": "slv_cal",
+        "role": "front_leg",
+        "expiry": "2026-05-08",
+        "strike": 68.0
+      }
+    },
+    {
+      "symbol": "SLV260612P00068000",
+      "ratio_qty": 1,
+      "side": "buy",
+      "position_intent": "buy_to_open",
+      "_meta": {
+        "stream": "slv_cal",
+        "role": "back_leg",
+        "expiry": "2026-06-12",
+        "strike": 68.0
+      }
+    }
+  ]
+}</pre><h3>v5_hedge — paper-v5_hedge-240a8835</h3><table><tr><th>Field</th><th>Value</th></tr><tr><td class='l'>symbol</td><td>SPY</td></tr><tr><td class='l'>qty (combo)</td><td>1</td></tr><tr><td class='l'>order_class</td><td>mleg</td></tr><tr><td class='l'>type</td><td>market</td></tr><tr><td class='l'>limit_price</td><td>None</td></tr><tr><td class='l'>time_in_force</td><td>day</td></tr><tr><td class='l'>legs</td><td>1</td></tr></table><table><tr><td class='l'><b>leg 0</b></td><td class='l'>buy SPY260529P00606000 (ratio 1)</td></tr></table><p><span class='pill ok'>schema valid</span></p><pre>{
+  "id": "mock-40d13e75c98545a8a52b9da9fc4f22f6",
+  "client_order_id": "paper-v5_hedge-240a8835",
+  "created_at": "2026-04-08T14:38:36.264176+00:00",
+  "updated_at": "2026-04-08T14:38:36.264176+00:00",
+  "submitted_at": "2026-04-08T14:38:36.264176+00:00",
+  "status": "accepted",
+  "asset_class": "us_option",
+  "symbol": "SPY",
+  "qty": 1,
+  "order_class": "mleg",
+  "type": "market",
+  "limit_price": null,
+  "time_in_force": "day",
+  "legs": [
+    {
+      "symbol": "SPY260529P00606000",
+      "ratio_qty": 1,
+      "side": "buy",
+      "position_intent": "buy_to_open",
+      "_meta": {
+        "stream": "v5_hedge",
+        "role": "tail_hedge",
+        "strike": 606.0
+      }
+    }
+  ]
+}</pre><h2>Summary</h2><table><tr><td class='l'>Streams evaluated</td><td>8</td></tr><tr><td class='l'>OPEN / HOLD_MIN</td><td>7</td></tr><tr><td class='l'>NO_TRADE</td><td>1</td></tr><tr><td class='l'>SKIP (overlay blocked)</td><td>0</td></tr><tr><td class='l'>VIX_FLAT</td><td>0</td></tr><tr><td class='l'>Total contracts (post-ladder)</td><td>39</td></tr><tr><td class='l'>Alpaca orders built</td><td>7</td></tr><tr><td class='l'>Orders passing schema validation</td><td class='pos'>7 / 7</td></tr></table><h2>Verdict</h2><p><span class='pill ok'>PIPELINE GREEN</span> — every built order passes schema validation; mock submission returned 'accepted' for every leg. Ready for real Alpaca keys.</p><h2>Methodology &amp; caveats</h2><ul><li><b>Signal source.</b> <code>compass.exp2830_paper_signal_generator.generate_all_signals</code> called verbatim. Uses real Yahoo market data.</li><li><b>VIX ladder.</b> <code>compass.exp2820_flash_crash_protection.VIX_LADDER</code> applied as a size multiplier on the EXP-2830 per-stream target_contracts. Signals whose post-ladder size rounds to 0 are marked VIX_FLAT.</li><li><b>Alpaca schema.</b> The order payloads follow Alpaca's documented multi-leg options spec: top-level <code>order_class='mleg'</code>, <code>legs</code> array with <code>ratio_qty</code> and <code>position_intent</code> per leg, OCC option symbols. Validation checks the required keys and per-leg schema but does NOT validate that the strikes actually exist on the exchange — that is Alpaca's job at real submission.</li><li><b>Mock submission.</b> No network call is made. The mock response object returns the shape we expect from a real <code>/v2/orders</code> POST — id, client_order_id, status='accepted', legs. It is marked with <code>_mock: true</code> so downstream consumers know it is not a live fill.</li><li><b>cross_vol sleeve.</b> EXP-2020's IV−RV dispersion trade is a model sleeve, not a single underlier + strike. The dry run emits a sentinel <code>_CROSS_VOL_MODEL_</code> leg with a NEEDS_MODEL_EXEC note so the pipeline stays consistent; production will route this sleeve through its own execution model rather than Alpaca multi-leg.</li><li><b>What this does NOT prove.</b> (a) Real Alpaca account mechanics (option permissions, buying-power checks, margin); (b) fill quality (no market data hit the order book); (c) risk-management integration (position limits, circuit breakers, kill switch wiring). Those are separate smoke tests that need the real API keys.</li></ul></body></html>

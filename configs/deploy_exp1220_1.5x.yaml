@@ -1,0 +1,132 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EXP-1220 Deployment Config — 1.5× Static Leverage, Paper Trading
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Validated performance (real Yahoo/IronVault data, corrected Sharpe):
+#   Full period: CAGR 99.2%, Sharpe 3.83, Max DD 11.2%
+#   OOS 2022-25: CAGR 92.7%, Sharpe 3.40
+#   Walk-forward: all 4 OOS years profitable
+#
+# Approved: static_vs_dynamic_leverage analysis (commit dcf617c)
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: "EXP-1220 Paper Trading — 1.5× Static Leverage"
+version: "1.0.0"
+mode: paper  # paper | live
+created: "2026-04-05"
+
+# ─── Account ─────────────────────────────────────────────────────────────
+account:
+  broker: alpaca
+  environment: paper  # paper | live
+  starting_capital: 100000
+  currency: USD
+  margin_type: reg_t  # standard margin (not portfolio margin)
+
+# ─── Instrument ──────────────────────────────────────────────────────────
+instrument:
+  ticker: SPY
+  asset_class: options
+  strategy_type: bull_put_spread  # primary: sell put spread (credit)
+  fallback_type: bear_call_spread  # in downtrend regimes
+
+# ─── Leverage ────────────────────────────────────────────────────────────
+# IMPORTANT: For credit spreads, "1.5× leverage" means position sizing at
+# 1.5× the base risk percentage. No margin borrowing is needed because
+# defined-risk spreads have capped max loss = (spread_width - credit) × 100.
+#
+# With $100K account at 1.5× and 1% base risk per trade:
+#   Risk per trade = $100K × 1% × 1.5 = $1,500
+#   With $5 wide spread, max loss per contract ≈ $400-450
+#   → ~3 contracts per trade
+#
+# Alpaca margin accounts support this since max loss is defined at entry.
+leverage:
+  mode: static
+  multiplier: 1.5
+  dynamic_leverage: false  # disabled — static beats dynamic (see dcf617c)
+  hedge_overlay: false     # disabled — complexity doesn't pay at 1.5×
+
+# ─── Entry Cadence ───────────────────────────────────────────────────────
+cadence:
+  frequency: 7d           # enter new trade every 7 calendar days
+  scan_day: monday        # scan for entries on Monday market open
+  scan_time: "09:35"      # 5 min after open (let spreads settle)
+  max_concurrent: 5       # max 5 open positions at once
+  min_spacing_days: 5     # never enter 2 trades within 5 bdays
+
+# ─── Position Sizing ────────────────────────────────────────────────────
+sizing:
+  base_risk_pct: 1.0      # 1% of account per trade (before leverage)
+  leveraged_risk_pct: 1.5  # 1.5% after leverage (= base × multiplier)
+  max_portfolio_risk_pct: 8.0  # hard cap: never risk >8% total
+  contracts_min: 1
+  contracts_max: 10
+  # Example: $100K account, 1.5% risk = $1,500 per trade
+  # $5 spread, ~$4.50 max loss → 3 contracts ($1,350 risk)
+
+# ─── Spread Construction ────────────────────────────────────────────────
+spread:
+  width: 5.0              # $5 wide spreads (standard for SPY)
+  target_dte: 30          # 30 days to expiration
+  min_dte: 21             # never enter below 21 DTE
+  max_dte: 45             # never enter above 45 DTE
+  otm_pct: 0.05           # short strike 5% OTM
+  min_credit: 0.30        # minimum $0.30 credit to enter ($30/contract)
+  min_credit_pct: 0.06    # minimum 6% of spread width as credit
+
+# ─── EXP-1220 Tail Risk Protection Signals ───────────────────────────────
+# These are the VIX-based regime signals from TailRiskProtector.
+# They determine ENTRY — not leverage (leverage is fixed at 1.5×).
+entry_signals:
+  vix_max_entry: 35.0     # don't enter new trades when VIX > 35
+  vix_min_entry: 10.0     # don't enter when VIX < 10 (no premium)
+  ts_max_ratio: 1.15      # skip entry if VIX/VIX3M > 1.15 (deep inversion)
+  trend_filter: true      # require SPY > 20-day MA for bull puts
+  trend_ma_period: 20
+
+# ─── Exit Rules ──────────────────────────────────────────────────────────
+exits:
+  profit_target_pct: 50   # close at 50% of max profit
+  stop_loss_multiplier: 2.0  # close if loss reaches 2× credit received
+  max_hold_days: 21       # close if held >21 days regardless
+  dte_exit: 5             # close if DTE drops below 5 (gamma risk)
+  vix_emergency_exit: 45  # close ALL positions if VIX > 45
+
+# ─── Risk Management ────────────────────────────────────────────────────
+risk:
+  max_daily_loss_pct: 3.0    # halt trading if daily loss > 3%
+  max_weekly_loss_pct: 5.0   # halt trading if weekly loss > 5%
+  max_drawdown_halt_pct: 10.0  # halt ALL trading if DD > 10%
+  drawdown_recovery_pct: 5.0   # resume when DD recovers to -5%
+  correlation_check: true      # skip if >3 positions on same expiry
+
+# ─── Monitoring & Alerts ─────────────────────────────────────────────────
+monitoring:
+  check_interval_minutes: 15   # check positions every 15 min during market hours
+  daily_report_time: "16:05"   # generate daily P&L report 5 min after close
+  alert_channels:
+    - telegram                  # requires TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+  alerts:
+    position_opened: true
+    position_closed: true
+    stop_loss_hit: true
+    profit_target_hit: true
+    vix_spike_above: 30        # alert when VIX crosses 30
+    daily_loss_above_pct: 2.0  # alert when daily loss > 2%
+    drawdown_above_pct: 5.0    # alert when DD > 5%
+
+# ─── Data Sources ────────────────────────────────────────────────────────
+data:
+  price_source: alpaca          # real-time quotes from Alpaca
+  vix_source: yahoo             # VIX from Yahoo Finance (free, 15min delay OK)
+  options_source: alpaca        # option chains from Alpaca
+  historical_cache: data/options_cache.db  # IronVault local cache
+
+# ─── Logging ─────────────────────────────────────────────────────────────
+logging:
+  level: INFO
+  file: logs/paper_trading.log
+  max_size_mb: 50
+  backup_count: 5
+  trade_journal: logs/trade_journal.csv  # every trade logged

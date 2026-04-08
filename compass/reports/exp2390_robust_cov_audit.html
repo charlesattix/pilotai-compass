@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>EXP-2390 — Audit of EXP-2360</title>
+<style>
+body { font-family:-apple-system,sans-serif;max-width:1200px;margin:0 auto;padding:28px;background:#fff;color:#1e293b; }
+h1 { font-size:1.8em;color:#0f172a; }
+h2 { margin-top:2em;border-bottom:2px solid #e2e8f0;padding-bottom:8px;color:#334155; }
+.sources { background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px;font-size:0.84rem;line-height:1.6; }
+.bug { background:#fef2f2;border:2px solid #dc2626;border-radius:10px;padding:16px;margin:16px 0; }
+.bug h3 { margin-top:0;color:#991b1b; }
+.fix { background:#ecfdf5;border:2px solid #16a34a;border-radius:10px;padding:16px;margin:16px 0; }
+.fix h3 { margin-top:0;color:#065f46; }
+.note { background:#fefce8;border:1px solid #fde047;border-radius:6px;padding:12px 16px;font-size:0.86rem;margin:14px 0; }
+table { width:100%;border-collapse:collapse;margin:12px 0;font-size:0.86em; }
+th { background:#f1f5f9;padding:9px 11px;text-align:right;border-bottom:2px solid #cbd5e1;font-size:0.72em;text-transform:uppercase; }
+th:first-child { text-align:left; }
+td { padding:7px 11px;text-align:right;border-bottom:1px solid #e2e8f0; }
+td:first-child { text-align:left; }
+</style></head><body>
+
+<h1>EXP-2390 — Audit of EXP-2360 Robust Covariance Sharpe Numbers</h1>
+<p style="color:#64748b">Investigation of the suspicious Sharpe 11.7-13.7 (and
+one_factor 19.1) pooled OOS values · 2026-04-08 04:36</p>
+
+<div class="sources">
+<strong>Rule Zero:</strong> reuses compass.exp2080_corr_regime.load_streams
+(cached 5-stream real-data cube) + XLF/XLI from
+compass.exp2160_high_capacity_alts. Only transformation is the XLF/XLI
+convert-to-daily method (smeared vs sparse).
+</div>
+
+<div class="bug">
+<h3>ROOT CAUSE — NOT a Sharpe formula bug, NOT look-ahead</h3>
+Look-ahead bias: <strong>NONE</strong> (verified by code inspection —
+train = df.iloc[i-TRAIN:i], test = df.iloc[i:i+TEST], covariance fit
+on train only, vol-target scale computed on train only).<br>
+Sharpe formula: <strong>CORRECT</strong> (mean/std × √252, cross-
+consistency check passes: μ·252 ÷ σ·√252 reproduces the reported
+Sharpe to 4 decimals).<br>
+Vol targeting: <strong>APPLIED</strong> (scaled = raw * target_vol / train_vol,
+clipped [0.1, 5.0]).<br>
+<br>
+<strong>The bug:</strong> EXP-2360 builds the XLF/XLI streams via
+<code>compass.exp2160_high_capacity_alts.trades_to_daily_pct</code>,
+which UNIFORMLY SMEARS each ~30-day credit-spread P&L across the
+holding window. EXP-2160's own report flags this as "method-inflated
+on high-win-rate strategies due to P&L smearing across the holding
+period". XLF at 98.4% win rate has per-trade Sharpe 11.19 that inflates
+to a smeared daily Sharpe of ~27.22 (2.4× inflation).<br>
+<br>
+When fed into Ledoit-Wolf / OAS / one-factor shrinkage covariance,
+the estimator sees XLF/XLI as "extraordinarily high-Sharpe, near-zero-
+vol, near-zero-correlation" streams and loads them heavily in the
+risk-parity weights. Vol-targeting then scales the resulting low-vol
+portfolio up to the 15% annual target, multiplying the inflated
+mean along with it.
+</div>
+
+<h2>1. Walk-forward reproduction — smeared vs sparse XLF/XLI</h2>
+<table>
+<thead><tr>
+<th>Estimator</th>
+<th style='color:#dc2626'>Smeared SR</th><th>Smeared vol</th><th>Smeared CAGR</th>
+<th style='color:#16a34a'>Sparse SR (honest)</th><th>Sparse vol</th><th>Sparse CAGR</th>
+<th>Inflation</th>
+</tr></thead>
+<tbody><tr><td><strong>sample</strong></td><td style='color:#dc2626;font-weight:700'>8.30</td><td>7.59%</td><td>87.1%</td><td style='color:#16a34a;font-weight:700'>6.18</td><td>10.58%</td><td>91.0%</td><td style='color:#dc2626;font-weight:700'>×1.34</td></tr><tr><td><strong>ledoit_wolf</strong></td><td style='color:#dc2626;font-weight:700'>11.73</td><td>6.10%</td><td>103.9%</td><td style='color:#16a34a;font-weight:700'>6.87</td><td>10.32%</td><td>101.8%</td><td style='color:#dc2626;font-weight:700'>×1.71</td></tr><tr><td><strong>oas</strong></td><td style='color:#dc2626;font-weight:700'>13.73</td><td>5.22%</td><td>104.2%</td><td style='color:#16a34a;font-weight:700'>6.66</td><td>10.25%</td><td>96.8%</td><td style='color:#dc2626;font-weight:700'>×2.06</td></tr></tbody>
+</table>
+<div class="note">
+The "smeared" column reproduces EXP-2360's published numbers. The
+"sparse" column uses the exit-date convention identical to the
+EXP-2280 (4.43) and EXP-2110 (5.24) baselines. The inflation factor
+is the smeared/sparse ratio.
+</div>
+
+<h2>2. Per-stream standalone metrics (both cubes)</h2>
+<table>
+<thead><tr>
+<th>Stream</th>
+<th style='color:#dc2626'>Smeared SR</th><th>Smeared vol</th>
+<th style='color:#16a34a'>Sparse SR</th><th>Sparse vol</th>
+<th>Inflation</th>
+</tr></thead>
+<tbody><tr><td>exp1220</td><td colspan='2'>4.01  (vol 11.3%)</td><td colspan='2'>identical</td><td>—</td></tr><tr><td>v5_hedge</td><td colspan='2'>-0.13  (vol 6.4%)</td><td colspan='2'>identical</td><td>—</td></tr><tr><td>gld_cal</td><td colspan='2'>2.72  (vol 6.0%)</td><td colspan='2'>identical</td><td>—</td></tr><tr><td>slv_cal</td><td colspan='2'>2.31  (vol 12.2%)</td><td colspan='2'>identical</td><td>—</td></tr><tr><td>cross_vol</td><td colspan='2'>2.14  (vol 3.5%)</td><td colspan='2'>identical</td><td>—</td></tr><tr><td><strong>xlf_cs</strong></td><td style='color:#dc2626;font-weight:700'>27.22</td><td>0.60%</td><td style='color:#16a34a;font-weight:700'>4.96</td><td>3.30%</td><td style='color:#dc2626;font-weight:700'>×5.49</td></tr><tr><td><strong>xli_cs</strong></td><td style='color:#dc2626;font-weight:700'>21.45</td><td>0.76%</td><td style='color:#16a34a;font-weight:700'>3.36</td><td>4.76%</td><td style='color:#dc2626;font-weight:700'>×6.38</td></tr></tbody>
+</table>
+<div class="note">
+Only xlf_cs and xli_cs differ between the cubes. The other 5 streams
+(exp1220, v5_hedge, gld_cal, slv_cal, cross_vol) use identical daily
+series in both representations.
+</div>
+
+<h2>3. Baseline references (for sanity)</h2>
+<ul>
+<li>EXP-2110 5-stream sparse leverage sweep: pooled Sharpe <strong>5.24</strong></li>
+<li>EXP-2280 7-stream sparse equal_risk_15%:  pooled Sharpe <strong>4.43</strong></li>
+<li>EXP-2360 reported OAS (smeared XLF/XLI):  Sharpe <strong>13.73</strong></li>
+<li>EXP-2390 honest OAS (sparse XLF/XLI):     Sharpe <strong>6.66</strong></li>
+</ul>
+
+<div class="fix">
+<h3>VERDICT</h3>
+The 11.73 / 13.73 Sharpe values are arithmetically correct on the smeared cube (no bugs, no look-ahead, no formula errors) but the smeared cube is NOT tradeable — it models each 30-day P&L as if it accrued smoothly every day. The HONEST pooled Sharpe on the sparse (exit-date) cube is in the 6.66-6.87 range, in line with the EXP-2110 (5.24) and EXP-2280 (4.43) baselines. Do NOT use EXP-2360 numbers in any deployment or investor materials.
+</div>
+
+<h2>4. Recommendation</h2>
+<div class="note">
+1. EXP-2360 headline numbers should be marked STALE. 2. Re-run EXP-2360 with sparse XLF/XLI and republish. 3. Add a unit test to exp2160 that FAILS if the sleeve    is consumed as a daily Sharpe target without the    trade-level caveat. 4. The trade-level Sharpe (XLF 11.19, XLI 6.04) remains    valid as a per-trade metric — it's the portfolio-level    daily Sharpe on smeared streams that is misleading.
+</div>
+
+<p style="margin-top:3em;color:#94a3b8;font-size:0.78em;text-align:center">
+compass/exp2390_robust_cov_audit.py · Rule Zero · all real data
+</p>
+</body></html>

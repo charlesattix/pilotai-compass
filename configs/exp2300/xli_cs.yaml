@@ -1,0 +1,63 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EXP-2300 sleeve 3 — XLI put-credit-spreads (19.24% weight)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Reference: compass.exp2160_high_capacity_alts.run_put_credit_spreads("XLI")
+# Validated: 248 trades, 96.8% win rate, trade Sharpe 6.04
+# Weight: 19.24% (equal_risk_15% from EXP-2200)
+# Mode: LIVE (fully tradeable via Alpaca paper)
+# ═══════════════════════════════════════════════════════════════════════════
+
+sleeve_id: xli_cs
+portfolio_weight: 0.1924
+mode: live
+
+strategy:
+  module: compass.exp2160_high_capacity_alts
+  runner: run_put_credit_spreads
+  runner_arg_ticker: XLI
+  description: "Delta-targeted put credit spread, weekly cadence, BS-inversion strike selection"
+
+instrument:
+  ticker: XLI
+  asset_class: options
+  strategy_type: put_credit_spread
+
+cadence:
+  entry_frequency_days: 5
+  scan_window: "monday 09:35-10:00 ET"
+  max_concurrent: 4
+
+spread:
+  short_delta: 0.15
+  long_delta: 0.08
+  target_dte: 30
+  min_dte: 21
+  max_dte: 45
+  min_net_credit: 0.10
+
+entry_filters:
+  vix_max_entry: 40.0
+  spot_min_price: 50.0
+
+exits:
+  hold_to_expiration: true
+  profit_target_pct: null
+  stop_loss_multiplier: null
+  max_hold_days: 35
+
+sizing:
+  base: starting_capital
+  risk_per_trade_pct: 2.0
+  min_contracts: 1
+  max_contracts: 6
+
+data:
+  options_source: ironvault
+  options_db: data/options_cache.db
+  underlying_source: alpaca
+
+logging:
+  level: INFO
+  file: logs/exp2300/sleeve_xli_cs.log
+  journal: logs/exp2300/journal_xli_cs.csv

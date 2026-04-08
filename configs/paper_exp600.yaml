@@ -1,0 +1,184 @@
+# ============================================================================
+# paper_exp600.yaml — EXP-600 IBIT Adaptive Paper Trading Config
+# ============================================================================
+# Strategy: Direction-adaptive credit spreads on IBIT.
+#           MA50 determines direction:
+#             - Price above MA50 → bull put spreads
+#             - Price below MA50 → bear call spreads
+#
+# Backtest champion (sweep config #14):
+#   139.2% avg annual return | -19.4% max DD | 0.95 overfit score
+#   DTE=14 | OTM=10% | Width=$5 | PT=30% | SL=2.5x | Risk=15% | Kelly=1.0
+#
+# Created by: charles (2026-03-22)
+#
+# Usage:
+#   python main.py scheduler --config configs/paper_exp600.yaml \
+#                            --env-file .env.exp600
+#
+# Required env vars (in .env.exp600):
+#   ALPACA_API_KEY       — Alpaca paper trading API key
+#   ALPACA_API_SECRET    — Alpaca paper trading API secret
+#   POLYGON_API_KEY      — Polygon.io API key
+#   TELEGRAM_BOT_TOKEN   — (optional) Telegram alerts
+#   TELEGRAM_CHAT_ID     — (optional) Telegram chat ID
+# ============================================================================
+
+paper_mode: true
+db_path: "data/exp600/pilotai_exp600.db"
+experiment_id: "EXP-600"
+created_by: "charles"     # Attribution: experiment creator
+
+tickers:
+  - IBIT
+
+# ============================================================================
+# Strategy — Direction-adaptive credit spreads via MA50
+# ============================================================================
+strategy:
+  # --- DTE: target 14, allow 10-21 window for fill flexibility ---
+  min_dte: 10
+  max_dte: 21
+  target_dte: 14
+
+  manage_dte: 0             # No early DTE exit — matches backtest
+
+  # --- Direction: MA50 adaptive ---
+  #     bull put spreads when price > MA50
+  #     bear call spreads when price < MA50
+  direction: both
+
+  # --- Strike selection: 10% OTM (backtest champion param) ---
+  otm_pct: 0.10
+  use_delta_selection: false
+  target_delta: 0.12
+  min_delta: 0.05
+  max_delta: 0.25
+
+  # --- Spread construction: $5 wide ---
+  spread_width: 5
+
+  # --- IV filters ---
+  min_iv_rank: 0
+  min_iv_percentile: 0
+
+  # --- Iron condor: disabled (IBIT — directional strategy only) ---
+  iron_condor:
+    enabled: false
+
+  # --- Straddle/strangle: disabled ---
+  straddle_strangle:
+    enabled: false
+
+  # --- Technical filters ---
+  technical:
+    use_trend_filter: true    # MA50 is the direction gate
+    use_rsi_filter: false
+    use_support_resistance: false
+    fast_ma: 50               # MA50 adaptive direction
+    slow_ma: 50
+    rsi_period: 14
+    rsi_oversold: 30
+    rsi_overbought: 70
+
+  # --- Regime detection: MA mode (simple MA50 direction, no VIX/RSI signals) ---
+  regime_mode: ma
+  regime_config:
+    fast_ma: 50
+
+# ============================================================================
+# Risk Management
+# ============================================================================
+risk:
+  account_size: 100000
+
+  # 15% risk per trade (backtest champion param)
+  max_risk_per_trade: 15.0
+
+  # Kelly sizing: fraction=1.0 (full Kelly — matches backtest)
+  sizing_mode: kelly
+  kelly_fraction: 1.0
+  compound: false
+
+  # Contract limits
+  min_contracts: 1
+  max_contracts: 25
+
+  # Position limits (max 5 — backtest champion param)
+  max_positions: 5
+  max_positions_per_ticker: 5
+
+  scan_days: [0, 1, 2, 3, 4]
+
+  # Exit rules (backtest champion params)
+  profit_target: 30             # 30% of credit received
+  stop_loss_multiplier: 2.5     # 2.5x credit received
+  stop_loss_pct_of_width: 90
+
+  delta_threshold: 0.30
+  min_credit_pct: 3             # Lower floor for IBIT spreads
+  momentum_filter_pct: 2.0
+
+  portfolio_risk:
+    max_portfolio_risk_pct: 40
+    max_single_ticker_pct: 40
+    max_same_expiration: 3
+
+  drawdown_cb_pct: 40
+  cooldown_bars: 3
+
+  enable_rolling: false
+  max_rolls_per_position: 0
+
+# ============================================================================
+# Alpaca Paper Trading
+# ============================================================================
+alpaca:
+  enabled: true
+  paper: true
+  base_url: "https://paper-api.alpaca.markets"
+  api_key: "${ALPACA_API_KEY}"
+  api_secret: "${ALPACA_API_SECRET}"
+
+# ============================================================================
+# Alerts
+# ============================================================================
+alerts:
+  output_json: true
+  output_text: true
+  output_csv: true
+  json_file: "alerts_exp600.json"
+  text_file: "alerts_exp600.txt"
+  csv_file: "alerts_exp600.csv"
+
+  telegram:
+    enabled: true
+    bot_token: "${TELEGRAM_BOT_TOKEN}"
+    chat_id: "${TELEGRAM_CHAT_ID}"
+
+# ============================================================================
+# Logging
+# ============================================================================
+logging:
+  level: "INFO"
+  file: "logs/paper_exp600.log"
+  console: true
+
+# ============================================================================
+# Data
+# ============================================================================
+data:
+  provider: polygon
+  cache_dir: "data/options_cache"
+
+# ============================================================================
+# Backtester Reference (sweep config #14, mega sweep)
+# ============================================================================
+backtest:
+  starting_capital: 100000
+  commission_per_contract: 0.65
+  slippage: 0.05
+  exit_slippage: 0.10
+  score_threshold: 25
+  generate_reports: true
+  report_dir: "output/backtest_reports"

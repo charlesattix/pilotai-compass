@@ -1,0 +1,193 @@
+# ============================================================================
+# paper_champion.yaml — Regime-Adaptive Champion Paper Trading Config
+# ============================================================================
+# Strategy: Regime-adaptive credit spreads + iron condors on SPY
+# Validation: ROBUST 0.870 | WF 3/3 | Jitter 0.98 | Avg +32.7%/yr
+# Config source: configs/champion.json (regime_adaptive_20260312)
+#
+# Usage:
+#   python main.py scheduler --config configs/paper_champion.yaml \
+#                            --env-file .env.champion
+#
+# Required env vars:
+#   ALPACA_API_KEY         — Alpaca paper trading API key
+#   ALPACA_API_SECRET      — Alpaca paper trading API secret
+#   POLYGON_API_KEY        — Polygon.io API key (options chain data)
+#   TELEGRAM_BOT_TOKEN     — (optional) Telegram alert bot token
+#   TELEGRAM_CHAT_ID       — (optional) Telegram chat ID for alerts
+# ============================================================================
+
+# --- Paper trading safety flags ---
+paper_mode: true          # SAFETY: blocks live API URLs when true
+db_path: "data/pilotai_exp400.db"  # Isolated DB per experiment
+experiment_id: "EXP-400"  # Prefix for Telegram alerts
+created_by: "maximus"     # Attribution: experiment creator
+
+# Tickers
+tickers:
+  - SPY
+
+# ============================================================================
+# Credit Spread Strategy (from champion.json)
+# ============================================================================
+strategy:
+  # --- DTE ---
+  min_dte: 15
+  max_dte: 25
+  target_dte: 15
+
+  manage_dte: 0           # DISABLED — matches backtester (no early DTE exit)
+
+  # --- Direction: regime-adaptive (bull put in bull, bear call in bear) ---
+  direction: both
+
+  # --- Strike selection ---
+  otm_pct: 0.02            # 2% OTM
+  use_delta_selection: false
+  target_delta: 0.12
+  min_delta: 0.08
+  max_delta: 0.18
+
+  # --- Spread construction ---
+  spread_width: 12          # $12 wide spreads
+  spread_width_high_iv: 12
+  spread_width_low_iv: 12
+
+  # --- IV filters (credit spread has no IV floor) ---
+  min_iv_rank: 0
+  min_iv_percentile: 0
+
+  # --- Iron Condor (enabled — key part of champion) ---
+  iron_condor:
+    enabled: true
+    rsi_min: 35
+    rsi_max: 60
+    min_iv_rank: 45.0
+    target_dte: 30
+    min_dte: 20
+    otm_pct_put: 0.04
+    otm_pct_call: 0.03
+    spread_width: 12
+    min_combined_credit_pct: 0.25
+    profit_target_pct: 0.30
+    stop_loss_multiplier: 2.5
+    max_risk_pct: 3.5
+
+  # --- Technical filters ---
+  technical:
+    use_trend_filter: true
+    use_rsi_filter: false
+    use_support_resistance: false
+    fast_ma: 50
+    slow_ma: 80              # Champion uses MA80 trend filter
+    rsi_period: 14
+    rsi_oversold: 30
+    rsi_overbought: 70
+
+  # --- Regime detection ---
+  regime_mode: combo
+  regime_config:
+    signals:
+      - price_vs_ma200
+      - rsi_momentum
+      - vix_structure
+    ma_slow_period: 80
+    ma200_neutral_band_pct: 0.5
+
+# ============================================================================
+# Risk Management
+# ============================================================================
+risk:
+  account_size: 100000
+
+  # Credit spread: 8.5% risk per trade (from champion.json)
+  max_risk_per_trade: 8.5
+
+  # Sizing: flat (fixed % of starting capital — not compound)
+  sizing_mode: flat
+  compound: false          # Fixed sizing for honest P&L tracking
+
+  # Contract limits
+  min_contracts: 1
+  max_contracts: 25
+
+  # Position limits
+  max_positions: 10
+  max_positions_per_ticker: 2
+
+  scan_days: [0, 1, 2, 3, 4]   # Monday-Friday
+
+  # Credit spread exit rules
+  profit_target: 55          # 55% of credit received
+  stop_loss_multiplier: 1.25  # 1.25x credit received
+  stop_loss_pct_of_width: 90
+
+  # Momentum filter
+  momentum_filter_pct: 2.0
+
+  # Portfolio-level risk limits
+  portfolio_risk:
+    max_portfolio_risk_pct: 40
+    max_single_ticker_pct: 40
+    max_same_expiration: 4
+
+  # Drawdown circuit breaker
+  drawdown_cb_pct: 40
+  cooldown_bars: 3
+
+  # No rolling
+  enable_rolling: false
+  max_rolls_per_position: 0
+
+# ============================================================================
+# Alpaca Paper Trading
+# ============================================================================
+alpaca:
+  enabled: true
+  paper: true
+  base_url: "https://paper-api.alpaca.markets"
+  api_key: "${ALPACA_API_KEY}"
+  api_secret: "${ALPACA_API_SECRET}"
+
+# ============================================================================
+# Alerts
+# ============================================================================
+alerts:
+  output_json: true
+  output_text: true
+  output_csv: true
+  json_file: "alerts_champion.json"
+  text_file: "alerts_champion.txt"
+  csv_file: "alerts_champion.csv"
+
+  telegram:
+    enabled: true
+    bot_token: "${TELEGRAM_BOT_TOKEN}"
+    chat_id: "${TELEGRAM_CHAT_ID}"
+
+# ============================================================================
+# Logging
+# ============================================================================
+logging:
+  level: "INFO"
+  file: "logs/paper_champion.log"
+  console: true
+
+# ============================================================================
+# Data
+# ============================================================================
+data:
+  provider: polygon
+  cache_dir: "data/options_cache"
+
+# ============================================================================
+# Backtester Reference (for comparison)
+# ============================================================================
+backtest:
+  starting_capital: 100000
+  commission_per_contract: 0.65
+  slippage: 0.05
+  exit_slippage: 0.10
+  score_threshold: 25
+  generate_reports: true
+  report_dir: "output/backtest_reports"

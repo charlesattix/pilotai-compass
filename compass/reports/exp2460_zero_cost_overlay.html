@@ -1,0 +1,55 @@
+<!doctype html><html><head><meta charset='utf-8'>
+<title>EXP-2460 — Zero-Cost Overlay</title>
+<style>
+ body{font-family:-apple-system,Segoe UI,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;color:#1a1a1a;line-height:1.5;background:#fff}
+ h1{border-bottom:2px solid #222;padding-bottom:.3em} h2{margin-top:1.6em;border-bottom:1px solid #ccc}
+ table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.93em}
+ th,td{border:1px solid #bbb;padding:5px 8px;text-align:left} th{background:#f0f0f0}
+ .ok{color:#0a7a0a;font-weight:600} .warn{color:#b86b00;font-weight:600}
+ .small{color:#555;font-size:.88em}
+</style></head><body>
+<h1>EXP-2460 — Zero-Cost Alpha: Portfolio-Level T+V Timing Overlay</h1>
+<p class='small'>Generated 2026-04-08T05:05:32 · 7-stream cube · LW risk-parity ·
+  15% vol target · 5bps/turnover · Rule Zero clean.</p>
+
+<h2>Block-day coverage</h2>
+<p>T (^VIX/^VIX3M &gt; 0.95): <b>318</b> days<br>
+   V (vvol 20d/252d-z &gt; 1.5): <b>98</b> days<br>
+   Both: <b>37</b> days<br>
+   Any block: <b>379</b> days (24.2% of sample)</p>
+
+<h2>Variant bake-off</h2>
+<table>
+<tr><th>Variant</th><th>Rebalance events</th><th>Skipped days</th><th>Flat days</th>
+ <th>Gross Sharpe</th><th>Net Sharpe</th><th>Net CAGR</th><th>Net DD</th><th>Total cost (bps)</th></tr>
+<tr><td>baseline</td><td>263</td><td>0</td><td>0</td><td>12.10</td><td>12.05</td><td>102.27%</td><td>2.27%</td><td>187.8</td></tr><tr><td>skip_hold</td><td>206</td><td>57</td><td>0</td><td>11.83</td><td>11.79</td><td>101.54%</td><td>2.27%</td><td>180.9</td></tr><tr><td>skip_flat</td><td>263</td><td>0</td><td>57</td><td>10.27</td><td>9.73</td><td>67.37%</td><td>2.27%</td><td>1141.6</td></tr><tr><td>skip_half</td><td>263</td><td>57</td><td>0</td><td>11.14</td><td>11.14</td><td>78.52%</td><td>2.27%</td><td>868.8</td></tr>
+</table>
+
+<h2>Headline</h2>
+<table>
+<tr><th>Metric</th><th>Baseline</th><th>skip_hold</th><th>Δ</th></tr>
+<tr><td>Net Sharpe</td><td>12.05</td><td>11.79</td>
+ <td class='warn'>-0.26</td></tr>
+<tr><td>Rebalance events</td>
+ <td>263</td>
+ <td>206</td>
+ <td>-21.7%</td></tr>
+<tr><td>Total cost (bps)</td>
+ <td>187.8</td>
+ <td>180.9</td>
+ <td class='ok'>-6.9</td></tr>
+</table>
+
+<h2>Notes</h2>
+<ul>
+<li>Overlay blocks rebalancing when <b>VIX/VIX3M &gt; 0.95</b> (term
+    backwardation) OR <b>vvol 20d-z &gt; 1.5</b> (elevated vol of vol).</li>
+<li><b>skip_hold</b> keeps previous weights (pure cost reduction).<br>
+    <b>skip_flat</b> goes to cash on block days (cost reduction +
+    exposure reduction; will incur a close-out turnover).<br>
+    <b>skip_half</b> keeps previous weights at 50% leverage
+    (compromise between cost and exposure).</li>
+<li>Target Sharpe 6.0 is leverage-invariant — these variants modify
+    Sharpe only through regime timing, not through leverage.</li>
+</ul>
+</body></html>

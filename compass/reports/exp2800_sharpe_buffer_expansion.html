@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>EXP-2800 — Sharpe Buffer Expansion</title>
+<style>
+body { font-family:-apple-system,sans-serif;max-width:1400px;margin:0 auto;padding:28px;background:#fff;color:#1e293b; }
+h1 { font-size:1.8em;color:#0f172a; }
+h2 { margin-top:2em;border-bottom:2px solid #e2e8f0;padding-bottom:8px;color:#334155; }
+h3 { color:#475569;margin-top:1.5em; }
+.sources { background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px;font-size:0.84rem;line-height:1.6; }
+.decision { background:#fff;border:2px solid #dc2626;border-radius:10px;padding:16px;margin:16px 0; }
+.decision h3 { margin-top:0;color:#dc2626; }
+table { width:100%;border-collapse:collapse;margin:10px 0;font-size:0.82em; }
+th { background:#f1f5f9;padding:7px 9px;text-align:right;border-bottom:2px solid #cbd5e1;font-size:0.7em;text-transform:uppercase; }
+th:first-child { text-align:left; }
+td { padding:6px 9px;text-align:right;border-bottom:1px solid #e2e8f0; }
+td:first-child { text-align:left; }
+</style></head><body>
+
+<h1>EXP-2800 — Sharpe Buffer Expansion via XLE 9th Stream</h1>
+<p style="color:#64748b">Adding XLE credit spreads as the 9th stream to
+expand the Sharpe 6.0 buffer · 2026-04-08 14:06</p>
+
+<div class="sources">
+<strong>Rule Zero:</strong> EXP-2450 sparse 7-stream + EXP-2250 QQQ cache
++ compass.exp2710_xle_integration.run_xle_credit_spreads on real IronVault
+data (26 XLE trades, WR 96.2%, trade Sharpe 1.87, corr to exp1220 -0.016).
+EXP-2570 drag model (890.3 bps annual).
+</div>
+
+<div class="decision">
+<h3>Decision: KEEP_V8A</h3>
+XLE does not materially improve buffer (-0.12) and 10 perturbations still breach.
+</div>
+
+<h2>Buffer comparison</h2>
+<table>
+<thead><tr><th>Metric</th><th>v8a (8-stream)</th><th>v9 (+XLE)</th><th>Δ</th></tr></thead>
+<tbody>
+<tr><td>baseline pooled SR</td>
+<td>6.164</td>
+<td>6.034</td>
+<td>-0.130</td></tr>
+<tr><td>median fold Sharpe</td>
+<td>6.942</td>
+<td>7.026</td>
+<td>+0.084</td></tr>
+<tr><td>min perturbation SR (worst case)</td>
+<td>5.499</td>
+<td>5.379</td>
+<td style='font-weight:700'>-0.120</td></tr>
+<tr><td><strong>buffer above 6.0</strong></td>
+<td>-0.501</td>
+<td>-0.621</td>
+<td style='font-weight:700;color:#dc2626'>-0.120</td></tr>
+<tr><td># perturbations below 6</td>
+<td>5</td>
+<td>10</td>
+<td>+5</td></tr>
+<tr><td>worst perturbation</td>
+<td>slippage_+100%</td>
+<td>slippage_+100%</td>
+<td>—</td></tr>
+</tbody>
+</table>
+
+<h2>Full sensitivity matrix</h2>
+
+<h3>vol_target</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div><strong>v8a</strong>
+<table><thead><tr><th>Label</th><th>Sharpe</th><th>Med fold</th><th>%≥6</th><th>CAGR</th><th>DD</th></tr></thead>
+<tbody><tr><td>vol_target_-20%</td><td style='color:#dc2626;font-weight:700'>5.998</td><td>6.77</td><td>70%</td><td>89%</td><td>5.7%</td></tr><tr><td>vol_target_-10%</td><td style='color:#16a34a;font-weight:700'>6.090</td><td>6.86</td><td>70%</td><td>106%</td><td>6.4%</td></tr><tr><td>vol_target_+10%</td><td style='color:#16a34a;font-weight:700'>6.225</td><td>7.02</td><td>70%</td><td>147%</td><td>7.8%</td></tr><tr><td>vol_target_+20%</td><td style='color:#16a34a;font-weight:700'>6.275</td><td>7.09</td><td>70%</td><td>170%</td><td>8.5%</td></tr></tbody></table></div>
+<div><strong>v9 (+XLE)</strong>
+<table><thead><tr><th>Label</th><th>Sharpe</th><th>Med fold</th><th>%≥6</th><th>CAGR</th><th>DD</th></tr></thead>
+<tbody><tr><td>vol_target_-20%</td><td style='color:#dc2626;font-weight:700'>5.871</td><td>6.85</td><td>70%</td><td>88%</td><td>5.9%</td></tr><tr><td>vol_target_-10%</td><td style='color:#dc2626;font-weight:700'>5.962</td><td>6.95</td><td>70%</td><td>106%</td><td>6.5%</td></tr><tr><td>vol_target_+10%</td><td style='color:#16a34a;font-weight:700'>6.094</td><td>7.09</td><td>70%</td><td>146%</td><td>7.9%</td></tr><tr><td>vol_target_+20%</td><td style='color:#16a34a;font-weight:700'>6.144</td><td>7.14</td><td>70%</td><td>168%</td><td>8.6%</td></tr></tbody></table></div>
+</div>
+<h3>shrinkage</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div><strong>v8a</strong>
+<table><thead><tr><th>Label</th><th>Sharpe</th><th>Med fold</th><th>%≥6</th><th>CAGR</th><th>DD</th></tr></thead>
+<tbody><tr><td>shrinkage_-50%</td><td style='color:#16a34a;font-weight:700'>6.164</td><td>6.94</td><td>70%</td><td>126%</td><td>7.1%</td></tr><tr><td>shrinkage_-20%</td><td style='color:#16a34a;font-weight:700'>6.164</td><td>6.94</td><td>70%</td><td>126%</td><td>7.1%</td></tr><tr><td>shrinkage_+20%</td><td style='color:#16a34a;font-weight:700'>6.185</td><td>6.94</td><td>70%</td><td>126%</td><td>7.1%</td></tr><tr><td>shrinkage_+50%</td><td style='color:#16a34a;font-weight:700'>6.215</td><td>6.95</td><td>70%</td><td>126%</td><td>7.1%</td></tr></tbody></table></div>
+<div><strong>v9 (+XLE)</strong>
+<table><thead><tr><th>Label</th><th>Sharpe</th><th>Med fold</th><th>%≥6</th><th>CAGR</th><th>DD</th></tr></thead>
+<tbody><tr><td>shrinkage_-50%</td><td style='color:#16a34a;font-weight:700'>6.034</td><td>7.03</td><td>70%</td><td>125%</td><td>7.2%</td></tr><tr><td>shrinkage_-20%</td><td style='color:#16a34a;font-weight:700'>6.034</td><td>7.03</td><td>70%</td><td>125%</td><td>7.2%</td></tr><tr><td>shrinkage_+20%</td><td style='color:#16a34a;font-weight:700'>6.055</td><td>7.04</td><td>70%</td><td>125%</td><td>7.2%</td></tr><tr><td>shrinkage_+50%</td><td style='color:#16a34a;font-weight:700'>6.084</td><td>7.04</td><td>70%</td><td>125%</td><td>7.2%</td></tr></tbody></table></div>
+</div>
+<h3>stream_weights</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div><strong>v8a</strong>
+<table><thead><tr><th>Label</th><th>Sharpe</th><th>Med fold</th><th>%≥6</th><th>CAGR</th><th>DD</th></tr></thead>
+<tbody><tr><td>exp1220_-20%</td><td style='color:#16a34a;font-weight:700'>6.014</td><td>6.86</td><td>70%</td><td>122%</td><td>7.3%</td></tr><tr><td>exp1220_+20%</td><td style='color:#16a34a;font-weight:700'>6.266</td><td>7.07</td><td>70%</td><td>128%</td><td>6.9%</td></tr><tr><td>v5_hedge_-20%</td><td style='color:#16a34a;font-weight:700'>6.467</td><td>7.15</td><td>70%</td><td>129%</td><td>6.4%</td></tr><tr><td>v5_hedge_+20%</td><td style='color:#dc2626;font-weight:700'>5.822</td><td>6.92</td><td>65%</td><td>121%</td><td>7.8%</td></tr><tr><td>gld_cal_-20%</td><td style='color:#16a34a;font-weight:700'>6.127</td><td>6.96</td><td>70%</td><td>126%</td><td>7.0%</td></tr><tr><td>gld_cal_+20%</td><td style='color:#16a34a;font-weight:700'>6.179</td><td>6.88</td><td>70%</td><td>125%</td><td>7.1%</td></tr><tr><td>slv_cal_-20%</td><td style='color:#16a34a;font-weight:700'>6.170</td><td>7.08</td><td>70%</td><td>127%</td><td>7.0%</td></tr><tr><td>slv_cal_+20%</td><td style='color:#16a34a;font-weight:700'>6.136</td><td>6.87</td><td>70%</td><td>124%</td><td>7.1%</td></tr><tr><td>cross_vol_-20%</td><td style='color:#16a34a;font-weight:700'>6.125</td><td>6.93</td><td>70%</td><td>125%</td><td>7.3%</td></tr><tr><td>cross_vol_+20%</td><td style='color:#16a34a;font-weight:700'>6.176</td><td>7.05</td><td>70%</td><td>125%</td><td>6.9%</td></tr><tr><td>xlf_cs_-20%</td><td style='color:#16a34a;font-weight:700'>6.011</td><td>6.79</td><td>70%</td><td>121%</td><td>7.3%</td></tr><tr><td>xlf_cs_+20%</td><td style='color:#16a34a;font-weight:700'>6.288</td><td>7.10</td><td>70%</td><td>129%</td><td>6.9%</td></tr><tr><td>xli_cs_-20%</td><td style='color:#16a34a;font-weight:700'>6.133</td><td>7.02</td><td>70%</td><td>125%</td><td>7.3%</td></tr><tr><td>xli_cs_+20%</td><td style='color:#16a34a;font-weight:700'>6.173</td><td>6.83</td><td>70%</td><td>125%</td><td>6.9%</td></tr><tr><td>qqq_cs_-20%</td><td style='color:#16a34a;font-weight:700'>6.150</td><td>6.92</td><td>70%</td><td>126%</td><td>7.1%</td></tr><tr><td>qqq_cs_+20%</td><td style='color:#16a34a;font-weight:700'>6.172</td><td>6.99</td><td>70%</td><td>125%</td><td>7.1%</td></tr></tbody></table></div>
+<div><strong>v9 (+XLE)</strong>
+<table><thead><tr><th>Label</th><th>Sharpe</th><th>Med fold</th><th>%≥6</th><th>CAGR</th><th>DD</th></tr></thead>
+<tbody><tr><td>exp1220_-20%</td><td style='color:#dc2626;font-weight:700'>5.883</td><td>6.86</td><td>70%</td><td>121%</td><td>7.4%</td></tr><tr><td>exp1220_+20%</td><td style='color:#16a34a;font-weight:700'>6.141</td><td>7.12</td><td>70%</td><td>127%</td><td>7.0%</td></tr><tr><td>v5_hedge_-20%</td><td style='color:#16a34a;font-weight:700'>6.338</td><td>7.20</td><td>70%</td><td>128%</td><td>6.5%</td></tr><tr><td>v5_hedge_+20%</td><td style='color:#dc2626;font-weight:700'>5.693</td><td>6.91</td><td>65%</td><td>120%</td><td>8.0%</td></tr><tr><td>gld_cal_-20%</td><td style='color:#dc2626;font-weight:700'>5.991</td><td>7.06</td><td>70%</td><td>125%</td><td>7.2%</td></tr><tr><td>gld_cal_+20%</td><td style='color:#16a34a;font-weight:700'>6.057</td><td>6.93</td><td>70%</td><td>124%</td><td>7.3%</td></tr><tr><td>slv_cal_-20%</td><td style='color:#16a34a;font-weight:700'>6.030</td><td>7.17</td><td>70%</td><td>126%</td><td>7.2%</td></tr><tr><td>slv_cal_+20%</td><td style='color:#16a34a;font-weight:700'>6.016</td><td>6.85</td><td>70%</td><td>123%</td><td>7.3%</td></tr><tr><td>cross_vol_-20%</td><td style='color:#dc2626;font-weight:700'>5.995</td><td>6.92</td><td>70%</td><td>124%</td><td>7.4%</td></tr><tr><td>cross_vol_+20%</td><td style='color:#16a34a;font-weight:700'>6.046</td><td>7.14</td><td>70%</td><td>124%</td><td>7.1%</td></tr><tr><td>xlf_cs_-20%</td><td style='color:#dc2626;font-weight:700'>5.879</td><td>6.83</td><td>70%</td><td>120%</td><td>7.4%</td></tr><tr><td>xlf_cs_+20%</td><td style='color:#16a34a;font-weight:700'>6.160</td><td>7.19</td><td>70%</td><td>128%</td><td>7.0%</td></tr><tr><td>xli_cs_-20%</td><td style='color:#16a34a;font-weight:700'>6.006</td><td>7.04</td><td>70%</td><td>124%</td><td>7.4%</td></tr><tr><td>xli_cs_+20%</td><td style='color:#16a34a;font-weight:700'>6.043</td><td>6.95</td><td>70%</td><td>124%</td><td>7.0%</td></tr><tr><td>qqq_cs_-20%</td><td style='color:#16a34a;font-weight:700'>6.021</td><td>6.97</td><td>70%</td><td>125%</td><td>7.3%</td></tr><tr><td>qqq_cs_+20%</td><td style='color:#16a34a;font-weight:700'>6.041</td><td>7.05</td><td>70%</td><td>124%</td><td>7.2%</td></tr><tr><td>xle_cs_-20%</td><td style='color:#16a34a;font-weight:700'>6.055</td><td>7.03</td><td>70%</td><td>125%</td><td>7.2%</td></tr><tr><td>xle_cs_+20%</td><td style='color:#16a34a;font-weight:700'>6.013</td><td>7.03</td><td>70%</td><td>124%</td><td>7.2%</td></tr></tbody></table></div>
+</div>
+<h3>slippage</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div><strong>v8a</strong>
+<table><thead><tr><th>Label</th><th>Sharpe</th><th>Med fold</th><th>%≥6</th><th>CAGR</th><th>DD</th></tr></thead>
+<tbody><tr><td>slippage_+25%</td><td style='color:#dc2626;font-weight:700'>5.998</td><td>6.77</td><td>70%</td><td>121%</td><td>7.2%</td></tr><tr><td>slippage_+50%</td><td style='color:#dc2626;font-weight:700'>5.831</td><td>6.60</td><td>70%</td><td>116%</td><td>7.2%</td></tr><tr><td>slippage_+100%</td><td style='color:#dc2626;font-weight:700'>5.499</td><td>6.23</td><td>55%</td><td>107%</td><td>7.3%</td></tr></tbody></table></div>
+<div><strong>v9 (+XLE)</strong>
+<table><thead><tr><th>Label</th><th>Sharpe</th><th>Med fold</th><th>%≥6</th><th>CAGR</th><th>DD</th></tr></thead>
+<tbody><tr><td>slippage_+25%</td><td style='color:#dc2626;font-weight:700'>5.871</td><td>6.85</td><td>70%</td><td>120%</td><td>7.3%</td></tr><tr><td>slippage_+50%</td><td style='color:#dc2626;font-weight:700'>5.707</td><td>6.68</td><td>65%</td><td>115%</td><td>7.3%</td></tr><tr><td>slippage_+100%</td><td style='color:#dc2626;font-weight:700'>5.379</td><td>6.30</td><td>55%</td><td>106%</td><td>7.4%</td></tr></tbody></table></div>
+</div>
+<h3>spread</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div><strong>v8a</strong>
+<table><thead><tr><th>Label</th><th>Sharpe</th><th>Med fold</th><th>%≥6</th><th>CAGR</th><th>DD</th></tr></thead>
+<tbody><tr><td>spread_+10%</td><td style='color:#16a34a;font-weight:700'>6.204</td><td>6.95</td><td>70%</td><td>126%</td><td>7.0%</td></tr><tr><td>spread_+20%</td><td style='color:#16a34a;font-weight:700'>6.242</td><td>6.96</td><td>70%</td><td>127%</td><td>7.0%</td></tr></tbody></table></div>
+<div><strong>v9 (+XLE)</strong>
+<table><thead><tr><th>Label</th><th>Sharpe</th><th>Med fold</th><th>%≥6</th><th>CAGR</th><th>DD</th></tr></thead>
+<tbody><tr><td>spread_+10%</td><td style='color:#16a34a;font-weight:700'>6.064</td><td>7.04</td><td>70%</td><td>125%</td><td>7.2%</td></tr><tr><td>spread_+20%</td><td style='color:#16a34a;font-weight:700'>6.094</td><td>7.06</td><td>70%</td><td>125%</td><td>7.1%</td></tr></tbody></table></div>
+</div>
+
+<p style="margin-top:3em;color:#94a3b8;font-size:0.78em;text-align:center">
+compass/exp2800_sharpe_buffer_expansion.py · Rule Zero · real data
+</p>
+</body></html>

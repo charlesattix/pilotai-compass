@@ -1,0 +1,296 @@
+# ============================================================================
+# paper_exp880.yaml — EXP-880 Crisis Hedge V2 Paper Trading Config
+# ============================================================================
+# Strategy: ML-filtered credit spreads (EXP-710 P>=0.75 ensemble) with
+#           Crisis Hedge V2 Ultra-Safe overlay and 2x regime leverage.
+#
+# Based on: EXP-880 backtest results (76.9% CAGR, 10.2% DD, Sharpe 4.97)
+#           EXP-860 production ensemble (Sharpe 12.30, 89.6% WR)
+#           EXP-840 regime leverage (56% CAGR, Calmar 12.31)
+#           EXP-970 walk-forward validation (2.5x → 36.4% CAGR, 5.6% DD)
+#
+# Leverage: 2x base with regime multipliers (conservative per EXP-980 margin)
+# Hedge: Crisis Hedge V2 Ultra-Safe (min_scale=0.20, DD 2%→7%)
+# Signal: 3-model ensemble (XGB+RF+ET) with P>=0.75 filter
+#
+# Account: Alpaca paper trading (fresh account)
+#
+# Usage:
+#   python main.py scheduler --config configs/paper_exp880.yaml \
+#                            --env-file .env.exp880
+#
+# Required env vars (in .env.exp880):
+#   ALPACA_API_KEY       — Alpaca paper trading API key
+#   ALPACA_API_SECRET    — Alpaca paper trading API secret
+#   POLYGON_API_KEY      — Polygon.io API key
+#   TELEGRAM_BOT_TOKEN   — (optional) Telegram alerts
+#   TELEGRAM_CHAT_ID     — (optional) Telegram chat ID
+# ============================================================================
+
+paper_mode: true
+db_path: "data/exp880/pilotai_exp880.db"
+experiment_id: "EXP-880"
+created_by: "maximus"
+
+tickers:
+  - SPY
+
+# ============================================================================
+# Strategy — ML Ensemble + Crisis Hedge + Regime Leverage
+# ============================================================================
+strategy:
+  # --- DTE (matches EXP-401/503 core) ---
+  min_dte: 15
+  max_dte: 25
+  target_dte: 15
+  manage_dte: 0
+
+  # --- Direction: regime-adaptive ---
+  direction: both
+
+  # --- Strike selection ---
+  otm_pct: 0.02
+  use_delta_selection: false
+  target_delta: 0.12
+  min_delta: 0.08
+  max_delta: 0.18
+
+  # --- Spread construction ---
+  spread_width: 12
+
+  # --- IV filters ---
+  min_iv_rank: 0
+  min_iv_percentile: 0
+
+  # --- Iron condor: disabled (cleaner ML signal) ---
+  iron_condor:
+    enabled: false
+
+  # --- Straddle/strangle: disabled ---
+  straddle_strangle:
+    enabled: false
+
+  # --- Technical filters ---
+  technical:
+    use_trend_filter: true
+    use_rsi_filter: false
+    use_support_resistance: false
+    fast_ma: 50
+    slow_ma: 80
+    rsi_period: 14
+    rsi_oversold: 30
+    rsi_overbought: 70
+
+  # --- Regime detection ---
+  regime_mode: combo
+  regime_config:
+    signals:
+      - price_vs_ma200
+      - rsi_momentum
+      - vix_structure
+    ma_slow_period: 80
+    ma200_neutral_band_pct: 0.5
+
+  # ── ML Ensemble Signal Filter (EXP-860 production ensemble) ────────────
+  ml_enhanced:
+    enabled: true
+
+    # Base regime multipliers at 2x leverage (EXP-840 validated)
+    # These are pre-leverage: actual position = mult × base_risk × leverage
+    min_mult: 0.10          # bear / high_vol — near-flat
+    max_mult: 1.50          # bull — lean in hard
+    neutral_mult: 1.00      # neutral — normal
+    low_vol_mult: 1.20      # low_vol — calm, slightly more
+    crash_mult: 0.00        # crash — no new trades
+
+    # Regime gate: suppress signal generation in defensive regimes
+    regime_gate: true
+
+    # Production ensemble (XGB + RF + ExtraTrees, walk-forward trained)
+    use_signal_model: true
+    use_ensemble: true
+    ensemble_models:
+      - xgboost
+      - random_forest
+      - extra_trees
+    ensemble_threshold: 0.75    # P>=0.75 filter (EXP-710 validated)
+    ml_blend_weight: 0.50       # 50% ensemble, 50% regime table
+
+    # Confidence-graded sizing (EXP-860 tiers)
+    confidence_sizing: true
+    confidence_tiers:
+      - threshold: 0.90
+        size_fraction: 1.00     # P>=0.90 → full size
+      - threshold: 0.80
+        size_fraction: 0.75     # P>=0.80 → 75%
+      - threshold: 0.75
+        size_fraction: 0.50     # P>=0.75 → 50%
+
+    # Ensemble disagreement sizing (EXP-860)
+    disagreement_scaling: true
+    max_disagreement_std: 0.20  # above this → halve size
+
+    # Shadow mode: log ensemble predictions for comparison
+    shadow_ensemble: true
+
+    # Minimum score after all adjustments
+    min_score_threshold: 30.0
+
+  # ── Regime Leverage (EXP-840 validated, 2x base) ─────────────────────
+  leverage:
+    enabled: true
+    base_leverage: 2.0        # 2x base (conservative per EXP-980 margin)
+    regime_multipliers:
+      bull: 1.20              # 2x × 1.2 = 2.4x effective
+      sideways: 0.80          # 2x × 0.8 = 1.6x
+      low_vol: 0.90           # 2x × 0.9 = 1.8x
+      bear: 0.30              # 2x × 0.3 = 0.6x
+      high_vol: 0.20          # 2x × 0.2 = 0.4x
+      crash: 0.10             # 2x × 0.1 = 0.2x
+
+# ============================================================================
+# Crisis Hedge V2 — Ultra-Safe Configuration (EXP-880 validated)
+# ============================================================================
+crisis_hedge:
+  enabled: true
+  version: "v2"
+
+  # VIX tier thresholds
+  vix_reduce: 25.0              # start reducing at VIX 25
+  vix_minimum: 35.0             # reach min_scale at VIX 35
+  vix_full_hedge: 50.0          # activate full put overlay at VIX 50
+
+  # Scale limits — Ultra-Safe variant
+  max_scale: 1.0                # normal market
+  min_scale: 0.20               # NEVER halt completely (V2 improvement)
+                                # Ultra-Safe: 0.20 (vs V2 default 0.40)
+
+  # Drawdown-controlled delevering — Ultra-Safe triggers
+  dd_start: 0.02                # start delevering at 2% DD (aggressive early)
+  dd_full: 0.07                 # reach min_scale at 7% DD
+  dd_floor_scale: 0.20          # emergency floor scale
+  dd_kill: 0.10                 # hard stop: no new trades above 10% DD
+
+  # Put spread tail hedge overlay
+  put_overlay:
+    enabled: true
+    vix_activate: 30.0          # activate puts when VIX > 30
+    cost_annual_pct: 2.0        # 2% base cost (scaled by VIX/20)
+    protection_multiplier: 3.0  # 3x cost in downside protection
+    max_cost_pct: 5.0           # cap annual put cost at 5%
+
+  # Recovery detection
+  recovery:
+    momentum_days: 10           # 10 consecutive positive momentum days
+    vix_threshold: 22.0         # VIX must be below 22
+    ramp_up_days: 20            # ramp leverage back over 20 days
+    min_recovery_days: 5        # minimum days in recovery before re-leverage
+
+  # Monitoring and alerts
+  monitoring:
+    alert_on_delever: true      # Telegram alert when delevering
+    alert_on_recovery: true     # alert on recovery ramp
+    log_scale_changes: true     # log every scale adjustment
+
+# ============================================================================
+# Risk Management
+# ============================================================================
+risk:
+  account_size: 100000
+
+  # Base risk per trade (before leverage and ML adjustment)
+  max_risk_per_trade: 8.5       # EXP-400 validated optimal
+
+  sizing_mode: flat
+  compound: false
+
+  # Contract limits (leverage accounted for separately)
+  min_contracts: 1
+  max_contracts: 25
+
+  # Position limits (tighter for leveraged portfolio)
+  max_positions: 8              # fewer positions at 2x leverage
+  max_positions_per_ticker: 2
+
+  scan_days: [0, 1, 2, 3, 4]
+
+  # Exit rules
+  profit_target: 55
+  stop_loss_multiplier: 1.25
+  stop_loss_pct_of_width: 90
+
+  delta_threshold: 0.30
+  min_credit_pct: 5
+  momentum_filter_pct: 2.0
+
+  portfolio_risk:
+    max_portfolio_risk_pct: 30  # lower at 2x leverage (30% × 2 = 60% notional)
+    max_single_ticker_pct: 30
+    max_same_expiration: 3
+
+  # Drawdown circuit breaker (backs up crisis hedge)
+  drawdown_cb_pct: 12           # 12% hard stop (matches THESIS DD limit)
+  cooldown_bars: 5              # 5-bar cooldown after circuit breaker
+
+  enable_rolling: false
+  max_rolls_per_position: 0
+
+  # Regime scales (applied before leverage)
+  regime_scale_bull: 1.0
+  regime_scale_bear: 0.3
+  regime_scale_high_vol: 0.3
+  regime_scale_low_vol: 0.8
+  regime_scale_crash: 0.0
+
+# ============================================================================
+# Alpaca Paper Trading
+# ============================================================================
+alpaca:
+  enabled: true
+  paper: true
+  base_url: "https://paper-api.alpaca.markets"
+  api_key: "${ALPACA_API_KEY}"
+  api_secret: "${ALPACA_API_SECRET}"
+
+# ============================================================================
+# Alerts
+# ============================================================================
+alerts:
+  output_json: true
+  output_text: true
+  output_csv: true
+  json_file: "alerts_exp880.json"
+  text_file: "alerts_exp880.txt"
+  csv_file: "alerts_exp880.csv"
+
+  telegram:
+    enabled: true
+    bot_token: "${TELEGRAM_BOT_TOKEN}"
+    chat_id: "${TELEGRAM_CHAT_ID}"
+
+# ============================================================================
+# Logging
+# ============================================================================
+logging:
+  level: "INFO"
+  file: "logs/paper_exp880.log"
+  console: true
+
+# ============================================================================
+# Data
+# ============================================================================
+data:
+  provider: polygon
+  cache_dir: "data/options_cache"
+
+# ============================================================================
+# Backtester Reference
+# ============================================================================
+backtest:
+  starting_capital: 100000
+  commission_per_contract: 0.65
+  slippage: 0.05
+  exit_slippage: 0.10
+  score_threshold: 25
+  generate_reports: true
+  report_dir: "output/backtest_reports"

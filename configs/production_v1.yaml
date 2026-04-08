@@ -1,0 +1,208 @@
+# ============================================================================
+# production_v1.yaml — EXP-1220 + Dynamic Leverage (Honest Config)
+# ============================================================================
+# Strategy: EXP-1220 Tail Risk Protection with lagged dynamic leverage
+# Audit result: Sharpe 4.89 (corrected), CAGR +43.9%, DD 4.7%
+# Data source: Yahoo Finance (SPY, VIX, VIX3M) — no synthetic data
+# Hedge: NONE (collar hedge deferred — real put cost 4.36%/yr too high)
+#
+# Usage:
+#   python3 main.py scheduler --config configs/production_v1.yaml
+#
+# Required env vars (in .env.production_v1):
+#   ALPACA_API_KEY         — Alpaca paper trading API key
+#   ALPACA_API_SECRET      — Alpaca paper trading secret
+#   POLYGON_API_KEY        — Polygon.io API key
+#   TELEGRAM_BOT_TOKEN     — Telegram bot token for alerts
+#   TELEGRAM_CHAT_ID       — Telegram chat ID
+# ============================================================================
+
+# --- Mode ---
+paper_mode: true            # SAFETY: paper trading only until validated
+db_path: "data/production_v1.db"
+experiment_id: "PROD-V1"
+created_by: "maximus"
+
+# --- Ticker ---
+tickers:
+  - SPY
+
+# ============================================================================
+# EXP-1220 Tail Risk Protection
+# ============================================================================
+strategy:
+  name: "EXP-1220 Dynamic Leverage"
+  type: "tail_risk_overlay"
+
+  # --- Trade cadence ---
+  cadence_days: 7             # Weekly: scan every 7 calendar days
+  scan_days: [0, 1]           # Monday and Tuesday only
+  min_entry_spacing: 5        # Minimum 5 trading days between entries
+
+  # --- Credit spread parameters ---
+  direction: both             # Regime-adaptive: bull put in bull, bear call in bear
+  min_dte: 25
+  max_dte: 45
+  target_dte: 35              # Target 5-week expiration
+  otm_pct: 0.05              # 5% OTM (from EXP-1220 calibration)
+  spread_width: 5             # $5 wide (EXP-850: $5+ mandatory for slippage)
+  min_credit_pct: 0.20        # Minimum 20% of width as credit
+
+  # --- Exit rules ---
+  profit_target_pct: 50       # Close at 50% profit
+  stop_loss_multiplier: 2.0   # 2x credit received
+  dte_exit: 7                 # Close at 7 DTE
+
+  # --- Regime detection ---
+  regime_mode: combo
+  regime_signals:
+    - vix_level                # VIX spot level
+    - vix_term_structure       # VIX / VIX3M ratio
+    - price_vs_ma200           # SPY trend
+  regime_vix_bull: 20         # VIX < 20 = bullish
+  regime_vix_bear: 28         # VIX > 28 = bearish
+
+# ============================================================================
+# Dynamic Leverage (from audit: compass/dynamic_leverage.py)
+# ============================================================================
+leverage:
+  enabled: true
+  mode: "dynamic"             # "static" or "dynamic"
+
+  # --- Target leverage ---
+  target: 1.8                 # Max leverage in calm conditions
+  floor: 0.3                  # Minimum leverage (crisis floor)
+
+  # --- CRITICAL: use lagged VIX (audit finding) ---
+  vix_lag_days: 1             # Use PRIOR day's VIX — zero look-ahead
+
+  # --- VIX ramp thresholds ---
+  vix_calm: 15.0              # Below: full target leverage
+  vix_crisis: 35.0            # Above: floor leverage
+
+  # --- Term structure ramp ---
+  ts_contango: 0.90           # VIX/VIX3M < 0.90: full leverage
+  ts_deep_inversion: 1.25     # VIX/VIX3M > 1.25: floor leverage
+
+  # --- Realized vol ramp ---
+  rvol_low: 0.10              # 20d rvol < 10%: full leverage
+  rvol_extreme: 0.40          # 20d rvol > 40%: floor leverage
+
+  # --- Smoothing (prevents whipsaw) ---
+  ema_halflife_days: 5        # EMA smoothing on leverage changes
+
+# ============================================================================
+# Hedge (DISABLED — real cost too high)
+# ============================================================================
+hedge:
+  enabled: false              # No purchased hedge
+  # Real SPY put cost: 4.36%/yr (2.2x assumed 2%)
+  # Collar hedge available but caps upside — deferred for now
+  # If enabled in future, use collar variant from compass/smart_hedge.py
+
+# ============================================================================
+# Risk Management
+# ============================================================================
+risk:
+  account_size: 100000
+
+  # --- Position sizing ---
+  max_risk_per_trade: 2.0     # 2% of account per trade
+  sizing_mode: flat           # Fixed sizing (not compounding)
+  compound: false
+
+  # --- Contract limits ---
+  min_contracts: 1
+  max_contracts: 10
+
+  # --- Position limits ---
+  max_positions: 5
+  max_positions_per_ticker: 2
+
+  # --- Drawdown circuit breaker ---
+  drawdown_cb_pct: 15         # Kill switch at 15% portfolio DD
+  cooldown_days: 5            # Wait 5 days after circuit breaker
+
+  # --- Portfolio risk ---
+  portfolio_risk:
+    max_portfolio_risk_pct: 20  # Max 20% of account at risk
+    max_single_ticker_pct: 20
+
+# ============================================================================
+# Monitoring & Alerts
+# ============================================================================
+monitoring:
+  # --- Alert thresholds ---
+  dd_alert_pct: 5.0           # Telegram alert if DD > 5%
+  dd_kill_pct: 15.0           # Kill switch if DD > 15%
+  win_rate_alert: 0.80        # Alert if WR drops below 80%
+  sharpe_alert: 2.0           # Alert if rolling Sharpe drops below 2.0
+  sharpe_window_days: 60      # Rolling window for Sharpe monitoring
+
+  # --- Health check ---
+  stale_data_alert_days: 2    # Alert if no new data for 2 days
+  scanner_fail_alert: 3       # Alert after 3 consecutive scanner failures
+
+  # --- Reporting ---
+  daily_summary: true         # Daily P&L summary via Telegram
+  weekly_report: true         # Weekly HTML report generation
+
+# ============================================================================
+# Alpaca Paper Trading
+# ============================================================================
+alpaca:
+  enabled: true
+  paper: true
+  base_url: "https://paper-api.alpaca.markets"
+  api_key: "${ALPACA_API_KEY}"
+  api_secret: "${ALPACA_API_SECRET}"
+
+# ============================================================================
+# Telegram Alerts
+# ============================================================================
+alerts:
+  telegram:
+    enabled: true
+    bot_token: "${TELEGRAM_BOT_TOKEN}"
+    chat_id: "${TELEGRAM_CHAT_ID}"
+    # Alert types
+    trade_signals: true       # New trade entries/exits
+    risk_alerts: true         # DD breaches, circuit breaker
+    daily_summary: true       # EOD P&L summary
+    weekly_report: true       # Weekly performance report
+    system_health: true       # Scanner failures, data staleness
+
+  # File outputs
+  output_json: true
+  json_file: "alerts_production_v1.json"
+
+# ============================================================================
+# Logging
+# ============================================================================
+logging:
+  level: "INFO"
+  file: "logs/production_v1.log"
+  console: true
+  max_size_mb: 10             # Rotate at 10 MB
+  keep_files: 5               # Keep 5 rotated files
+
+# ============================================================================
+# Data
+# ============================================================================
+data:
+  provider: polygon
+  cache_db: "data/options_cache.db"
+  # Daily data refresh handled by cron (scripts/daily_data_update.sh)
+
+# ============================================================================
+# Audit Trail
+# ============================================================================
+audit:
+  source_commit: "680541a"    # Dynamic leverage audit commit
+  honest_sharpe: 4.89         # Corrected Sharpe (arithmetic daily)
+  honest_cagr: 43.9           # % — with lagged VIX, zero look-ahead
+  honest_dd: 4.7              # % — max DD in backtest
+  sharpe_formula: "arithmetic_daily_mean"  # NOT cagr-derived
+  look_ahead: "none"          # Lagged t-1 VIX eliminates look-ahead
+  data_source: "yahoo_finance"  # SPY, VIX, VIX3M
+  validation: "walk_forward_4_windows"

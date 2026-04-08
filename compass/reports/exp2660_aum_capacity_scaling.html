@@ -1,0 +1,60 @@
+<!doctype html><html><head><meta charset='utf-8'>
+<title>EXP-2660 — Multi-Underlying Scaling Audit</title>
+<style>
+ body{font-family:-apple-system,Segoe UI,sans-serif;max-width:1100px;margin:2em auto;padding:0 1em;background:#fff;color:#1a1a1a;line-height:1.5}
+ h1{border-bottom:2px solid #222;padding-bottom:.3em} h2{margin-top:1.6em;border-bottom:1px solid #ccc}
+ table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.92em}
+ th,td{border:1px solid #bbb;padding:5px 8px;text-align:left} th{background:#f0f0f0}
+ .ok{color:#0a7a0a;font-weight:600} .warn{color:#b86b00;font-weight:600}
+ .small{color:#555;font-size:.88em}
+ .callout{background:#fff8e1;border-left:4px solid #e0a500;padding:.9em 1.1em;margin:1em 0}
+</style></head><body>
+<h1>EXP-2660 — Multi-Underlying Scaling Audit</h1>
+<p class='small'>Generated 2026-04-08T07:03:50 · 8 candidates tested · Rule Zero clean.</p>
+
+<div class='callout'>
+<b>Headline:</b> 1 of 8 candidates
+have IronVault option chains and can be backtested today. The remaining
+7 (IWM, EEM, DIA, XLV, AAPL, MSFT, AMZN) are <b>blocked by
+Rule Zero</b> — zero option contracts in <code>data/options_cache.db</code>.
+Unblocking them requires a paid market-data subscription.
+</div>
+
+<h2>1. IronVault coverage + Yahoo capacity proxies</h2>
+<table>
+<tr><th>Ticker</th><th>IronVault contracts</th><th>From</th><th>To</th>
+ <th>ADV notional (Yahoo)</th><th>Last close</th><th>Status</th></tr>
+<tr><td>IWM</td><td>0</td><td>—</td><td>—</td><td>$7.25B</td><td>$246.16</td><td class='warn'>BLOCKED</td></tr><tr><td>EEM</td><td>0</td><td>—</td><td>—</td><td>$1.22B</td><td>$54.71</td><td class='warn'>BLOCKED</td></tr><tr><td>DIA</td><td>0</td><td>—</td><td>—</td><td>$1.64B</td><td>$480.57</td><td class='warn'>BLOCKED</td></tr><tr><td>XLE</td><td>1,757</td><td>2020-04-17</td><td>2026-04-04</td><td>$1.38B</td><td>$44.71</td><td class='ok'>TRADEABLE</td></tr><tr><td>XLV</td><td>0</td><td>—</td><td>—</td><td>$1.37B</td><td>$154.8</td><td class='warn'>BLOCKED</td></tr><tr><td>AAPL</td><td>0</td><td>—</td><td>—</td><td>$12.04B</td><td>$271.86</td><td class='warn'>BLOCKED</td></tr><tr><td>MSFT</td><td>0</td><td>—</td><td>—</td><td>$9.42B</td><td>$483.62</td><td class='warn'>BLOCKED</td></tr><tr><td>AMZN</td><td>0</td><td>—</td><td>—</td><td>$8.56B</td><td>$230.82</td><td class='warn'>BLOCKED</td></tr>
+</table>
+
+<h2>2. Credit-spread backtest (tradeable candidates only)</h2>
+<table>
+<tr><th>Ticker</th><th>n</th><th>WR</th><th>Sharpe</th>
+ <th>CAGR</th><th>Max DD</th><th>Total PnL</th></tr>
+<tr><td>XLE</td><td>11</td><td>100.0%</td><td>1.95</td><td>0.61%</td><td>-0.00%</td><td>2.30%</td></tr>
+</table>
+
+<h2>3. Correlation to existing 7-stream cube</h2>
+<table>
+<tr><th>New stream</th><th>exp1220</th><th>v5_hedge</th><th>gld_cal</th><th>slv_cal</th><th>cross_vol</th><th>EW portfolio</th></tr>
+<tr><td>XLE</td><td>-0.012</td><td>-0.001</td><td>-0.015</td><td>-0.013</td><td>-0.011</td><td><b>-0.023</b></td></tr>
+</table>
+
+<h2>4. Recommendation</h2>
+<ul>
+<li><b>Add XLE</b> as the 8th sleeve if its standalone Sharpe / correlation
+    pass the production bar (typically Sharpe ≥ 1.0, |corr| &lt; 0.4).</li>
+<li><b>Buy Polygon Options Advanced</b> (~$199/mo) to unblock IWM, EEM,
+    DIA, XLV, AAPL, MSFT, AMZN — all 7 candidates have multi-billion-dollar
+    underlier ADV (Yahoo capacity proxy is informative). At $199/mo the
+    payback on a single ~$50M AUM uplift is &lt; 1 day.</li>
+<li><b>Do NOT extrapolate fills</b> for the blocked names. Rule Zero
+    forbids running the engine on synthesised option chains.</li>
+</ul>
+
+<h2>Honest scope note</h2>
+<p class='small'>This experiment is a feasibility audit, not a portfolio
+construction step. The single XLE backtest (if Sharpe is positive)
+should be promoted via a separate experiment that integrates it into
+the 7-stream cube and re-runs the risk-parity walk-forward.</p>
+</body></html>

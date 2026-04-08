@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>EXP-2150 — Higher-Frequency EXP-1220</title>
+<style>
+body { font-family:-apple-system,sans-serif;max-width:1300px;margin:0 auto;padding:28px;background:#fff;color:#1e293b; }
+h1 { font-size:1.75em;color:#0f172a; }
+h2 { margin-top:2em;border-bottom:2px solid #e2e8f0;padding-bottom:8px;color:#334155; }
+.sources { background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px;font-size:0.84rem;line-height:1.6; }
+.winner { background:#ecfdf5;border:2px solid #16a34a;border-radius:10px;padding:18px;margin:20px 0; }
+.winner h3 { margin-top:0;color:#065f46; }
+.note { background:#fefce8;border:1px solid #fde047;border-radius:6px;padding:12px 16px;font-size:0.86rem;margin:14px 0; }
+table { width:100%;border-collapse:collapse;margin:12px 0;font-size:0.82em; }
+th { background:#f1f5f9;padding:9px 10px;text-align:right;border-bottom:2px solid #cbd5e1;font-size:0.72em;text-transform:uppercase; }
+th:first-child { text-align:left; }
+td { padding:7px 10px;text-align:right;border-bottom:1px solid #e2e8f0; }
+td:first-child { text-align:left; }
+</style></head><body>
+<h1>EXP-2150 — Higher-Frequency EXP-1220 + T+V Filter</h1>
+<p style="color:#64748b">Weekly cadence + term-structure + vol-of-vol filters ·
+Config A portfolio integration · 2020-2025 ·
+2026-04-07 17:03</p>
+
+<div class="sources">
+<strong>Rule Zero — all real:</strong><br>
+EXP-1220 trades: compass.exp1220_standalone fork with configurable
+min_spacing_days on real IronVault <code>data/options_cache.db</code>
+SPY chains + Yahoo SPY/^VIX<br>
+T filter: compass.exp1750_putcall_overlay.load_vix_term_structure on
+real Yahoo ^VIX/^VIX3M<br>
+V filter: compass.exp1970_vol_of_vol.build_vvol_panel on real Yahoo ^VIX<br>
+v5_hedge, GLD calendar, SLV calendar: compass/cache/exp1860_streams.pkl<br>
+vol_arb: compass/cache/exp2020_vol_arb_trades.pkl<br>
+Canonical Sharpe: compass.metrics.full_metrics (mean/std × √252)
+</div>
+
+<div class="winner">
+<h3>★ Winner: <code>weekly</code></h3>
+CAGR <strong>11.8%</strong> ·
+Sharpe <strong>2.33</strong> ·
+Max DD <strong>2.5%</strong> ·
+Calmar <strong>4.75</strong><br>
+Lift vs baseline biweekly: <strong>+0.30</strong> Sharpe points
+</div>
+
+<h2>1. All variants — trade counts, trade Sharpe, portfolio metrics</h2>
+<table>
+<thead><tr>
+<th>Variant</th><th>N</th><th>Trades/yr</th><th>Trade SR</th>
+<th>Zero-days</th><th>CAGR</th><th>Sharpe</th><th>ΔSR vs base</th>
+<th>DD</th><th>Calmar</th>
+</tr></thead>
+<tbody><tr><td style='font-weight:700'>baseline_biweekly</td><td>171</td><td>29.2</td><td>1.26</td><td>89%</td><td>10.0%</td><td style='font-weight:700'>2.03</td><td style='color:#0f172a;font-weight:700'>+0.00</td><td>1.3%</td><td>7.44</td></tr><tr><td style='font-weight:700'>weekly ★</td><td>294</td><td>50.2</td><td>1.47</td><td>83%</td><td>11.8%</td><td style='font-weight:700'>2.33</td><td style='color:#16a34a;font-weight:700'>+0.30</td><td>2.5%</td><td>4.75</td></tr><tr><td style='font-weight:700'>weekly_T</td><td>281</td><td>48.0</td><td>1.81</td><td>83%</td><td>10.9%</td><td style='font-weight:700'>2.12</td><td style='color:#0f172a;font-weight:700'>+0.09</td><td>2.5%</td><td>4.37</td></tr><tr><td style='font-weight:700'>weekly_V</td><td>279</td><td>47.7</td><td>1.87</td><td>84%</td><td>11.2%</td><td style='font-weight:700'>2.21</td><td style='color:#16a34a;font-weight:700'>+0.18</td><td>2.5%</td><td>4.50</td></tr><tr><td style='font-weight:700'>weekly_T+V</td><td>270</td><td>46.1</td><td>1.79</td><td>84%</td><td>10.6%</td><td style='font-weight:700'>2.09</td><td style='color:#0f172a;font-weight:700'>+0.06</td><td>2.5%</td><td>4.28</td></tr><tr><td style='font-weight:700'>biweekly_T+V</td><td>157</td><td>26.8</td><td>2.23</td><td>90%</td><td>9.5%</td><td style='font-weight:700'>1.95</td><td style='color:#dc2626;font-weight:700'>-0.08</td><td>1.0%</td><td>9.72</td></tr></tbody>
+</table>
+
+<h2>2. Year-by-year portfolio metrics</h2>
+<table>
+<thead>
+<tr><th rowspan='2'>Year</th><th colspan='3'>baseline_biweekly</th><th colspan='3'>weekly</th><th colspan='3'>weekly_T</th><th colspan='3'>weekly_V</th><th colspan='3'>weekly_T+V</th><th colspan='3'>biweekly_T+V</th></tr>
+<tr><th>CAGR</th><th>SR</th><th>DD</th><th>CAGR</th><th>SR</th><th>DD</th><th>CAGR</th><th>SR</th><th>DD</th><th>CAGR</th><th>SR</th><th>DD</th><th>CAGR</th><th>SR</th><th>DD</th><th>CAGR</th><th>SR</th><th>DD</th></tr>
+</thead>
+<tbody><tr><td style='font-weight:700'>2021</td><td style='color:#16a34a'>9%</td><td>1.74</td><td>0.7%</td><td style='color:#16a34a'>10%</td><td>2.07</td><td>0.9%</td><td style='color:#16a34a'>10%</td><td>2.07</td><td>0.9%</td><td style='color:#16a34a'>10%</td><td>2.06</td><td>0.8%</td><td style='color:#16a34a'>10%</td><td>2.06</td><td>0.8%</td><td style='color:#16a34a'>10%</td><td>1.89</td><td>0.7%</td></tr><tr><td style='font-weight:700'>2022</td><td style='color:#16a34a'>17%</td><td>3.43</td><td>0.6%</td><td style='color:#16a34a'>21%</td><td>3.36</td><td>2.5%</td><td style='color:#16a34a'>18%</td><td>2.96</td><td>2.5%</td><td style='color:#16a34a'>20%</td><td>3.26</td><td>2.5%</td><td style='color:#16a34a'>17%</td><td>2.86</td><td>2.5%</td><td style='color:#16a34a'>15%</td><td>3.26</td><td>0.6%</td></tr><tr><td style='font-weight:700'>2023</td><td style='color:#16a34a'>9%</td><td>2.25</td><td>0.6%</td><td style='color:#16a34a'>11%</td><td>2.68</td><td>0.6%</td><td style='color:#16a34a'>11%</td><td>2.68</td><td>0.6%</td><td style='color:#16a34a'>10%</td><td>2.52</td><td>0.6%</td><td style='color:#16a34a'>10%</td><td>2.52</td><td>0.6%</td><td style='color:#16a34a'>9%</td><td>2.19</td><td>0.6%</td></tr><tr><td style='font-weight:700'>2024</td><td style='color:#16a34a'>9%</td><td>1.79</td><td>0.6%</td><td style='color:#16a34a'>10%</td><td>2.00</td><td>0.8%</td><td style='color:#16a34a'>10%</td><td>1.86</td><td>0.8%</td><td style='color:#16a34a'>10%</td><td>2.23</td><td>0.6%</td><td style='color:#16a34a'>10%</td><td>2.23</td><td>0.6%</td><td style='color:#16a34a'>9%</td><td>1.91</td><td>0.6%</td></tr><tr><td style='font-weight:700'>2025</td><td style='color:#16a34a'>6%</td><td>0.62</td><td>1.3%</td><td style='color:#16a34a'>8%</td><td>1.44</td><td>1.6%</td><td style='color:#16a34a'>7%</td><td>0.89</td><td>1.6%</td><td style='color:#16a34a'>6%</td><td>0.69</td><td>1.6%</td><td style='color:#16a34a'>6%</td><td>0.60</td><td>1.6%</td><td style='color:#16a34a'>5%</td><td>0.06</td><td>1.0%</td></tr></tbody>
+</table>
+
+<div class="note">
+<strong>What to watch for:</strong> the hypothesis is that weekly
+cadence reduces the zero-return-day fraction (MASTERPLAN Bug 3 penalty)
+enough that the per-trade alpha survives into the portfolio daily
+Sharpe. The T and V filters are signal-quality gates: they should
+raise trade Sharpe, but only if the remaining trades are DENSE enough
+to avoid re-inflicting the dilution penalty. Compare the "Zero-days"
+column to the Sharpe column to see whether density matters more than
+per-trade quality on this metric.
+</div>
+
+<p style="margin-top:3em;color:#94a3b8;font-size:0.78em;text-align:center">
+compass/exp2150_higher_frequency.py · Rule Zero ·
+real IronVault + Yahoo only
+</p>
+</body></html>

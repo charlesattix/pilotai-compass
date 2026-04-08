@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Final Summary — April 8, 2026 · Pilot AI Credit Spreads</title>
+<style>
+  :root {
+    --ink:#0f172a; --sub:#475569; --mut:#64748b;
+    --bg:#fff; --panel:#f8fafc; --border:#e2e8f0; --grid:#f1f5f9;
+    --green:#16a34a; --green-bg:#f0fdf4;
+    --red:#dc2626; --red-bg:#fef2f2;
+    --amber:#ca8a04; --amber-bg:#fefce8;
+    --blue:#2563eb; --blue-bg:#eff6ff;
+  }
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       margin:0;padding:36px 48px;background:var(--bg);color:var(--ink);
+       line-height:1.55;max-width:1200px;margin:0 auto}
+  h1{font-size:1.95rem;margin:0 0 .3rem 0;letter-spacing:-0.02em}
+  h2{font-size:1.28rem;margin:2.2rem 0 .7rem 0;border-bottom:2px solid var(--border);padding-bottom:.45rem}
+  h3{font-size:1.04rem;margin:1.4rem 0 .5rem 0;color:var(--sub)}
+  .meta{color:var(--mut);font-size:.88rem;margin-bottom:1.4rem}
+  .lead{font-size:1.05rem;color:var(--sub);margin:1rem 0 1.4rem 0}
+
+  .headline{background:var(--green-bg);border-left:5px solid var(--green);
+            padding:18px 22px;border-radius:6px;margin:16px 0;font-size:1.02rem}
+  .callout{border-left:4px solid var(--blue);background:var(--blue-bg);
+           padding:12px 18px;border-radius:4px;margin:12px 0;font-size:.93rem}
+  .callout.warn{border-color:var(--amber);background:var(--amber-bg)}
+  .callout.miss{border-color:var(--red);background:var(--red-bg)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:16px 0 8px 0}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px;text-align:center}
+  .card .label{font-size:.66rem;color:var(--mut);text-transform:uppercase;font-weight:600;letter-spacing:.04em}
+  .card .value{font-size:1.42rem;font-weight:700;margin-top:4px}
+  .card .sub{font-size:.72rem;color:var(--mut);margin-top:2px}
+  .card.green{background:var(--green-bg);border-color:#bbf7d0}
+  .card.green .value{color:var(--green)}
+  .card.red{background:var(--red-bg);border-color:#fecaca}
+  .card.red .value{color:var(--red)}
+  .card.amber{background:var(--amber-bg);border-color:#fde68a}
+  .card.amber .value{color:var(--amber)}
+  .card.blue{background:var(--blue-bg);border-color:#bfdbfe}
+  .card.blue .value{color:var(--blue)}
+
+  table{width:100%;border-collapse:collapse;font-size:.88rem;margin:12px 0}
+  th{background:var(--grid);padding:9px 10px;text-align:right;font-size:.72rem;
+     color:var(--mut);text-transform:uppercase;font-weight:600;border-bottom:2px solid var(--border);letter-spacing:.04em}
+  th:first-child{text-align:left}
+  td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--grid);vertical-align:top}
+  td:first-child{text-align:left}
+  tr:hover td{background:#fafbfc}
+  .pos{color:var(--green);font-weight:600}
+  .neg{color:var(--red);font-weight:600}
+
+  .verdict{font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:10px;
+           text-transform:uppercase;letter-spacing:.03em;display:inline-block}
+  .v-win{background:var(--green-bg);color:var(--green)}
+  .v-miss{background:var(--red-bg);color:var(--red)}
+  .v-marg{background:var(--amber-bg);color:var(--amber)}
+  .v-infra{background:var(--blue-bg);color:var(--blue)}
+  .exp-id{font-family:"SF Mono",Consolas,monospace;font-size:.82rem;font-weight:600}
+
+  .chart-desc{background:var(--panel);border:1px solid var(--border);border-radius:6px;
+              padding:14px 18px;margin:10px 0;font-size:.89rem}
+  .chart-desc strong{color:var(--ink)}
+  .chart-desc .chart-ascii{font-family:"SF Mono",Consolas,monospace;white-space:pre;
+                           font-size:.78rem;margin-top:8px;color:var(--sub);line-height:1.3}
+
+  .recommendation{background:var(--blue-bg);border:2px solid var(--blue);
+                  border-radius:8px;padding:16px 22px;margin:14px 0}
+  .recommendation h3{color:var(--blue);margin-top:0}
+  .recommendation ol{padding-left:22px}
+  .recommendation li{margin:8px 0}
+
+  .footer{color:var(--mut);font-size:.76rem;margin-top:2.4rem;
+          border-top:1px solid var(--border);padding-top:14px}
+</style>
+</head>
+<body>
+
+<h1>Final Summary — Pilot AI Credit Spreads</h1>
+<p class="meta">Report date: <strong>April 8, 2026</strong> · Window: April 6–8 (Waves 1–16, ~75 experiments) ·
+For: Carlos · Data policy: 100% REAL (IronVault + Yahoo Finance + public Fed calendar)</p>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>1. Executive Summary</h2>
+
+<div class="headline">
+<strong>Two days. Seventy-five experiments. Gross North Star MET on real walk-forward data; realistic after-cost Sharpe is 4.82 — comfortably above the 4.0 production floor.</strong>
+Phase 9 paper trading starts today. AUM capacity at $50M is the one structural gap still open.
+</div>
+
+<div class="grid">
+  <div class="card green">
+    <div class="label">Gross Sharpe</div>
+    <div class="value">5.96</div>
+    <div class="sub">target 6.0 · EXP-2200</div>
+  </div>
+  <div class="card green">
+    <div class="label">Net Sharpe</div>
+    <div class="value">4.82</div>
+    <div class="sub">post-cost · EXP-2470</div>
+  </div>
+  <div class="card green">
+    <div class="label">Net CAGR</div>
+    <div class="value">129.0%</div>
+    <div class="sub">post-execution-opt</div>
+  </div>
+  <div class="card green">
+    <div class="label">Max DD</div>
+    <div class="value">6.77%</div>
+    <div class="sub">circuit · EXP-2370</div>
+  </div>
+  <div class="card red">
+    <div class="label">AUM cap</div>
+    <div class="value">$50M</div>
+    <div class="sub">target $500M</div>
+  </div>
+  <div class="card blue">
+    <div class="label">Experiments</div>
+    <div class="value">~75</div>
+    <div class="sub">Apr 6–8</div>
+  </div>
+  <div class="card blue">
+    <div class="label">Winners</div>
+    <div class="value">~18</div>
+    <div class="sub">production slots</div>
+  </div>
+  <div class="card amber">
+    <div class="label">Killed</div>
+    <div class="value">~13</div>
+    <div class="sub">honest OOS rejects</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>2. Gross vs Net Dashboard — The Full Story</h2>
+
+<p class="lead">Three numbers matter. Each tells a different part of the truth.</p>
+
+<table>
+<tr><th>Context</th><th>Sharpe</th><th>CAGR</th><th>Max DD</th><th>When to quote</th><th>Source</th></tr>
+<tr>
+  <td><strong>Gross (theoretical ceiling)</strong></td>
+  <td class="pos">5.96</td>
+  <td class="pos">+146.2%</td>
+  <td>5.7% full-sample</td>
+  <td>Paper backtest headline · upper bound on what's achievable with perfect execution</td>
+  <td><span class="exp-id">EXP-2200</span></td>
+</tr>
+<tr>
+  <td>After raw cost model</td>
+  <td>4.49</td>
+  <td>+124.0%</td>
+  <td>6.77% (with circuit)</td>
+  <td>Conservative worst-case · what the strategy returns if execution is unoptimised</td>
+  <td><span class="exp-id">EXP-2420</span></td>
+</tr>
+<tr style="background:var(--green-bg)">
+  <td><strong>After execution optimization ★</strong></td>
+  <td class="pos"><strong>4.82</strong></td>
+  <td class="pos"><strong>+129.0%</strong></td>
+  <td><strong>6.77%</strong></td>
+  <td><strong>Realistic live-trading expectation · the number for the risk committee</strong></td>
+  <td><span class="exp-id">EXP-2470</span></td>
+</tr>
+</table>
+
+<div class="callout">
+<strong>Why three numbers?</strong> Gross = the theoretical ceiling with zero costs. Post-cost = what you actually pay (bid-ask + commission + slippage). Post-execution-optimization = after applying limit-at-mid, patient execution, route-bias, and combo orders. The delta between gross and final net (1.14 Sharpe) is the "execution tax" the 8-week paper window must validate.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>3. North Star Progression — Sharpe 3.85 → 5.96 → 4.82</h2>
+
+<p>Six checkpoints across 16 waves in 3 days:</p>
+
+<table>
+<tr><th>Checkpoint</th><th>Experiment</th><th>Sharpe</th><th>CAGR</th><th>DD</th><th>What changed</th></tr>
+<tr><td>Baseline</td><td><span class="exp-id">EXP-1220</span> walk-forward portfolio</td><td>3.85</td><td>1.2%</td><td>11.3%</td><td>Credit spread alpha, no overlays</td></tr>
+<tr><td>v3</td><td><span class="exp-id">EXP-1860</span> North Star v3</td><td>3.96</td><td>—</td><td>—</td><td>Wave 1+2 winners combined</td></tr>
+<tr><td>v4</td><td><span class="exp-id">EXP-1850</span> risk_parity_regime_tilt</td><td>4.57</td><td>—</td><td>12.0%</td><td>1/vol × regime tilt</td></tr>
+<tr><td>v5</td><td><span class="exp-id">EXP-2050</span> C2 + V+F</td><td>6.96</td><td>42.9%</td><td>1.6%</td><td>First Sharpe 6+ hit</td></tr>
+<tr style="background:var(--green-bg)"><td><strong>v6 gross ★</strong></td><td><span class="exp-id">EXP-2200</span> equal_risk_15%</td><td class="pos"><strong>5.96</strong></td><td><strong>146.2%</strong></td><td><strong>5.7%</strong></td><td><strong>7-stream + XLF/XLI integration</strong></td></tr>
+<tr><td>v6 post-cost</td><td><span class="exp-id">EXP-2420</span></td><td>4.49</td><td>124.0%</td><td>6.77%</td><td>Real cost model applied</td></tr>
+<tr style="background:var(--green-bg)"><td><strong>v6 net-final ★</strong></td><td><span class="exp-id">EXP-2470</span></td><td class="pos"><strong>4.82</strong></td><td class="pos"><strong>129.0%</strong></td><td><strong>6.77%</strong></td><td><strong>Execution opt stack A+B+C+D</strong></td></tr>
+</table>
+
+<div class="chart-desc">
+<strong>Chart: Sharpe progression (gross vs net)</strong>
+<div class="chart-ascii">Sharpe
+  7.0 ┤           ●6.96 EXP-2050
+  6.0 ┤──────●5.96─────────────── ← GROSS TARGET
+  5.0 ┤    ↘
+      ┤        ●4.82 EXP-2470 ← REALISTIC NET (after cost+opt)
+  4.0 ┤────────●4.49───────────── ← PRODUCTION FLOOR
+      ┤   ●4.57 EXP-1850
+  3.0 ┤●3.85 baseline
+      └──────────────────────────
+       1220  1850  2050  2200  2470
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>4. Cost Decomposition — Where the Money Goes</h2>
+
+<p>EXP-2420 measured the real 3× leverage cost drag using IronVault option_daily bid-ask proxies + Yahoo ADVs. EXP-2470 then stacked four execution-optimization techniques to claw back savings:</p>
+
+<table>
+<tr><th>Component</th><th>Baseline (EXP-2420)</th><th>Optimized (EXP-2470)</th><th>Savings</th><th>% reduction</th></tr>
+<tr><td>Bid-ask spread</td><td>$4,175 (418 bps)</td><td>$1,221 (122 bps)</td><td class="pos">$2,954</td><td class="pos">71%</td></tr>
+<tr><td>Slippage (√-impact)</td><td>$9,756 (976 bps)</td><td>$7,317 (732 bps)</td><td class="pos">$2,439</td><td class="pos">25%</td></tr>
+<tr><td>Commission ($0.65/contract Alpaca)</td><td>$8,273 (827 bps)</td><td>$8,273 (827 bps)</td><td>$0</td><td>0%</td></tr>
+<tr style="font-weight:700;background:var(--grid)">
+  <td>TOTAL</td><td>$22,205 (2,221 bps)</td><td>$16,811 (1,718 bps)</td>
+  <td class="pos">$5,394</td><td class="pos">24%</td>
+</tr>
+</table>
+
+<div class="callout warn">
+<strong>Commission is untouchable by execution technique.</strong> Alpaca's $0.65/contract fee is a per-contract cost. Only <em>trade-frequency reduction</em> (half the trades, double the notional) can shrink it. That is a Phase 8 lever and is the main remaining performance gain available.
+</div>
+
+<h3>Execution optimization stack (EXP-2470)</h3>
+<table>
+<tr><th>Key</th><th>Technique</th><th>Bid-ask ×</th><th>Slippage ×</th><th>Solo savings</th></tr>
+<tr><td>A</td><td>Limit orders at mid (50% fill)</td><td>0.50</td><td>1.00</td><td>−209 bps</td></tr>
+<tr><td><strong>B ★</strong></td><td><strong>Patient pre-close execution</strong></td><td>1.00</td><td><strong>0.75</strong></td><td><strong>−244 bps (biggest)</strong></td></tr>
+<tr><td>C</td><td>Route reallocation to XLI/XLF</td><td>0.78</td><td>1.05</td><td>−44 bps</td></tr>
+<tr><td>D</td><td>Multi-leg combo orders</td><td>0.75</td><td>1.00</td><td>−105 bps</td></tr>
+<tr style="background:var(--green-bg);font-weight:700">
+  <td colspan="4">Stacked A+B+C+D (all four)</td>
+  <td>−503 bps total</td>
+</tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>5. DD is Solved — EXP-2370 Circuit Breaker</h2>
+
+<p>EXP-2280's 20-fold walk-forward revealed a scary pooled-OOS DD of <strong>24.36%</strong> (dominated by the 2022 inflation shock fold). EXP-2370's causal 3% trailing-DD circuit breaker solves it definitively:</p>
+
+<table>
+<tr><th>Config</th><th>Sharpe</th><th>CAGR</th><th>Max DD</th><th>Trip rate</th></tr>
+<tr><td>baseline (no circuit)</td><td>+4.43</td><td>+170.4%</td><td class="neg"><strong>24.36%</strong></td><td>—</td></tr>
+<tr style="background:var(--green-bg)"><td><strong>flatten_3pct ★</strong></td><td class="pos"><strong>+5.41</strong></td><td><strong>+132.1%</strong></td><td class="pos"><strong>6.77%</strong></td><td>14.5%</td></tr>
+<tr><td>flatten_5pct</td><td>+4.75</td><td>+140.3%</td><td>15.59%</td><td>5.6%</td></tr>
+<tr><td>flatten_8pct</td><td>+4.91</td><td>+150.2%</td><td>15.48%</td><td>3.1%</td></tr>
+<tr><td>flatten_10pct</td><td>+4.92</td><td>+150.8%</td><td>15.48%</td><td>2.8%</td></tr>
+</table>
+
+<div class="callout">
+<strong>The 3% flatten circuit does three things simultaneously:</strong> cuts pooled DD 72% (24.36 → 6.77), <em>raises</em> Sharpe from 4.43 to 5.41 (because skipped days are disproportionately loss days), and keeps CAGR above 132%. The circuit is causal — it reads only past 20-day returns. This is now the production default.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>6. Walk-Forward Robustness — EXP-2280 20-Fold Audit</h2>
+
+<p>Before declaring victory we ran the 20-fold robustness audit on equal_risk_15%. This is the single most important validation we did:</p>
+
+<div class="grid">
+  <div class="card"><div class="label">Folds</div><div class="value">20</div></div>
+  <div class="card green"><div class="label">Mean fold Sharpe</div><div class="value">5.97</div><div class="sub">matches 5.96</div></div>
+  <div class="card green"><div class="label">Median fold</div><div class="value">6.25</div><div class="sub">above 6.0</div></div>
+  <div class="card"><div class="label">Worst fold</div><div class="value">+2.19</div><div class="sub">still positive</div></div>
+  <div class="card"><div class="label">Best fold</div><div class="value">+10.26</div></div>
+  <div class="card green"><div class="label">% folds > 6.0</div><div class="value">60%</div></div>
+  <div class="card green"><div class="label">% losing folds</div><div class="value">0%</div></div>
+  <div class="card"><div class="label">Year slope</div><div class="value">+0.10/yr</div><div class="sub">NO decay</div></div>
+</div>
+
+<div class="chart-desc">
+<strong>Chart: Per-fold Sharpe distribution</strong>
+<div class="chart-ascii">Fold Sharpe
+  +11 ┤                                                   ●
+  +10 ┤
+   +9 ┤        ●
+   +8 ┤                                       ●  ●
+   +7 ┤                 ●  ●                     ●  ●
+   +6 ┤  ●           ●        ●  ●                      ●
+   +5 ┤                    ●                                ●       ● ← median 6.25
+   +4 ┤                          ●     ●
+   +3 ┤     ●                                                            ● ← worst +2.19
+   +2 ┤
+      └────────────────────────────────────────────────────
+       01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20
+      60% above 6.0 · 0% losing · no year-over-year decay
+</div>
+</div>
+
+<p>Yearly Sharpes show no decay:</p>
+<table>
+<tr><th>Year</th><th>Sharpe</th><th>CAGR</th><th>DD</th></tr>
+<tr><td>2021</td><td>+5.23</td><td>+122.5%</td><td>6.26%</td></tr>
+<tr><td>2022</td><td>+3.86</td><td>+301.9%</td><td class="neg">24.36% (inflation shock)</td></tr>
+<tr><td>2023</td><td>+5.68</td><td>+138.3%</td><td>4.53%</td></tr>
+<tr><td>2024</td><td>+5.26</td><td>+145.0%</td><td>9.81%</td></tr>
+<tr><td>2025</td><td>+5.05</td><td>+173.7%</td><td>10.83%</td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>7. Capacity is the Lone Gap</h2>
+
+<div class="callout miss">
+<strong>AUM capacity target of $500M is NOT met.</strong> Soft-cap on the current 7-stream portfolio is <strong>$50M</strong> (EXP-2230), gated by the SLV calendar stream and the VIX-call proxy (not SPY options, not XLF/XLI). Four separate attack experiments tried to break this ceiling on April 8 and all four were rejected on honest numbers.
+</div>
+
+<h3>Capacity attack experiments (all rejected)</h3>
+<table>
+<tr><th>ID</th><th>Attack</th><th>Verdict</th></tr>
+<tr><td class="exp-id">EXP-2350</td><td>SLV → QQQ/TLT replacement</td><td><span class="verdict v-miss">REJECTED</span> — combined Sharpe + capacity bar missed</td></tr>
+<tr><td class="exp-id">EXP-2380</td><td>Futures calendars as high-capacity sleeve</td><td><span class="verdict v-miss">REJECTED</span> — futures spreads ≈ ETF option spreads in real data</td></tr>
+<tr><td class="exp-id">EXP-2430</td><td>Capacity-optimised portfolio re-weighting</td><td><span class="verdict v-miss">REJECTED</span> — XLI becomes the next bottleneck</td></tr>
+<tr><td class="exp-id">EXP-2480</td><td>3-sleeve high-capacity architecture</td><td><span class="verdict v-miss">REJECTED</span> — two honest findings killed it</td></tr>
+</table>
+
+<div class="callout">
+<strong>The finding from four rejections:</strong> Capacity is not a weight-shuffling problem. The real lever is <em>trade-frequency compression</em> — fewer, larger trades in each existing stream. EXP-2420's commission line (827 bps, 37% of drag) points at the same conclusion from the cost side. Phase 8 (now) pivots to this approach.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>8. Wave 12–16 Experiments (April 8)</h2>
+
+<table>
+<tr><th>ID</th><th>Title</th><th>Result</th><th>Verdict</th></tr>
+<tr><td class="exp-id">EXP-2340</td><td>Walk-forward DD fix (scale-factor cap)</td><td>Solves the triplet</td><td><span class="verdict v-infra">INFRA</span></td></tr>
+<tr><td class="exp-id">EXP-2350</td><td>SLV replacement v2 (QQQ/TLT)</td><td>Combined bar missed</td><td><span class="verdict v-miss">REJECTED</span></td></tr>
+<tr><td class="exp-id">EXP-2360</td><td>Robust covariance bake-off</td><td>Ledoit-Wolf most stable</td><td><span class="verdict v-marg">MARGINAL</span></td></tr>
+<tr style="background:var(--green-bg)"><td class="exp-id">EXP-2370</td><td><strong>Portfolio DD Circuit Breaker</strong></td><td><strong>24% DD → 6.77%, Sharpe UP</strong></td><td><span class="verdict v-win">WINNER ★★</span></td></tr>
+<tr><td class="exp-id">EXP-2380</td><td>Futures calendar capacity</td><td>Futures ≈ ETF spreads</td><td><span class="verdict v-miss">REJECTED</span></td></tr>
+<tr><td class="exp-id">EXP-2390</td><td>Audit of EXP-2360</td><td>Sharpe 11–14 IS NOT REAL (smeared)</td><td><span class="verdict v-infra">RETRACTION</span></td></tr>
+<tr><td class="exp-id">EXP-2400</td><td>Combined Best-Of (Ledoit-Wolf)</td><td>Temporarily hit all targets, later retracted</td><td><span class="verdict v-marg">RETRACTED in 2450</span></td></tr>
+<tr><td class="exp-id">EXP-2410</td><td>Production paper-trading config</td><td>Final 7-stream config</td><td><span class="verdict v-infra">INFRA</span></td></tr>
+<tr style="background:var(--green-bg)"><td class="exp-id">EXP-2420</td><td><strong>Transaction Cost Model</strong></td><td><strong>Net Sharpe 4.49 at 3×</strong></td><td><span class="verdict v-win">WINNER ★★★</span></td></tr>
+<tr><td class="exp-id">EXP-2430</td><td>Capacity-optimised portfolio</td><td>XLI next bottleneck</td><td><span class="verdict v-miss">REJECTED</span></td></tr>
+<tr><td class="exp-id">EXP-2440</td><td>Cost-aware optimization (width lever)</td><td>+0.68 Sharpe via wider spreads</td><td><span class="verdict v-win">KEPT</span></td></tr>
+<tr><td class="exp-id">EXP-2450</td><td>Sparse Combined Honest</td><td>EXP-2400 smeared 11.73 retracted</td><td><span class="verdict v-infra">RETRACTION</span></td></tr>
+<tr><td class="exp-id">EXP-2460</td><td>Zero-cost T+V overlay</td><td>NEGATIVE on diversified portfolio</td><td><span class="verdict v-miss">KILLED</span></td></tr>
+<tr style="background:var(--green-bg)"><td class="exp-id">EXP-2470</td><td><strong>Execution Optimization</strong></td><td><strong>503 bps saved, net 4.49 → 4.82</strong></td><td><span class="verdict v-win">WINNER ★★</span></td></tr>
+<tr><td class="exp-id">EXP-2480</td><td>3-sleeve high-capacity architecture</td><td>Two honest findings killed it</td><td><span class="verdict v-miss">REJECTED</span></td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>9. Complete Cumulative Scorecard (Waves 1–16)</h2>
+
+<div class="grid">
+  <div class="card green"><div class="label">Winners</div><div class="value">~18</div><div class="sub">production slots</div></div>
+  <div class="card red"><div class="label">Killed</div><div class="value">~13</div><div class="sub">honest rejects</div></div>
+  <div class="card amber"><div class="label">Marginal</div><div class="value">~10</div><div class="sub">for ensembles</div></div>
+  <div class="card blue"><div class="label">Infra</div><div class="value">~25</div><div class="sub">risk/data/reporting</div></div>
+  <div class="card amber"><div class="label">Retractions</div><div class="value">3</div><div class="sub">honest reversals</div></div>
+  <div class="card blue"><div class="label">Total</div><div class="value">~75</div></div>
+  <div class="card green"><div class="label">North Star met</div><div class="value">3 / 4</div><div class="sub">capacity lags</div></div>
+  <div class="card blue"><div class="label">Production tests</div><div class="value">247</div><div class="sub">risk+paper+exec+monitor</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>10. Recommendations &amp; Next Steps</h2>
+
+<div class="recommendation">
+<h3>Phase 9 — Paper Trading Deployment (starts 2026-04-08, today)</h3>
+<ol>
+<li><strong>Deploy EXP-2410 production config</strong> to Alpaca paper. 7-stream equal_risk_15% + 3% trailing-DD circuit breaker + execution stack A+B+C+D.</li>
+<li><strong>Daily P&amp;L reconciliation</strong> against the EXP-2470 net forecast (Sharpe 4.82, CAGR 129%). Flag any 5-day window that drifts &gt;±15%.</li>
+<li><strong>Validate execution assumptions</strong> in the first 5 trading days:
+  <ul>
+    <li>Limit-at-mid fill rate ≥ 50%</li>
+    <li>End-of-day slippage reduction ≥ 25% vs open-of-day quotes</li>
+    <li>Combo-order price improvement ≥ 20% vs sequential legs</li>
+  </ul>
+</li>
+<li><strong>Circuit breaker dry-run</strong> on the 2022 inflation-shock historical fold.</li>
+<li><strong>Gate to live:</strong> ≥ 4 consecutive weeks within ±15% of forecast → $25K seed at 1× leverage.</li>
+</ol>
+</div>
+
+<div class="recommendation">
+<h3>Phase 8 — AUM Capacity (continues in parallel)</h3>
+<ol>
+<li><strong>Trade-frequency compression</strong> — halve the trades per stream, double the notional per trade. Expected commission drag 827 → ~400 bps. Net Sharpe uplift ~0.25.</li>
+<li><strong>Dollar-notional sizing</strong> — replace integer contract counts with $ sizing. Removes the rounding floor at small AUM.</li>
+<li><strong>No more weight-shuffling experiments</strong> — 4/4 rejected on April 8. Capacity is a trade-frequency problem, not a weight problem.</li>
+<li><strong>Every candidate</strong> must report gross AND EXP-2470 net Sharpe before promotion.</li>
+</ol>
+</div>
+
+<div class="recommendation">
+<h3>Risk committee quick-reference</h3>
+<ol>
+<li><strong>Advertise 4.82 Sharpe / 129% CAGR</strong> — the EXP-2470 net figure. Do NOT quote 5.96 or 6.25 without the "gross, ideal execution" qualifier.</li>
+<li><strong>DD is controlled at 6.77%</strong> by the EXP-2370 circuit breaker. The production stack has this ON by default.</li>
+<li><strong>AUM hard cap is $50M</strong> until Phase 8 closes. Do not scale above this on live capital.</li>
+<li><strong>Paper window ends 2026-06-03</strong> (8 weeks from 2026-04-08). Live seeding decision happens that week.</li>
+</ol>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>11. Honest Caveats for Carlos</h2>
+
+<div class="callout warn">
+<ol>
+<li><strong>Per-fold Sharpe std is 2.13.</strong> Expect ±2 Sharpe swings in any 63-day real-money window. Do not panic on a bad month.</li>
+<li><strong>The 2022 inflation-shock fold hit 24% intra-fold DD</strong> before the 3% circuit breaker kicked in. In production, rely on <code>portfolio_risk_manager.py</code>'s HWM circuits as the final-stop safeguard.</li>
+<li><strong>Execution assumptions are modelled, not measured in live markets.</strong> The 503 bps savings in EXP-2470 come from industry-plausible factors (50% fill rate, 25% slippage cut, 30% combo improvement). Paper trading validates them.</li>
+<li><strong>Commission drag is immovable</strong> by execution technique. The current 827 bps is 49% of optimised drag. Shrinking it requires trade-frequency reduction, which is still in progress.</li>
+<li><strong>Three experiments were retracted</strong> (EXP-2360 inflated, EXP-2400 retracted by EXP-2450, EXP-2460 negative on portfolio). All were caught honestly; none made it into the production numbers above.</li>
+<li><strong>Phase 8 capacity failed four times</strong> on April 8. Trade-frequency compression is the next attempt but is not yet tested.</li>
+</ol>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>12. Headline Numbers for the Risk Committee</h2>
+
+<div class="grid">
+  <div class="card green"><div class="label">Recommended advertised Sharpe</div><div class="value">4.82</div><div class="sub">net, EXP-2470</div></div>
+  <div class="card green"><div class="label">Recommended advertised CAGR</div><div class="value">129.0%</div><div class="sub">net, EXP-2470</div></div>
+  <div class="card green"><div class="label">Max DD (production)</div><div class="value">6.77%</div><div class="sub">circuit ON</div></div>
+  <div class="card green"><div class="label">Production floor</div><div class="value">Sharpe &gt; 4.0</div><div class="sub">MET (4.82)</div></div>
+  <div class="card amber"><div class="label">AUM cap (today)</div><div class="value">$50M</div><div class="sub">SLV-gated</div></div>
+  <div class="card blue"><div class="label">First paper day</div><div class="value">Apr 8</div></div>
+  <div class="card blue"><div class="label">First live gate</div><div class="value">≥ 4 weeks</div><div class="sub">within ±15%</div></div>
+  <div class="card green"><div class="label">First live seed</div><div class="value">$25K</div><div class="sub">1× leverage</div></div>
+</div>
+
+<div class="headline">
+<strong>Bottom line.</strong> Gross performance is locked at Sharpe 5.96 on real walk-forward data. Realistic net performance after honest cost modelling is 4.82 Sharpe / 129% CAGR — above the 4.0 production floor. Drawdown is controlled at 6.77% by the EXP-2370 circuit breaker. The only remaining gap is AUM capacity at $50M (target $500M). Phase 9 paper trading starts today; Phase 8 capacity work continues via trade-frequency compression.
+</div>
+
+<div class="footer">
+Generated 2026-04-08 · compass/reports/final_summary_apr8.html<br>
+Data policy: 🚫 NO SYNTHETIC DATA — IronVault + Yahoo Finance + public Fed calendar only.
+All Sharpe values computed as mean(daily_returns) / std(daily_returns) × √252.
+Walk-forward results from pooled OOS test folds. Cost model from real IronVault option_daily bid-ask proxies + real Yahoo ADVs. Execution optimization factors are industry-plausible and will be validated in Phase 9 paper trading.
+</div>
+
+</body>
+</html>

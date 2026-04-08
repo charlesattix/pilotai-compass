@@ -1,0 +1,63 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EXP-2300 sleeve 7 — Crisis Alpha v5 multi-asset CTA hedge (2.28% weight)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Reference: compass.crisis_alpha_v5 frozen best config
+#   lookback=slow / vt=0.05 / lev=1.0 / sg=0.05 / sh=2.0 / equity_short_only
+# Validated: standalone CAGR −1.1%, Sharpe −0.82 (it's a HEDGE, not alpha)
+#   Corr with EXP-1220 −0.151 (diversification purpose)
+# Weight: 2.28% (equal_risk_15% from EXP-2200)
+# Mode: SIGNAL_ONLY (13-asset CTA rebalance, requires multi-ETF execution)
+# ═══════════════════════════════════════════════════════════════════════════
+
+sleeve_id: v5_hedge
+portfolio_weight: 0.0228
+mode: signal_only
+
+strategy:
+  module: compass.crisis_alpha_v5
+  runner: live_signal
+  description: "13-asset trend-following CTA with stress gate + safe-haven tilt"
+
+universe:
+  safe_havens: [TLT, GLD, LQD, UUP]
+  equities: [SPY, IWM, EFA, EEM, QQQ]
+  other: [HYG]
+
+config:
+  lookback_preset: slow
+  vol_target: 0.05
+  leverage: 1.0
+  dd_brake_threshold: 0.05
+  dd_brake_zone: 0.03
+  max_weight: 0.20
+  require_confirmation: false
+  stress_threshold: 0.05
+  stress_lookback: 60
+  safe_haven_boost: 2.0
+  equity_short_only: true
+
+cadence:
+  rebalance_frequency_days: 5
+  scan_time: "09:45 ET"
+
+execution:
+  requires_multi_etf_broker: true
+  broker_status: PARTIAL         # Alpaca can trade the ETF legs but the
+                                  # short-equity and CTA overlay logic is
+                                  # not yet wired to the paper harness
+  action_on_signal: "log + telegram alert"
+
+data:
+  underlying_source: yahoo
+
+logging:
+  level: INFO
+  file: logs/exp2300/sleeve_v5_hedge.log
+  journal: logs/exp2300/journal_v5_hedge.csv
+
+deployment_notes: |
+  Upgrade path: wire the compass.crisis_alpha_v5 weight vector to the
+  paper_trading harness so the 13 ETF legs are rebalanced weekly. For
+  now this sleeve logs the target weights to journal and Telegram
+  without submitting orders.

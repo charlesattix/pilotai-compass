@@ -1,0 +1,57 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>EXP-2670 Paper Trading Go/No-Go Checklist</title>
+<style>
+body{font-family:-apple-system,sans-serif;margin:0;padding:24px;background:#fff;color:#1e293b;max-width:1150px}
+h1{font-size:1.5rem;color:#0f172a} h2{font-size:1.08rem;color:#334155;border-bottom:1px solid #e2e8f0;padding-bottom:4px;margin-top:1.6rem}
+.meta{color:#64748b;font-size:0.82rem;margin-bottom:18px}
+.headline{background:#f0fdf4;border-left:5px solid #ca8a04;padding:16px 22px;border-radius:6px;margin:14px 0;font-size:1.02rem;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;text-align:center}
+.card .l{font-size:0.65rem;color:#64748b;text-transform:uppercase} .card .v{font-size:1.3rem;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:0.84rem;margin:10px 0}
+th{background:#f1f5f9;padding:7px 9px;text-align:left;font-size:0.7rem;color:#64748b;text-transform:uppercase;border-bottom:2px solid #e2e8f0}
+td{padding:8px 10px;text-align:left;border-bottom:1px solid #f1f5f9;vertical-align:top}
+code{font-family:"SF Mono",Consolas,monospace;font-size:.78rem;background:#f1f5f9;padding:1px 5px;border-radius:3px}
+</style></head><body>
+<h1>EXP-2670 — Paper Trading Go/No-Go Checklist</h1>
+<p class="meta">Pre-flight verification for Phase 9 paper trading on Alpaca. 6 independent checks · 10 gating criteria · machine-checkable.</p>
+
+<div class="headline" style="color:#ca8a04">⚠ One or more checks WARN — remediate before Phase 9 launch.</div>
+
+<div class="grid">
+  <div class="card"><div class="l">Overall</div><div class="v" style="color:#ca8a04">CAUTION</div></div>
+  <div class="card"><div class="l">Checks PASS</div><div class="v">5/6</div></div>
+  <div class="card"><div class="l">Checks WARN</div><div class="v">1</div></div>
+  <div class="card"><div class="l">Checks FAIL</div><div class="v">0</div></div>
+  <div class="card"><div class="l">Streams</div><div class="v">8</div></div>
+  <div class="card"><div class="l">Gates</div><div class="v">10</div></div>
+</div>
+
+<h2>Pre-flight checks</h2>
+<table>
+<tr><th style="width:22%">Check</th><th style="width:10%;text-align:center">Status</th><th>Detail</th></tr>
+<tr><td><strong>Check 1</strong><br>Stream backtester presence</td><td style='color:#16a34a;font-weight:700;text-align:center'>PASS</td><td>All 8 streams importable.</td></tr><tr><td><strong>Check 2</strong><br>Alpaca API connectivity</td><td style='color:#ca8a04;font-weight:700;text-align:center'>WARN</td><td>alpaca-py installed but ALPACA_PAPER_API_KEY / ALPACA_PAPER_SECRET not in environment. SDK import verified; live-connection check skipped.<div style='color:#475569;font-size:.8rem;margin-top:4px'>⟶ Export ALPACA_PAPER_API_KEY and ALPACA_PAPER_SECRET from the paper account before Phase 9 launch.</div></td></tr><tr><td><strong>Check 3</strong><br>Ledoit-Wolf covariance</td><td style='color:#16a34a;font-weight:700;text-align:center'>PASS</td><td>LedoitWolf fits on 252-day × 7-stream frame. shrinkage=0.0925, cond=22.2, symmetric=True, PSD=True, finite=True.</td></tr><tr><td><strong>Check 4</strong><br>Daily signal generation script</td><td style='color:#16a34a;font-weight:700;text-align:center'>PASS</td><td>generate_daily_signals.py created at compass/scripts/generate_daily_signals.py. Functions: main=True, generate_all_signals=True. Note: individual stream modules need `generate_today_signals(date)` entry points for the loop to emit actionable rows.<div style='color:#475569;font-size:.8rem;margin-top:4px'>⟶ Add a `generate_today_signals(date)` function to each stream module that returns a list of signal dicts. The paper harness will call these in sequence.</div></td></tr><tr><td><strong>Check 5</strong><br>Monitoring dashboard</td><td style='color:#16a34a;font-weight:700;text-align:center'>PASS</td><td>3 monitoring module(s) found. Tracks: daily PnL, rolling drawdown, rolling Sharpe (30d), stream correlation matrix, fold-equivalent deviation.</td></tr><tr><td><strong>Check 6</strong><br>Paper → Live gating criteria</td><td style='color:#16a34a;font-weight:700;text-align:center'>PASS</td><td>10 machine-checkable gates defined. All must pass for 4 consecutive weeks before $25K live seed.</td></tr>
+</table>
+
+<h2>8-Stream production roster</h2>
+<table><tr><th>Stream</th><th>Underlier</th><th>Direction</th><th>Module</th></tr>
+<tr><td>exp1220</td><td>SPY</td><td>put credit spread 5% OTM</td><td><code>compass.exp1220_standalone</code></td></tr><tr><td>xlf_cs</td><td>XLF</td><td>put credit spread</td><td><code>compass.exp2200_north_star_v6</code></td></tr><tr><td>xli_cs</td><td>XLI</td><td>put credit spread</td><td><code>compass.exp2200_north_star_v6</code></td></tr><tr><td>gld_cal</td><td>GLD-GC=F</td><td>calendar spread</td><td><code>compass.exp1770_commodity_calendars</code></td></tr><tr><td>slv_cal</td><td>SLV-SI=F</td><td>calendar spread</td><td><code>compass.exp1770_commodity_calendars</code></td></tr><tr><td>vol_arb</td><td>SPY/ETFs</td><td>IV-RV long/short</td><td><code>compass.exp2020_cross_vol_arb</code></td></tr><tr><td>v5_hedge</td><td>SPY+VIX</td><td>put + VIX call hedge</td><td><code>compass.crisis_alpha_v5</code></td></tr><tr><td>spy_weekly_cs</td><td>SPY</td><td>weekly put credit spread 3% OTM</td><td><code>compass.exp2580_spy_weekly_cs</code></td></tr></table>
+
+<h2>Paper → Live gating criteria (all must pass for 4 weeks)</h2>
+<table><tr><th>ID</th><th>Gate</th><th>Rule</th></tr>
+<tr><td>G1</td><td>Paper duration</td><td>≥ 4 consecutive weeks of paper P&L data (20 trading days)</td></tr><tr><td>G2</td><td>Sharpe tracking</td><td>Realised 20-day rolling Sharpe within ±15% of EXP-2570 forecast (6.00)</td></tr><tr><td>G3</td><td>CAGR tracking</td><td>Annualised 20-day CAGR within ±20% of EXP-2570 forecast (93%)</td></tr><tr><td>G4</td><td>Max drawdown</td><td>Paper Max DD stays below 8% (EXP-2370 circuit expected ≤ 4.2%)</td></tr><tr><td>G5</td><td>Circuit-breaker false positives</td><td>EXP-2370 3% trailing-DD circuit breaker does not trip on false alarms (< 2 trips in 20 trading days)</td></tr><tr><td>G6</td><td>Fill rate (limit-at-mid)</td><td>Limit-at-mid fill rate ≥ 50% validates EXP-2470 technique A</td></tr><tr><td>G7</td><td>Slippage vs model</td><td>Realised slippage ≥ 25% below open-of-day quotes validates EXP-2470 technique B</td></tr><tr><td>G8</td><td>Alpaca fills vs NBBO</td><td>Alpaca fills match IBKR NBBO within ±3 cents/contract (no PFOF tax relative to EXP-2510 assumption)</td></tr><tr><td>G9</td><td>Correlation sanity</td><td>Rolling pairwise correlations among 8 streams stay below 0.50 during stress windows (EXP-1890 CorrelationMonitor)</td></tr><tr><td>G10</td><td>No manual overrides</td><td>Zero manual trade overrides during the 4-week window</td></tr></table>
+
+<h2>Post-flight deployment steps</h2>
+<ol>
+  <li>Export <code>ALPACA_PAPER_API_KEY</code> and <code>ALPACA_PAPER_SECRET</code> from the Alpaca dashboard.</li>
+  <li>Re-run this checklist: <code>python3 -m compass.exp2670_paper_gonogo</code>. Overall status must be <strong>GO</strong>.</li>
+  <li>Cron <code>compass/scripts/generate_daily_signals.py</code> at 09:25 ET weekdays.</li>
+  <li>Cron <code>compass.paper_monitor_dashboard</code> at 16:30 ET weekdays.</li>
+  <li>On-call rota: daily P&L reconciliation against EXP-2570 forecast (Sharpe 6.00 / CAGR 93%).</li>
+  <li>Gate review every Friday; go-live decision on the first Friday after all 10 gates have passed for 20 consecutive trading days.</li>
+</ol>
+
+<div style="color:#94a3b8;font-size:.75rem;margin-top:1.8rem;border-top:1px solid #e2e8f0;padding-top:8px">
+compass/exp2670_paper_gonogo.py · generated 2026-04-08 07:05 UTC
+</div>
+</body></html>

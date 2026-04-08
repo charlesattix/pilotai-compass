@@ -1,0 +1,193 @@
+# ============================================================================
+# paper_crypto_etha.yaml — ETHA Credit Spread Paper Trading Config
+# ============================================================================
+# Strategy: Regime-adaptive credit spreads on ETHA (iShares Ethereum Trust ETF)
+# Status:   PLACEHOLDER — params to be tuned via backtest sweep
+#
+# ETHA characteristics (vs IBIT):
+#   - Even higher vol than IBIT: ETH ~60-100% annualized vs BTC ~50-80%
+#   - ETH/BTC correlation ~0.8-0.9 but higher beta — moves further on BTC moves
+#   - Wider OTM required: 7-8% vs 5% for IBIT
+#   - Shorter target DTE: 21 days (faster decay at higher vol)
+#   - Lower liquidity than IBIT: wider bid/ask spreads
+#   - Options data available from ~July 2024 only (same launch as IBIT)
+#
+# Usage:
+#   python main.py scheduler --config configs/paper_crypto_etha.yaml \
+#                            --env-file .env
+#
+# Required env vars:
+#   ALPACA_API_KEY         — Alpaca paper trading API key
+#   ALPACA_API_SECRET      — Alpaca paper trading API secret
+#   POLYGON_API_KEY        — Polygon.io API key (options chain data)
+#   TELEGRAM_BOT_TOKEN     — (optional) Telegram alert bot token
+#   TELEGRAM_CHAT_ID       — (optional) Telegram chat ID for alerts
+# ============================================================================
+
+# --- Paper trading safety flags ---
+paper_mode: true
+db_path: "data/pilotai_etha.db"
+experiment_id: "EXP-ETHA-001"
+created_by: "maximus"     # Attribution: experiment creator
+
+# Tickers
+tickers:
+  - ETHA
+
+# ============================================================================
+# Credit Spread Strategy (placeholder — tune via backtest)
+# ============================================================================
+strategy:
+  # --- DTE: shorter for higher vol underlying ---
+  min_dte: 14
+  max_dte: 28
+  target_dte: 21
+
+  manage_dte: 0           # Matches backtester default (no early DTE exit)
+
+  # --- Direction: regime-adaptive ---
+  direction: both
+
+  # --- Strike selection: wider OTM for higher-vol underlying ---
+  otm_pct: 0.07           # 7% OTM (vs 5% for IBIT) — placeholder
+  use_delta_selection: false
+  target_delta: 0.08
+  min_delta: 0.05
+  max_delta: 0.12
+
+  # --- Spread construction ---
+  spread_width: 3           # $3 wide (narrower than IBIT; ETHA trades ~$30-50) — placeholder
+  spread_width_high_iv: 4
+  spread_width_low_iv: 2
+
+  # --- IV filters ---
+  min_iv_rank: 15           # Even lower threshold — ETH IV is structurally very high
+  min_iv_percentile: 15
+
+  # --- Iron Condor: DISABLED until 2+ years of data available ---
+  iron_condor:
+    enabled: false
+
+  # --- Technical filters ---
+  technical:
+    use_trend_filter: true
+    use_rsi_filter: false
+    use_support_resistance: false
+    fast_ma: 20
+    slow_ma: 50             # MA50 for crypto
+    rsi_period: 14
+    rsi_oversold: 30
+    rsi_overbought: 70
+
+  # --- Regime detection ---
+  regime_mode: combo
+  regime_config:
+    signals:
+      - price_vs_ma200
+      - rsi_momentum
+      - vix_structure
+    ma_slow_period: 50      # MA50 (MA200 unavailable for 2024-only ETF data)
+    ma200_neutral_band_pct: 1.5   # Even wider neutral band for ETH
+
+# ============================================================================
+# Risk Management (conservative placeholder — tune via backtest)
+# ============================================================================
+risk:
+  account_size: 100000
+
+  # Very conservative risk per trade: ETH is the higher-vol asset
+  max_risk_per_trade: 2.0   # 2% risk per trade (vs 3% for IBIT) — placeholder
+
+  # Sizing: flat for honest P&L tracking in paper phase
+  sizing_mode: flat
+  compound: false
+
+  # Contract limits
+  min_contracts: 1
+  max_contracts: 8
+
+  # Position limits
+  max_positions: 4
+  max_positions_per_ticker: 2
+
+  scan_days: [0, 1, 2, 3, 4]   # Monday-Friday
+
+  # Credit spread exit rules
+  profit_target: 50          # 50% of credit received
+  stop_loss_multiplier: 2.0  # 2x credit
+  stop_loss_pct_of_width: 85
+
+  # Momentum filter: larger threshold for crypto
+  momentum_filter_pct: 7.0
+
+  # Portfolio-level risk limits
+  portfolio_risk:
+    max_portfolio_risk_pct: 15   # Tighter heat cap for higher-vol underlying
+    max_single_ticker_pct: 15
+    max_same_expiration: 2
+
+  # Drawdown circuit breaker
+  drawdown_cb_pct: 25        # 25% (tighter than IBIT/SPY — ETH can move 20% in a day)
+  cooldown_bars: 7
+
+  # No rolling
+  enable_rolling: false
+  max_rolls_per_position: 0
+
+# ============================================================================
+# Alpaca Paper Trading
+# ============================================================================
+alpaca:
+  enabled: true
+  paper: true
+  base_url: "https://paper-api.alpaca.markets"
+  api_key: "${ALPACA_API_KEY}"
+  api_secret: "${ALPACA_API_SECRET}"
+
+# ============================================================================
+# Alerts
+# ============================================================================
+alerts:
+  output_json: true
+  output_text: true
+  output_csv: true
+  json_file: "alerts_etha.json"
+  text_file: "alerts_etha.txt"
+  csv_file: "alerts_etha.csv"
+
+  telegram:
+    enabled: true
+    bot_token: "${TELEGRAM_BOT_TOKEN}"
+    chat_id: "${TELEGRAM_CHAT_ID}"
+
+# ============================================================================
+# Logging
+# ============================================================================
+logging:
+  level: "INFO"
+  file: "logs/paper_etha.log"
+  console: true
+
+# ============================================================================
+# Data
+# ============================================================================
+data:
+  provider: polygon
+  cache_dir: "data/options_cache"
+
+# ============================================================================
+# Backtest reference targets (to be updated after sweep)
+# ============================================================================
+backtest:
+  starting_capital: 100000
+  commission_per_contract: 0.65
+  slippage: 0.15          # Higher slippage for ETHA (lower liquidity than IBIT)
+  exit_slippage: 0.25
+  score_threshold: 25
+  generate_reports: true
+  report_dir: "output/backtest_reports"
+
+  # NOTE: ETHA options data only available from ~July 2024.
+  # Even lower liquidity than IBIT — backtest results may be unreliable
+  # until 12+ months of live trading data are available.
+  # Cross-reference with IBIT backtest to check BTC/ETH correlation stability.

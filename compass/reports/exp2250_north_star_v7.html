@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>EXP-2250 — North Star v7 (9 streams)</title>
+<style>
+body { font-family:-apple-system,sans-serif;max-width:1300px;margin:0 auto;padding:28px;background:#fff;color:#1e293b; }
+h1 { font-size:1.85em;color:#0f172a; }
+h2 { margin-top:2em;border-bottom:2px solid #e2e8f0;padding-bottom:8px;color:#334155; }
+.sources { background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px;font-size:0.84rem;line-height:1.6; }
+.winner { background:#fff;border:2px solid #16a34a;border-radius:10px;padding:18px;margin:20px 0; }
+.winner h3 { margin-top:0;color:#16a34a; }
+.note { background:#fefce8;border:1px solid #fde047;border-radius:6px;padding:12px 16px;font-size:0.86rem;margin:14px 0; }
+table { width:100%;border-collapse:collapse;margin:12px 0;font-size:0.84em; }
+th { background:#f1f5f9;padding:9px 11px;text-align:right;border-bottom:2px solid #cbd5e1;font-size:0.72em;text-transform:uppercase; }
+th:first-child { text-align:left; }
+td { padding:7px 11px;text-align:right;border-bottom:1px solid #e2e8f0; }
+td:first-child { text-align:left; }
+</style></head><body>
+
+<h1>EXP-2250 — 8/9-Stream North Star Portfolio v7</h1>
+<p style="color:#64748b">Adding QQQ credit spreads + EEM VRP to the 7-stream v6 ·
+2026-04-07 18:03</p>
+
+<div class="sources">
+<strong>Rule Zero — all real:</strong><br>
+Carried over from EXP-2200 (7 streams): exp1220, xlf_cs, xli_cs, gld_cal,
+slv_cal, vol_arb, v5_hedge<br>
+NEW stream 8 — qqq_cs: compass.exp2240_qqq_iwm_credit_spreads
+.run_credit_spread_trades on real IronVault QQQ chains + Yahoo QQQ/^VIX<br>
+NEW stream 9 — eem_vrp: compass.exp1660_vrp_deepening walk-forward on real
+Yahoo EEM + FRED VXEEMCLS, vol-targeted to 5%/yr<br>
+Sharpe: compass.metrics.full_metrics (canonical mean/std × √252)
+</div>
+
+<div class="winner">
+<h3>★ Winner: <code>v7_9stream_QQQ_EEM_15%</code> — 6.0 target YES ✓</h3>
+<strong>SPARSE Sharpe (honest):</strong> 6.55 ·
+CAGR 167.1% · Max DD 5.9% ·
+Calmar 28.13<br>
+Baseline (EXP-2200 7-stream equal_risk_15%): 5.96<br>
+Lift from adding new streams: <strong>+0.59</strong>
+</div>
+
+<h2>1. Stream-level metrics (smeared, all 9 streams)</h2>
+<table>
+<thead><tr><th>Stream</th><th>N trades</th><th>Trade SR</th><th>CAGR</th><th>Smeared SR</th><th>Max DD</th><th>Vol</th></tr></thead>
+<tbody><tr><td>exp1220</td><td>171</td><td>1.26</td><td>1.2%</td><td>-7.18</td><td>1.5%</td><td>0.46%</td></tr><tr><td>xlf_cs</td><td>248</td><td>—</td><td>17.6%</td><td>19.67</td><td>1.4%</td><td>0.60%</td></tr><tr><td>xli_cs</td><td>248</td><td>—</td><td>17.7%</td><td>15.52</td><td>1.4%</td><td>0.76%</td></tr><tr><td>qqq_cs</td><td>85</td><td>1.86</td><td>1.5%</td><td>-6.88</td><td>0.7%</td><td>0.44%</td></tr><tr><td>gld_cal</td><td>—</td><td>—</td><td>17.4%</td><td>1.96</td><td>2.5%</td><td>5.97%</td></tr><tr><td>slv_cal</td><td>—</td><td>—</td><td>31.5%</td><td>1.94</td><td>6.1%</td><td>12.17%</td></tr><tr><td>vol_arb</td><td>271</td><td>2.28</td><td>7.9%</td><td>3.92</td><td>3.8%</td><td>0.78%</td></tr><tr><td>v5_hedge</td><td>—</td><td>—</td><td>-1.0%</td><td>-0.83</td><td>12.8%</td><td>6.42%</td></tr><tr><td>eem_vrp</td><td>—</td><td>—</td><td>18.4%</td><td>2.61</td><td>18.0%</td><td>4.81%</td></tr></tbody>
+</table>
+
+<h2>2. Correlation matrix (smeared daily)</h2>
+<table>
+<thead><tr><th></th><th>exp1220</th><th>xlf_cs</th><th>xli_cs</th><th>qqq_cs</th><th>gld_cal</th><th>slv_cal</th><th>vol_arb</th><th>v5_hedge</th><th>eem_vrp</th></tr></thead>
+<tbody><tr><td>exp1220</td><td style='color:#dc2626'>+1.000</td><td style='color:#0f172a'>+0.159</td><td style='color:#0f172a'>+0.168</td><td style='color:#0f172a'>+0.150</td><td style='color:#16a34a'>-0.038</td><td style='color:#16a34a'>-0.031</td><td style='color:#0f172a'>+0.017</td><td style='color:#16a34a'>-0.089</td><td style='color:#0f172a'>+0.072</td></tr><tr><td>xlf_cs</td><td style='color:#0f172a'>+0.159</td><td style='color:#dc2626'>+1.000</td><td style='color:#0f172a'>+0.224</td><td style='color:#0f172a'>+0.040</td><td style='color:#0f172a'>+0.005</td><td style='color:#16a34a'>-0.027</td><td style='color:#0f172a'>+0.100</td><td style='color:#16a34a'>-0.052</td><td style='color:#0f172a'>+0.016</td></tr><tr><td>xli_cs</td><td style='color:#0f172a'>+0.168</td><td style='color:#0f172a'>+0.224</td><td style='color:#dc2626'>+1.000</td><td style='color:#0f172a'>+0.115</td><td style='color:#16a34a'>-0.003</td><td style='color:#16a34a'>-0.011</td><td style='color:#16a34a'>-0.103</td><td style='color:#16a34a'>-0.054</td><td style='color:#0f172a'>+0.046</td></tr><tr><td>qqq_cs</td><td style='color:#0f172a'>+0.150</td><td style='color:#0f172a'>+0.040</td><td style='color:#0f172a'>+0.115</td><td style='color:#dc2626'>+1.000</td><td style='color:#0f172a'>+0.013</td><td style='color:#0f172a'>+0.013</td><td style='color:#16a34a'>-0.020</td><td style='color:#16a34a'>-0.026</td><td style='color:#16a34a'>-0.047</td></tr><tr><td>gld_cal</td><td style='color:#16a34a'>-0.038</td><td style='color:#0f172a'>+0.005</td><td style='color:#16a34a'>-0.003</td><td style='color:#0f172a'>+0.013</td><td style='color:#dc2626'>+1.000</td><td style='color:#0f172a'>+0.256</td><td style='color:#16a34a'>-0.003</td><td style='color:#16a34a'>-0.049</td><td style='color:#0f172a'>+0.034</td></tr><tr><td>slv_cal</td><td style='color:#16a34a'>-0.031</td><td style='color:#16a34a'>-0.027</td><td style='color:#16a34a'>-0.011</td><td style='color:#0f172a'>+0.013</td><td style='color:#0f172a'>+0.256</td><td style='color:#dc2626'>+1.000</td><td style='color:#16a34a'>-0.025</td><td style='color:#16a34a'>-0.018</td><td style='color:#0f172a'>+0.020</td></tr><tr><td>vol_arb</td><td style='color:#0f172a'>+0.017</td><td style='color:#0f172a'>+0.100</td><td style='color:#16a34a'>-0.103</td><td style='color:#16a34a'>-0.020</td><td style='color:#16a34a'>-0.003</td><td style='color:#16a34a'>-0.025</td><td style='color:#dc2626'>+1.000</td><td style='color:#16a34a'>-0.005</td><td style='color:#0f172a'>+0.032</td></tr><tr><td>v5_hedge</td><td style='color:#16a34a'>-0.089</td><td style='color:#16a34a'>-0.052</td><td style='color:#16a34a'>-0.054</td><td style='color:#16a34a'>-0.026</td><td style='color:#16a34a'>-0.049</td><td style='color:#16a34a'>-0.018</td><td style='color:#16a34a'>-0.005</td><td style='color:#dc2626'>+1.000</td><td style='color:#0f172a'>+0.022</td></tr><tr><td>eem_vrp</td><td style='color:#0f172a'>+0.072</td><td style='color:#0f172a'>+0.016</td><td style='color:#0f172a'>+0.046</td><td style='color:#16a34a'>-0.047</td><td style='color:#0f172a'>+0.034</td><td style='color:#0f172a'>+0.020</td><td style='color:#0f172a'>+0.032</td><td style='color:#0f172a'>+0.022</td><td style='color:#dc2626'>+1.000</td></tr></tbody>
+</table>
+
+<h2>3. Portfolio configurations — equal-risk weights, vol targets</h2>
+<table>
+<thead><tr>
+<th>Config</th><th>N sleeves</th>
+<th>Smeared CAGR</th><th>Smeared SR</th>
+<th>Sparse SR (honest)</th><th>ΔSR vs baseline</th>
+<th>Sparse DD</th><th>Target vol</th>
+</tr></thead>
+<tbody><tr><td><strong>v6_7stream_none</strong></td><td>7</td><td>10%</td><td>13.40</td><td style='font-weight:700;color:#0f172a'>3.40</td><td style='color:#dc2626;font-weight:700'>-2.56</td><td>0.6%</td><td>—</td></tr><tr><td><strong>v6_7stream_12%</strong></td><td>7</td><td>1521%</td><td>24.90</td><td style='font-weight:700;color:#0f172a'>5.89</td><td style='color:#dc2626;font-weight:700'>-0.07</td><td>4.6%</td><td>12%</td></tr><tr><td><strong>v6_7stream_15%</strong></td><td>7</td><td>3130%</td><td>24.98</td><td style='font-weight:700;color:#0f172a'>5.96</td><td style='color:#0f172a;font-weight:700'>+0.00</td><td>5.7%</td><td>15%</td></tr><tr><td><strong>v7_8stream_QQQ_none</strong></td><td>8</td><td>8%</td><td>9.84</td><td style='font-weight:700;color:#0f172a'>2.68</td><td style='color:#dc2626;font-weight:700'>-3.28</td><td>0.5%</td><td>—</td></tr><tr><td><strong>v7_8stream_QQQ_12%</strong></td><td>8</td><td>1307%</td><td>24.29</td><td style='font-weight:700;color:#16a34a'>6.09</td><td style='color:#16a34a;font-weight:700'>+0.13</td><td>4.5%</td><td>12%</td></tr><tr><td><strong>v7_8stream_QQQ_15%</strong></td><td>8</td><td>2608%</td><td>24.38</td><td style='font-weight:700;color:#16a34a'>6.17</td><td style='color:#16a34a;font-weight:700'>+0.21</td><td>5.7%</td><td>15%</td></tr><tr><td><strong>v7_9stream_QQQ_EEM_none</strong></td><td>9</td><td>8%</td><td>9.98</td><td style='font-weight:700;color:#0f172a'>2.98</td><td style='color:#dc2626;font-weight:700'>-2.98</td><td>0.5%</td><td>—</td></tr><tr><td><strong>v7_9stream_QQQ_EEM_12%</strong></td><td>9</td><td>1274%</td><td>23.34</td><td style='font-weight:700;color:#16a34a'>6.47</td><td style='color:#16a34a;font-weight:700'>+0.51</td><td>4.8%</td><td>12%</td></tr><tr><td><strong>v7_9stream_QQQ_EEM_15% ★</strong></td><td>9</td><td>2530%</td><td>23.42</td><td style='font-weight:700;color:#16a34a'>6.55</td><td style='color:#16a34a;font-weight:700'>+0.59</td><td>5.9%</td><td>15%</td></tr></tbody>
+</table>
+
+<div class="note">
+<strong>Methodology:</strong> smeared daily Sharpe uses EXP-2160's uniform
+P&L smearing across entry→exit (dense stream, upper bound). Sparse
+daily Sharpe uses exit-date only (conservative lower bound). The
+honest portfolio Sharpe sits between the two. We select the winner by
+SPARSE Sharpe because that's the most-conservative honest measurement.
+Baseline for ΔSR is the EXP-2200 winning config (7-stream equal_risk_15%
+sparse Sharpe 5.96).
+</div>
+
+<p style="margin-top:3em;color:#94a3b8;font-size:0.78em;text-align:center">
+compass/exp2250_north_star_v7.py · Rule Zero · all real data
+</p>
+</body></html>

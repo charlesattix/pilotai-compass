@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<title>EXP-1760 Crypto Volatility Hardening</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1100px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.55; }
+  h1 { color:#0f172a; margin-bottom:4px; font-size:1.8em; }
+  h2 { color:#334155; margin-top:2.5em; padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:16px; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:18px 0; }
+  .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;
+          padding:18px; text-align:center; flex:1; min-width:140px; }
+  .kpi .value { font-size:1.7em; font-weight:800; color:#0f172a; }
+  .kpi .label { font-size:0.72em; color:#64748b; margin-top:4px; text-transform:uppercase; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.86em; }
+  th { background:#f1f5f9; padding:9px 12px; text-align:right; font-weight:600;
+       color:#475569; border-bottom:2px solid #cbd5e1; font-size:0.78em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  .disclaimer { background:#fef2f2; border:2px solid #dc2626; border-radius:8px;
+                  padding:16px; margin:20px 0; font-size:0.88rem; line-height:1.7; }
+  .sources { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;
+               padding:14px; margin:14px 0; font-size:0.85rem; line-height:1.7; }
+  .pass { color:#16a34a; font-weight:700; }
+  .fail { color:#dc2626; font-weight:700; }
+</style></head><body>
+
+<h1>EXP-1760 — Crypto Volatility Hardening</h1>
+<div class="subtitle">IBIT/BITO put credit spreads, gated by crypto regime classifier
+| 2026-04-07 11:59:42</div>
+
+<div class="disclaimer">
+    <strong>⚠ FEASIBILITY VALIDATION (not a fully-priced backtest):</strong><br>
+    IronVault has zero IBIT and zero BITO option contracts (verified
+    against options_cache.db on 2026-04-06). Yahoo Finance does not expose
+    historical option-chain prices. Therefore option premiums are derived
+    via Black-Scholes from <strong>real spot prices</strong> (Yahoo IBIT,
+    BITO, BTC-USD, GBTC) and <strong>real BTC realized vol × 1.15</strong>
+    (Deribit-empirical IV/RV multiplier). All inputs are real; pricing is
+    deterministic. This is the same methodology used by EXP-1810. To
+    promote to a true backtest, ingest IBIT/BITO option chains via
+    Polygon Options ($200/mo) or IBKR.
+</div>
+
+<div class="sources">
+    <strong>Data sources (REAL):</strong><br>
+    • IBIT spot: Yahoo Finance (558 days,
+      2024-01-11 → 2026-04-02)<br>
+    • BITO spot: Yahoo Finance (1117 days,
+      2021-10-20 → 2026-04-02)<br>
+    • BTC-USD: Yahoo Finance — used for realized vol IV proxy<br>
+    • GBTC: Yahoo Finance — used as on-chain stress / discount proxy<br>
+    • Risk-free rate: 4.5% T-bill<br>
+    • Pricing: Black-Scholes (deterministic)
+</div>
+
+<h2>Headline Results</h2>
+<div class="kpi-row">
+    <div class="kpi"><div class="value">IBIT (no filter)</div><div class="label">Best Configuration</div></div>
+    <div class="kpi"><div class="value" style="color:#0f172a">4.5%</div><div class="label">CAGR</div></div>
+    <div class="kpi"><div class="value">1.04</div><div class="label">Sharpe</div></div>
+    <div class="kpi"><div class="value">-4.6%</div><div class="label">Max DD</div></div>
+    <div class="kpi"><div class="value" style="color:#ca8a04">+0.308</div><div class="label">Corr → EXP-1220</div></div>
+</div>
+
+<h2>Target Check</h2>
+<table>
+    <thead><tr><th>Target</th><th>Goal</th><th>Achieved</th><th>Status</th></tr></thead>
+    <tbody>
+        <tr><td>CAGR</td><td>25–50%</td><td>4.5%</td>
+            <td class="fail">FAIL</td></tr>
+        <tr><td>Sharpe</td><td>≥ 1.5</td><td>1.04</td>
+            <td class="fail">FAIL</td></tr>
+        <tr><td>|ρ| → EXP-1220</td><td>&lt; 0.20</td><td>+0.308</td>
+            <td class="fail">FAIL</td></tr>
+    </tbody>
+</table>
+
+<h2>Configuration Sweep</h2>
+<table>
+    <thead><tr><th>Configuration</th><th>Trades</th><th>Win %</th><th>P&amp;L</th>
+    <th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Vol</th></tr></thead>
+    <tbody><tr>
+            <td><strong>IBIT (no filter)</strong></td>
+            <td>106</td>
+            <td>76%</td>
+            <td>$9,892</td>
+            <td style="color:#16a34a;font-weight:600">4.47%</td>
+            <td>1.04</td>
+            <td>-4.58%</td>
+            <td>4.3%</td>
+        </tr><tr>
+            <td><strong>IBIT (regime)</strong></td>
+            <td>86</td>
+            <td>74%</td>
+            <td>$3,539</td>
+            <td style="color:#16a34a;font-weight:600">1.53%</td>
+            <td>0.40</td>
+            <td>-5.35%</td>
+            <td>4.0%</td>
+        </tr><tr>
+            <td><strong>BITO (no filter)</strong></td>
+            <td>186</td>
+            <td>68%</td>
+            <td>$-172</td>
+            <td style="color:#dc2626;font-weight:600">-0.18%</td>
+            <td>-0.01</td>
+            <td>-11.22%</td>
+            <td>5.4%</td>
+        </tr><tr>
+            <td><strong>BITO (regime)</strong></td>
+            <td>138</td>
+            <td>67%</td>
+            <td>$-5,126</td>
+            <td style="color:#dc2626;font-weight:600">-1.24%</td>
+            <td>-0.28</td>
+            <td>-10.66%</td>
+            <td>4.2%</td>
+        </tr></tbody>
+</table>
+
+<h2>Regime Breakdown — Best Configuration</h2>
+<table>
+    <thead><tr><th>Regime</th><th>Trades</th><th>P&amp;L</th><th>Win %</th><th>Avg P&amp;L</th></tr></thead>
+    <tbody><tr>
+            <td><strong>CALM</strong></td>
+            <td>28</td>
+            <td>$315</td>
+            <td>78.6%</td>
+            <td>$11</td>
+        </tr><tr>
+            <td><strong>NORMAL</strong></td>
+            <td>33</td>
+            <td>$2,016</td>
+            <td>72.7%</td>
+            <td>$61</td>
+        </tr><tr>
+            <td><strong>ELEVATED</strong></td>
+            <td>25</td>
+            <td>$2,198</td>
+            <td>72.0%</td>
+            <td>$88</td>
+        </tr><tr>
+            <td><strong>CRISIS</strong></td>
+            <td>20</td>
+            <td>$5,363</td>
+            <td>80.0%</td>
+            <td>$268</td>
+        </tr></tbody>
+</table>
+
+<h2>Walk-Forward (Year-by-Year)</h2>
+<table>
+    <thead><tr><th>Year</th><th>Trades</th><th>P&amp;L</th><th>CAGR</th>
+    <th>Sharpe</th><th>Max DD</th><th>Win %</th></tr></thead>
+    <tbody><tr>
+            <td>2024</td>
+            <td>47</td>
+            <td>$6,522</td>
+            <td style="color:#16a34a;font-weight:600">5.6%</td>
+            <td>1.19</td>
+            <td>-4.6%</td>
+            <td>79%</td>
+        </tr><tr>
+            <td>2025</td>
+            <td>48</td>
+            <td>$2,934</td>
+            <td style="color:#16a34a;font-weight:600">2.4%</td>
+            <td>0.69</td>
+            <td>-4.0%</td>
+            <td>77%</td>
+        </tr><tr>
+            <td>2026</td>
+            <td>11</td>
+            <td>$436</td>
+            <td style="color:#16a34a;font-weight:600">0.4%</td>
+            <td>0.20</td>
+            <td>-2.2%</td>
+            <td>54%</td>
+        </tr></tbody>
+</table>
+
+<div style="margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0;
+            font-size:0.78em; color:#94a3b8; text-align:center;">
+EXP-1760 — compass/exp1760_crypto_vol.py · Feasibility validation
+with real spot + Black-Scholes pricing · Walk-forward year-by-year
+</div>
+
+</body></html>

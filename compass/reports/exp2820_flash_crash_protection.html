@@ -1,0 +1,54 @@
+<!doctype html><html><head><meta charset='utf-8'>
+<title>EXP-2820 — Flash Crash Protection</title>
+<style>
+ body{font-family:-apple-system,Segoe UI,sans-serif;max-width:1100px;margin:2em auto;padding:0 1em;background:#fff;color:#1a1a1a;line-height:1.5}
+ h1{border-bottom:2px solid #222;padding-bottom:.3em} h2{margin-top:1.6em;border-bottom:1px solid #ccc}
+ table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.92em}
+ th,td{border:1px solid #bbb;padding:5px 8px;text-align:left} th{background:#f0f0f0}
+ .ok{background:#e8f5e9} .warn{background:#fff8e1}
+ .small{color:#555;font-size:.88em}
+ .callout{background:#f0f8ff;border-left:4px solid #2c5282;padding:.8em 1em;margin:1em 0}
+</style></head><body>
+<h1>EXP-2820 — Flash Crash Protection</h1>
+<p class='small'>Generated 2026-04-08T14:05:03 · Real v8a cube + real Yahoo ^VIX + synthetic flash-crash overlay from EXP-2750.</p>
+
+<div class='callout'>
+<b>Baseline (no protection):</b> flash-crash window DD
+<b>43.14%</b>.
+Target: below <b>15%</b> without losing more than 1.0 Sharpe on the normal case.
+</div>
+
+<h2>VIX leverage ladder</h2>
+<table><tr><th>Regime</th><th>Scale multiplier</th></tr><tr><td>VIX &lt; 20.0</td><td>1.00×</td></tr><tr><td>VIX &lt; 25.0</td><td>0.90×</td></tr><tr><td>VIX &lt; 30.0</td><td>0.75×</td></tr><tr><td>VIX &lt; 35.0</td><td>0.60×</td></tr><tr><td>VIX &lt; 40.0</td><td>0.50×</td></tr><tr><td>VIX &lt; 50.0</td><td>0.35×</td></tr><tr><td>VIX &lt; 60.0</td><td>0.25×</td></tr><tr><td>VIX &lt; 70.0</td><td>0.15×</td></tr><tr><td>VIX ≥ 70</td><td>0.00× (flat)</td></tr></table>
+
+<h2>Protection variants</h2>
+<table>
+<tr><th>Variant</th><th>Normal DD</th><th>Normal Sharpe</th><th>Normal CAGR</th>
+ <th>Crash DD</th><th>Recovery (d)</th><th>ΔSharpe</th>
+ <th>DD ≤ 15%</th><th>Sharpe OK</th><th>PASS</th></tr>
+<tr class=''><td>baseline_no_protection</td><td>4.43%</td><td>12.13</td><td>306.68%</td><td>43.14%</td><td>49</td><td>+0.00</td><td>✗</td><td>✓</td><td>✗</td></tr><tr class=''><td>cap_8x_only</td><td>2.76%</td><td>12.16</td><td>139.39%</td><td>26.65%</td><td>37</td><td>+0.03</td><td>✗</td><td>✓</td><td>✗</td></tr><tr class='ok'><td>vix_ladder_only</td><td>4.38%</td><td>12.61</td><td>266.66%</td><td>0.80%</td><td>1</td><td>+0.49</td><td>✓</td><td>✓</td><td>✓</td></tr><tr class='ok'><td>vix_ladder_cap8</td><td>2.73%</td><td>12.60</td><td>123.65%</td><td>0.49%</td><td>1</td><td>+0.48</td><td>✓</td><td>✓</td><td>✓</td></tr><tr class=''><td>cond_hedge_only</td><td>4.43%</td><td>12.16</td><td>308.40%</td><td>42.51%</td><td>47</td><td>+0.03</td><td>✗</td><td>✓</td><td>✗</td></tr><tr class='ok'><td>full_stack</td><td>2.73%</td><td>12.64</td><td>124.00%</td><td>-0.15%</td><td>1</td><td>+0.51</td><td>✓</td><td>✓</td><td>✓</td></tr>
+</table>
+
+<h2>Passing variants</h2>
+<p>vix_ladder_only, vix_ladder_cap8, full_stack</p>
+
+<h2>VIX sample stats</h2>
+<ul>
+<li>Median: 18.99</li>
+<li>Max: 82.69</li>
+<li>Days with VIX ≥ 25: 21.97%</li>
+<li>Days with VIX ≥ 35: 3.83%</li>
+</ul>
+
+<h2>Notes</h2>
+<ul>
+<li>VIX ladder deleverages PRE-emptively as volatility rises, so the
+    crash-day return is already at reduced scale.</li>
+<li>The conditional OTM put overlay only activates when VIX &gt; 35 —
+    zero premium decay cost during the ~95% of the sample with calm VIX.</li>
+<li>The scale-cap reduction from 13× to 8× directly bounds worst-case
+    single-day levered loss.</li>
+<li>Normal-case Sharpe loss is the cost of protection — below 1.0 is
+    acceptable per the promotion bar in EXP-2410.</li>
+</ul>
+</body></html>

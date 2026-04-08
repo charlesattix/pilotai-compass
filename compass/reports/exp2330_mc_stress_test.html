@@ -1,0 +1,208 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>EXP-2330 North Star v6 MC Stress Test</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1200px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.55; }
+  h1 { color:#0f172a; } h2 { color:#334155; margin-top:2.2em;
+         padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:16px; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:18px 0; }
+  .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;
+          padding:18px; text-align:center; flex:1; min-width:140px; }
+  .kpi .value { font-size:1.5em; font-weight:800; color:#0f172a; }
+  .kpi .label { font-size:0.72em; color:#64748b; margin-top:4px; text-transform:uppercase; }
+  .good { color:#16a34a; font-weight:700; }
+  .bad  { color:#dc2626; font-weight:700; }
+  .warn { color:#ca8a04; font-weight:700; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.84em; }
+  th { background:#f1f5f9; padding:9px 12px; text-align:right; font-weight:600;
+       color:#475569; border-bottom:2px solid #cbd5e1; font-size:0.72em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; font-size:0.9em; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  .note { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;
+            padding:14px; margin:14px 0; font-size:0.85rem; }
+</style></head><body>
+
+<h1>EXP-2330 — Monte Carlo Stress Test · North Star v6</h1>
+<div class="subtitle">Final risk sign-off before paper trading | 2026-04-07T19:04:42.639332Z</div>
+
+<div class="note">
+    <strong>Portfolio:</strong> 7-stream North Star v6 (exp1220, xlf_cs,
+    xli_cs, gld_cal, slv_cal, vol_arb, v5_hedge) at equal-risk 15%/sleeve
+    target vol, gross leverage clipped at 3.0×. <strong>Data:</strong>
+    1566 daily rows (2020-01 → 2025-12) from compass/cache/exp2280_v6_sparse.pkl,
+    all real IronVault + Yahoo derived. <strong>MC method:</strong>
+    Politis-Romano stationary bootstrap (block mean 10 days) preserves
+    serial correlation; 10,000 paths × 5-year horizon.
+</div>
+
+<h2>Sign-Off Decision</h2>
+<div class="kpi-row">
+    <div class="kpi"><div class="value good">APPROVE</div><div class="label">Decision</div></div>
+    <div class="kpi"><div class="value">25.3%</div><div class="label">MC Median CAGR</div></div>
+    <div class="kpi"><div class="value">-2.9%</div><div class="label">MC 5% DD Tail</div></div>
+    <div class="kpi"><div class="value">0.0%</div><div class="label">Paths ≥12% DD</div></div>
+    <div class="kpi"><div class="value">0.0%</div><div class="label">Paths Losing $</div></div>
+</div>
+
+<h2>1) Monte Carlo Bootstrap — 10,000 paths × 5-year horizon</h2>
+<table>
+    <thead><tr><th>Metric</th><th>p05</th><th>p25</th><th>median</th><th>mean</th><th>p75</th><th>p95</th></tr></thead>
+    <tbody>
+        <tr><td><strong>Terminal equity ($1 start)</strong></td>
+            <td>2.75</td>
+            <td>2.94</td>
+            <td>3.09</td>
+            <td>—</td>
+            <td>3.24</td>
+            <td>3.50</td></tr>
+        <tr><td><strong>CAGR</strong></td>
+            <td>22.43%</td>
+            <td>—</td>
+            <td>25.31%</td>
+            <td>25.34%</td>
+            <td>—</td>
+            <td>28.44%</td></tr>
+        <tr><td><strong>Max DD</strong></td>
+            <td class="bad">-2.94%</td>
+            <td>-2.74%</td>
+            <td>-2.74%</td>
+            <td>-2.11%</td>
+            <td>—</td>
+            <td>—</td></tr>
+        <tr><td><strong>Sharpe</strong></td>
+            <td>5.27</td>
+            <td>—</td>
+            <td>6.07</td>
+            <td>6.06</td>
+            <td>—</td>
+            <td>6.83</td></tr>
+    </tbody>
+</table>
+<p class="note">
+    <strong>Breach counts:</strong>
+    0.00% of paths breach the 12% DD ceiling at some point over 5 years,
+    0.00% breach 20%,
+    and 0.00% end up below starting capital.
+</p>
+
+<h2>2) Historical Crisis Replay</h2>
+<table>
+    <thead><tr><th>Event</th><th>Window</th><th>Days</th><th>Total Return</th>
+    <th>Sharpe</th><th>Max DD</th><th>Vol</th></tr></thead>
+    <tbody><tr>
+                <td><strong>2020_covid</strong></td>
+                <td>2020-02-19 → 2020-04-30</td>
+                <td>52</td>
+                <td class="good">+3.64%</td>
+                <td>2.33</td>
+                <td class="bad">-2.75%</td>
+                <td>7.55%</td>
+            </tr><tr>
+                <td><strong>2022_bear</strong></td>
+                <td>2022-01-03 → 2022-10-31</td>
+                <td>216</td>
+                <td class="good">+28.05%</td>
+                <td>6.99</td>
+                <td class="bad">-0.68%</td>
+                <td>4.14%</td>
+            </tr><tr>
+                <td><strong>2018_volmageddon</strong></td>
+                <td>2018-02-01 → 2018-02-16</td>
+                <td colspan="5" class="warn">Window lies outside the 2020-2025 stream coverage; not extrapolated. No synthetic fill (Rule Zero).</td>
+            </tr></tbody>
+</table>
+
+<h2>3) Correlation Stress — Force ρ = 0.50 on all pairs</h2>
+<table>
+    <thead><tr><th>Scenario</th><th>Median CAGR</th><th>Median Vol</th>
+    <th>Median Sharpe</th><th>5% DD Tail</th><th>Worst DD</th><th>% ≥12% DD</th></tr></thead>
+    <tbody>
+        <tr><td>Empirical corr</td>
+            <td>22.47%</td>
+            <td>3.75%</td>
+            <td>5.99</td>
+            <td class="bad">-1.96%</td>
+            <td class="bad">-3.46%</td>
+            <td>0.00%</td></tr>
+        <tr><td>Forced ρ = 0.50</td>
+            <td>22.50%</td>
+            <td>7.22%</td>
+            <td>3.13</td>
+            <td class="bad">-6.14%</td>
+            <td class="bad">-12.27%</td>
+            <td>0.05%</td></tr>
+    </tbody>
+</table>
+
+<h2>4) Regime Analysis</h2>
+<table>
+    <thead><tr><th>Regime</th><th>Days</th><th>Share</th><th>CAGR</th>
+    <th>Sharpe</th><th>Max DD</th><th>Vol</th></tr></thead>
+    <tbody><tr>
+            <td><strong>BULL</strong></td>
+            <td>731</td>
+            <td>48.5%</td>
+            <td class="good">25.96%</td>
+            <td>6.76</td>
+            <td>-1.30%</td>
+            <td>3.42%</td>
+        </tr><tr>
+            <td><strong>BEAR</strong></td>
+            <td>154</td>
+            <td>10.2%</td>
+            <td class="good">19.60%</td>
+            <td>3.53</td>
+            <td>-3.25%</td>
+            <td>5.10%</td>
+        </tr><tr>
+            <td><strong>SIDEWAYS</strong></td>
+            <td>563</td>
+            <td>37.3%</td>
+            <td class="good">26.19%</td>
+            <td>6.49</td>
+            <td>-1.04%</td>
+            <td>3.59%</td>
+        </tr><tr>
+            <td><strong>CRISIS</strong></td>
+            <td>60</td>
+            <td>4.0%</td>
+            <td class="good">50.86%</td>
+            <td>7.15</td>
+            <td>-1.23%</td>
+            <td>5.78%</td>
+        </tr></tbody>
+</table>
+
+<h2>5) VaR / CVaR</h2>
+<table>
+    <thead><tr><th>Metric</th><th>95%</th><th>99%</th></tr></thead>
+    <tbody>
+        <tr><td>Historical daily VaR</td>
+            <td class="bad">-0.20%</td>
+            <td class="bad">-0.49%</td></tr>
+        <tr><td>Historical daily CVaR (expected shortfall)</td>
+            <td class="bad">-0.39%</td>
+            <td class="bad">-0.75%</td></tr>
+        <tr><td>Parametric annual VaR (Gaussian SQRT-t)</td>
+            <td class="bad">16.39%</td>
+            <td class="bad">13.83%</td></tr>
+        <tr><td>Parametric annual CVaR</td>
+            <td class="bad">14.82%</td>
+            <td class="bad">12.55%</td></tr>
+    </tbody>
+</table>
+
+<h2>Sign-Off Reasoning</h2>
+<ul>
+    <li>(a) 0.00% MC paths breach 12% DD — PASS (<10% target)</li><li>(b) MC p05 (worst-5%) max DD = -2.94% — PASS (≥ -20% target)</li><li>(c) 2020 COVID replay total = +3.64% — PASS (≥ -15% target)</li><li>(d) 2022 bear replay total = +28.05% — PASS (≥ -15% target)</li><li>(e) forced-ρ 0.50 median DD = -3.51% — PASS (≥ -25% target)</li><li>(f) 99% daily historical VaR = 0.49% — PASS (≤ 4% target)</li>
+</ul>
+
+<div style="margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0;
+            font-size:0.78em; color:#94a3b8; text-align:center;">
+EXP-2330 — compass/exp2330_mc_stress_test.py · Real 7-stream cache · Deterministic seed 20260407
+</div>
+
+</body></html>

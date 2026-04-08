@@ -1,0 +1,52 @@
+<!doctype html><html><head><meta charset='utf-8'>
+<title>EXP-1740 — Sentiment-Filtered Entry Timing</title>
+<style>
+ body { font-family:-apple-system,Segoe UI,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;color:#1a1a1a;line-height:1.5}
+ h1{border-bottom:2px solid #222;padding-bottom:.3em}
+ h2{margin-top:1.8em;border-bottom:1px solid #ccc}
+ table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.93em}
+ th,td{border:1px solid #bbb;padding:5px 8px;text-align:left}
+ th{background:#f0f0f0}
+ .ok{color:#0a7a0a;font-weight:600} .bad{color:#b80000;font-weight:600}
+ .warn{color:#b86b00;font-weight:600}
+ .callout{background:#fff8e1;border-left:4px solid #e0a500;padding:.8em 1em}
+ .small{color:#555;font-size:.88em}
+</style></head><body>
+<h1>EXP-1740 — Sentiment-Filtered Entry Timing</h1>
+<p class='small'>Generated 2026-04-07T11:58:57 · 89 FOMC meetings ·
+   Real Yahoo VIX · Real IronVault options. Rule-Zero clean.</p>
+
+<h2>Headline</h2>
+<table>
+<tr><th>Variant</th><th>Trades</th><th>Sharpe</th><th>CAGR</th><th>Max DD</th><th>Net PnL</th></tr>
+<tr><td><b>Baseline (no filter)</b></td><td>171</td><td>1.26</td>
+    <td>1.22%</td><td>1.55%</td><td>$7372</td></tr>
+<tr><td><b>Best filter:</b> haw≥0.30, vix_slope≥0.0</td><td>142</td><td>1.86</td>
+    <td>1.08%</td><td>0.65%</td><td>$6456</td></tr>
+</table>
+<p>Δ Sharpe vs baseline: <b>+0.60</b>
+   &nbsp;·&nbsp; Target +0.50: <span class='ok'>MET</span></p>
+
+<h2>All filter variants</h2>
+<table><tr><th>Filter</th><th>n</th><th>WR</th><th>Sharpe</th><th>CAGR</th><th>Max DD</th><th>PnL</th></tr>
+<tr><td>haw≥0.15, vix_slope≥None</td><td>147</td><td>87.8%</td><td>1.11</td><td>1.06%</td><td>1.55%</td><td>$6364</td></tr><tr><td>haw≥0.15, vix_slope≥0.0</td><td>139</td><td>88.5%</td><td>1.79</td><td>1.03%</td><td>0.65%</td><td>$6196</td></tr><tr><td>haw≥0.15, vix_slope≥0.5</td><td>132</td><td>87.9%</td><td>1.56</td><td>0.88%</td><td>0.66%</td><td>$5244</td></tr><tr><td>haw≥0.20, vix_slope≥None</td><td>148</td><td>87.8%</td><td>1.12</td><td>1.06%</td><td>1.55%</td><td>$6388</td></tr><tr><td>haw≥0.20, vix_slope≥0.0</td><td>140</td><td>88.6%</td><td>1.80</td><td>1.04%</td><td>0.65%</td><td>$6220</td></tr><tr><td>haw≥0.20, vix_slope≥0.5</td><td>133</td><td>88.0%</td><td>1.57</td><td>0.89%</td><td>0.66%</td><td>$5268</td></tr><tr><td>haw≥0.30, vix_slope≥None</td><td>150</td><td>88.0%</td><td>1.16</td><td>1.10%</td><td>1.55%</td><td>$6624</td></tr><tr><td>haw≥0.30, vix_slope≥0.0</td><td>142</td><td>88.7%</td><td>1.86</td><td>1.08%</td><td>0.65%</td><td>$6456</td></tr><tr><td>haw≥0.30, vix_slope≥0.5</td><td>135</td><td>88.1%</td><td>1.63</td><td>0.93%</td><td>0.66%</td><td>$5504</td></tr></table>
+
+<h2>Walk-forward by year (best params)</h2>
+<table><tr><th>Year</th><th>Baseline n</th><th>Baseline Sharpe</th>
+    <th>Filtered n</th><th>Filtered Sharpe</th><th>Δ Sharpe</th></tr>
+<tr><td>2020</td><td>27</td><td>0.14</td><td>23</td><td>4.45</td><td class='ok'>+4.31</td></tr><tr><td>2021</td><td>34</td><td>0.98</td><td>31</td><td>1.07</td><td class='ok'>+0.09</td></tr><tr><td>2022</td><td>32</td><td>2.30</td><td>24</td><td>1.97</td><td class='bad'>-0.33</td></tr><tr><td>2023</td><td>26</td><td>6.51</td><td>19</td><td>7.62</td><td class='ok'>+1.11</td></tr><tr><td>2024</td><td>26</td><td>0.32</td><td>23</td><td>-0.31</td><td class='bad'>-0.63</td></tr><tr><td>2025</td><td>26</td><td>2.84</td><td>22</td><td>3.39</td><td class='ok'>+0.55</td></tr></table>
+
+<h2>FOMC sentiment features (first &amp; last 5 meetings)</h2>
+<table><tr><th>Release</th><th>Hawkish hits</th><th>Dovish hits</th><th>HD score</th><th>Unc/1k words</th></tr>
+<tr><td>2015-01-28</td><td>35</td><td>11</td><td>+0.52</td><td>7.52</td></tr><tr><td>2015-03-18</td><td>58</td><td>43</td><td>+0.15</td><td>6.04</td></tr><tr><td>2015-04-29</td><td>55</td><td>41</td><td>+0.15</td><td>7.05</td></tr><tr><td>2015-06-17</td><td>56</td><td>25</td><td>+0.38</td><td>9.07</td></tr><tr><td>2015-07-29</td><td>47</td><td>36</td><td>+0.13</td><td>7.98</td></tr><tr><td>2025-07-30</td><td>67</td><td>20</td><td>+0.54</td><td>12.20</td></tr><tr><td>2025-09-17</td><td>65</td><td>31</td><td>+0.35</td><td>9.10</td></tr><tr><td>2025-10-29</td><td>77</td><td>25</td><td>+0.51</td><td>10.88</td></tr><tr><td>2025-12-10</td><td>57</td><td>14</td><td>+0.61</td><td>9.36</td></tr><tr><td>2026-01-28</td><td>44</td><td>22</td><td>+0.33</td><td>9.67</td></tr></table>
+
+<h2>Method notes</h2>
+<ul>
+<li>FOMC minutes downloaded directly from federalreserve.gov (89 meetings 2015-01 → 2025-12).</li>
+<li>HD score = (hawkish - dovish) / (hawkish + dovish), bounded [-1, +1].</li>
+<li>Hawkish window block: any trade entered within ~7 calendar days after a meeting whose HD score ≥ threshold is dropped.</li>
+<li>VIX slope filter: only enter when ^VIX3M − ^VIX ≥ threshold (term structure in contango).</li>
+<li>Trade engine: <code>compass.exp1220_standalone.run_exp1220_trades</code> on real IronVault SPY option chains.</li>
+<li>Sharpe annualisation uses trade-level √(trades/yr) — comparable to MASTERPLAN's per-trade 1.26 baseline, not the portfolio daily Sharpe.</li>
+</ul>
+</body></html>

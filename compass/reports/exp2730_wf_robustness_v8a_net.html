@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>EXP-2730 — WF Robustness v8a NET</title>
+<style>
+body { font-family:-apple-system,sans-serif;max-width:1250px;margin:0 auto;padding:28px;background:#fff;color:#1e293b; }
+h1 { font-size:1.8em;color:#0f172a; }
+h2 { margin-top:2em;border-bottom:2px solid #e2e8f0;padding-bottom:8px;color:#334155; }
+h3 { margin-top:1.5em;color:#475569; }
+.sources { background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px;font-size:0.84rem;line-height:1.6; }
+.claim { background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:14px;font-size:0.88rem;margin:14px 0; }
+table { width:100%;border-collapse:collapse;margin:12px 0;font-size:0.85em; }
+th { background:#f1f5f9;padding:8px 10px;text-align:right;border-bottom:2px solid #cbd5e1;font-size:0.72em;text-transform:uppercase; }
+th:first-child, th:nth-child(2) { text-align:left; }
+td { padding:7px 10px;text-align:right;border-bottom:1px solid #e2e8f0; }
+td:first-child, td:nth-child(2) { text-align:left; }
+</style></head><body>
+
+<h1>EXP-2730 — Walk-Forward Robustness Deep Dive (v8a NET)</h1>
+<p style="color:#64748b">20-fold walk-forward on the full NET pipeline —
+Ledoit-Wolf covariance + risk-parity + 12% vol target + 890 bps drag ·
+2026-04-08 08:34</p>
+
+<div class="sources">
+<strong>Rule Zero:</strong> EXP-2450 sparse 7-stream cube + EXP-2250 cached
+QQQ trades (real IronVault). EXP-2570 drag rate (Alpaca commission-free +
+execution optimization). Ledoit-Wolf cov from compass.exp2360_robust_cov.
+</div>
+
+<div class="claim">
+<strong>Claim from EXP-2600:</strong> v8a @ vt=0.12 → pooled net Sharpe
+<strong>6.164</strong>, CAGR 125.7%, DD 7.1%. EXP-2730 validates per-fold.
+</div>
+
+
+<h2>ROLLING-window walk-forward</h2>
+
+<div style="background:#fff;border:2px solid #16a34a;border-radius:10px;padding:14px;margin:14px 0;">
+<strong style="color:#16a34a;">Decision: SHIP</strong><br>
+Median fold net Sharpe 6.94 ≥ 6.0, pooled 6.16 ≥ 6.0, 70% folds ≥ 6.0. All three criteria satisfied.
+</div>
+
+<h3>Pooled OOS net metrics</h3>
+<p>Sharpe <strong>6.164</strong> ·
+CAGR <strong>+125.70%</strong> ·
+Max DD <strong>7.11%</strong> ·
+Vol <strong>13.37%</strong></p>
+
+<h3>Per-fold distribution</h3>
+<table>
+<thead><tr>
+<th>Metric</th><th>min</th><th>p10</th><th>p25</th><th>median</th>
+<th>mean</th><th>p75</th><th>p90</th><th>max</th><th>std</th>
+</tr></thead>
+<tbody><tr><td>net_sharpe</td><td>3.72</td><td>4.41</td><td>5.26</td><td style='font-weight:700'>6.94</td><td>6.72</td><td>8.03</td><td>8.42</td><td>9.44</td><td>1.66</td></tr><tr><td>gross_sharpe</td><td>4.22</td><td>5.06</td><td>6.19</td><td style='font-weight:700'>7.81</td><td>7.48</td><td>8.72</td><td>9.43</td><td>10.38</td><td>1.77</td></tr><tr><td>net_cagr_pct</td><td>54.88</td><td>73.24</td><td>94.45</td><td style='font-weight:700'>129.87</td><td>130.09</td><td>163.14</td><td>189.77</td><td>209.28</td><td>45.91</td></tr><tr><td>net_max_dd_pct</td><td>0.86</td><td>1.00</td><td>1.28</td><td style='font-weight:700'>1.81</td><td>2.50</td><td>3.23</td><td>5.57</td><td>7.11</td><td>1.81</td></tr></tbody>
+</table>
+
+<h3>Fold counts</h3>
+<p>
+Total folds: <strong>20</strong><br>
+% folds net Sharpe ≥ 6.0: <strong>70%</strong><br>
+% folds net Sharpe ≥ 5.0: <strong>80%</strong><br>
+% folds net Sharpe ≥ 4.0: <strong>95%</strong><br>
+% folds CAGR ≥ 100%:       <strong>70%</strong><br>
+% folds DD &lt; 12%:           <strong>100%</strong>
+</p>
+
+<h3>Per-fold table</h3>
+<table>
+<thead><tr>
+<th>Fold</th><th>Test window</th><th>Vol scale</th>
+<th>Gross SR</th><th>Net SR</th><th>Net CAGR</th><th>Net DD</th>
+</tr></thead>
+<tbody><tr><td>0★</td><td>2020-12-18→2021-03-16</td><td>6.60×</td><td>8.67</td><td style='color:#16a34a;font-weight:700'>8.00</td><td>+186.7%</td><td>1.07%</td></tr><tr><td>1★</td><td>2021-03-17→2021-06-11</td><td>7.03×</td><td>8.15</td><td style='color:#16a34a;font-weight:700'>7.32</td><td>+117.0%</td><td>1.77%</td></tr><tr><td>2★</td><td>2021-06-14→2021-09-08</td><td>8.62×</td><td>8.28</td><td style='color:#16a34a;font-weight:700'>7.32</td><td>+95.8%</td><td>1.52%</td></tr><tr><td>3★</td><td>2021-09-09→2021-12-06</td><td>9.17×</td><td>9.39</td><td style='color:#16a34a;font-weight:700'>8.34</td><td>+101.9%</td><td>0.94%</td></tr><tr><td>4★</td><td>2021-12-07→2022-03-03</td><td>11.32×</td><td>6.89</td><td style='color:#16a34a;font-weight:700'>6.39</td><td>+204.8%</td><td>5.84%</td></tr><tr><td>5</td><td>2022-03-04→2022-05-31</td><td>10.72×</td><td>4.69</td><td style='color:#f59e0b;font-weight:700'>4.34</td><td>+188.1%</td><td>5.54%</td></tr><tr><td>6★</td><td>2022-06-01→2022-08-26</td><td>8.70×</td><td>7.11</td><td style='color:#16a34a;font-weight:700'>6.43</td><td>+131.5%</td><td>2.09%</td></tr><tr><td>7★</td><td>2022-08-29→2022-11-23</td><td>8.22×</td><td>7.49</td><td style='color:#16a34a;font-weight:700'>6.80</td><td>+137.2%</td><td>3.19%</td></tr><tr><td>8+</td><td>2022-11-24→2023-02-20</td><td>7.29×</td><td>5.70</td><td style='color:#84cc16;font-weight:700'>5.18</td><td>+139.3%</td><td>2.05%</td></tr><tr><td>9</td><td>2023-02-21→2023-05-18</td><td>6.52×</td><td>5.10</td><td style='color:#f59e0b;font-weight:700'>4.41</td><td>+75.6%</td><td>3.37%</td></tr><tr><td>10★</td><td>2023-05-19→2023-08-15</td><td>6.56×</td><td>7.91</td><td style='color:#16a34a;font-weight:700'>6.82</td><td>+73.4%</td><td>1.01%</td></tr><tr><td>11+</td><td>2023-08-16→2023-11-10</td><td>6.88×</td><td>6.35</td><td style='color:#84cc16;font-weight:700'>5.29</td><td>+54.9%</td><td>1.20%</td></tr><tr><td>12★</td><td>2023-11-13→2024-02-07</td><td>9.04×</td><td>7.70</td><td style='color:#16a34a;font-weight:700'>7.07</td><td>+165.6%</td><td>1.97%</td></tr><tr><td>13★</td><td>2024-02-08→2024-05-06</td><td>9.59×</td><td>8.97</td><td style='color:#16a34a;font-weight:700'>8.11</td><td>+128.2%</td><td>1.31%</td></tr><tr><td>14★</td><td>2024-05-07→2024-08-01</td><td>10.77×</td><td>8.88</td><td style='color:#16a34a;font-weight:700'>8.14</td><td>+162.3%</td><td>1.85%</td></tr><tr><td>15★</td><td>2024-08-02→2024-10-29</td><td>10.08×</td><td>8.59</td><td style='color:#16a34a;font-weight:700'>7.75</td><td>+124.2%</td><td>1.59%</td></tr><tr><td>16</td><td>2024-10-30→2025-01-24</td><td>10.37×</td><td>5.25</td><td style='color:#f59e0b;font-weight:700'>4.52</td><td>+71.8%</td><td>4.20%</td></tr><tr><td>17</td><td>2025-01-27→2025-04-23</td><td>11.44×</td><td>4.22</td><td style='color:#dc2626;font-weight:700'>3.72</td><td>+90.5%</td><td>7.11%</td></tr><tr><td>18★</td><td>2025-04-24→2025-07-21</td><td>9.98×</td><td>9.78</td><td style='color:#16a34a;font-weight:700'>9.07</td><td>+209.3%</td><td>1.53%</td></tr><tr><td>19★</td><td>2025-07-22→2025-10-16</td><td>9.42×</td><td>10.38</td><td style='color:#16a34a;font-weight:700'>9.44</td><td>+143.8%</td><td>0.86%</td></tr></tbody>
+</table>
+
+
+
+<h2>EXPANDING-window walk-forward</h2>
+
+<div style="background:#fff;border:2px solid #16a34a;border-radius:10px;padding:14px;margin:14px 0;">
+<strong style="color:#16a34a;">Decision: SHIP</strong><br>
+Median fold net Sharpe 7.28 ≥ 6.0, pooled 6.78 ≥ 6.0, 70% folds ≥ 6.0. All three criteria satisfied.
+</div>
+
+<h3>Pooled OOS net metrics</h3>
+<p>Sharpe <strong>6.781</strong> ·
+CAGR <strong>+109.23%</strong> ·
+Max DD <strong>3.73%</strong> ·
+Vol <strong>10.99%</strong></p>
+
+<h3>Per-fold distribution</h3>
+<table>
+<thead><tr>
+<th>Metric</th><th>min</th><th>p10</th><th>p25</th><th>median</th>
+<th>mean</th><th>p75</th><th>p90</th><th>max</th><th>std</th>
+</tr></thead>
+<tbody><tr><td>net_sharpe</td><td>4.71</td><td>5.01</td><td>5.55</td><td style='font-weight:700'>7.28</td><td>7.06</td><td>8.09</td><td>8.81</td><td>9.44</td><td>1.53</td></tr><tr><td>gross_sharpe</td><td>5.52</td><td>5.73</td><td>6.44</td><td style='font-weight:700'>8.05</td><td>7.92</td><td>9.11</td><td>9.79</td><td>10.56</td><td>1.62</td></tr><tr><td>net_cagr_pct</td><td>54.96</td><td>66.58</td><td>90.68</td><td style='font-weight:700'>113.73</td><td>111.70</td><td>128.27</td><td>156.22</td><td>186.75</td><td>33.33</td></tr><tr><td>net_max_dd_pct</td><td>0.65</td><td>0.91</td><td>1.07</td><td style='font-weight:700'>1.53</td><td>1.77</td><td>2.21</td><td>3.10</td><td>3.73</td><td>0.92</td></tr></tbody>
+</table>
+
+<h3>Fold counts</h3>
+<p>
+Total folds: <strong>20</strong><br>
+% folds net Sharpe ≥ 6.0: <strong>70%</strong><br>
+% folds net Sharpe ≥ 5.0: <strong>90%</strong><br>
+% folds net Sharpe ≥ 4.0: <strong>100%</strong><br>
+% folds CAGR ≥ 100%:       <strong>60%</strong><br>
+% folds DD &lt; 12%:           <strong>100%</strong>
+</p>
+
+<h3>Per-fold table</h3>
+<table>
+<thead><tr>
+<th>Fold</th><th>Test window</th><th>Vol scale</th>
+<th>Gross SR</th><th>Net SR</th><th>Net CAGR</th><th>Net DD</th>
+</tr></thead>
+<tbody><tr><td>0★</td><td>2020-12-18→2021-03-16</td><td>6.60×</td><td>8.67</td><td style='color:#16a34a;font-weight:700'>8.00</td><td>+186.7%</td><td>1.07%</td></tr><tr><td>1★</td><td>2021-03-17→2021-06-11</td><td>6.64×</td><td>8.32</td><td style='color:#16a34a;font-weight:700'>7.51</td><td>+126.2%</td><td>1.75%</td></tr><tr><td>2★</td><td>2021-06-14→2021-09-08</td><td>6.86×</td><td>8.62</td><td style='color:#16a34a;font-weight:700'>7.62</td><td>+95.0%</td><td>1.29%</td></tr><tr><td>3★</td><td>2021-09-09→2021-12-06</td><td>7.20×</td><td>9.36</td><td style='color:#16a34a;font-weight:700'>8.24</td><td>+91.6%</td><td>0.65%</td></tr><tr><td>4★</td><td>2021-12-07→2022-03-03</td><td>7.54×</td><td>8.90</td><td style='color:#16a34a;font-weight:700'>8.04</td><td>+127.2%</td><td>1.35%</td></tr><tr><td>5+</td><td>2022-03-04→2022-05-31</td><td>7.79×</td><td>6.22</td><td style='color:#84cc16;font-weight:700'>5.60</td><td>+119.7%</td><td>2.11%</td></tr><tr><td>6★</td><td>2022-06-01→2022-08-26</td><td>7.79×</td><td>7.19</td><td style='color:#16a34a;font-weight:700'>6.39</td><td>+102.7%</td><td>1.71%</td></tr><tr><td>7★</td><td>2022-08-29→2022-11-23</td><td>7.87×</td><td>7.29</td><td style='color:#16a34a;font-weight:700'>6.55</td><td>+116.5%</td><td>2.98%</td></tr><tr><td>8+</td><td>2022-11-24→2023-02-20</td><td>7.78×</td><td>5.74</td><td style='color:#84cc16;font-weight:700'>5.20</td><td>+132.8%</td><td>1.92%</td></tr><tr><td>9</td><td>2023-02-21→2023-05-18</td><td>7.61×</td><td>5.60</td><td style='color:#f59e0b;font-weight:700'>4.92</td><td>+87.8%</td><td>3.07%</td></tr><tr><td>10★</td><td>2023-05-19→2023-08-15</td><td>7.62×</td><td>7.77</td><td style='color:#16a34a;font-weight:700'>6.78</td><td>+82.3%</td><td>1.07%</td></tr><tr><td>11+</td><td>2023-08-16→2023-11-10</td><td>7.80×</td><td>6.51</td><td style='color:#84cc16;font-weight:700'>5.42</td><td>+55.0%</td><td>1.01%</td></tr><tr><td>12★</td><td>2023-11-13→2024-02-07</td><td>8.00×</td><td>7.69</td><td style='color:#16a34a;font-weight:700'>7.04</td><td>+161.0%</td><td>2.50%</td></tr><tr><td>13★</td><td>2024-02-08→2024-05-06</td><td>8.04×</td><td>9.74</td><td style='color:#16a34a;font-weight:700'>8.76</td><td>+119.0%</td><td>1.17%</td></tr><tr><td>14★</td><td>2024-05-07→2024-08-01</td><td>8.21×</td><td>9.65</td><td style='color:#16a34a;font-weight:700'>8.73</td><td>+131.4%</td><td>1.15%</td></tr><tr><td>15★</td><td>2024-08-02→2024-10-29</td><td>8.37×</td><td>9.03</td><td style='color:#16a34a;font-weight:700'>8.01</td><td>+99.6%</td><td>1.85%</td></tr><tr><td>16+</td><td>2024-10-30→2025-01-24</td><td>8.49×</td><td>5.88</td><td style='color:#84cc16;font-weight:700'>5.02</td><td>+66.6%</td><td>3.36%</td></tr><tr><td>17</td><td>2025-01-27→2025-04-23</td><td>8.59×</td><td>5.52</td><td style='color:#f59e0b;font-weight:700'>4.71</td><td>+66.2%</td><td>3.73%</td></tr><tr><td>18★</td><td>2025-04-24→2025-07-21</td><td>8.64×</td><td>10.21</td><td style='color:#16a34a;font-weight:700'>9.33</td><td>+155.7%</td><td>0.94%</td></tr><tr><td>19★</td><td>2025-07-22→2025-10-16</td><td>8.73×</td><td>10.56</td><td style='color:#16a34a;font-weight:700'>9.44</td><td>+110.9%</td><td>0.67%</td></tr></tbody>
+</table>
+
+
+<p style="margin-top:3em;color:#94a3b8;font-size:0.78em;text-align:center">
+compass/exp2730_wf_robustness_v8a_net.py · Rule Zero · all real data
+</p>
+</body></html>

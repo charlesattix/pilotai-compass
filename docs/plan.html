@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+@page { size: letter; margin: 1in; }
+body { font-family: -apple-system, BlinkMacSystemFont, Helvetica, sans-serif; font-size: 11pt; line-height: 1.6; color: #1a1a2e; max-width: 700px; margin: 0 auto; padding: 40px; }
+h1 { color: #9B6DFF; font-size: 22pt; border-bottom: 3px solid #9B6DFF; padding-bottom: 8px; margin-top: 30px; }
+h2 { color: #E84FAD; font-size: 16pt; margin-top: 25px; }
+h3 { color: #9B6DFF; font-size: 13pt; }
+table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+th, td { border: 1px solid #e0d8f0; padding: 8px 12px; text-align: left; font-size: 10pt; }
+th { background: #f3eeff; color: #1a1a2e; font-weight: 600; }
+tr:nth-child(even) { background: #faf9fb; }
+code { background: #f0ecf7; padding: 2px 6px; border-radius: 3px; font-size: 9pt; }
+pre { background: #1a1a2e; color: #e0e0e0; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 8pt; line-height: 1.4; white-space: pre-wrap; }
+pre code { background: none; color: inherit; }
+strong { color: #9B6DFF; }
+hr { border: none; height: 2px; background: linear-gradient(90deg, #9B6DFF, #E84FAD, #F59E42); margin: 20px 0; }
+ul, ol { padding-left: 20px; }
+li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<h1>PilotAI Credit Spread Trading System</h1>
+<h2>Project Plan &amp; Architecture</h2>
+<hr />
+<h2>1. Executive Summary</h2>
+<p>PilotAI is an automated credit spread trading system that scans the options market for high-probability credit spread opportunities, generates actionable alerts, and executes paper trades automatically. The system targets a <strong>90%+ probability of profit</strong> per trade using disciplined delta-based strike selection on highly liquid ETFs.</p>
+<p><strong>Current Status:</strong> Live and operational. Dashboard deployed. Paper trading engine running. Real broker integration (Alpaca) in progress.</p>
+<hr />
+<h2>2. What Is a Credit Spread?</h2>
+<p>A credit spread is an options strategy where you simultaneously sell a closer-to-the-money option and buy a further-out-of-the-money option. You collect a net credit upfront. If the underlying stays away from your strikes by expiration, you keep the credit as profit.</p>
+<p><strong>Two types we trade:</strong>
+- <strong>Bull Put Spread</strong> (Bullish) — Sell a put, buy a lower put. Profits if price stays above the short strike.
+- <strong>Bear Call Spread</strong> (Bearish) — Sell a call, buy a higher call. Profits if price stays below the short strike.</p>
+<p><strong>Why credit spreads?</strong>
+- Defined risk (max loss = spread width minus credit)
+- High probability of profit (we target 85-90%+)
+- Time decay works in our favor (theta positive)
+- Don't need to predict direction precisely — just need price to stay in a range</p>
+<hr />
+<h2>3. Strategy Rules</h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Underlyings</strong></td>
+<td>SPY, QQQ, IWM</td>
+</tr>
+<tr>
+<td><strong>Short Strike Delta</strong></td>
+<td>0.10 – 0.15 (85-90% probability OTM)</td>
+</tr>
+<tr>
+<td><strong>Days to Expiration</strong></td>
+<td>30 – 45 DTE</td>
+</tr>
+<tr>
+<td><strong>Spread Width</strong></td>
+<td>$5</td>
+</tr>
+<tr>
+<td><strong>Minimum Credit</strong></td>
+<td>20% of spread width ($1.00 on $5 spread)</td>
+</tr>
+<tr>
+<td><strong>IV Rank Minimum</strong></td>
+<td>25+ (prefer elevated volatility for richer premiums)</td>
+</tr>
+<tr>
+<td><strong>Profit Target</strong></td>
+<td>50% of max credit</td>
+</tr>
+<tr>
+<td><strong>Stop Loss</strong></td>
+<td>2.5× the credit received</td>
+</tr>
+<tr>
+<td><strong>Max Concurrent Positions</strong></td>
+<td>5</td>
+</tr>
+<tr>
+<td><strong>Max Risk Per Trade</strong></td>
+<td>2% of account</td>
+</tr>
+</tbody>
+</table>
+<h3>Entry Criteria</h3>
+<ol>
+<li>Technical analysis confirms directional bias (RSI, moving averages, volume)</li>
+<li>IV Rank ≥ 25 (options are relatively expensive)</li>
+<li>Short strike delta between 0.10-0.15</li>
+<li>Credit received ≥ 20% of spread width</li>
+<li>30-45 DTE for optimal theta decay</li>
+<li>Liquidity check — sufficient open interest and tight bid-ask</li>
+</ol>
+<h3>Exit Rules</h3>
+<ul>
+<li><strong>Winner:</strong> Close at 50% of max profit (don't get greedy)</li>
+<li><strong>Loser:</strong> Close if loss reaches 2.5× credit received</li>
+<li><strong>Time:</strong> Close at 7 DTE regardless (avoid gamma risk near expiration)</li>
+<li><strong>Emergency:</strong> Close if short strike is breached</li>
+</ul>
+<hr />
+<h2>4. System Architecture</h2>
+<pre><code>┌─────────────────────────────────────────────────┐
+│                   DATA LAYER                     │
+│  yfinance (free/delayed) ← current default       │
+│  Tradier API (real-time, real Greeks) ← pending   │
+│  Polygon.io (historical bars) ← built            │
+│  Alpaca (paper trading execution) ← in progress  │
+└─────────────┬───────────────────────┬────────────┘
+              │                       │
+              ▼                       ▼
+┌─────────────────────┐  ┌─────────────────────────┐
+│  STRATEGY ENGINE     │  │  PAPER TRADING ENGINE    │
+│  • Technical Analysis│  │  • Auto-execute signals  │
+│  • Options Analyzer  │  │  • Position tracking     │
+│  • Opportunity Scorer│  │  • P&amp;L monitoring        │
+│  • Signal Generator  │  │  • Auto-exit management  │
+└─────────┬───────────┘  │  • Alpaca API (live sim)  │
+          │               └──────────┬────────────────┘
+          ▼                          │
+┌─────────────────────┐              │
+│  ALERT GENERATOR     │              │
+│  • JSON/CSV/TXT      │              │
+│  • Telegram push     │              │
+│  • Score + PoP + Risk│              │
+└─────────┬───────────┘              │
+          │                          │
+          ▼                          ▼
+┌─────────────────────────────────────────────────┐
+│              WEB DASHBOARD                       │
+│  &quot;Alerts by PilotAI&quot;                             │
+│  • Live alerts feed with expandable cards        │
+│  • Paper trading portfolio view                  │
+│  • Real-time ticker tape (TradingView)           │
+│  • Performance stats (from real trade data)      │
+│  • Hosted on Railway (permanent URL)             │
+│  https://pilotai-alerts-production.up.railway.app│
+└─────────────────────────────────────────────────┘
+</code></pre>
+<hr />
+<h2>5. What's Built (Complete)</h2>
+<h3>5.1 Core Python System</h3>
+<ul>
+<li><strong>17 Python files, ~3,500+ lines</strong></li>
+<li>Scanner finds opportunities across SPY, QQQ, IWM</li>
+<li>Black-Scholes delta calculation for accurate strike selection</li>
+<li>Technical analysis: RSI, moving averages, volume analysis</li>
+<li>Scoring algorithm ranks opportunities by probability, credit, and risk</li>
+<li>Alert generation in JSON, CSV, and plain text formats</li>
+<li>Full backtest module for historical validation</li>
+</ul>
+<h3>5.2 Paper Trading Engine</h3>
+<ul>
+<li>Auto-executes top-scored signals on each scan</li>
+<li>Tracks entries, exits, P&amp;L per trade</li>
+<li>Position sizing: max 2% risk per trade</li>
+<li>Auto-closes at 50% profit or 2.5× stop loss</li>
+<li>Stores all data in JSON for dashboard consumption</li>
+</ul>
+<h3>5.3 Web Dashboard</h3>
+<ul>
+<li><strong>Next.js 14</strong> with TypeScript and Tailwind CSS</li>
+<li>PilotAI branding: purple→pink→orange gradient, light theme</li>
+<li>Live ticker tape via TradingView widget</li>
+<li>Alert cards with full trade details, expandable</li>
+<li>Paper trading portfolio page with positions and P&amp;L</li>
+<li>Deployed on Railway at permanent URL</li>
+<li>Mobile responsive (900px, 600px breakpoints)</li>
+</ul>
+<h3>5.4 Automated Scanning</h3>
+<ul>
+<li>Cron job: every 30 minutes, 10 AM – 3:30 PM ET, Mon-Fri</li>
+<li>Auto-scans, auto-trades, and pushes summary to Telegram</li>
+</ul>
+<h3>5.5 Data Providers Built</h3>
+<ul>
+<li><strong>yfinance</strong> — working (free, 15-min delay)</li>
+<li><strong>Tradier</strong> — provider built, pending API key</li>
+<li><strong>Polygon.io</strong> — provider built, free tier limited to historical data</li>
+</ul>
+<hr />
+<h2>6. What's In Progress</h2>
+<h3>6.1 Alpaca Paper Trading Integration</h3>
+<p><strong>Status: Account created, completing setup</strong></p>
+<p>Alpaca provides a real paper trading environment with:
+- Simulated order execution against live market data
+- Real fill prices based on actual bid/ask
+- Options trading enabled by default on paper accounts
+- Full REST API for programmatic trading
+- Free — no cost for paper trading</p>
+<p><strong>What this gives us:</strong>
+- Instead of our JSON-based simulation, trades execute on Alpaca's paper trading platform
+- Real order fills, realistic slippage
+- Proper options chain data
+- Portfolio tracking through Alpaca's dashboard + our dashboard</p>
+<h3>6.2 Telegram Alerts</h3>
+<ul>
+<li>Bot module exists, needs bot token configuration</li>
+<li>Will push alerts with trade details on each scan</li>
+</ul>
+<hr />
+<h2>7. What's Next</h2>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Task</th>
+<th>Timeline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>P0</strong></td>
+<td>Complete Alpaca integration — real paper trading</td>
+<td>This week</td>
+</tr>
+<tr>
+<td><strong>P0</strong></td>
+<td>First paper trades on Alpaca during market hours</td>
+<td>Next trading day</td>
+</tr>
+<tr>
+<td><strong>P1</strong></td>
+<td>Telegram alert bot — push notifications</td>
+<td>This week</td>
+</tr>
+<tr>
+<td><strong>P1</strong></td>
+<td>Dashboard: live P&amp;L from Alpaca positions</td>
+<td>This week</td>
+</tr>
+<tr>
+<td><strong>P2</strong></td>
+<td>Backtest validation — run 6-month historical test</td>
+<td>Next week</td>
+</tr>
+<tr>
+<td><strong>P2</strong></td>
+<td>Add more underlyings (AAPL, MSFT, AMZN)</td>
+<td>Next week</td>
+</tr>
+<tr>
+<td><strong>P3</strong></td>
+<td>Iron condor strategy (neutral market)</td>
+<td>Week 3</td>
+</tr>
+<tr>
+<td><strong>P3</strong></td>
+<td>Live trading readiness (Alpaca live account)</td>
+<td>After paper validation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>8. Risk Management</h2>
+<h3>Per-Trade Risk</h3>
+<ul>
+<li>Max 2% of account per trade</li>
+<li>Defined max loss (spread width - credit) × contracts</li>
+<li>Stop loss at 2.5× credit to cut losers early</li>
+</ul>
+<h3>Portfolio Risk</h3>
+<ul>
+<li>Max 5 concurrent positions</li>
+<li>Diversified across SPY, QQQ, IWM</li>
+<li>No single underlying &gt; 40% of portfolio risk</li>
+<li>Dashboard shows real-time portfolio risk bar</li>
+</ul>
+<h3>Strategy Edge</h3>
+<ul>
+<li>Selling options with 85-90% probability of expiring worthless</li>
+<li>Time decay (theta) generates daily income</li>
+<li>IV Rank filter ensures we sell when premiums are rich</li>
+<li>50% profit target locks in gains early, improves win rate further</li>
+</ul>
+<hr />
+<h2>9. Access &amp; URLs</h2>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Dashboard</strong></td>
+<td>https://pilotai-alerts-production.up.railway.app</td>
+</tr>
+<tr>
+<td><strong>Paper Trading</strong></td>
+<td>https://pilotai-alerts-production.up.railway.app/paper-trading</td>
+</tr>
+<tr>
+<td><strong>Alpaca Dashboard</strong></td>
+<td>https://app.alpaca.markets (atlas@attix.com)</td>
+</tr>
+<tr>
+<td><strong>System Files</strong></td>
+<td>Mac Studio: ~/credit-spread-system/</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>10. Technology Stack</h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Strategy Engine</td>
+<td>Python 3.9, scipy, numpy, pandas</td>
+</tr>
+<tr>
+<td>Options Data</td>
+<td>yfinance (current), Tradier/Alpaca (planned)</td>
+</tr>
+<tr>
+<td>Technical Analysis</td>
+<td>Custom RSI, SMA, EMA + ta-lib</td>
+</tr>
+<tr>
+<td>Paper Trading</td>
+<td>Alpaca Markets API</td>
+</tr>
+<tr>
+<td>Web Dashboard</td>
+<td>Next.js 14, TypeScript, Tailwind CSS</td>
+</tr>
+<tr>
+<td>Hosting</td>
+<td>Railway</td>
+</tr>
+<tr>
+<td>Alerts</td>
+<td>Telegram Bot API</td>
+</tr>
+<tr>
+<td>Scheduling</td>
+<td>OpenClaw cron (30-min intervals)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Document generated by Atlas for PilotAI — February 12, 2026</em></p></body></html>

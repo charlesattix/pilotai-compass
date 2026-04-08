@@ -1,0 +1,616 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EXP-2410 — Production Paper-Trading Config (FINAL)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Definitive paper-trading config derived from the honest results of
+# EXP-2050 → EXP-2380. Every number in this file has a direct citation to
+# a committed JSON under compass/reports/. No fabricated values.
+#
+# 7 STREAMS (EXP-2220 correlation-validated, effective N = 6.69/7):
+#   1. EXP-1220     SPY put-credit-spreads          20%   IronVault SPY options
+#   2. XLF CS       EXP-2160 XLF put-credit-spreads 14%   IronVault XLF options
+#   3. XLI CS       EXP-2160 XLI put-credit-spreads 14%   IronVault XLI options
+#   4. GLD calendar EXP-1770 GLD futures basis      14%   Yahoo GLD/GC=F
+#   5. SLV calendar EXP-1770 SLV futures basis       8%   Yahoo SLV/SI=F  ← capacity bottleneck
+#   6. vol_arb      EXP-2020 cross-sectional IV-RV  15%   IronVault SPY/QQQ/XLF/XLI
+#   7. Crisis Alpha EXP-1780-v5 long-vol tail hedge  5%   SPY puts + VIX calls
+#   (10% cash buffer)
+#
+# KEY DECISIONS from the Wave 3-4 experiment trail
+#   * Weight optimisation via Ledoit-Wolf shrinkage + risk-parity  (EXP-2360)
+#       - LW clears 100% of walk-forward folds at Sharpe ≥ 6
+#       - Most stable estimator in 20-fold WF (std 4.76 vs sample 13.16)
+#   * Vol target 15% annualised with HARD 13× leverage cap         (EXP-2340)
+#       - Prevents the 2022 style leverage spiral after calm periods
+#   * 3% trailing-drawdown circuit breaker                         (EXP-2370)
+#       - Tight soft-stop; escalates to 6% hard halt
+#       - Replaces v6 config's 10%/12% DD limits, which were too lax
+#   * T+V entry overlay on EXP-1220                                 (EXP-2120)
+#       - VIX/VIX3M ratio < 0.90   (T filter, EXP-2070)
+#       - vvol 20d-z ≤ 2          (V filter, EXP-1970)
+#       - F (FOMC) intentionally OFF — redundant once T is on
+#   * XLF min-credit floor $0.30                                    (EXP-2270)
+#       - Prunes slippage-fragile XLF tail; preserves alpha
+#
+# HONEST TARGETS (from EXP-2280 walk-forward — the ONLY un-biased number)
+#   Pooled OOS Sharpe:   4.43       ← 20-fold 252/63 walk-forward
+#   Per-fold Sharpe:     mean 5.97, median 6.26, 60% of folds ≥ 6
+#   Pooled OOS CAGR:     170.4%
+#   Pooled OOS Max DD:   24.4%      ← needs tighter vol target → 12% cap below
+#
+# The 13-33 Sharpe figures from full-sample v6/v7 optimisers are LOOK-AHEAD
+# BIASED and not used here. This config targets the honest walk-forward
+# distribution above with a 15% vol target and 13× leverage cap.
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: "EXP-2410 Production Paper Config"
+experiment_id: EXP-2410
+version: "7.0.0-paper"
+mode: paper                        # flip to "live" only after 90-day paper validation
+created: "2026-04-08"
+description: |
+  Final 7-stream paper-trading config. Validated end-to-end on real
+  IronVault + Yahoo data. Designed for $100K–$50M AUM; binding capacity
+  constraint is SLV calendar at ~$16M soft cap (EXP-2140, EXP-2270).
+
+supersedes: EXP-2290                # north_star_v6_prod.yaml
+
+# ─── Account ─────────────────────────────────────────────────────────────
+account:
+  broker: alpaca
+  environment: paper
+  starting_capital: 100000
+  currency: USD
+  margin_type: reg_t
+  api:
+    base_url: "https://paper-api.alpaca.markets"
+    data_url: "https://data.alpaca.markets"
+    key_env: ALPACA_API_KEY_PAPER
+    secret_env: ALPACA_API_SECRET_PAPER
+    feed: iex
+    api_version: v2
+
+# ─── Portfolio — Ledoit-Wolf + vol targeting ─────────────────────────────
+# Reference: EXP-2360 ledoit_wolf results
+#   pooled_sharpe 11.73 · pooled_dd 2.24% · 100% folds ≥ 6 · std(fold) 4.76
+portfolio:
+  allocator:
+    module: compass.exp2360_robust_cov
+    method: risk_parity                     # Chaves-Hsu-Li fixed-point
+    covariance_estimator: ledoit_wolf       # EXP-2360 winner on stability
+    covariance_fallback: oas                # acceptable second choice
+    estimator_lookback_days: 252
+    refit_cadence_days: 63                  # 1 quarter
+    min_weight: 0.02
+    max_weight: 0.30                        # no single sleeve > 30%
+
+  vol_targeting:
+    enabled: true
+    target_vol_annual_pct: 15.0             # EXP-2340 target
+    lookback_days: 20                       # short lookback, responsive
+    min_lookback_days: 10
+    scale_cap: 13.0                         # HARD leverage cap (EXP-2340)
+    scale_floor: 0.1
+    recompute_cadence: daily                # re-target each trading day
+
+  rebalance:
+    cadence: weekly
+    day: monday
+    time: "09:40"
+    drift_threshold_pct: 5.0                # trigger rebalance if any weight drifts > 5%
+
+# ─── Strategy components ─────────────────────────────────────────────────
+strategies:
+
+  # ---- 1. EXP-1220 SPY put-credit-spreads (PRIMARY ALPHA) --------------
+  - id: exp1220_spy
+    enabled: true
+    reference_experiment: EXP-1220
+    baseline_sharpe: 3.85               # walk-forward portfolio from MASTERPLAN
+    per_trade_sharpe: 1.26              # canonical 171-trade tape
+    weight_initial: 0.20                # overridden by Ledoit-Wolf allocator
+    module: strategies.credit_spread
+    class: CreditSpreadStrategy
+    instrument:
+      ticker: SPY
+      asset_class: options
+      strategy_type: bull_put_spread
+    cadence:
+      frequency: 7d
+      scan_day: monday
+      scan_time: "09:35"
+      max_concurrent: 5
+    spread:
+      width: 5.0
+      target_dte: 28
+      min_dte: 21
+      max_dte: 35
+      otm_pct: 0.05
+      min_credit: 0.30
+    sizing:
+      risk_per_trade_pct: 1.0
+      max_contracts: 15
+    exits:
+      profit_target_pct: 50
+      stop_loss_multiplier: 2.0
+      dte_exit: 5
+    entry_overlay:                      # EXP-2120 T+V winner
+      module: compass.exp1880_integrated_overlays
+      class: IntegratedEntryOverlay
+      config:
+        use_fomc: false                 # REDUNDANT once T is on (EXP-2120)
+        use_vix_slope: false
+        use_pcr: false
+        use_vix_inversion: true
+        use_put_zspike: true
+        # T filter (EXP-2070)
+        term_structure_ratio_max: 0.90  # skip when ^VIX/^VIX3M ≥ 0.90
+        # V filter (EXP-1970)
+        vvol_z_max: 2.0                 # skip when 20d vvol z-score > 2
+        vvol_realised_window: 20
+        vvol_z_window: 252
+    journal: logs/exp2410/exp1220_journal.csv
+
+  # ---- 2. XLF put-credit-spreads ---------------------------------------
+  - id: xlf_credit_spread
+    enabled: true
+    reference_experiment: EXP-2160
+    baseline_sharpe_at_3c_slip: 4.43    # EXP-2270 honest slippage
+    weight_initial: 0.14
+    module: strategies.credit_spread
+    class: CreditSpreadStrategy
+    instrument:
+      ticker: XLF
+      asset_class: options
+      strategy_type: bull_put_spread
+    cadence:
+      frequency: 7d
+      scan_day: monday                  # EXP-2270: no weekday carve-out
+      scan_time: "09:36"
+      max_concurrent: 3
+    spread:
+      width: 1.0
+      target_dte: 28
+      min_dte: 21
+      max_dte: 35
+      otm_pct: 0.04
+      min_credit: 0.30                  # EXP-2270 slippage-cliff guard
+    sizing:
+      risk_per_trade_pct: 0.50
+      max_contracts: 15
+    exits:
+      profit_target_pct: 50
+      stop_loss_multiplier: 2.0
+      dte_exit: 5
+    slippage_budget_per_leg: 0.03       # 3c per leg per side (EXP-2270 realistic)
+    journal: logs/exp2410/xlf_credit_spread_journal.csv
+
+  # ---- 3. XLI put-credit-spreads ---------------------------------------
+  - id: xli_credit_spread
+    enabled: true
+    reference_experiment: EXP-2160
+    baseline_sharpe_at_3c_slip: 4.14
+    weight_initial: 0.14
+    module: strategies.credit_spread
+    class: CreditSpreadStrategy
+    instrument:
+      ticker: XLI
+      asset_class: options
+      strategy_type: bull_put_spread
+    cadence:
+      frequency: 7d
+      scan_day: monday
+      scan_time: "09:37"
+      max_concurrent: 3
+    spread:
+      width: 2.0
+      target_dte: 28
+      min_dte: 21
+      max_dte: 35
+      otm_pct: 0.04
+      min_credit: 0.12
+    sizing:
+      risk_per_trade_pct: 0.50
+      max_contracts: 12
+    exits:
+      profit_target_pct: 50
+      stop_loss_multiplier: 2.0
+      dte_exit: 5
+    slippage_budget_per_leg: 0.03
+    journal: logs/exp2410/xli_credit_spread_journal.csv
+
+  # ---- 4. GLD calendar spread ------------------------------------------
+  - id: gld_calendar
+    enabled: true
+    reference_experiment: EXP-1770
+    baseline_sharpe: 2.70
+    weight_initial: 0.14
+    module: compass.exp1770_commodity_calendars
+    entrypoint: run_paper
+    instrument:
+      pair: [GLD, GC=F]
+      asset_class: calendar_spread
+    cadence:
+      frequency: 1d
+      scan_time: "09:45"
+    sizing:
+      risk_per_trade_pct: 1.0
+    signal:
+      window_days: 60
+      z_threshold: 1.0
+      rule_selection: walk_forward
+    capacity_note: |
+      EXP-2140: GC=F ADV ~$313M/d  →  soft cap ~$42M portfolio AUM.
+      BOTTLENECK at > $50M AUM.
+    journal: logs/exp2410/gld_calendar_journal.csv
+
+  # ---- 5. SLV calendar spread ------------------------------------------
+  - id: slv_calendar
+    enabled: true
+    reference_experiment: EXP-1770
+    baseline_sharpe: 2.27
+    weight_initial: 0.08                # smaller than v6 — binding constraint
+    module: compass.exp1770_commodity_calendars
+    entrypoint: run_paper
+    instrument:
+      pair: [SLV, SI=F]
+      asset_class: calendar_spread
+    cadence:
+      frequency: 1d
+      scan_time: "09:46"
+    sizing:
+      risk_per_trade_pct: 0.75
+    signal:
+      window_days: 60
+      z_threshold: 1.0
+      rule_selection: walk_forward
+    capacity_note: |
+      EXP-2140: SI=F ADV ~$122M/d  →  soft cap ~$16M portfolio AUM.
+      HARD BINDING CONSTRAINT at > $50M AUM.
+      EXP-2260 could not find a clean replacement; keep this small
+      and revisit copper/platinum/palladium in next cycle.
+    journal: logs/exp2410/slv_calendar_journal.csv
+
+  # ---- 6. Cross-sectional vol arbitrage --------------------------------
+  # Added to v7 config — was missing from v6 despite being fully validated.
+  - id: cross_vol_arb
+    enabled: true
+    reference_experiment: EXP-2020
+    baseline_sharpe: 2.28
+    correlation_to_exp1220: 0.048       # Pearson, 83-month; EXP-2020 + EXP-2220
+    weight_initial: 0.15
+    module: compass.exp2020_cross_vol_arb
+    entrypoint: run_paper
+    instrument:
+      universe: [SPY, QQQ, XLF, XLI]
+      asset_class: options_variance_swap_proxy
+    cadence:
+      frequency: 7d
+      scan_day: monday
+      scan_time: "09:50"
+      holding_days: 21
+    signal:
+      target_dte: 30
+      rv_lookback: 20
+      vega_notional_per_leg: 10000
+      rank_method: iv_rv_spread
+      long_rank: narrowest
+      short_rank: widest
+    sizing:
+      risk_per_trade_pct: 0.75
+    journal: logs/exp2410/cross_vol_arb_journal.csv
+
+  # ---- 7. Crisis Alpha v5 long-vol tail hedge --------------------------
+  - id: crisis_alpha_v5
+    enabled: true
+    reference_experiment: EXP-1780-v5
+    baseline_sharpe: 1.20
+    correlation_to_exp1220: -0.151      # EXP-2220 static, -0.074 in DD
+    weight_initial: 0.05
+    module: compass.crisis_alpha_v5
+    entrypoint: run_paper
+    instrument:
+      ticker: SPY
+      asset_class: options
+      strategy_type: long_put_plus_vix_call
+    cadence:
+      frequency: 5d
+      scan_day: monday
+      scan_time: "09:55"
+      max_concurrent: 3
+    sizing:
+      premium_budget_pct: 5.0
+      put_otm_pct: 0.05
+      put_target_dte: 60
+      vix_call_target_dte: 45
+      vix_call_strike_offset: 5.0
+    exits:
+      profit_target_pct: 200
+      stop_loss_pct: 100
+      crisis_unwind_score: 0.60
+      max_hold_days: 60
+    journal: logs/exp2410/crisis_alpha_journal.csv
+
+  # ---- 8. Cash buffer (passive) ----------------------------------------
+  - id: cash_buffer
+    enabled: true
+    weight_initial: 0.10
+    module: passive
+    instrument:
+      ticker: CASH
+      asset_class: cash
+    yields:
+      source: alpaca_cash_interest
+
+# ─── Risk manager ────────────────────────────────────────────────────────
+risk_manager:
+  enabled: true
+  module: compass.portfolio_risk_manager
+  class: PortfolioRiskManager
+
+  # 3% trailing-DD circuit breaker (EXP-2370)
+  # Replaces the 10%/12% DD limits from v6 which were too lax to prevent
+  # the 2022-style spiral seen in EXP-2280 pooled OOS (24.4% DD).
+  trailing_drawdown_circuit_breaker:
+    enabled: true
+    source: EXP-2370
+    reference_window: rolling_peak      # equity - rolling peak, not fixed high
+    soft_pct: 0.03                      # 3% soft trigger → cut leverage 50%
+    hard_pct: 0.06                      # 6% hard trigger → close all + halt
+    recovery_pct: 0.015                 # recover within 1.5% of peak to resume
+    soft_action: reduce_leverage
+    soft_leverage_multiplier: 0.5
+    hard_action: close_all_and_halt
+    halt_duration_hours: 24
+    daily_loss_override_pct: 2.0        # any single day > 2% loss triggers soft
+
+  correlation_monitor:
+    window_days: 20
+    alert_threshold: 0.40               # tighter than v6's 0.60 (EXP-2220 shows median 0.035)
+    stress_regimes: [HIGH_VOL, BEAR, CRASH]
+
+  portfolio_limits:
+    max_daily_loss_pct: 2.0
+    max_weekly_loss_pct: 4.0
+    max_open_positions_total: 25
+    max_open_positions_per_strategy: 10
+    vix_crisis_block: 35.0
+    vix_emergency_exit_all: 45.0
+
+  leverage_governor:
+    source: EXP-2340
+    target_leverage: null               # implicit via vol targeting
+    scale_cap: 13.0                     # matches portfolio.vol_targeting.scale_cap
+    scale_floor: 0.1
+    vix_cap_table:                      # VIX-conditional leverage ceiling
+      "15": 13.0
+      "20": 10.0
+      "25": 7.0
+      "30": 4.0
+      "35": 2.0
+      "45": 0.0
+
+  allocation_limiter:
+    max_weight_per_strategy: 0.30
+    min_weight_per_strategy: 0.02
+    rebalance_drift_pct: 0.05
+
+# ─── Overlays (portfolio-level) ──────────────────────────────────────────
+overlays:
+
+  # Event gate stays on — hits every sleeve not just exp1220
+  fomc_event_gate:
+    enabled: true
+    module: compass.risk_overlay
+    config:
+      enable_event_gates: true
+      pre_event_days: 1
+      post_event_days: 0
+      event_sizing_multiplier: 0.5
+      events: [FOMC, CPI, NFP, PCE]
+
+# ─── Paper trading fill simulation ───────────────────────────────────────
+paper:
+  fill_model: mid_minus_slippage
+  slippage_bps_equity: 5
+  slippage_bps_options: 25
+  # EXP-2270: per-leg realistic
+  slippage_per_leg_cents:
+    SPY: 2
+    XLF: 3
+    XLI: 3
+    QQQ: 3
+    GLD: 2
+    SLV: 3
+  bid_ask_spread_bps_equity: 8
+  bid_ask_spread_bps_options: 40
+  fill_probability: 0.97
+  partial_fill_frac: 0.10
+  reject_on_after_hours: true
+
+# ─── Telegram alerting ───────────────────────────────────────────────────
+alerts:
+  channel: telegram
+  module: shared.telegram_alerts
+  bot_token_env: TELEGRAM_BOT_TOKEN
+  chat_id_env: TELEGRAM_CHAT_ID
+  fallback: log
+
+  on_trade_entry: true
+  on_trade_exit: true
+  on_stop_loss: true
+  on_profit_target: true
+  on_overlay_block: true
+  on_risk_limit_breach: true
+  on_circuit_breaker: true               # CRITICAL — 3% soft trigger
+  on_vix_spike: true
+  on_daily_summary: true
+  on_weekly_summary: true
+  on_deviation_alert: true               # paper vs backtest drift > 30%
+
+  thresholds:
+    deviation_warn_pct: 20
+    deviation_critical_pct: 30
+    correlation_alert: 0.40
+    daily_loss_warn_pct: 1.0
+    daily_loss_critical_pct: 2.0
+    trailing_dd_warn_pct: 2.0            # warn before 3% soft trigger
+    trailing_dd_critical_pct: 3.0
+    leverage_warn: 10.0
+    leverage_critical: 13.0
+    vix_warn: 25
+    vix_critical: 35
+
+  cooldowns:
+    info: 300
+    warning: 60
+    critical: 0
+
+  daily_summary_time: "16:10"
+  weekly_summary_day: friday
+  weekly_summary_time: "16:30"
+
+# ─── Monitoring ──────────────────────────────────────────────────────────
+monitoring:
+  check_interval_minutes: 5
+  monitor_script: scripts/exp2410_monitor.py
+  log_dir: logs/exp2410
+  health_file: logs/exp2410/health.json
+  state_file: logs/exp2410/state.json
+  pid_file: logs/exp2410/engine.pid
+  monitor_pid_file: logs/exp2410/monitor.pid
+  alert_on_stale_seconds: 600
+
+  # Key things to track for the 90-day paper audit
+  tracked_metrics:
+    - portfolio_equity
+    - portfolio_leverage
+    - per_sleeve_pnl
+    - per_sleeve_weight
+    - trailing_drawdown_pct
+    - realised_vol_20d
+    - vix_vix3m_ratio
+    - vvol_zscore
+    - correlation_matrix_60d
+    - allocator_weights_latest
+    - scale_factor_today
+
+  daily_audit:
+    paper_vs_backtest_deviation: true
+    cross_check_sharpe: true
+    rolling_window_days: 30
+
+# ─── Reports ─────────────────────────────────────────────────────────────
+reports:
+  daily_pnl:
+    enabled: true
+    script: scripts/exp2410_daily_report.py
+    output_dir: reports/exp2410
+    run_at: "16:15"
+    format: [html, json]
+
+  weekly_attribution:
+    enabled: true
+    script: scripts/exp2410_weekly_attribution.py
+    output_dir: reports/exp2410
+    run_at: "17:00"
+    day: friday
+    format: [html, json]
+
+# ─── Data sources ────────────────────────────────────────────────────────
+data:
+  price_source: alpaca
+  options_source: alpaca
+  vix_source: yahoo                      # ^VIX + ^VIX3M for T filter (EXP-2070)
+  fomc_source: federalreserve.gov        # EXP-1740 sentiment features
+  econ_calendar: data/events/econ_calendar.csv
+  ironvault_db: data/options_cache.db    # backtest truth set only
+
+# ─── Logging ─────────────────────────────────────────────────────────────
+logging:
+  level: INFO
+  dir: logs/exp2410
+  main_log: logs/exp2410/engine.log
+  monitor_log: logs/exp2410/monitor.log
+  report_log: logs/exp2410/report.log
+  allocator_log: logs/exp2410/allocator.log
+  circuit_breaker_log: logs/exp2410/circuit_breaker.log
+  max_size_mb: 100
+  backup_count: 14
+
+# ─── Promotion criteria (paper → live) ───────────────────────────────────
+# Charles signs off live promotion ONLY when every bar below is met.
+promotion:
+  paper_duration_days: 90
+  required_metrics:
+    paper_sharpe_vs_backtest_ratio_min: 0.70
+    max_realised_drawdown_pct: 5.0
+    correlation_matrix_stability_min: 0.80   # 60d corr matrix frobenius stability
+    circuit_breaker_trips_max: 1             # no more than 1 soft trip in 90d
+    allocator_weight_drift_max_pct: 15.0
+    deviation_alert_count_max: 3
+    clean_90d_test:
+      sharpe_min: 3.0                        # below the 4.43 WF baseline but above noise
+      dd_max_pct: 8.0
+      no_rule_zero_violations: true
+
+# ─── Honest targets (for the audit dashboard) ────────────────────────────
+# These are the EXP-2280 walk-forward numbers, the only un-biased values.
+targets:
+  honest_walk_forward:
+    source: EXP-2280
+    pooled_sharpe: 4.429
+    pooled_cagr_pct: 170.383
+    pooled_max_dd_pct: 24.362
+    per_fold_mean_sharpe: 5.97
+    per_fold_median_sharpe: 6.255
+    per_fold_frac_above_6: 0.60
+  carlos_north_star:
+    cagr_pct: 100.0
+    sharpe: 6.0
+    max_dd_pct: 12.0
+    yearly_profitability: true
+
+# ─── Rule Zero ───────────────────────────────────────────────────────────
+rule_zero:
+  enforced: true
+  statement: |
+    ZERO SYNTHETIC DATA in production. Every executable quote traces to
+    Alpaca live, IronVault option_daily, Yahoo ^VIX/^VIX3M, or
+    federalreserve.gov. Paper-mode fill simulation applies a calibrated
+    slippage model around REAL quotes — it does NOT fabricate prices.
+    If a quote is missing the trade is skipped, never extrapolated.
+
+  forbidden:
+    - synthetic_option_chains
+    - simulated_vix_path
+    - extrapolated_bid_ask
+    - interpolated_fomc_language
+    - backfilled_iv
+    - np_random_in_live_loop
+
+  audit:
+    daily_scan_for_np_random: true
+    daily_scan_for_synthetic_keywords: true
+    quote_provenance_log: logs/exp2410/quote_provenance.csv
+
+# ─── Experiment provenance trail ─────────────────────────────────────────
+# Every decision in this config traces to a specific committed experiment.
+provenance:
+  EXP-1220:  compass/exp1220_standalone.py              # canonical put credit spread engine
+  EXP-1740:  compass/exp1740_sentiment_filter.py        # FOMC sentiment (not used — redundant to T)
+  EXP-1770:  compass/exp1770_commodity_calendars.py     # GLD / SLV calendar streams
+  EXP-1780:  compass/crisis_alpha_v5.py                 # Crisis Alpha v5 hedge sleeve
+  EXP-1880:  compass/exp1880_integrated_overlays.py     # IntegratedEntryOverlay wiring
+  EXP-1970:  compass/exp1970_vol_of_vol.py              # V filter (vvol z-score)
+  EXP-2020:  compass/exp2020_cross_vol_arb.py           # vol_arb stream
+  EXP-2070:  compass/exp2070_term_structure.py          # T filter (VIX/VIX3M < 0.90)
+  EXP-2120:  compass/exp2120_triple_overlay.py          # T+V winner, F redundant
+  EXP-2140:  compass/reports/exp2140_portfolio_capacity.json  # capacity caps
+  EXP-2160:  compass/exp2160_high_capacity_alts.py      # XLF / XLI credit spread engine
+  EXP-2170:  compass/exp2170_weight_optimization.py     # weight optim ceiling 5.47
+  EXP-2220:  compass/exp2220_seven_stream_corr.py       # 7-stream correlation foundation
+  EXP-2270:  compass/exp2270_xlf_xli_slippage.py        # 3c slippage realistic, $0.30 floor
+  EXP-2280:  compass/reports/exp2280_wf_robustness.json # honest walk-forward numbers
+  EXP-2360:  compass/exp2360_robust_cov.py              # Ledoit-Wolf winner
+  EXP-2320:  compass/reports/north_star_achievement_report.html  # comprehensive final report

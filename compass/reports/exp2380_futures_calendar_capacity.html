@@ -1,0 +1,297 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>EXP-2380 Futures Calendar Capacity</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1200px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.55; }
+  h1 { color:#0f172a; } h2 { color:#334155; margin-top:2.2em;
+         padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  h3 { color:#475569; margin-top:1.5em; }
+  h4 { color:#64748b; margin-top:1.2em; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:16px; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:18px 0; }
+  .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;
+          padding:18px; text-align:center; flex:1; min-width:150px; }
+  .kpi .value { font-size:1.5em; font-weight:800; color:#0f172a; }
+  .kpi .label { font-size:0.72em; color:#64748b; margin-top:4px; text-transform:uppercase; }
+  .good { color:#16a34a; font-weight:700; }
+  .bad  { color:#dc2626; font-weight:700; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.86em; }
+  th { background:#f1f5f9; padding:9px 12px; text-align:right; font-weight:600;
+       color:#475569; border-bottom:2px solid #cbd5e1; font-size:0.74em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  td.ok   { background:#dcfce7; }
+  td.warn { background:#fef9c3; }
+  td.bad  { background:#fee2e2; }
+  .note { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;
+            padding:14px; margin:14px 0; font-size:0.85rem; }
+</style></head><body>
+
+<h1>EXP-2380 — Futures-Based Calendar Capacity</h1>
+<div class="subtitle">Does switching GLD/SLV calendar from ETF options to futures fix the bottleneck? | 2026-04-08T04:02:28.502080Z</div>
+
+<div class="note">
+    <strong>Model:</strong> square-root market-impact
+    <code>impact = k · √participation</code>, k = 100 (equity) / 120
+    (futures) / 150 (options). Soft cap = 1% ADV, hard cap = 5% ADV,
+    50 round-trips/yr turnover. <strong>Data:</strong> Yahoo Finance
+    90-day median for ETFs/futures; IronVault <code>option_daily</code>
+    (since 2024) for options. Real data only.
+</div>
+
+<h2>Verdict</h2>
+<div class="kpi-row">
+    <div class="kpi"><div class="value bad">NO</div><div class="label">Does futures fix the bottleneck?</div></div>
+    <div class="kpi"><div class="value">$40.5M</div><div class="label">ETF-option path soft cap</div></div>
+    <div class="kpi"><div class="value">$16.3M</div><div class="label">Futures path soft cap</div></div>
+    <div class="kpi"><div class="value">0.4×</div><div class="label">Futures/ETF-opt liquidity ratio</div></div>
+</div>
+<ul>
+    <li>ETF-option path binds at $40.5M portfolio AUM (bottleneck sleeve: gld_calendar).</li><li>Futures path binds at $16.3M portfolio AUM (bottleneck sleeve: slv_calendar).</li><li>Futures-path capacity is 0.4× the ETF-option path.</li><li>Futures calendar does not provide enough headroom.</li>
+</ul>
+
+
+        <h2>gld_calendar (w=7.5%, baseline alpha 1520 bps/yr)</h2>
+        <h3>Real ADV legs</h3>
+        <table>
+            <thead><tr><th>Leg</th><th>Instrument</th><th>Daily Vol</th>
+            <th>Unit Notional</th><th>ADV $</th><th>Impact k</th></tr></thead>
+            <tbody><tr>
+                <td><strong>etf_shares</strong></td>
+                <td>GLD ETF shares</td>
+                <td>12,367,150</td>
+                <td>$428</td>
+                <td><strong>$5.29B</strong></td>
+                <td>100</td>
+            </tr><tr>
+                <td><strong>etf_options</strong></td>
+                <td>GLD options (7,105 contracts/d)</td>
+                <td>7,105</td>
+                <td>$43K</td>
+                <td><strong>$303.8M</strong></td>
+                <td>150</td>
+            </tr><tr>
+                <td><strong>futures</strong></td>
+                <td>GC=F (mult 100)</td>
+                <td>650</td>
+                <td>$466K</td>
+                <td><strong>$302.5M</strong></td>
+                <td>120</td>
+            </tr></tbody>
+        </table>
+        
+                <h4>Path A — ETF-option calendar</h4>
+                <p>Binding leg: <strong>GLD options</strong> ·
+                   soft cap AUM: $40.5M ·
+                   hard cap AUM: $202.6M</p>
+                <table>
+                    <thead><tr><th>AUM</th><th>Sleeve Notional</th>
+                    <th>Participation</th><th>Impact bps/yr</th>
+                    <th>Alpha After</th><th>Decay</th><th>Flag</th></tr></thead>
+                    <tbody><tr>
+                    <td>$10M</td>
+                    <td>$750K</td>
+                    <td>0.247%</td>
+                    <td>372.6</td>
+                    <td>1147</td>
+                    <td>24.5%</td>
+                    <td class="ok"><strong>OK</strong></td>
+                </tr><tr>
+                    <td>$50M</td>
+                    <td>$3.8M</td>
+                    <td>1.234%</td>
+                    <td>833.2</td>
+                    <td>687</td>
+                    <td>54.8%</td>
+                    <td class="warn"><strong>BOTTLENECK</strong></td>
+                </tr><tr>
+                    <td>$100M</td>
+                    <td>$7.5M</td>
+                    <td>2.468%</td>
+                    <td>1178.3</td>
+                    <td>342</td>
+                    <td>77.5%</td>
+                    <td class="warn"><strong>BOTTLENECK</strong></td>
+                </tr><tr>
+                    <td>$500M</td>
+                    <td>$37.5M</td>
+                    <td>12.342%</td>
+                    <td>2634.8</td>
+                    <td>0</td>
+                    <td>100.0%</td>
+                    <td class="bad"><strong>BROKEN</strong></td>
+                </tr><tr>
+                    <td>$1.0B</td>
+                    <td>$75.0M</td>
+                    <td>24.684%</td>
+                    <td>3726.2</td>
+                    <td>0</td>
+                    <td>100.0%</td>
+                    <td class="bad"><strong>BROKEN</strong></td>
+                </tr><tr>
+                    <td>$5.0B</td>
+                    <td>$375.0M</td>
+                    <td>123.418%</td>
+                    <td>8332.0</td>
+                    <td>0</td>
+                    <td>100.0%</td>
+                    <td class="bad"><strong>BROKEN</strong></td>
+                </tr></tbody>
+                </table>
+            
+        
+                <h4>Path B — Futures calendar</h4>
+                <p>Binding leg: <strong>GC=F futures</strong> ·
+                   soft cap AUM: $40.3M ·
+                   hard cap AUM: $201.7M</p>
+                <table>
+                    <thead><tr><th>AUM</th><th>Sleeve Notional</th>
+                    <th>Participation</th><th>Impact bps/yr</th>
+                    <th>Alpha After</th><th>Decay</th><th>Flag</th></tr></thead>
+                    <tbody><tr>
+                    <td>$10M</td>
+                    <td>$750K</td>
+                    <td>0.248%</td>
+                    <td>298.8</td>
+                    <td>1221</td>
+                    <td>19.7%</td>
+                    <td class="ok"><strong>OK</strong></td>
+                </tr><tr>
+                    <td>$50M</td>
+                    <td>$3.8M</td>
+                    <td>1.240%</td>
+                    <td>668.1</td>
+                    <td>852</td>
+                    <td>44.0%</td>
+                    <td class="warn"><strong>BOTTLENECK</strong></td>
+                </tr><tr>
+                    <td>$100M</td>
+                    <td>$7.5M</td>
+                    <td>2.479%</td>
+                    <td>944.8</td>
+                    <td>575</td>
+                    <td>62.2%</td>
+                    <td class="warn"><strong>BOTTLENECK</strong></td>
+                </tr><tr>
+                    <td>$500M</td>
+                    <td>$37.5M</td>
+                    <td>12.398%</td>
+                    <td>2112.6</td>
+                    <td>0</td>
+                    <td>100.0%</td>
+                    <td class="bad"><strong>BROKEN</strong></td>
+                </tr><tr>
+                    <td>$1.0B</td>
+                    <td>$75.0M</td>
+                    <td>24.795%</td>
+                    <td>2987.7</td>
+                    <td>0</td>
+                    <td>100.0%</td>
+                    <td class="bad"><strong>BROKEN</strong></td>
+                </tr><tr>
+                    <td>$5.0B</td>
+                    <td>$375.0M</td>
+                    <td>123.976%</td>
+                    <td>6680.7</td>
+                    <td>0</td>
+                    <td>100.0%</td>
+                    <td class="bad"><strong>BROKEN</strong></td>
+                </tr></tbody>
+                </table>
+            
+        
+        <h2>slv_calendar (w=7.5%, baseline alpha 2489 bps/yr)</h2>
+        <h3>Real ADV legs</h3>
+        <table>
+            <thead><tr><th>Leg</th><th>Instrument</th><th>Daily Vol</th>
+            <th>Unit Notional</th><th>ADV $</th><th>Impact k</th></tr></thead>
+            <tbody><tr>
+                <td><strong>etf_shares</strong></td>
+                <td>SLV ETF shares</td>
+                <td>66,987,500</td>
+                <td>$66</td>
+                <td><strong>$4.43B</strong></td>
+                <td>100</td>
+            </tr><tr>
+                    <td><strong>etf_options</strong></td>
+                    <td colspan="5"><em>DATA_GAP</em></td>
+                </tr><tr>
+                <td><strong>futures</strong></td>
+                <td>SI=F (mult 5000)</td>
+                <td>340</td>
+                <td>$359K</td>
+                <td><strong>$122.3M</strong></td>
+                <td>120</td>
+            </tr></tbody>
+        </table>
+        <h4>Path A — ETF-option calendar: <em>DATA_GAP</em></h4>
+        
+                <h4>Path B — Futures calendar</h4>
+                <p>Binding leg: <strong>SI=F futures</strong> ·
+                   soft cap AUM: $16.3M ·
+                   hard cap AUM: $81.5M</p>
+                <table>
+                    <thead><tr><th>AUM</th><th>Sleeve Notional</th>
+                    <th>Participation</th><th>Impact bps/yr</th>
+                    <th>Alpha After</th><th>Decay</th><th>Flag</th></tr></thead>
+                    <tbody><tr>
+                    <td>$10M</td>
+                    <td>$750K</td>
+                    <td>0.613%</td>
+                    <td>469.9</td>
+                    <td>2019</td>
+                    <td>18.9%</td>
+                    <td class="ok"><strong>OK</strong></td>
+                </tr><tr>
+                    <td>$50M</td>
+                    <td>$3.8M</td>
+                    <td>3.067%</td>
+                    <td>1050.7</td>
+                    <td>1438</td>
+                    <td>42.2%</td>
+                    <td class="warn"><strong>BOTTLENECK</strong></td>
+                </tr><tr>
+                    <td>$100M</td>
+                    <td>$7.5M</td>
+                    <td>6.133%</td>
+                    <td>1485.9</td>
+                    <td>1003</td>
+                    <td>59.7%</td>
+                    <td class="bad"><strong>BROKEN</strong></td>
+                </tr><tr>
+                    <td>$500M</td>
+                    <td>$37.5M</td>
+                    <td>30.666%</td>
+                    <td>3322.6</td>
+                    <td>0</td>
+                    <td>100.0%</td>
+                    <td class="bad"><strong>BROKEN</strong></td>
+                </tr><tr>
+                    <td>$1.0B</td>
+                    <td>$75.0M</td>
+                    <td>61.333%</td>
+                    <td>4698.9</td>
+                    <td>0</td>
+                    <td>100.0%</td>
+                    <td class="bad"><strong>BROKEN</strong></td>
+                </tr><tr>
+                    <td>$5.0B</td>
+                    <td>$375.0M</td>
+                    <td>306.664%</td>
+                    <td>10507.1</td>
+                    <td>0</td>
+                    <td>100.0%</td>
+                    <td class="bad"><strong>BROKEN</strong></td>
+                </tr></tbody>
+                </table>
+            
+        
+
+<div style="margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0;
+            font-size:0.78em; color:#94a3b8; text-align:center;">
+EXP-2380 — compass/exp2380_futures_calendar_capacity.py · Yahoo + IronVault real volumes
+</div>
+
+</body></html>

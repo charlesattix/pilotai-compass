@@ -1,0 +1,297 @@
+# ============================================================================
+# paper_ultimate_v4.yaml — Ultimate Portfolio v4 Paper Trading Config
+# ============================================================================
+# 5 strategies + tail risk hedge + dynamic sizing + regime-adaptive allocation
+#
+# Strategies:
+#   1. EXP-1220 Dynamic Leverage (SPY credit spreads, primary alpha)
+#   2. Cross-Asset Pairs (GLD-TLT, GLD-SPY, TLT-XLF, TLT-QQQ, GLD-QQQ)
+#   3. Vol Term Structure (SPY front/back contango)
+#   4. TLT Iron Condors (bond vol harvesting)
+#   5. XLI Iron Condors (sector vol harvesting)
+#
+# Overlays:
+#   - Tail risk hedge (SPY puts + VIX calls, 2% annual budget)
+#   - Dynamic sizing (0.5x-2.5x leverage based on VIX/regime/DD)
+#   - Regime-adaptive allocation (5 regime profiles)
+#   - Drawdown circuit breaker (-8% DD → 0.5x until -3% recovery)
+#
+# Usage:
+#   python main.py scheduler --config configs/paper_ultimate_v4.yaml \
+#                            --env-file .env.ultimate_v4
+#
+# Required env vars (.env.ultimate_v4):
+#   ALPACA_API_KEY       — Alpaca paper trading API key
+#   ALPACA_API_SECRET    — Alpaca paper trading API secret
+#   POLYGON_API_KEY      — Polygon.io API key (options chain data)
+#   TELEGRAM_BOT_TOKEN   — (optional) Telegram alert bot token
+#   TELEGRAM_CHAT_ID     — (optional) Telegram chat ID
+# ============================================================================
+
+paper_mode: true
+db_path: "data/ultimate_v4/pilotai_ultimate_v4.db"
+experiment_id: "ULTIMATE-V4"
+created_by: "maximus"
+version: "4.0"
+
+# ============================================================================
+# Tickers — all strategies
+# ============================================================================
+tickers:
+  primary: [SPY]
+  pairs: [GLD, TLT, SPY, XLF, QQQ]
+  iron_condors: [TLT, XLI]
+  sector: [XLF, XLI, XLE]
+
+# ============================================================================
+# Strategy 1: EXP-1220 Dynamic Leverage (primary alpha)
+# ============================================================================
+strategy_exp1220:
+  enabled: true
+  type: credit_spread
+  ticker: SPY
+  allocation_pct: 55  # base allocation (regime-adjusted)
+
+  min_dte: 15
+  max_dte: 30
+  target_dte: 21
+  direction: both
+  otm_pct: 0.05
+  spread_width: 5
+  use_delta_selection: true
+  target_delta: 0.15
+  min_delta: 0.08
+  max_delta: 0.20
+
+  ml_enhanced: true
+  ml_threshold: 0.65
+  ml_model_path: "models/exp1220_ensemble.pkl"
+
+  technical:
+    use_trend_filter: true
+    fast_ma: 50
+    slow_ma: 200
+    use_rsi_filter: true
+    rsi_period: 14
+    rsi_overbought: 75
+    rsi_oversold: 25
+
+  regime_mode: combo
+  regime_config:
+    signals: [price_vs_ma200, rsi_momentum, vix_structure]
+
+# ============================================================================
+# Strategy 2: Cross-Asset Pairs
+# ============================================================================
+strategy_pairs:
+  enabled: true
+  type: pairs
+  allocation_pct: 15
+
+  pairs:
+    - {asset_a: GLD, asset_b: TLT, spread_width_a: 2, spread_width_b: 2}
+    - {asset_a: GLD, asset_b: SPY, spread_width_a: 2, spread_width_b: 5}
+    - {asset_a: TLT, asset_b: XLF, spread_width_a: 2, spread_width_b: 1}
+    - {asset_a: TLT, asset_b: QQQ, spread_width_a: 2, spread_width_b: 5}
+    - {asset_a: GLD, asset_b: QQQ, spread_width_a: 2, spread_width_b: 5}
+
+  entry_zscore: 2.0
+  exit_zscore: 0.5
+  lookback_days: 60
+  min_half_life: 5
+  max_half_life: 120
+
+# ============================================================================
+# Strategy 3: Vol Term Structure
+# ============================================================================
+strategy_vol_term:
+  enabled: true
+  type: calendar
+  ticker: SPY
+  allocation_pct: 10
+
+  front_dte: 21
+  back_dte: 50
+  contango_threshold: 1.15  # front/back price ratio
+  otm_pct: 0.05
+  strike_match: atm
+
+# ============================================================================
+# Strategy 4: TLT Iron Condors
+# ============================================================================
+strategy_tlt_ic:
+  enabled: true
+  type: iron_condor
+  ticker: TLT
+  allocation_pct: 10
+
+  min_dte: 21
+  target_dte: 35
+  put_otm_pct: 0.05
+  call_otm_pct: 0.05
+  spread_width: 2
+  profit_target_pct: 50
+  stop_loss_pct: 200
+  min_credit: 0.30
+
+# ============================================================================
+# Strategy 5: XLI Iron Condors
+# ============================================================================
+strategy_xli_ic:
+  enabled: true
+  type: iron_condor
+  ticker: XLI
+  allocation_pct: 10
+
+  min_dte: 21
+  target_dte: 35
+  put_otm_pct: 0.05
+  call_otm_pct: 0.05
+  spread_width: 2
+  profit_target_pct: 50
+  stop_loss_pct: 200
+  min_credit: 0.20
+
+# ============================================================================
+# Regime-Adaptive Allocation
+# ============================================================================
+regime_allocation:
+  bull:
+    leverage: 2.0
+    exp1220: 65
+    pairs: 10
+    vol_term: 5
+    tlt_ic: 10
+    xli_ic: 10
+  bear:
+    leverage: 0.8
+    exp1220: 40
+    pairs: 25
+    vol_term: 15
+    tlt_ic: 10
+    xli_ic: 10
+  crash:
+    leverage: 0.5
+    exp1220: 20
+    pairs: 30
+    vol_term: 20
+    tlt_ic: 15
+    xli_ic: 15
+  high_vol:
+    leverage: 1.0
+    exp1220: 35
+    pairs: 20
+    vol_term: 20
+    tlt_ic: 15
+    xli_ic: 10
+  low_vol:
+    leverage: 2.0
+    exp1220: 70
+    pairs: 8
+    vol_term: 7
+    tlt_ic: 8
+    xli_ic: 7
+
+# ============================================================================
+# Dynamic Sizing
+# ============================================================================
+dynamic_sizing:
+  enabled: true
+  min_leverage: 0.5
+  max_leverage: 2.5
+  default_leverage: 1.6
+  vix_boost_threshold: 15
+  vix_reduce_threshold: 30
+  smoothing_halflife: 3
+  ramp_up_days: 15
+
+# ============================================================================
+# Tail Risk Hedge
+# ============================================================================
+tail_risk_hedge:
+  enabled: true
+  annual_budget_pct: 2.0
+  put_allocation_pct: 60   # 60% to SPY puts
+  vix_call_pct: 40          # 40% to VIX calls
+  put_buy_vix_threshold: 20
+  ts_inversion_boost: 3.0
+
+# ============================================================================
+# Drawdown Circuit Breaker
+# ============================================================================
+circuit_breaker:
+  enabled: true
+  dd_trigger: 8.0          # -8% DD → force 0.5x
+  dd_recovery: 3.0         # resume at -3% DD
+  min_leverage: 0.5
+  daily_loss_halt: 8.0     # halt entries for the day
+  weekly_loss_reduction: 15.0  # 50% size reduction for 5 days
+
+# ============================================================================
+# Risk Management
+# ============================================================================
+risk:
+  account_size: 100000
+  max_risk_per_trade: 5.0   # % of account per trade
+  max_total_exposure: 15.0  # % total open risk
+  max_positions: 10
+  max_positions_per_ticker: 3
+  min_risk_reward: 1.0
+  max_correlated_positions: 3
+
+# ============================================================================
+# Execution
+# ============================================================================
+execution:
+  profit_target_pct: 50
+  stop_loss_multiplier: 2.0
+  dte_exit: 7
+  slippage_per_contract: 0.04
+  commission_per_contract: 0.65
+
+# ============================================================================
+# Alpaca Broker
+# ============================================================================
+alpaca:
+  enabled: true
+  paper: true
+  base_url: "https://paper-api.alpaca.markets"
+  api_key: "${ALPACA_API_KEY}"
+  api_secret: "${ALPACA_API_SECRET}"
+
+# ============================================================================
+# Alerts
+# ============================================================================
+alerts:
+  output_json: true
+  telegram:
+    enabled: true
+    bot_token: "${TELEGRAM_BOT_TOKEN}"
+    chat_id: "${TELEGRAM_CHAT_ID}"
+  thresholds:
+    dd_warn: 5.0
+    dd_critical: 8.0
+    dd_halt: 13.0
+    consecutive_losses_warn: 3
+    stale_position_days: 5
+
+# ============================================================================
+# Data
+# ============================================================================
+data:
+  provider: polygon
+  cache_dir: "data/options_cache"
+  cache_ttl: 300
+  fallback: last_known
+
+# ============================================================================
+# Schedule (ET timezone)
+# ============================================================================
+schedule:
+  pre_market: "09:00"
+  scans: ["09:15", "09:45", "10:00", "10:30", "11:00", "11:30",
+          "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
+          "15:00", "15:30"]
+  post_market_report: "16:15"
+  model_retrain_check: "16:30"
+  weekly_macro: "friday:17:00"

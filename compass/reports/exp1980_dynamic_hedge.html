@@ -1,0 +1,52 @@
+<!DOCTYPE html><html><head><meta charset='UTF-8'>
+<title>EXP-1980 Dynamic Hedge Ratio</title>
+<style>
+body{font-family:-apple-system,sans-serif;margin:0;padding:24px;background:#fff;color:#1e293b;max-width:1100px}
+h1{font-size:1.5rem;color:#0f172a} h2{font-size:1.05rem;color:#334155;border-bottom:1px solid #e2e8f0;padding-bottom:4px;margin-top:1.6rem}
+.meta{color:#64748b;font-size:0.82rem;margin-bottom:18px}
+.headline{background:#f0fdf4;border-left:4px solid #16a34a;padding:14px;border-radius:6px;margin:14px 0;font-size:0.95rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:14px 0}
+.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;text-align:center}
+.card .l{font-size:0.65rem;color:#64748b;text-transform:uppercase} .card .v{font-size:1.15rem;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:0.83rem;margin:10px 0}
+th{background:#f1f5f9;padding:6px 8px;text-align:right;font-size:0.7rem;color:#64748b;text-transform:uppercase;border-bottom:2px solid #e2e8f0}
+th:first-child{text-align:left} td{padding:5px 8px;text-align:right;border-bottom:1px solid #f1f5f9} td:first-child{text-align:left}
+</style></head><body>
+<h1>EXP-1980 — Correlation Regime Switching / Dynamic Hedge Ratio</h1>
+<p class='meta'>Streams: EXP-1220 · v5_hedge · GLD/SLV calendars · SPY (all real).
+Walk-forward 252/63. Hedge schedule re-fit per fold.</p>
+
+<div class='headline'><strong>Pooled OOS:</strong>
+&nbsp;Static-5% CAGR <strong>+61.48%</strong> Sharpe <strong>4.02</strong> DD <strong>7.6%</strong>
+→ Dynamic CAGR <strong>+61.61%</strong> Sharpe <strong>4.07</strong> DD <strong>7.5%</strong>
+&nbsp;|&nbsp; ΔCAGR <strong>+0.13pp</strong>, ΔSharpe <strong>+0.04</strong>, ΔDD <strong>-0.05pp</strong>
+&nbsp;(✅ TARGET MET)</div>
+
+<div class='grid'>
+  <div class='card'><div class='l'>Mean hedge w</div><div class='v'>16.2%</div></div>
+  <div class='card'><div class='l'>Median hedge w</div><div class='v'>15.0%</div></div>
+  <div class='card'><div class='l'>Days at 0% hedge</div><div class='v'>0%</div></div>
+  <div class='card'><div class='l'>Days at &gt;12% hedge</div><div class='v'>93%</div></div>
+  <div class='card'><div class='l'>Baseline CAGR</div><div class='v'>+61.46%</div></div>
+  <div class='card'><div class='l'>Baseline DD</div><div class='v'>7.6%</div></div>
+</div>
+
+<h2>Walk-Forward Folds</h2>
+<table><tr><th>Test start</th><th>Test end</th>
+<th>Mean test ρ</th><th>Mean hedge w</th>
+<th>Static Sh</th><th>Dyn Sh</th><th>Δ Sh</th>
+<th>Static DD</th><th>Dyn DD</th></tr>
+<tr><td>2020-12-31</td><td>2021-04-01</td><td>+0.77</td><td>15.00%</td><td>5.97</td><td>5.97</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>1.4%</td><td>1.4%</td></tr><tr><td>2021-04-05</td><td>2021-07-01</td><td>+0.87</td><td>15.00%</td><td>5.10</td><td>5.10</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>1.7%</td><td>1.7%</td></tr><tr><td>2021-07-02</td><td>2021-09-30</td><td>+0.85</td><td>15.00%</td><td>5.00</td><td>5.00</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>1.8%</td><td>1.8%</td></tr><tr><td>2021-10-01</td><td>2021-12-30</td><td>+0.62</td><td>15.00%</td><td>7.08</td><td>7.09</td><td style='color:#16a34a;font-weight:700'>+0.01</td><td>1.7%</td><td>1.7%</td></tr><tr><td>2021-12-31</td><td>2022-03-31</td><td>+0.55</td><td>15.11%</td><td>0.89</td><td>1.19</td><td style='color:#16a34a;font-weight:700'>+0.30</td><td>2.0%</td><td>2.0%</td></tr><tr><td>2022-04-01</td><td>2022-07-01</td><td>+0.47</td><td>17.38%</td><td>0.41</td><td>0.79</td><td style='color:#16a34a;font-weight:700'>+0.38</td><td>2.7%</td><td>2.7%</td></tr><tr><td>2022-07-05</td><td>2022-09-30</td><td>+0.64</td><td>20.00%</td><td>3.59</td><td>3.87</td><td style='color:#16a34a;font-weight:700'>+0.28</td><td>3.9%</td><td>3.9%</td></tr><tr><td>2022-10-03</td><td>2022-12-30</td><td>+0.63</td><td>20.00%</td><td>1.18</td><td>1.00</td><td style='color:#dc2626;font-weight:700'>-0.18</td><td>7.6%</td><td>7.5%</td></tr><tr><td>2023-01-03</td><td>2023-04-03</td><td>+0.93</td><td>20.00%</td><td>4.48</td><td>4.47</td><td style='color:#dc2626;font-weight:700'>-0.02</td><td>3.9%</td><td>3.9%</td></tr><tr><td>2023-04-04</td><td>2023-07-05</td><td>+0.90</td><td>20.00%</td><td>3.38</td><td>3.38</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>3.9%</td><td>3.9%</td></tr><tr><td>2023-07-06</td><td>2023-10-03</td><td>+0.96</td><td>20.00%</td><td>0.68</td><td>0.68</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>4.4%</td><td>4.4%</td></tr><tr><td>2023-10-04</td><td>2024-01-03</td><td>+0.79</td><td>15.00%</td><td>5.63</td><td>5.62</td><td style='color:#dc2626;font-weight:700'>-0.02</td><td>2.6%</td><td>2.6%</td></tr><tr><td>2024-01-04</td><td>2024-04-04</td><td>+0.94</td><td>15.00%</td><td>5.53</td><td>5.53</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>1.6%</td><td>1.6%</td></tr><tr><td>2024-04-05</td><td>2024-07-05</td><td>+0.79</td><td>15.00%</td><td>6.91</td><td>6.87</td><td style='color:#dc2626;font-weight:700'>-0.03</td><td>1.6%</td><td>1.6%</td></tr><tr><td>2024-07-08</td><td>2024-10-03</td><td>+0.65</td><td>15.00%</td><td>5.05</td><td>5.06</td><td style='color:#16a34a;font-weight:700'>+0.01</td><td>1.3%</td><td>1.3%</td></tr><tr><td>2024-10-04</td><td>2025-01-03</td><td>+0.64</td><td>15.00%</td><td>3.69</td><td>3.69</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>1.1%</td><td>1.1%</td></tr><tr><td>2025-01-06</td><td>2025-04-07</td><td>+0.61</td><td>15.00%</td><td>3.81</td><td>3.78</td><td style='color:#dc2626;font-weight:700'>-0.03</td><td>1.7%</td><td>1.8%</td></tr><tr><td>2025-04-08</td><td>2025-07-09</td><td>+0.31</td><td>5.48%</td><td>6.29</td><td>6.29</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>1.6%</td><td>1.6%</td></tr><tr><td>2025-07-10</td><td>2025-10-07</td><td>+0.90</td><td>20.00%</td><td>4.93</td><td>4.93</td><td style='color:#dc2626;font-weight:700'>+0.00</td><td>2.2%</td><td>2.2%</td></tr></table>
+
+<h2>Method</h2>
+<ul>
+<li>Streams: cached EXP-1850 (exp1220 + v5_hedge) + exp1770 GLD/SLV calendars + Yahoo SPY.</li>
+<li>Rolling 60-day corr(EXP-1220, SPY) gates a 3-knee hedge schedule
+   (low_thr, high_thr, w_low, w_mid, w_high). Grid search per train fold,
+   apply OOS.</li>
+<li>Walk-forward 252-day train, 63-day test, expanding step.</li>
+<li>Pooled OOS metrics aggregate every test fold's daily returns.</li>
+</ul>
+<div style='color:#94a3b8;font-size:0.75rem;margin-top:1.6rem;border-top:1px solid #e2e8f0;padding-top:8px'>
+compass/exp1980_dynamic_hedge.py · ALL REAL DATA</div>
+</body></html>

@@ -1,0 +1,230 @@
+# ============================================================================
+# paper_exp401.yaml — EXP-401 CS+SS Blend Paper Trading Config
+# ============================================================================
+# Blend: Credit Spread (12% risk) + Straddle/Strangle (3% risk)
+# Validation: ROBUST 0.951 | +26.9% after slippage | -7.0% DD
+# Regime scales from output/regime_switching_results.json
+#
+# Usage:
+#   python main.py scheduler --config configs/paper_exp401.yaml \
+#                            --env-file .env.exp401
+#
+# Required env vars:
+#   ALPACA_API_KEY         — Alpaca paper trading API key
+#   ALPACA_API_SECRET      — Alpaca paper trading API secret
+#   POLYGON_API_KEY        — Polygon.io API key (options chain data)
+#   TELEGRAM_BOT_TOKEN     — (optional) Telegram alert bot token
+#   TELEGRAM_CHAT_ID       — (optional) Telegram chat ID for alerts
+# ============================================================================
+
+# --- Paper trading safety flags ---
+paper_mode: true
+db_path: "data/pilotai_exp401.db"
+experiment_id: "EXP-401"  # Prefix for Telegram alerts
+created_by: "maximus"     # Attribution: experiment creator
+
+# Tickers
+tickers:
+  - SPY
+
+# ============================================================================
+# Credit Spread Strategy (12% risk, regime-adaptive)
+# ============================================================================
+strategy:
+  # --- DTE ---
+  min_dte: 15
+  max_dte: 25
+  target_dte: 15
+
+  manage_dte: 0           # DISABLED — matches backtester
+
+  # --- Direction: regime-adaptive ---
+  direction: both
+
+  # --- Strike selection ---
+  otm_pct: 0.02
+  use_delta_selection: false
+  target_delta: 0.12
+  min_delta: 0.08
+  max_delta: 0.18
+
+  # --- Spread construction ---
+  spread_width: 12
+  spread_width_high_iv: 12
+  spread_width_low_iv: 12
+
+  # --- IV filters ---
+  min_iv_rank: 0
+  min_iv_percentile: 0
+
+  # --- Iron Condor (enabled) ---
+  iron_condor:
+    enabled: true
+    rsi_min: 35
+    rsi_max: 60
+    min_iv_rank: 45.0
+    target_dte: 30
+    min_dte: 20
+    otm_pct_put: 0.04
+    otm_pct_call: 0.03
+    spread_width: 12
+    min_combined_credit_pct: 0.25
+    profit_target_pct: 0.30
+    stop_loss_multiplier: 2.5
+    max_risk_pct: 3.5
+
+  # --- Straddle/Strangle (EXP-401 blend component) ---
+  straddle_strangle:
+    enabled: true
+    mode: short_post_event
+    target_dte: 5
+    otm_pct: 0.04
+    event_iv_boost: 0.15
+    iv_crush_pct: 0.5
+    profit_target_pct: 0.55
+    stop_loss_pct: 0.45
+    max_risk_pct: 3.0
+    event_types: fomc_cpi
+
+  # --- Technical filters ---
+  technical:
+    use_trend_filter: true
+    use_rsi_filter: false
+    use_support_resistance: false
+    fast_ma: 50
+    slow_ma: 80
+    rsi_period: 14
+    rsi_oversold: 30
+    rsi_overbought: 70
+
+  # --- Regime detection ---
+  regime_mode: combo
+  regime_config:
+    signals:
+      - price_vs_ma200
+      - rsi_momentum
+      - vix_structure
+    ma_slow_period: 80
+    ma200_neutral_band_pct: 0.5
+
+# ============================================================================
+# Risk Management
+# ============================================================================
+risk:
+  account_size: 100000
+
+  # Credit spread: 12% risk per trade (EXP-401 blend weight)
+  max_risk_per_trade: 12.0
+
+  # Straddle/strangle: 3% risk per trade
+  straddle_strangle_risk_pct: 3.0
+
+  # Sizing: flat
+  sizing_mode: flat
+  compound: false
+
+  # Contract limits
+  min_contracts: 1
+  max_contracts: 25
+
+  # Position limits
+  max_positions: 12
+  max_positions_per_ticker: 3
+
+  scan_days: [0, 1, 2, 3, 4]
+
+  # Credit spread exit rules
+  profit_target: 55
+  stop_loss_multiplier: 1.25
+  stop_loss_pct_of_width: 90
+
+  # Delta threshold for position exit
+  delta_threshold: 0.30
+
+  # Minimum credit: 5% of spread width
+  min_credit_pct: 5
+
+  # Momentum filter
+  momentum_filter_pct: 2.0
+
+  # Portfolio-level risk limits
+  portfolio_risk:
+    max_portfolio_risk_pct: 40
+    max_single_ticker_pct: 40
+    max_same_expiration: 4
+
+  # Drawdown circuit breaker
+  drawdown_cb_pct: 40
+  cooldown_bars: 3
+
+  # No rolling
+  enable_rolling: false
+  max_rolls_per_position: 0
+
+  # --- Regime scales (from regime_switching_results.json) ---
+  # Credit spread scales
+  regime_scale_bull: 1.0
+  regime_scale_bear: 0.3
+  regime_scale_high_vol: 0.3
+  regime_scale_low_vol: 0.8
+  regime_scale_crash: 0.0
+
+  # Straddle/strangle scales
+  ss_regime_scale_bull: 1.5
+  ss_regime_scale_bear: 1.5
+  ss_regime_scale_high_vol: 2.5
+  ss_regime_scale_low_vol: 1.0
+  ss_regime_scale_crash: 0.5
+
+# ============================================================================
+# Alpaca Paper Trading
+# ============================================================================
+alpaca:
+  enabled: true
+  paper: true
+  base_url: "https://paper-api.alpaca.markets"
+  api_key: "${ALPACA_API_KEY}"
+  api_secret: "${ALPACA_API_SECRET}"
+
+# ============================================================================
+# Alerts
+# ============================================================================
+alerts:
+  output_json: true
+  output_text: true
+  output_csv: true
+  json_file: "alerts_exp401.json"
+  text_file: "alerts_exp401.txt"
+  csv_file: "alerts_exp401.csv"
+
+  telegram:
+    enabled: true
+    bot_token: "${TELEGRAM_BOT_TOKEN}"
+    chat_id: "${TELEGRAM_CHAT_ID}"
+
+# ============================================================================
+# Logging
+# ============================================================================
+logging:
+  level: "INFO"
+  file: "logs/paper_exp401.log"
+  console: true
+
+# ============================================================================
+# Data
+# ============================================================================
+data:
+  provider: polygon
+  cache_dir: "data/options_cache"
+
+# ============================================================================
+# Backtester Reference
+# ============================================================================
+backtest:
+  starting_capital: 100000
+  commission_per_contract: 0.65
+  slippage: 0.05
+  exit_slippage: 0.10
+  score_threshold: 25
+  generate_reports: true
+  report_dir: "output/backtest_reports"

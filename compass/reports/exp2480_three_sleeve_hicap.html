@@ -1,0 +1,275 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>EXP-2480 3-Sleeve High-Capacity Architecture</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1200px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.55; }
+  h1 { color:#0f172a; } h2 { color:#334155; margin-top:2.2em;
+         padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:16px; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:18px 0; }
+  .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;
+          padding:18px; text-align:center; flex:1; min-width:150px; }
+  .kpi .value { font-size:1.5em; font-weight:800; color:#0f172a; }
+  .kpi .label { font-size:0.72em; color:#64748b; margin-top:4px; text-transform:uppercase; }
+  .good { color:#16a34a; font-weight:700; }
+  .bad  { color:#dc2626; font-weight:700; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.85em; }
+  th { background:#f1f5f9; padding:9px 12px; text-align:right; font-weight:600;
+       color:#475569; border-bottom:2px solid #cbd5e1; font-size:0.74em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  tr.row-best { background:#ecfdf5; font-weight:600; }
+  td.ok   { background:#dcfce7; }
+  td.warn { background:#fef9c3; }
+  td.bad  { background:#fee2e2; }
+  .note { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;
+            padding:14px; margin:14px 0; font-size:0.85rem; }
+</style></head><body>
+
+<h1>EXP-2480 — 3-Sleeve High-Capacity Architecture</h1>
+<div class="subtitle">exp1220 (SPY) + qqq_cs + v5_hedge · Does this unlock $200M+ AUM? | 2026-04-08T05:09:21.223358Z</div>
+
+<div class="note">
+    <strong>Design:</strong> collapse to the three highest-capacity
+    sleeves (SPY options ≈$152B/d, QQQ options ≈$12B/d, VIX-call proxy
+    ≈$0.75B/d). Capital weights 60/30/10. Equal-risk inv-vol sizing at
+    10%/12%/15% vol targets, 3× gross clip. Transaction costs applied
+    post-backtest: 25/30/40 bps per round-trip × 50 trips/yr.
+</div>
+
+<h2>Decision</h2>
+<div class="kpi-row">
+    <div class="kpi"><div class="value bad">REJECT</div><div class="label">Verdict</div></div>
+    <div class="kpi"><div class="value">0.1%</div><div class="label">Net CAGR (1x_gross)</div></div>
+    <div class="kpi"><div class="value">0.11</div><div class="label">Net Sharpe</div></div>
+    <div class="kpi"><div class="value">-1.39%</div><div class="label">Max DD</div></div>
+    <div class="kpi"><div class="value">$72.1M</div><div class="label">Soft Cap AUM</div></div>
+</div>
+
+<h2>Variant Comparison (gross vs net post-TC)</h2>
+<table>
+    <thead><tr><th>Gross Leverage</th><th>Gross</th>
+    <th>Gross CAGR</th><th>Gross Sharpe</th>
+    <th>Net CAGR</th><th>Net Sharpe</th>
+    <th>Max DD</th><th>Vol</th><th>TC Drag (bps/yr)</th></tr></thead>
+    <tbody><tr class="row-best">
+            <td><strong>1x_gross</strong></td>
+            <td>1.00×</td>
+            <td>1.25%</td>
+            <td>1.75</td>
+            <td>0.07%</td>
+            <td>0.11</td>
+            <td>-1.39%</td>
+            <td>0.69%</td>
+            <td>117 bps</td>
+        </tr><tr class="">
+            <td><strong>2x_gross</strong></td>
+            <td>2.00×</td>
+            <td>2.52%</td>
+            <td>1.75</td>
+            <td>0.14%</td>
+            <td>0.11</td>
+            <td>-2.77%</td>
+            <td>1.38%</td>
+            <td>234 bps</td>
+        </tr><tr class="">
+            <td><strong>3x_gross</strong></td>
+            <td>3.00×</td>
+            <td>3.80%</td>
+            <td>1.75</td>
+            <td>0.21%</td>
+            <td>0.11</td>
+            <td>-4.13%</td>
+            <td>2.07%</td>
+            <td>352 bps</td>
+        </tr></tbody>
+</table>
+
+<h2>Capacity — per sleeve</h2>
+<table>
+    <thead><tr><th>Sleeve</th><th>Weight</th><th>ADV $</th>
+    <th>Soft Cap AUM</th><th>Hard Cap AUM</th></tr></thead>
+    <tbody><tr>
+            <td><strong>exp1220</strong></td>
+            <td>60%</td>
+            <td>$152.49B</td>
+            <td>$2.54B</td>
+            <td>$12.71B</td>
+        </tr><tr>
+            <td><strong>qqq_cs</strong></td>
+            <td>30%</td>
+            <td>$11.09B</td>
+            <td>$369.6M</td>
+            <td>$1.85B</td>
+        </tr><tr>
+            <td><strong>v5_hedge</strong></td>
+            <td>10%</td>
+            <td>$721.5M</td>
+            <td>$72.1M</td>
+            <td>$360.7M</td>
+        </tr></tbody>
+</table>
+<p><strong>Portfolio bottleneck:</strong> v5_hedge at soft cap $72.1M,
+hard cap $360.7M.</p>
+
+<h2>Capacity matrix (participation / flag)</h2>
+<table>
+    <thead><tr><th>Sleeve</th><th>$50M</th><th>$100M</th><th>$200M</th><th>$500M</th><th>$1.0B</th><th>$2.0B</th></tr></thead>
+    <tbody><tr><td><strong>exp1220</strong></td><td class="ok">0.02%<br><strong>OK</strong></td><td class="ok">0.04%<br><strong>OK</strong></td><td class="ok">0.08%<br><strong>OK</strong></td><td class="ok">0.20%<br><strong>OK</strong></td><td class="ok">0.39%<br><strong>OK</strong></td><td class="ok">0.79%<br><strong>OK</strong></td></tr><tr><td><strong>qqq_cs</strong></td><td class="ok">0.14%<br><strong>OK</strong></td><td class="ok">0.27%<br><strong>OK</strong></td><td class="ok">0.54%<br><strong>OK</strong></td><td class="warn">1.35%<br><strong>BOTTLENECK</strong></td><td class="warn">2.71%<br><strong>BOTTLENECK</strong></td><td class="bad">5.41%<br><strong>BROKEN</strong></td></tr><tr><td><strong>v5_hedge</strong></td><td class="ok">0.69%<br><strong>OK</strong></td><td class="warn">1.39%<br><strong>BOTTLENECK</strong></td><td class="warn">2.77%<br><strong>BOTTLENECK</strong></td><td class="bad">6.93%<br><strong>BROKEN</strong></td><td class="bad">13.86%<br><strong>BROKEN</strong></td><td class="bad">27.72%<br><strong>BROKEN</strong></td></tr></tbody>
+</table>
+
+<h2>20-Fold Walk-Forward (recommended = 1x_gross, NET returns)</h2>
+<table>
+    <thead><tr><th>Fold</th><th>Start</th><th>End</th><th>CAGR</th>
+    <th>Sharpe</th><th>Max DD</th></tr></thead>
+    <tbody><tr>
+            <td>1</td>
+            <td>2020-01-01</td>
+            <td>2020-04-17</td>
+            <td class="bad">-3.58%</td>
+            <td>-1.97</td>
+            <td>-1.15%</td>
+        </tr><tr>
+            <td>2</td>
+            <td>2020-04-20</td>
+            <td>2020-08-05</td>
+            <td class="good">+2.89%</td>
+            <td>4.29</td>
+            <td>-0.03%</td>
+        </tr><tr>
+            <td>3</td>
+            <td>2020-08-06</td>
+            <td>2020-11-23</td>
+            <td class="good">+0.14%</td>
+            <td>0.24</td>
+            <td>-0.39%</td>
+        </tr><tr>
+            <td>4</td>
+            <td>2020-11-24</td>
+            <td>2021-03-11</td>
+            <td class="bad">-0.36%</td>
+            <td>-1.08</td>
+            <td>-0.16%</td>
+        </tr><tr>
+            <td>5</td>
+            <td>2021-03-12</td>
+            <td>2021-06-29</td>
+            <td class="bad">-1.22%</td>
+            <td>-3.08</td>
+            <td>-0.42%</td>
+        </tr><tr>
+            <td>6</td>
+            <td>2021-06-30</td>
+            <td>2021-10-15</td>
+            <td class="bad">-0.27%</td>
+            <td>-0.55</td>
+            <td>-0.27%</td>
+        </tr><tr>
+            <td>7</td>
+            <td>2021-10-18</td>
+            <td>2022-02-02</td>
+            <td class="bad">-0.58%</td>
+            <td>-0.88</td>
+            <td>-0.40%</td>
+        </tr><tr>
+            <td>8</td>
+            <td>2022-02-03</td>
+            <td>2022-05-23</td>
+            <td class="good">+0.87%</td>
+            <td>1.01</td>
+            <td>-0.34%</td>
+        </tr><tr>
+            <td>9</td>
+            <td>2022-05-24</td>
+            <td>2022-09-08</td>
+            <td class="good">+1.42%</td>
+            <td>1.78</td>
+            <td>-0.30%</td>
+        </tr><tr>
+            <td>10</td>
+            <td>2022-09-09</td>
+            <td>2022-12-27</td>
+            <td class="good">+0.79%</td>
+            <td>1.04</td>
+            <td>-0.27%</td>
+        </tr><tr>
+            <td>11</td>
+            <td>2022-12-28</td>
+            <td>2023-04-14</td>
+            <td class="good">+0.91%</td>
+            <td>3.87</td>
+            <td>-0.02%</td>
+        </tr><tr>
+            <td>12</td>
+            <td>2023-04-17</td>
+            <td>2023-08-02</td>
+            <td class="good">+0.11%</td>
+            <td>1.07</td>
+            <td>-0.05%</td>
+        </tr><tr>
+            <td>13</td>
+            <td>2023-08-03</td>
+            <td>2023-11-20</td>
+            <td class="bad">-0.11%</td>
+            <td>-0.64</td>
+            <td>-0.03%</td>
+        </tr><tr>
+            <td>14</td>
+            <td>2023-11-21</td>
+            <td>2024-03-07</td>
+            <td class="bad">-0.32%</td>
+            <td>-3.94</td>
+            <td>-0.10%</td>
+        </tr><tr>
+            <td>15</td>
+            <td>2024-03-08</td>
+            <td>2024-06-25</td>
+            <td class="bad">-1.74%</td>
+            <td>-2.66</td>
+            <td>-0.54%</td>
+        </tr><tr>
+            <td>16</td>
+            <td>2024-06-26</td>
+            <td>2024-10-11</td>
+            <td class="bad">-0.47%</td>
+            <td>-0.72</td>
+            <td>-0.41%</td>
+        </tr><tr>
+            <td>17</td>
+            <td>2024-10-14</td>
+            <td>2025-01-29</td>
+            <td class="good">+0.38%</td>
+            <td>1.05</td>
+            <td>-0.16%</td>
+        </tr><tr>
+            <td>18</td>
+            <td>2025-01-30</td>
+            <td>2025-05-19</td>
+            <td class="good">+0.23%</td>
+            <td>0.21</td>
+            <td>-0.72%</td>
+        </tr><tr>
+            <td>19</td>
+            <td>2025-05-20</td>
+            <td>2025-09-04</td>
+            <td class="good">+1.23%</td>
+            <td>4.94</td>
+            <td>-0.00%</td>
+        </tr><tr>
+            <td>20</td>
+            <td>2025-09-05</td>
+            <td>2025-12-31</td>
+            <td class="good">+1.26%</td>
+            <td>3.83</td>
+            <td>-0.00%</td>
+        </tr></tbody>
+</table>
+
+<div style="margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0;
+            font-size:0.78em; color:#94a3b8; text-align:center;">
+EXP-2480 — compass/exp2480_three_sleeve_hicap.py · Real 7-stream cache + cached QQQ trades + live ADV
+</div>
+
+</body></html>

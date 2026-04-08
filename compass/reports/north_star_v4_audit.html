@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>North Star v4 — Sharpe Audit (EXP-1860 vs EXP-1870)</title>
+<style>
+* { box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+       max-width:1200px;margin:0 auto;padding:28px;background:#fff;color:#1e293b;line-height:1.5; }
+h1 { font-size:1.85em;color:#0f172a;margin-bottom:4px; }
+h2 { color:#334155;margin-top:2.4em;padding-bottom:8px;border-bottom:2px solid #e2e8f0; }
+.subtitle { color:#64748b;font-size:0.92rem;margin-bottom:24px; }
+.bug { background:#fef2f2;border:2px solid #dc2626;border-radius:10px;padding:20px;margin:24px 0; }
+.bug h3 { margin-top:0;color:#991b1b; }
+.fix { background:#ecfdf5;border:2px solid #16a34a;border-radius:10px;padding:20px;margin:24px 0; }
+.fix h3 { margin-top:0;color:#065f46; }
+.sources { background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:16px;margin:16px 0;font-size:0.84rem;line-height:1.7; }
+.kpi-row { display:flex;gap:14px;flex-wrap:wrap;margin:18px 0; }
+.kpi { background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;text-align:center;flex:1;min-width:120px; }
+.kpi .value { font-size:1.5em;font-weight:800;color:#0f172a; }
+.kpi .label { font-size:0.72em;color:#64748b;margin-top:4px;text-transform:uppercase; }
+table { width:100%;border-collapse:collapse;margin:14px 0;font-size:0.86em; }
+th { background:#f1f5f9;padding:10px 12px;text-align:right;font-weight:600;color:#475569;
+     border-bottom:2px solid #cbd5e1;font-size:0.74em;text-transform:uppercase; }
+th:first-child { text-align:left; }
+td { padding:8px 12px;text-align:right;border-bottom:1px solid #e2e8f0; }
+td:first-child { text-align:left; }
+tr:hover { background:#f8fafc; }
+.note { background:#fefce8;border:1px solid #fde047;border-radius:6px;padding:12px 16px;font-size:0.86rem;margin:12px 0; }
+.footer { margin-top:3em;padding-top:1em;border-top:1px solid #e2e8f0;font-size:0.78em;color:#94a3b8;text-align:center; }
+</style></head><body>
+
+<h1>North Star v4 — Definitive Sharpe Audit</h1>
+<div class="subtitle">EXP-1860 (Sharpe 3.96) vs EXP-1870 stress (Sharpe 8.02) ·
+re-computed on the SAME canonical real-data streams ·
+2026-04-07 13:33</div>
+
+<div class="bug">
+<h3>Root cause — NOT a Sharpe formula bug</h3>
+Both reports compute Sharpe correctly via
+<code>mean(daily) / std(daily) × √252</code>
+(canonical formula in <code>compass/metrics.py::annualized_sharpe</code>).
+The 8.02 vs 3.96 gap is an <strong>input stream mismatch</strong>:
+
+<ul>
+<li><strong>EXP-1870 stress</strong> calls
+<code>compass.exp1780_exp1220_integration.build_exp1220_daily_returns</code>
+which is a <em>calibrated functional proxy</em> explicitly designed to
+reproduce the <strong>discredited</strong> MASTERPLAN v6 headline numbers
+(77% CAGR / 5.78 Sharpe). MASTERPLAN itself documents that the 5.78 Sharpe
+was a √trades-vs-√252 annualization bug and the corrected number is 3.85.
+Standalone Sharpe of this proxy: ~6.32.</li>
+
+<li><strong>EXP-1870 stress</strong> uses <em>vol-targeted long-ETF
+returns with downside clipping</em> for the GLD/SLV "spreads" sleeve
+(<code>(rets * 5%/rolling_vol).clip(lower=-0.04)</code>) — this is NOT
+the EXP-1770 walk-forward GLD-GC=F / SLV-SI=F roll-yield harvest used
+by EXP-1860. Two completely different strategies sharing a name.</li>
+
+<li><strong>EXP-1870 stress</strong> includes a 5% Cash sleeve with
+vol ≈ 4e-19, which yields a standalone Sharpe of ≈ 1e17 from the
+divide-by-near-zero. It barely changes the portfolio Sharpe but is
+mathematically a flag.</li>
+</ul>
+</div>
+
+<div class="sources">
+<strong>Canonical streams used in this audit (Rule Zero — all real):</strong><br>
+<code>exp1220</code>: <code>scripts.ultimate_portfolio.load_exp1220_dynamic</code>
+(real Yahoo SPY + ^VIX + ^VIX3M, TailRiskProtector dynamic leverage 0.3-1.8×)<br>
+<code>v5_hedge</code>: <code>compass.crisis_alpha_v5</code> frozen best
+(slow / vt=0.05 / l=1.0 / sg=0.05 / sh=2.0 / equity-short-only) on real Yahoo 13-ETF<br>
+<code>gld_calendar / slv_calendar</code>: <code>compass.exp1770_commodity_calendars</code>
+walk-forward GLD−GC=F and SLV−SI=F (real Yahoo daily close)<br>
+Window: 2020-01-02 → 2025-12-31 (1508 business days)<br>
+Sharpe formula: <code>compass.metrics.full_metrics</code> (canonical arithmetic-mean Sharpe).
+</div>
+
+<h2>1. Stream-level metrics (canonical real-data, 2020-2025)</h2>
+<table>
+<thead><tr><th>Stream</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th><th>Vol</th><th>Days</th></tr></thead>
+<tbody><tr><td style='font-weight:700'>exp1220</td><td>58.84%</td><td style='font-weight:700'>3.70</td><td>7.58%</td><td>7.76</td><td>11.49%</td><td>1508</td></tr><tr><td style='font-weight:700'>v5_hedge</td><td>-1.07%</td><td style='font-weight:700'>-0.82</td><td>12.84%</td><td>-0.08</td><td>6.54%</td><td>1508</td></tr><tr><td style='font-weight:700'>gld_calendar</td><td>18.13%</td><td style='font-weight:700'>2.03</td><td>2.50%</td><td>7.25</td><td>6.08%</td><td>1508</td></tr><tr><td style='font-weight:700'>slv_calendar</td><td>32.85%</td><td style='font-weight:700'>1.99</td><td>6.08%</td><td>5.40</td><td>12.39%</td><td>1508</td></tr></tbody>
+</table>
+
+<h2>2. Stress test PROXY metrics (the discredited inputs)</h2>
+<p>For diagnostic only — re-runs the stress test's proxy builders on the same window
+to confirm the gap comes from the proxies, not the math.</p>
+<table>
+<thead><tr><th>Proxy stream</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th><th>Vol</th><th>Days</th></tr></thead>
+<tbody><tr><td style='font-weight:700'>exp1220_proxy</td><td>74.22%</td><td style='font-weight:700'>6.32</td><td>8.11%</td><td>9.15</td><td>8.14%</td><td>1508</td></tr><tr><td style='font-weight:700'>gld_voltarget</td><td>6.91%</td><td style='font-weight:700'>0.44</td><td>7.76%</td><td>0.89</td><td>5.31%</td><td>1508</td></tr></tbody>
+</table>
+<div class="note">
+The <code>exp1220_proxy</code> standalone Sharpe is ≈
+<strong>6.32</strong>,
+calibrated to the discredited MASTERPLAN v6 5.78 number. The
+<code>load_exp1220_dynamic</code> stream above produces Sharpe ≈
+<strong>3.70</strong> on the same window — that's the truth.
+</div>
+
+<h2>3. Both weight schemes on canonical streams</h2>
+<table>
+<thead><tr><th>Portfolio</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th><th>Vol</th><th>Days</th></tr></thead>
+<tbody>
+<tr><td style='font-weight:700'>v3 weights (80/5/7.5/7.5)</td><td>115.50%</td><td style='font-weight:700'>4.04</td><td>11.64%</td><td>9.92</td><td>18.35%</td><td>1508</td></tr>
+<tr><td style='font-weight:700'>stress weights (60/5/15/15/5)</td><td>86.72%</td><td style='font-weight:700'>4.25</td><td>8.67%</td><td>10.00</td><td>13.88%</td><td>1508</td></tr>
+</tbody>
+</table>
+
+<div class="fix">
+<h3>Definitive North Star v4 numbers</h3>
+On the canonical real-data streams over 2020-2025, the v3 weight scheme
+(80/5/7.5/7.5) gives:<br>
+<strong>CAGR 115.5% · Sharpe 4.04 ·
+Max DD 11.6% · Calmar 9.92</strong><br>
+<br>
+The stress weight scheme (60/5/15/15/5) gives:<br>
+<strong>CAGR 86.7% · Sharpe 4.25 ·
+Max DD 8.7% · Calmar 10.00</strong><br>
+<br>
+The 8.02 Sharpe headline from EXP-1870 is <strong>not reproducible</strong>
+once the calibrated EXP-1220 proxy is replaced with the real
+dynamic-leverage stream and the GLD/SLV "spreads" sleeve is replaced
+with the actual EXP-1770 walk-forward roll-yield strategy.
+</div>
+
+<h2>4. Year-by-year (canonical)</h2>
+<table>
+<thead>
+<tr><th rowspan='2'>Year</th>
+<th colspan='3'>v3 weights (80/5/7.5/7.5)</th>
+<th colspan='3'>stress weights (60/5/15/15/5)</th>
+</tr><tr>
+<th>CAGR</th><th>Sharpe</th><th>DD</th>
+<th>CAGR</th><th>Sharpe</th><th>DD</th>
+</tr></thead>
+<tbody><tr><td style='font-weight:700'>2020</td><td style='color:#16a34a'>96%</td><td>4.97</td><td>3.9%</td><td style='color:#16a34a'>75%</td><td>5.32</td><td>2.6%</td></tr><tr><td style='font-weight:700'>2021</td><td style='color:#16a34a'>175%</td><td>5.68</td><td>2.9%</td><td style='color:#16a34a'>124%</td><td>5.93</td><td>2.1%</td></tr><tr><td style='font-weight:700'>2022</td><td style='color:#16a34a'>42%</td><td>1.64</td><td>11.6%</td><td style='color:#16a34a'>40%</td><td>1.98</td><td>8.7%</td></tr><tr><td style='font-weight:700'>2023</td><td style='color:#16a34a'>153%</td><td>3.73</td><td>6.9%</td><td style='color:#16a34a'>111%</td><td>3.90</td><td>5.2%</td></tr><tr><td style='font-weight:700'>2024</td><td style='color:#16a34a'>125%</td><td>4.85</td><td>2.7%</td><td style='color:#16a34a'>93%</td><td>5.12</td><td>2.2%</td></tr><tr><td style='font-weight:700'>2025</td><td style='color:#16a34a'>130%</td><td>4.73</td><td>4.2%</td><td style='color:#16a34a'>89%</td><td>4.71</td><td>3.2%</td></tr></tbody>
+</table>
+
+<h2>5. Decision: which number to use</h2>
+<ol>
+<li><strong>Use the v3 numbers</strong> (Sharpe ~4) as the truthful North Star
+state. They trace cleanly through walk-forward backtests on real Yahoo /
+IronVault / FRED data.</li>
+
+<li><strong>Discard the EXP-1870 8.02 Sharpe headline.</strong> It is an
+artifact of two model proxies (one of them explicitly calibrated to a
+discredited MASTERPLAN number) — not a real backtest. The stress test
+should be re-run with the canonical streams before its other outputs
+(MC bootstrap, crisis replay, VaR/CVaR) are trusted.</li>
+
+<li><strong>Update <code>compass/north_star_stress_test.py::build_components</code></strong>
+to import <code>load_exp1220_dynamic</code> and the EXP-1770 walk-forward
+streams instead of the proxies. Also remove the Cash sleeve from the
+correlation matrix (its NaN row makes the matrix unparseable) or pin
+its vol floor to avoid the divide-by-near-zero Sharpe.</li>
+
+<li><strong>The North Star Sharpe target of 6.0 remains MISSED.</strong>
+The truthful answer for this 4-stream portfolio over 2020-2025 is in the
+3.9-4.2 range. To reach 6.0 requires either a new Sharpe ≥ 5 stream with
+near-zero correlation to existing streams, or actually re-running EXP-1220
+through the EXP-1740/EXP-1750 overlay gates as per-trade filters
+(raising mean AND reducing vol, not just scaling mean as EXP-1860 did).</li>
+</ol>
+
+<div class="footer">
+EXP-1860 vs EXP-1870 audit · compass/north_star_v4_audit.py ·
+canonical streams from compass/cache/exp1860_streams.pkl · Rule Zero
+(real Yahoo + IronVault + FRED only).
+</div>
+</body></html>

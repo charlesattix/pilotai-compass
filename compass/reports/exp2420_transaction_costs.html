@@ -1,0 +1,95 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>EXP-2420 Transaction Cost Model</title>
+<style>
+body{font-family:-apple-system,sans-serif;margin:0;padding:24px;background:#fff;color:#1e293b;max-width:1150px}
+h1{font-size:1.5rem;color:#0f172a} h2{font-size:1.05rem;color:#334155;border-bottom:1px solid #e2e8f0;padding-bottom:4px;margin-top:1.6rem}
+.meta{color:#64748b;font-size:0.82rem;margin-bottom:18px}
+.headline{background:#f0fdf4;border-left:5px solid #16a34a;padding:14px 18px;border-radius:6px;margin:14px 0;font-size:0.95rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;text-align:center}
+.card .l{font-size:0.65rem;color:#64748b;text-transform:uppercase} .card .v{font-size:1.15rem;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:0.8rem;margin:10px 0}
+th{background:#f1f5f9;padding:5px 7px;text-align:right;font-size:0.66rem;color:#64748b;text-transform:uppercase;border-bottom:2px solid #e2e8f0}
+th:first-child{text-align:left} td{padding:5px 7px;text-align:right;border-bottom:1px solid #f1f5f9} td:first-child{text-align:left}
+</style></head><body>
+<h1>EXP-2420 — Realistic Transaction Cost Model (7-stream, 3× leverage)</h1>
+<p class="meta">Bid-ask spread: real IronVault p25(H-L)/close · Commission: Alpaca $0.65/contract ·
+Slippage: sqrt market impact vs real Yahoo ADV · Baseline Sharpe 5.96 / CAGR 146.2% (EXP-2200).</p>
+
+<div class="headline"><strong>Net Sharpe:</strong>
+5.96 → <strong style="color:#16a34a">4.49</strong>
+(Δ -1.47) ·
+<strong>Net CAGR:</strong> 146.2% → <strong>124.0%</strong>
+· Annual drag <strong>22.21%</strong> (2221 bps) · ✅ Net Sharpe still above 4.0</div>
+
+<div class="grid">
+  <div class="card"><div class="l">Bid-ask drag</div><div class="v">418 bps</div></div>
+  <div class="card"><div class="l">Commission drag</div><div class="v">827 bps</div></div>
+  <div class="card"><div class="l">Slippage drag</div><div class="v">976 bps</div></div>
+  <div class="card"><div class="l">Total drag</div><div class="v">2221 bps</div></div>
+  <div class="card"><div class="l">Gross Sharpe</div><div class="v">5.96</div></div>
+  <div class="card"><div class="l">Net Sharpe</div><div class="v" style="color:#16a34a">4.49</div></div>
+  <div class="card"><div class="l">Net CAGR</div><div class="v">124.0%</div></div>
+  <div class="card"><div class="l">Leverage</div><div class="v">3×</div></div>
+</div>
+
+<h2>Per-stream cost breakdown (annual)</h2>
+<table><tr><th>Stream</th><th>Ticker</th><th>Tr/yr</th><th>Legs</th><th>Ctr/trade</th>
+<th>Notional/trade</th><th>Spread %</th>
+<th>Bid-ask $</th><th>Commission $</th><th>Slippage $</th>
+<th>Total $</th><th>Total bps</th></tr>
+<tr><td>exp1220</td><td>SPY</td><td>34</td><td>2</td><td>3.0</td><td>$395,358</td><td>18.95%</td><td>$349</td><td>$265</td><td>$365</td><td><strong>$979</strong></td><td><strong>97.9</strong></td></tr><tr><td>xlf_cs</td><td>XLF</td><td>34</td><td>2</td><td>15.0</td><td>$149,640</td><td>9.80%</td><td>$180</td><td>$1,326</td><td>$406</td><td><strong>$1,912</strong></td><td><strong>191.2</strong></td></tr><tr><td>xli_cs</td><td>XLI</td><td>34</td><td>2</td><td>5.0</td><td>$164,610</td><td>8.93%</td><td>$79</td><td>$442</td><td>$519</td><td><strong>$1,040</strong></td><td><strong>104.0</strong></td></tr><tr><td>gld_cal</td><td>GLD</td><td>50</td><td>2</td><td>7.0</td><td>$598,710</td><td>20.75%</td><td>$488</td><td>$910</td><td>$3,185</td><td><strong>$4,583</strong></td><td><strong>458.3</strong></td></tr><tr><td>slv_cal</td><td>SLV</td><td>50</td><td>2</td><td>30.0</td><td>$396,540</td><td>10.00%</td><td>$1,200</td><td>$3,900</td><td>$1,876</td><td><strong>$6,976</strong></td><td><strong>697.6</strong></td></tr><tr><td>vol_arb</td><td>SPY</td><td>45</td><td>4</td><td>5.0</td><td>$1,317,860</td><td>18.95%</td><td>$1,538</td><td>$1,170</td><td>$2,943</td><td><strong>$5,651</strong></td><td><strong>565.1</strong></td></tr><tr><td>v5_hedge</td><td>SPY</td><td>20</td><td>1</td><td>10.0</td><td>$658,930</td><td>18.95%</td><td>$342</td><td>$260</td><td>$462</td><td><strong>$1,064</strong></td><td><strong>106.4</strong></td></tr>
+<tr style="background:#f1f5f9;font-weight:700"><td colspan="7">PORTFOLIO TOTAL</td>
+<td>$4,175</td>
+<td>$8,273</td>
+<td>$9,756</td>
+<td>$22,205</td>
+<td>2221</td></tr>
+</table>
+
+<h2>Cost drag decomposition</h2>
+<table><tr><th>Component</th><th>Annual $</th><th>bps of capital</th><th>% of total drag</th></tr>
+<tr><td>Bid-ask spread</td><td>$4,175</td>
+<td>418</td><td>19%</td></tr>
+<tr><td>Commission ($0.65/ctr Alpaca)</td><td>$8,273</td>
+<td>827</td><td>37%</td></tr>
+<tr><td>Slippage (sqrt impact)</td><td>$9,756</td>
+<td>976</td><td>44%</td></tr>
+<tr style="font-weight:700;background:#f1f5f9">
+<td>TOTAL</td><td>$22,205</td>
+<td>2221</td><td>100%</td></tr>
+</table>
+
+<h2>Sharpe sensitivity to leverage (informational)</h2>
+<p class="meta">Bid-ask and slippage scale with notional (linear in leverage); commission scales with contracts only.
+At higher leverage, slippage grows as √lev because the larger position has a disproportionate participation rate.</p>
+<table><tr><th>Leverage</th><th>Bid-ask bps</th><th>Commission bps</th><th>Slippage bps</th>
+<th>Total bps</th><th>Net Sharpe</th><th>Net CAGR</th></tr>
+<tr><td>1×</td><td>139</td><td>276</td><td>188</td><td><strong>603</strong></td><td><strong>5.56</strong></td><td>+140.2%</td></tr><tr><td>2×</td><td>278</td><td>552</td><td>531</td><td><strong>1361</strong></td><td><strong>5.06</strong></td><td>+132.6%</td></tr><tr><td>3×</td><td>418</td><td>827</td><td>976</td><td><strong>2221</strong></td><td><strong>4.49</strong></td><td>+124.0%</td></tr><tr><td>5×</td><td>696</td><td>1379</td><td>2099</td><td><strong>4174</strong></td><td><strong>3.20</strong></td><td>+104.5%</td></tr>
+</table>
+
+<h2>Method</h2>
+<ul>
+<li><strong>Bid-ask proxy:</strong> 25th percentile of (high - low)/close across
+   IronVault option_daily rows with volume ≥ 500 and close ≥ $0.50 since 2024.
+   This is a conservative upper bound on true NBBO spread — when intraday
+   range is small, the range IS approximately the spread. When explicit
+   NBBO bid/ask is absent from the cache, p25 of daily range is the
+   cleanest available estimator.</li>
+<li><strong>Commission:</strong> Alpaca options tier $0.65 per contract per leg,
+   round-trip (entry + exit).</li>
+<li><strong>Slippage:</strong> Square-root market impact model
+   impact_bps = 50 · √(trade_notional / underlier_ADV_notional). Coefficient
+   50 bps is half the EXP-2140 options-desk coefficient (realistic for the
+   low participation rates we operate at).</li>
+<li><strong>Leverage:</strong> 3×. Applied to notional per trade (scales
+   bid-ask + slippage); commission scales with contract count only.</li>
+<li><strong>Net Sharpe:</strong> gross daily mean − (drag/252), vol unchanged;
+   Sharpe = (net mean / vol) × √252.</li>
+<li><strong>Real data:</strong> IronVault for contract spreads, Yahoo
+   90-day median ADV × close for underlier liquidity.</li>
+</ul>
+<div style="color:#94a3b8;font-size:.75rem;margin-top:1.6rem;border-top:1px solid #e2e8f0;padding-top:8px">
+compass/exp2420_transaction_costs.py · IronVault + Yahoo · Rule Zero
+</div>
+</body></html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>EXP-2230 — 7-Stream Capacity Analysis</title>
+<style>
+body{font-family:-apple-system,sans-serif;margin:0;padding:24px;background:#fff;color:#1e293b;max-width:1150px}
+h1{font-size:1.5rem;color:#0f172a;margin-bottom:.3rem}
+h2{font-size:1.1rem;color:#334155;border-bottom:1px solid #e2e8f0;padding-bottom:.35rem;margin-top:1.6rem}
+.meta{color:#64748b;font-size:0.82rem;margin-bottom:14px}
+.headline{background:#f0fdf4;border-left:5px solid #16a34a;padding:14px 18px;border-radius:6px;margin:14px 0;font-size:0.95rem}
+.warn-box{background:#fefce8;border-left:5px solid #ca8a04;padding:14px 18px;border-radius:6px;margin:14px 0;font-size:0.92rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;text-align:center}
+.card .l{font-size:0.65rem;color:#64748b;text-transform:uppercase} .card .v{font-size:1.1rem;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:0.82rem;margin:10px 0}
+th{background:#f1f5f9;padding:6px 8px;text-align:right;font-size:0.68rem;color:#64748b;text-transform:uppercase;border-bottom:2px solid #e2e8f0}
+th:first-child{text-align:left}
+td{padding:6px 8px;text-align:right;border-bottom:1px solid #f1f5f9;vertical-align:top}
+td:first-child{text-align:left}
+td.ok{background:#f0fdf4;color:#166534}
+td.warn{background:#fefce8;color:#854d0e}
+td.bad{background:#fef2f2;color:#991b1b}
+</style></head><body>
+<h1>EXP-2230 — 7-Stream Capacity Analysis (SPY + XLF + XLI)</h1>
+<p class="meta">Real IronVault option contract volumes · Yahoo Finance ADVs + prices ·
+Square-root market-impact model (1% soft / 5% hard participation)</p>
+
+<div class="warn-box"><strong>Hypothesis tested:</strong> "XLF and XLI
+add dramatic capacity because sector ETF options are deeply liquid."
+<strong>Honest finding:</strong> XLF and XLI options are liquid enough
+for mid-AUM deployment but their combined volume is only ~5 percent of SPY's.
+The capacity uplift from adding them is real but <em>not</em> dramatic —
+the pre-existing SPY bottleneck was never SPY options; it is the VIX /
+SLV / IWM sleeves. Splitting the credit-spread sleeve across 3
+underliers mainly helps via execution diversification and lower
+market-impact per venue.</div>
+
+<h2>1. Real liquidity data (IronVault option_daily + Yahoo)</h2>
+<table>
+<tr><th>Underlier</th><th>Median contracts/day</th><th>Last price</th>
+<th>Notional/day</th><th>Source</th></tr>
+<tr><td>SPY</td><td>2,314,201</td><td>656.44</td><td>$151.91B</td><td>IronVault + Yahoo</td></tr><tr><td>XLF</td><td>101,964</td><td>49.81</td><td>$507.8M</td><td>IronVault + Yahoo</td></tr><tr><td>XLI</td><td>14,068</td><td>163.84</td><td>$230.5M</td><td>IronVault + Yahoo</td></tr>
+</table>
+
+<h2>2. SPY/XLF/XLI split sweep (total credit-spread sleeve = 60%)</h2>
+<p class="meta">Objective: maximise soft-cap portfolio AUM. The split
+is expressed as percentages of the credit-spread 60% sleeve.</p>
+<table>
+<tr><th>Split (SPY / XLF / XLI)</th><th>Soft-cap AUM</th><th>Hard-cap AUM</th>
+<th>Bottleneck stream</th><th>$100M status</th><th>$500M status</th><th>$1B status</th></tr>
+<tr><td>30/50/20</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>40/40/20</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>40/50/10</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>50/30/20</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>50/40/10</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>50/50/0</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>60/20/20</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>60/30/10</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>60/40/0</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>70/10/20</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>70/20/10</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>70/30/0</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>80/0/20</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>80/10/10</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>80/20/0</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>90/0/10</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>90/10/0</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>100/0/0</td><td>$16.4M</td><td>$81.9M</td><td>SLV calendar (SLV − SI=F)</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>20/50/30</td><td>$12.8M</td><td>$64.0M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>30/40/30</td><td>$12.8M</td><td>$64.0M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>40/30/30</td><td>$12.8M</td><td>$64.0M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>50/20/30</td><td>$12.8M</td><td>$64.0M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>60/10/30</td><td>$12.8M</td><td>$64.0M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>70/0/30</td><td>$12.8M</td><td>$64.0M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>10/50/40</td><td>$9.6M</td><td>$48.0M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>20/40/40</td><td>$9.6M</td><td>$48.0M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>30/30/40</td><td>$9.6M</td><td>$48.0M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>40/20/40</td><td>$9.6M</td><td>$48.0M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>50/10/40</td><td>$9.6M</td><td>$48.0M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>60/0/40</td><td>$9.6M</td><td>$48.0M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>0/50/50</td><td>$7.7M</td><td>$38.4M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>10/40/50</td><td>$7.7M</td><td>$38.4M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>20/30/50</td><td>$7.7M</td><td>$38.4M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>30/20/50</td><td>$7.7M</td><td>$38.4M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>40/10/50</td><td>$7.7M</td><td>$38.4M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr><tr><td>50/0/50</td><td>$7.7M</td><td>$38.4M</td><td>EXP-1220 XLI credit spreads</td><td>BROKEN</td><td>BROKEN</td><td>BROKEN</td></tr>
+</table>
+
+<div class="headline"><strong>Optimal split:</strong>
+30/50/20 · soft-cap <strong>$16.4M</strong>
+· hard-cap <strong>$81.9M</strong>
+· bottleneck: SLV calendar (SLV − SI=F)</div>
+
+<h2>3. Per-stream capacity ladder (best split)</h2>
+<table>
+<tr><th>Stream</th><th>Weight</th><th>$10M</th><th>$50M</th><th>$100M</th><th>$500M</th><th>$1,000M</th></tr>
+<tr><td>EXP-1220 SPY credit spreads</td><td>18.0%</td><td class="ok">0.00%<br><span style="font-size:0.82em">Sh 3.65</span><br><strong>OK</strong></td><td class="ok">0.01%<br><span style="font-size:0.82em">Sh 3.40</span><br><strong>OK</strong></td><td class="ok">0.01%<br><span style="font-size:0.82em">Sh 3.22</span><br><strong>OK</strong></td><td class="ok">0.06%<br><span style="font-size:0.82em">Sh 2.44</span><br><strong>OK</strong></td><td class="ok">0.12%<br><span style="font-size:0.82em">Sh 1.86</span><br><strong>OK</strong></td></tr><tr><td>EXP-1220 XLF credit spreads</td><td>30.0%</td><td class="ok">0.59%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>OK</strong></td><td class="warn">2.95%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>BOTTLENECK</strong></td><td class="bad">5.91%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>BROKEN</strong></td><td class="bad">29.54%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>BROKEN</strong></td><td class="bad">59.07%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>BROKEN</strong></td></tr><tr><td>EXP-1220 XLI credit spreads</td><td>12.0%</td><td class="ok">0.52%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>OK</strong></td><td class="warn">2.60%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>BOTTLENECK</strong></td><td class="bad">5.21%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>BROKEN</strong></td><td class="bad">26.03%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>BROKEN</strong></td><td class="bad">52.06%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>BROKEN</strong></td></tr><tr><td>GLD calendar (GLD − GC=F)</td><td>7.5%</td><td class="ok">0.24%<br><span style="font-size:0.82em">Sh 2.18</span><br><strong>OK</strong></td><td class="warn">1.20%<br><span style="font-size:0.82em">Sh 1.53</span><br><strong>BOTTLENECK</strong></td><td class="warn">2.39%<br><span style="font-size:0.82em">Sh 1.05</span><br><strong>BOTTLENECK</strong></td><td class="bad">11.96%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>BROKEN</strong></td><td class="bad">23.92%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>BROKEN</strong></td></tr><tr><td>SLV calendar (SLV − SI=F)</td><td>7.5%</td><td class="ok">0.61%<br><span style="font-size:0.82em">Sh 1.84</span><br><strong>OK</strong></td><td class="warn">3.05%<br><span style="font-size:0.82em">Sh 1.31</span><br><strong>BOTTLENECK</strong></td><td class="bad">6.10%<br><span style="font-size:0.82em">Sh 0.92</span><br><strong>BROKEN</strong></td><td class="bad">30.52%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>BROKEN</strong></td><td class="bad">61.04%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>BROKEN</strong></td></tr><tr><td>Cross-vol arb (SPY vs IWM)</td><td>15.0%</td><td class="ok">0.01%<br><span style="font-size:0.82em">Sh 1.53</span><br><strong>OK</strong></td><td class="ok">0.07%<br><span style="font-size:0.82em">Sh 1.19</span><br><strong>OK</strong></td><td class="ok">0.15%<br><span style="font-size:0.82em">Sh 0.94</span><br><strong>OK</strong></td><td class="ok">0.73%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>OK</strong></td><td class="warn">1.46%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>BOTTLENECK</strong></td></tr><tr><td>Crisis Alpha v5 (SPY puts + VIX calls)</td><td>5.0%</td><td class="ok">0.07%<br><span style="font-size:0.82em">Sh 0.05</span><br><strong>OK</strong></td><td class="ok">0.33%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>OK</strong></td><td class="ok">0.66%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>OK</strong></td><td class="warn">3.28%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>BOTTLENECK</strong></td><td class="bad">6.55%<br><span style="font-size:0.82em">Sh 0.00</span><br><strong>BROKEN</strong></td></tr>
+</table>
+
+<h2>4. Reference: EXP-2140 SPY-only baseline</h2>
+<table>
+<tr><th>Stream</th><th>Weight</th><th>Soft-cap AUM</th><th>Hard-cap AUM</th></tr>
+<tr><td>EXP-1220 SPY credit spreads</td><td>60.0%</td><td>$2.53B</td><td>$12.66B</td></tr><tr><td>GLD calendar (GLD − GC=F)</td><td>7.5%</td><td>$41.8M</td><td>$209.0M</td></tr><tr><td>SLV calendar (SLV − SI=F)</td><td>7.5%</td><td>$16.4M</td><td>$81.9M</td></tr><tr><td>Cross-vol arb (SPY vs IWM)</td><td>15.0%</td><td>$683.6M</td><td>$3.42B</td></tr><tr><td>Crisis Alpha v5 (SPY puts + VIX calls)</td><td>5.0%</td><td>$152.6M</td><td>$763.1M</td></tr>
+</table>
+
+<h2>Method</h2>
+<ul>
+<li>Liquidity: IronVault <code>option_daily</code> × <code>option_contracts</code>
+   aggregated per ticker, median daily total contract volume since 2024.</li>
+<li>Notional: contracts/d × 100 × last Yahoo close.</li>
+<li>Impact: square-root model, impact_bps = coeff · √participation, coeff 150
+   for options, 100 for equity, 120 for futures.</li>
+<li>Soft cap: 1% of ADV. Hard cap: 5% of ADV.</li>
+<li>Sharpe after impact: baseline × (alpha - impact·turnover)/alpha, 50 turns/yr.</li>
+<li>AUM tiers: $10M, $50M, $100M, $500M, $1B.</li>
+<li>Sweep: 3-variable grid over SPY/XLF/XLI fractions of the 60% credit-spread
+   sleeve (step 0.1), other weights fixed at EXP-2140 values.</li>
+</ul>
+
+<div style="color:#94a3b8;font-size:.75rem;margin-top:1.6rem;border-top:1px solid #e2e8f0;padding-top:8px">
+compass/exp2230_capacity_xlf_xli.py · ALL REAL DATA (IronVault + Yahoo)
+</div>
+</body></html>

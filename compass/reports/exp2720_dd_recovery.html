@@ -1,0 +1,91 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>EXP-2720 Drawdown Recovery Analysis</title>
+<style>
+body{font-family:-apple-system,sans-serif;margin:0;padding:24px;background:#fff;color:#1e293b;max-width:1150px}
+h1{font-size:1.5rem;color:#0f172a} h2{font-size:1.08rem;color:#334155;border-bottom:1px solid #e2e8f0;padding-bottom:4px;margin-top:1.6rem}
+.meta{color:#64748b;font-size:0.82rem;margin-bottom:18px}
+.headline{background:#f0fdf4;border-left:5px solid #16a34a;padding:14px 18px;border-radius:6px;margin:14px 0;font-size:0.95rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;text-align:center}
+.card .l{font-size:0.65rem;color:#64748b;text-transform:uppercase} .card .v{font-size:1.2rem;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:0.83rem;margin:10px 0}
+th{background:#f1f5f9;padding:6px 8px;text-align:right;font-size:0.68rem;color:#64748b;text-transform:uppercase;border-bottom:2px solid #e2e8f0}
+th:first-child{text-align:left} td{padding:6px 8px;text-align:right;border-bottom:1px solid #f1f5f9}
+td:first-child{text-align:left}
+</style></head><body>
+<h1>EXP-2720 — Drawdown Recovery Analysis (North Star v8a)</h1>
+<p class="meta">Pooled OOS daily series from EXP-2600 walk-forward (Ledoit-Wolf, 252/63, target vol 12%).
+Baseline vs EXP-2640 adaptive VIX vol-target overlay. Real cached streams + Yahoo VIX.</p>
+
+<div class="headline"><strong>Recovery headline</strong>
+(baseline v8a pooled OOS): mean recovery after &gt;3% DD = <strong>5.5</strong> days
+(median 4.5d) ·
+after &gt;5% DD = <strong>7.33</strong> days
+(median 8.0d) ·
+worst-case <strong>11</strong> days ·
+total 217 DD episodes.
+</div>
+
+<div class="grid">
+  <div class="card"><div class="l">Pooled OOS days</div><div class="v">1260</div></div>
+  <div class="card"><div class="l">Target vol</div><div class="v">12%</div></div>
+  <div class="card"><div class="l">Sharpe (base)</div><div class="v">+6.83</div></div>
+  <div class="card"><div class="l">Max DD (base)</div><div class="v">6.94%</div></div>
+  <div class="card"><div class="l">Sharpe (VT)</div><div class="v">+7.11</div></div>
+  <div class="card"><div class="l">Max DD (VT)</div><div class="v">5.05%</div></div>
+  <div class="card"><div class="l">DD episodes</div><div class="v">217</div></div>
+</div>
+
+<h2>Recovery by drawdown depth — baseline vs adaptive VT</h2>
+<table>
+<tr>
+  <th>Depth</th><th>n episodes</th><th>n recovered</th>
+  <th colspan="3" style="text-align:center;background:#f0fdf4">BASELINE v8a</th>
+  <th colspan="3" style="text-align:center;background:#eff6ff">+ ADAPTIVE VT</th>
+  <th>Δ mean</th>
+</tr>
+<tr><th></th><th></th><th></th>
+  <th>mean d</th><th>median d</th><th>max d</th>
+  <th>mean d</th><th>median d</th><th>max d</th>
+  <th>days</th></tr>
+<tr><td><strong>&gt;1%</strong></td><td>43</td><td>43</td><td>3.16</td><td>2.0</td><td>11</td><td>3.13</td><td>2.0</td><td>10</td><td style='color:#16a34a;font-weight:700'>-0.0d</td></tr><tr><td><strong>&gt;3%</strong></td><td>8</td><td>8</td><td>5.5</td><td>4.5</td><td>11</td><td>6.6</td><td>8.0</td><td>9</td><td style='color:#dc2626;font-weight:700'>+1.1d</td></tr><tr><td><strong>&gt;5%</strong></td><td>3</td><td>3</td><td>7.33</td><td>8.0</td><td>11</td><td>5.5</td><td>5.5</td><td>8</td><td style='color:#16a34a;font-weight:700'>-1.8d</td></tr><tr><td><strong>&gt;8%</strong></td><td>0</td><td>0</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td style='color:#64748b;font-weight:700'>+0.0d</td></tr>
+</table>
+
+<h2>Worst 8 baseline drawdown episodes</h2>
+<table>
+<tr><th>Peak</th><th>Trough</th><th>Recovery</th><th>Depth</th>
+<th>Fall days</th><th>Recovery days</th><th>Underwater total</th><th>Status</th></tr>
+<tr><td>2025-04-02</td><td>2025-04-09</td><td>2025-04-21</td><td>6.94%</td><td>5</td><td>8</td><td>13</td><td>✅</td></tr><tr><td>2022-01-27</td><td>2022-02-09</td><td>2022-02-14</td><td>5.54%</td><td>9</td><td>3</td><td>12</td><td>✅</td></tr><tr><td>2022-05-18</td><td>2022-05-27</td><td>2022-06-13</td><td>5.27%</td><td>7</td><td>11</td><td>18</td><td>✅</td></tr><tr><td>2024-12-24</td><td>2025-01-10</td><td>2025-01-22</td><td>3.75%</td><td>13</td><td>8</td><td>21</td><td>✅</td></tr><tr><td>2023-03-24</td><td>2023-03-28</td><td>2023-04-04</td><td>3.30%</td><td>2</td><td>5</td><td>7</td><td>✅</td></tr><tr><td>2022-03-08</td><td>2022-03-09</td><td>2022-03-14</td><td>3.28%</td><td>1</td><td>3</td><td>4</td><td>✅</td></tr><tr><td>2022-09-30</td><td>2022-10-04</td><td>2022-10-10</td><td>3.12%</td><td>2</td><td>4</td><td>6</td><td>✅</td></tr><tr><td>2022-03-14</td><td>2022-03-16</td><td>2022-03-18</td><td>3.08%</td><td>2</td><td>2</td><td>4</td><td>✅</td></tr>
+</table>
+
+<h2>Interpretation</h2>
+<ul>
+<li>"Recovery days" = trading days from trough back to a new all-time high.</li>
+<li>"Underwater days" = trading days from peak to recovery — the full
+   duration investors are below the prior high-water-mark.</li>
+<li>The &gt;3% bucket is the most investor-relevant: everyone feels a 3%
+   drawdown. Mean-recovery-day number is the single-best proxy for "how
+   bad does it feel to sit through a drawdown on this fund."</li>
+<li>The adaptive VIX vol-target halves exposure between VIX 25 and 35
+   linearly. It reduces depth in stress windows but also damps the
+   recovery rate (because positions are smaller when the market rallies
+   off the bottom).</li>
+</ul>
+
+<h2>Method</h2>
+<ul>
+<li>Cube: v8a = base + qqq_cs (EXP-2600 build_cubes)</li>
+<li>Walk-forward: 252 train / 63 test, Ledoit-Wolf risk parity,
+   target vol 12% (scale cap 20.0)</li>
+<li>Equity curve: (1 + r).cumprod() on pooled OOS daily returns</li>
+<li>Episode extraction: every peak → trough → new-high triple is
+   one episode. Open episodes (still underwater at end) are reported
+   separately as "open DD".</li>
+<li>Adaptive VT: intervention_adaptive_vt from EXP-2640, applied
+   causally (VIX shifted by 1 day) with vix_low=25, vix_high=35,
+   exposure_at_high=0.5.</li>
+</ul>
+<div style="color:#94a3b8;font-size:.75rem;margin-top:1.6rem;border-top:1px solid #e2e8f0;padding-top:8px">
+compass/exp2720_dd_recovery.py · REAL DATA (cached 7-stream + cached QQQ + Yahoo VIX)
+</div>
+</body></html>

@@ -1,0 +1,32 @@
+ticker: IBIT
+regime_mode: crypto_composite
+
+backtest:
+  starting_capital: 100000
+  commission_per_contract: 1.0
+  slippage: 0.05
+  compound: false
+  sizing_mode: flat
+
+strategy:
+  direction: both
+  target_dte: 28
+  min_dte: 21
+  otm_pct: 0.05
+  spread_width: 5
+  min_credit_pct: 7
+  max_positions: 5
+  max_positions_per_expiration: 1
+  regime_mode: crypto_composite
+  regime_config:
+    ma_period: 50
+    neutral_band_pct: 0.5
+  iron_condor:
+    enabled: false  # insufficient history for ICs
+
+risk:
+  max_risk_per_trade: 3.0
+  max_positions: 5
+  drawdown_cb_pct: 30
+  profit_target: 50
+  stop_loss_multiplier: 2.0

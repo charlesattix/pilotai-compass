@@ -1,0 +1,55 @@
+<!doctype html><html><head><meta charset='utf-8'>
+<title>EXP-2710 — XLE Credit-Spread Integration</title>
+<style>
+ body{font-family:-apple-system,Segoe UI,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;background:#fff;color:#1a1a1a;line-height:1.5}
+ h1{border-bottom:2px solid #222;padding-bottom:.3em} h2{margin-top:1.6em;border-bottom:1px solid #ccc}
+ table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.93em}
+ th,td{border:1px solid #bbb;padding:5px 8px;text-align:left} th{background:#f0f0f0}
+ .ok{color:#0a7a0a;font-weight:600} .miss{color:#b86b00;font-weight:600}
+ .small{color:#555;font-size:.88em}
+</style></head><body>
+<h1>EXP-2710 — XLE Credit-Spread Integration</h1>
+<p class='small'>Generated 2026-04-08T07:36:58 · Rule Zero clean · Real IronVault XLE chains.</p>
+
+<h2>Chain reality</h2>
+<ul>
+<li>Total XLE put trading dates in IronVault: <b>1195</b></li>
+<li>Dates with ≥5 strikes in 10–60 DTE window: <b>73</b></li>
+<li>Dates with ≥3 strikes (this experiment's filter): <b>83</b></li>
+<li>Median put DTE: <b>36</b></li>
+</ul>
+
+<h2>Standalone XLE backtest (tuned)</h2>
+<table>
+<tr><th>Metric</th><th>Tuned (this exp)</th><th>Default EXP-2160</th></tr>
+<tr><td>Trades</td><td>26</td><td>11</td></tr>
+<tr><td>Win rate</td><td>96.2%</td><td>100.0%</td></tr>
+<tr><td>Sharpe</td><td>1.868</td><td>1.949</td></tr>
+<tr><td>CAGR</td><td>0.627%</td><td>0.613%</td></tr>
+<tr><td>Max DD</td><td>0.02%</td><td>-0.0%</td></tr>
+<tr><td>Total PnL</td><td>3.728%</td><td>2.304%</td></tr>
+</table>
+
+<h2>Walk-forward by year</h2>
+<table>
+<tr><th>Year</th><th>n</th><th>WR</th><th>Sharpe</th><th>CAGR</th><th>Max DD</th></tr>
+<tr><td>2020</td><td>3</td><td>100.0%</td><td>3.21</td><td>0.27%</td><td>-0.00%</td></tr><tr><td>2022</td><td>17</td><td>100.0%</td><td>4.37</td><td>1.24%</td><td>-0.00%</td></tr><tr><td>2023</td><td>1</td><td>0.0%</td><td>0.00</td><td>-0.02%</td><td>-0.00%</td></tr><tr><td>2025</td><td>4</td><td>100.0%</td><td>31.33</td><td>1.75%</td><td>-0.00%</td></tr><tr><td>2026</td><td>1</td><td>100.0%</td><td>0.00</td><td>0.44%</td><td>-0.00%</td></tr>
+</table>
+
+<h2>Correlation to existing 7-stream cube</h2>
+<table>
+<tr><th>Stream</th><th>Pearson</th></tr>
+<tr><td>exp1220</td><td>-0.016</td></tr><tr><td>v5_hedge</td><td>-0.002</td></tr><tr><td>gld_cal</td><td>-0.014</td></tr><tr><td>slv_cal</td><td>-0.012</td></tr><tr><td>cross_vol</td><td>-0.005</td></tr><tr><td>equal_weight_portfolio</td><td>-0.023</td></tr>
+</table>
+
+<h2>Promotion gate</h2>
+<table>
+<tr><th>Criterion</th><th>Target</th><th>Actual</th><th>Pass</th></tr>
+<tr><td>Standalone Sharpe</td><td>≥ 1.5</td><td>1.868</td><td class='ok'>YES</td></tr>
+<tr><td>|corr(EXP-1220)|</td><td>&lt; 0.3</td><td>-0.0156</td><td class='ok'>YES</td></tr>
+<tr><td><b>Promoted</b></td><td>both</td><td>—</td><td class='ok'>YES</td></tr>
+</table>
+
+<h2>v7 vs v8 portfolio (only if promoted)</h2>
+<table><tr><th>Metric</th><th>v7 (7-stream)</th><th>v8 (8-stream + XLE)</th></tr><tr><td>pooled.n_days</td><td>1260</td><td>1260</td></tr><tr><td>pooled.sharpe</td><td>11.906</td><td>12.173</td></tr><tr><td>pooled.cagr_pct</td><td>457.079</td><td>310.368</td></tr><tr><td>pooled.max_dd_pct</td><td>5.644</td><td>4.433</td></tr><tr><td>pooled.vol_pct</td><td>14.563</td><td>11.687</td></tr><tr><td>distribution.n_folds</td><td>20</td><td>20</td></tr><tr><td>distribution.mean</td><td>13.534</td><td>14.157</td></tr><tr><td>distribution.median</td><td>13.306</td><td>14.302</td></tr><tr><td>distribution.std</td><td>4.763</td><td>5.036</td></tr><tr><td>distribution.min</td><td>6.442</td><td>6.665</td></tr><tr><td>distribution.max</td><td>23.29</td><td>24.553</td></tr><tr><td>distribution.frac_above_6</td><td>1.0</td><td>1.0</td></tr><tr><td>distribution.frac_above_4</td><td>1.0</td><td>1.0</td></tr><tr><td>distribution.frac_below_3</td><td>0.0</td><td>0.0</td></tr><tr><td>distribution.frac_below_0</td><td>0.0</td><td>0.0</td></tr></table>
+</body></html>

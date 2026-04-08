@@ -1,0 +1,60 @@
+<!doctype html><html><head><meta charset='utf-8'>
+<title>EXP-2750 — OOS Regime Stress</title>
+<style>
+ body{font-family:-apple-system,Segoe UI,sans-serif;max-width:1100px;margin:2em auto;padding:0 1em;background:#fff;color:#1a1a1a;line-height:1.5}
+ h1{border-bottom:2px solid #222;padding-bottom:.3em} h2{margin-top:1.6em;border-bottom:1px solid #ccc}
+ table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.92em}
+ th,td{border:1px solid #bbb;padding:5px 8px;text-align:left} th{background:#f0f0f0}
+ .callout{background:#fff8e1;border-left:4px solid #e0a500;padding:.9em 1.1em;margin:1em 0}
+ .small{color:#555;font-size:.88em}
+</style></head><body>
+<h1>EXP-2750 — Out-of-Distribution Regime Stress Test</h1>
+<p class='small'>Generated 2026-04-08T08:36:49 · Rule-Zero labelled: stress-only use of synthetic shocks.</p>
+
+<div class='callout'>
+<b>Rule Zero scope:</b> the cube itself is the real v8a production cube
+(5 cached streams + XLF/XLI + XLE). Every stress overlay is a CLEARLY
+LABELED synthetic injection used ONLY to characterise the live
+allocator + circuit-breaker reaction. These numbers are never used for
+backtest Sharpe claims.
+</div>
+
+<h2>Baseline (no stress)</h2>
+<table>
+<tr><th>Max DD</th><th>Soft trips</th><th>Hard trips</th><th>Final equity</th></tr>
+<tr><td>4.43%</td><td>5</td>
+ <td>0</td><td>1106.161</td></tr>
+</table>
+
+<h2>Stress scenarios</h2>
+<table>
+<tr><th>Scenario</th><th>Description</th><th>Window start</th><th>Window end</th>
+ <th>Max DD</th><th>Soft trips</th><th>Hard trips</th>
+ <th>Days to recover</th><th>Window PnL</th><th>Final equity</th></tr>
+<tr><td>slow_grind_bear</td><td>12 months of -2%/month equity drift</td><td>2022-06-01</td><td>2023-05-31</td><td>10.70%</td><td>16</td><td>3</td><td>28</td><td>-6.09%</td><td>215.503</td></tr><tr><td>flash_crash_v</td><td>VIX spike to 80 + 5-day mean-reversion</td><td>2022-06-01</td><td>2022-07-31</td><td>43.14%</td><td>4</td><td>1</td><td>49</td><td>87.22%</td><td>314.337</td></tr><tr><td>stagflation</td><td>2 years flat equity + elevated vol + rates drag</td><td>2022-06-01</td><td>2024-05-31</td><td>3.74%</td><td>22</td><td>2</td><td>67</td><td>34.14%</td><td>67.811</td></tr><tr><td>correlation_breakdown</td><td>All streams forced to pairwise ρ≈0.8 for 1 year</td><td>2022-06-01</td><td>2023-05-31</td><td>30.05%</td><td>29</td><td>12</td><td>535</td><td>-19.20%</td><td>89.359</td></tr>
+</table>
+
+<h2>Interpretation</h2>
+<ul>
+<li><b>slow_grind_bear</b>: measures whether a steady 2%/month equity drift
+    trips the circuit breaker. Vol-targeting will de-lever into the drift;
+    the breaker fires on cumulative drawdown, not on velocity.</li>
+<li><b>flash_crash_v</b>: tests whether the 3%/6% breaker catches a
+    single-day gap-down before it compounds. Hedge sleeve (v5_hedge)
+    absorbs some of the impact.</li>
+<li><b>stagflation</b>: zero-mean + 1.5× vol for 2 years. The LW
+    risk-parity re-fit every 63 days should reduce weights on the
+    equity-sensitive streams as their realised vol spikes.</li>
+<li><b>correlation_breakdown</b>: all streams converge to ρ≈0.8. The
+    effective N drops from 6.69 → ~1, and the cube's diversification
+    benefit collapses. Tests whether LW shrinkage catches the regime
+    change fast enough to de-lever.</li>
+</ul>
+
+<h2>Scope note</h2>
+<p class='small'>These numbers are a forward-looking characterisation of
+the <b>allocator + breaker + vol targeting machinery</b>, not a claim
+about historical performance. Real stress historically has looked like
+COVID 2020 and 2022 — captured in the baseline. This experiment is
+about regimes outside that sample.</p>
+</body></html>

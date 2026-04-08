@@ -1,0 +1,263 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>EXP-2840 Backtest-to-Live Degradation</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1200px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.55; }
+  h1 { color:#0f172a; } h2 { color:#334155; margin-top:2.2em;
+         padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:16px; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:18px 0; }
+  .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;
+          padding:18px; text-align:center; flex:1; min-width:160px; }
+  .kpi .value { font-size:1.8em; font-weight:800; color:#0f172a; }
+  .kpi.good .value { color:#16a34a; }
+  .kpi.warn .value { color:#ca8a04; }
+  .kpi.bad  .value { color:#dc2626; }
+  .kpi .label { font-size:0.72em; color:#64748b; margin-top:4px; text-transform:uppercase; }
+  .good { color:#16a34a; font-weight:700; }
+  .warn { color:#ca8a04; font-weight:700; }
+  .bad  { color:#dc2626; font-weight:700; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.86em; }
+  th { background:#f1f5f9; padding:9px 12px; text-align:right; font-weight:600;
+       color:#475569; border-bottom:2px solid #cbd5e1; font-size:0.74em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  .note { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;
+            padding:14px; margin:14px 0; font-size:0.85rem; }
+  .warning { background:#fef2f2; border:2px solid #dc2626; border-radius:8px;
+                padding:14px 18px; margin:14px 0; font-size:0.9rem; }
+</style></head><body>
+
+<h1>EXP-2840 — Honest Backtest-to-Live Degradation</h1>
+<div class="subtitle">What Carlos should expect · 8-stream v8 portfolio · 2026-04-08T14:05:43.383767Z</div>
+
+<div class="note">
+<strong>Method:</strong> apply alpha-decay multipliers k ∈ &#123;1.0, 0.9, …, 0.3&#125; to
+each stream's non-zero-day MEAN (preserving vol — the correct alpha-decay
+model) and recompute portfolio metrics. Degradation ≠ vol inflation; live
+Sharpe drops because live returns are smaller, not because vol explodes.
+Data: real IronVault-derived streams + cached QQQ trades, no synthetic.
+<br><br>
+EXP-2760 literature survey: live Sharpe is typically <strong>0.5-0.7×</strong>
+of backtest for well-executed options-selling strategies. Our backtest
+net Sharpe is <strong>6.00</strong>, which implies a realistic live
+range of <strong>3.00-4.20</strong>.
+</div>
+
+<h2>Backtest Baseline</h2>
+<div class="kpi-row">
+    <div class="kpi good"><div class="value">4.70</div><div class="label">Backtest Sharpe</div></div>
+    <div class="kpi good"><div class="value">10.5%</div><div class="label">CAGR</div></div>
+    <div class="kpi good"><div class="value">-2.71%</div><div class="label">Max DD</div></div>
+    <div class="kpi"><div class="value">2.13%</div><div class="label">Vol</div></div>
+</div>
+
+<h2>What Carlos Should Expect — Live Range</h2>
+<div class="kpi-row">
+    
+        <div class="kpi good">
+            <div class="value">3.86</div>
+            <div class="label">Optimistic (k=0.8×)</div>
+            <div style="font-size:0.72em; color:#64748b; margin-top:4px;">
+                CAGR 8.3%
+            </div>
+        </div>
+    
+        <div class="kpi warn">
+            <div class="value">2.96</div>
+            <div class="label">Realistic (k=0.6×)</div>
+            <div style="font-size:0.72em; color:#64748b; margin-top:4px;">
+                CAGR 6.2%
+            </div>
+        </div>
+    
+        <div class="kpi warn">
+            <div class="value">2.49</div>
+            <div class="label">Pessimistic (k=0.5×)</div>
+            <div style="font-size:0.72em; color:#64748b; margin-top:4px;">
+                CAGR 5.1%
+            </div>
+        </div>
+    
+        <div class="kpi warn">
+            <div class="value">2.48</div>
+            <div class="label">Crisis (0.5× + Crisis Alpha zero)</div>
+            <div style="font-size:0.72em; color:#64748b; margin-top:4px;">
+                CAGR 5.1%
+            </div>
+        </div>
+</div>
+<ul>
+    <li><strong>Optimistic (k = 0.8×):</strong> Upper bound of literature range. Typical for well-executed high-liquidity options strategies.</li>
+    <li><strong>Realistic (k = 0.6×):</strong> Literature midpoint. Plan for this as the base case.</li>
+    <li><strong>Pessimistic (k = 0.5×):</strong> Lower bound of literature range. Triggers soul-searching but still profitable.</li>
+    <li><strong>Crisis:</strong> Simultaneous alpha decay AND our weakest stream going to zero. The floor case.</li>
+</ul>
+
+<h2>Uniform Degradation Sweep</h2>
+<table>
+    <thead><tr><th>Multiplier k</th><th>Implied Live Sh (from 6.00)</th>
+    <th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Vol</th><th>Band</th></tr></thead>
+    <tbody><tr>
+            <td><strong>1.0×</strong></td>
+            <td>6.00</td>
+            <td>10.50%</td>
+            <td class="good">4.70</td>
+            <td>-2.71%</td>
+            <td>2.13%</td>
+            <td class="good">ELITE</td>
+        </tr><tr>
+            <td><strong>0.9×</strong></td>
+            <td>5.40</td>
+            <td>9.40%</td>
+            <td class="good">4.29</td>
+            <td>-2.72%</td>
+            <td>2.10%</td>
+            <td class="good">ELITE</td>
+        </tr><tr>
+            <td><strong>0.8×</strong></td>
+            <td>4.80</td>
+            <td>8.31%</td>
+            <td class="good">3.86</td>
+            <td>-2.73%</td>
+            <td>2.07%</td>
+            <td class="good">ELITE</td>
+        </tr><tr>
+            <td><strong>0.7×</strong></td>
+            <td>4.20</td>
+            <td>7.23%</td>
+            <td class="good">3.42</td>
+            <td>-2.74%</td>
+            <td>2.05%</td>
+            <td class="good">ELITE</td>
+        </tr><tr>
+            <td><strong>0.6×</strong></td>
+            <td>3.60</td>
+            <td>6.17%</td>
+            <td class="warn">2.96</td>
+            <td>-2.75%</td>
+            <td>2.03%</td>
+            <td class="warn">GOOD</td>
+        </tr><tr>
+            <td><strong>0.5×</strong></td>
+            <td>3.00</td>
+            <td>5.11%</td>
+            <td class="warn">2.49</td>
+            <td>-2.76%</td>
+            <td>2.01%</td>
+            <td class="warn">GOOD</td>
+        </tr><tr>
+            <td><strong>0.4×</strong></td>
+            <td>2.40</td>
+            <td>4.06%</td>
+            <td class="warn">2.01</td>
+            <td>-2.77%</td>
+            <td>2.00%</td>
+            <td class="warn">GOOD</td>
+        </tr><tr>
+            <td><strong>0.3×</strong></td>
+            <td>1.80</td>
+            <td>3.03%</td>
+            <td class="bad">1.51</td>
+            <td>-2.77%</td>
+            <td>1.98%</td>
+            <td class="bad">BELOW</td>
+        </tr></tbody>
+</table>
+
+<h2>Break-Point Analysis</h2>
+<div class="kpi-row">
+    <div class="kpi good"><div class="value">0.61×</div><div class="label">k* for Sharpe ≥ 3.0 (elite)</div></div>
+    <div class="kpi warn"><div class="value">0.40×</div><div class="label">k* for Sharpe ≥ 2.0 (good)</div></div>
+    <div class="kpi"><div class="value">0.20×</div><div class="label">k* for Sharpe ≥ 1.0</div></div>
+</div>
+<p>Portfolio stays above Sharpe 3.0 (elite) as long as live delivers ≥ 61% of backtest alpha per stream. At the literature midpoint (60%), portfolio Sharpe is 2.96.</p>
+
+<h2>Stream-Kill Stress Tests</h2>
+<p>What happens if one sleeve goes entirely to zero (complete strategy failure)?</p>
+<table>
+    <thead><tr><th>Stream Killed</th><th>Baseline Stream Sh</th>
+    <th>Portfolio CAGR</th><th>Portfolio Sharpe</th><th>ΔSharpe</th></tr></thead>
+    <tbody><tr>
+            <td><strong>v5_hedge</strong></td>
+            <td>-0.27</td>
+            <td>10.53%</td>
+            <td>4.68</td>
+            <td>-0.01</td>
+        </tr><tr>
+            <td><strong>slv_cal</strong></td>
+            <td>2.31</td>
+            <td>9.89%</td>
+            <td>4.47</td>
+            <td>-0.22</td>
+        </tr><tr>
+            <td><strong>vol_arb</strong></td>
+            <td>5.38</td>
+            <td>9.37%</td>
+            <td>4.32</td>
+            <td>-0.38</td>
+        </tr><tr>
+            <td><strong>gld_cal</strong></td>
+            <td>2.72</td>
+            <td>9.07%</td>
+            <td>4.24</td>
+            <td>-0.46</td>
+        </tr></tbody>
+</table>
+
+<div class="warning">
+<strong>Combined nightmare scenario</strong> (Crisis Alpha ZERO + 0.5× on all others):
+CAGR <strong>5.12%</strong> · Sharpe
+<strong>2.48</strong> · Max DD
+-2.70% · ΔSh
+-2.21 vs backtest.
+This is the floor case — simultaneous alpha decay across all streams AND our
+weakest stream failing entirely.
+</div>
+
+<h2>Per-Stream Baseline (non-zero days)</h2>
+<table>
+    <thead><tr><th>Stream</th><th>Baseline Sharpe</th><th>Production Leverage</th></tr></thead>
+    <tbody><tr>
+            <td><strong>exp1220</strong></td>
+            <td>3.73</td>
+            <td>1.677</td>
+        </tr><tr>
+            <td><strong>qqq_cs</strong></td>
+            <td>7.71</td>
+            <td>0.804</td>
+        </tr><tr>
+            <td><strong>xlf_cs</strong></td>
+            <td>23.20</td>
+            <td>0.145</td>
+        </tr><tr>
+            <td><strong>xli_cs</strong></td>
+            <td>14.99</td>
+            <td>0.101</td>
+        </tr><tr>
+            <td><strong>gld_cal</strong></td>
+            <td>2.72</td>
+            <td>0.080</td>
+        </tr><tr>
+            <td><strong>slv_cal</strong></td>
+            <td>2.31</td>
+            <td>0.020</td>
+        </tr><tr>
+            <td><strong>vol_arb</strong></td>
+            <td>5.38</td>
+            <td>0.136</td>
+        </tr><tr>
+            <td><strong>v5_hedge</strong></td>
+            <td>-0.27</td>
+            <td>0.037</td>
+        </tr></tbody>
+</table>
+
+<div style="margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0;
+            font-size:0.78em; color:#94a3b8; text-align:center;">
+EXP-2840 — compass/exp2840_backtest_to_live_degradation.py · Real 8-stream cache · Mean-shift degradation model
+</div>
+
+</body></html>

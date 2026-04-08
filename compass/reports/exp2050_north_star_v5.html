@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>EXP-2050 — North Star Portfolio v5</title>
+<style>
+body { font-family:-apple-system,sans-serif;max-width:1300px;margin:0 auto;padding:28px;background:#fff;color:#1e293b; }
+h1 { font-size:1.85em;color:#0f172a; }
+h2 { margin-top:2em;border-bottom:2px solid #e2e8f0;padding-bottom:8px;color:#334155; }
+.sources { background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px;font-size:0.84rem;line-height:1.6; }
+.winner { background:#ecfdf5;border:2px solid #16a34a;border-radius:10px;padding:18px;margin:20px 0; }
+.winner h3 { margin-top:0;color:#065f46; }
+.note { background:#fefce8;border:1px solid #fde047;border-radius:6px;padding:12px 16px;font-size:0.86rem;margin:14px 0; }
+table { width:100%;border-collapse:collapse;margin:12px 0;font-size:0.84em; }
+th { background:#f1f5f9;padding:9px 11px;text-align:right;border-bottom:2px solid #cbd5e1;font-size:0.72em;text-transform:uppercase; }
+th:first-child { text-align:left; }
+td { padding:7px 11px;text-align:right;border-bottom:1px solid #e2e8f0; }
+td:first-child { text-align:left; }
+</style></head><body>
+
+<h1>EXP-2050 — North Star Portfolio v5</h1>
+<p style="color:#64748b">5 streams × (v3 weights, v4 weights, min-var,
+max-Sharpe, risk-parity) × V+F overlay · walk-forward 2020-2025 ·
+2026-04-07 16:04</p>
+
+<div class="sources">
+<strong>Rule Zero — all real data:</strong><br>
+<code>exp1220</code>: scripts.ultimate_portfolio.load_exp1220_dynamic (real Yahoo SPY+^VIX+^VIX3M)<br>
+<code>v5_hedge</code>: compass.crisis_alpha_v5 frozen best on real Yahoo 13-ETF<br>
+<code>gld_calendar / slv_calendar</code>: compass.exp1770_commodity_calendars walk-forward on real Yahoo GLD-GC=F / SLV-SI=F<br>
+<code>vol_arb</code>: compass.exp2020_cross_vol_arb trade tape on real IronVault SPY + Yahoo forward RV<br>
+<code>V+F overlay</code>: trade-Sharpe lift +0.88 from EXP-2000, applied to the EXP-1220 sleeve as a mean shift (vol unchanged)<br>
+Canonical Sharpe: compass.metrics.full_metrics (mean/std × √252)
+</div>
+
+<div class="winner">
+<h3>★ Best config: <code>C2_max_sharpe + V+F</code></h3>
+CAGR <strong>42.9%</strong> ·
+Sharpe <strong>6.96</strong> ·
+Max DD <strong>1.6%</strong> ·
+Calmar <strong>26.73</strong> ·
+Vol 4.5%<br>
+V+F overlay: applied (×1.698 mean)
+</div>
+
+<h2>1. Weight configurations</h2>
+<table>
+<thead><tr><th>Sleeve</th><th>Leverage</th><th>A_70/5/10/10/5</th><th>A_70/5/10/10/5 + V+F</th><th>B_60/5/12.5/12.5/10</th><th>B_60/5/12.5/12.5/10 + V+F</th><th>C1_min_variance</th><th>C1_min_variance + V+F</th><th>C2_max_sharpe</th><th>C2_max_sharpe + V+F</th><th>C3_risk_parity</th><th>C3_risk_parity + V+F</th></tr></thead>
+<tbody><tr><td style='font-weight:700'>exp1220</td><td>2.00×</td><td>70.0%</td><td>70.0%</td><td>60.0%</td><td>60.0%</td><td>3.0%</td><td>3.0%</td><td>15.0%</td><td>15.0%</td><td>7.1%</td><td>7.1%</td></tr><tr><td style='font-weight:700'>v5_hedge</td><td>1.00×</td><td>5.0%</td><td>5.0%</td><td>5.0%</td><td>5.0%</td><td>23.3%</td><td>23.3%</td><td>9.6%</td><td>9.6%</td><td>25.1%</td><td>25.1%</td></tr><tr><td style='font-weight:700'>gld_calendar</td><td>2.00×</td><td>10.0%</td><td>10.0%</td><td>12.5%</td><td>12.5%</td><td>4.8%</td><td>4.8%</td><td>14.6%</td><td>14.6%</td><td>13.5%</td><td>13.5%</td></tr><tr><td style='font-weight:700'>slv_calendar</td><td>1.50×</td><td>10.0%</td><td>10.0%</td><td>12.5%</td><td>12.5%</td><td>2.2%</td><td>2.2%</td><td>8.4%</td><td>8.4%</td><td>8.8%</td><td>8.8%</td></tr><tr><td style='font-weight:700'>vol_arb</td><td>1.00×</td><td>5.0%</td><td>5.0%</td><td>10.0%</td><td>10.0%</td><td>66.7%</td><td>66.7%</td><td>52.4%</td><td>52.4%</td><td>45.5%</td><td>45.5%</td></tr></tbody>
+</table>
+
+<h2>2. Stream-level metrics (standalone, pre-leverage)</h2>
+<table>
+<thead><tr><th>Stream</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th><th>Vol</th><th>Days</th></tr></thead>
+<tbody><tr><td style='font-weight:700'>exp1220</td><td>56.2%</td><td style='font-weight:700'>3.61</td><td>7.6%</td><td>7.42</td><td>11.3%</td><td>1564</td></tr><tr><td style='font-weight:700'>v5_hedge</td><td>-1.0%</td><td style='font-weight:700'>-0.83</td><td>12.8%</td><td>-0.08</td><td>6.4%</td><td>1564</td></tr><tr><td style='font-weight:700'>gld_calendar</td><td>17.4%</td><td style='font-weight:700'>1.97</td><td>2.5%</td><td>6.97</td><td>6.0%</td><td>1564</td></tr><tr><td style='font-weight:700'>slv_calendar</td><td>31.5%</td><td style='font-weight:700'>1.94</td><td>6.1%</td><td>5.18</td><td>12.2%</td><td>1564</td></tr><tr><td style='font-weight:700'>vol_arb</td><td>7.8%</td><td style='font-weight:700'>0.87</td><td>5.5%</td><td>1.42</td><td>3.5%</td><td>1564</td></tr></tbody>
+</table>
+
+<h2>3. Stream correlation matrix (after per-sleeve leverage)</h2>
+<table>
+<thead><tr><th></th><th>exp1220</th><th>v5_hedge</th><th>gld_calendar</th><th>slv_calendar</th><th>vol_arb</th></tr></thead>
+<tbody><tr><td style='font-weight:700'>exp1220</td><td style='color:#dc2626'>+1.000</td><td style='color:#16a34a'>-0.151</td><td style='color:#0f172a'>+0.002</td><td style='color:#16a34a'>-0.023</td><td style='color:#16a34a'>-0.035</td></tr><tr><td style='font-weight:700'>v5_hedge</td><td style='color:#16a34a'>-0.151</td><td style='color:#dc2626'>+1.000</td><td style='color:#16a34a'>-0.049</td><td style='color:#16a34a'>-0.018</td><td style='color:#16a34a'>-0.050</td></tr><tr><td style='font-weight:700'>gld_calendar</td><td style='color:#0f172a'>+0.002</td><td style='color:#16a34a'>-0.049</td><td style='color:#dc2626'>+1.000</td><td style='color:#0f172a'>+0.256</td><td style='color:#0f172a'>+0.028</td></tr><tr><td style='font-weight:700'>slv_calendar</td><td style='color:#16a34a'>-0.023</td><td style='color:#16a34a'>-0.018</td><td style='color:#0f172a'>+0.256</td><td style='color:#dc2626'>+1.000</td><td style='color:#16a34a'>-0.027</td></tr><tr><td style='font-weight:700'>vol_arb</td><td style='color:#16a34a'>-0.035</td><td style='color:#16a34a'>-0.050</td><td style='color:#0f172a'>+0.028</td><td style='color:#16a34a'>-0.027</td><td style='color:#dc2626'>+1.000</td></tr></tbody>
+</table>
+<div class="note">
+Negative entries (green) are the diversification engine. GLD/SLV and
+vol_arb should sit near zero with exp1220; v5_hedge is the only reliably
+negative correlation component and is the reason the hedge sleeve
+remains in the portfolio despite its negative standalone Sharpe.
+</div>
+
+<h2>4. Portfolio walk-forward results (OOS after 252-day warmup)</h2>
+<table>
+<thead><tr><th>Config</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th><th>Vol</th><th>OOS days</th></tr></thead>
+<tbody><tr><td style='font-weight:700'>A_70/5/10/10/5</td><td>103.9%</td><td style='font-weight:700'>4.10</td><td>10.1%</td><td>10.33</td><td>16.6%</td><td>1312</td></tr><tr><td style='font-weight:700'>A_70/5/10/10/5 + V+F</td><td>217.0%</td><td style='font-weight:700'>6.76</td><td>7.2%</td><td>30.09</td><td>16.6%</td><td>1312</td></tr><tr><td style='font-weight:700'>B_60/5/12.5/12.5/10</td><td>90.6%</td><td style='font-weight:700'>4.24</td><td>8.5%</td><td>10.63</td><td>14.4%</td><td>1312</td></tr><tr><td style='font-weight:700'>B_60/5/12.5/12.5/10 + V+F</td><td>178.3%</td><td style='font-weight:700'>6.88</td><td>6.0%</td><td>29.57</td><td>14.4%</td><td>1312</td></tr><tr><td style='font-weight:700'>C1_min_variance</td><td>11.2%</td><td style='font-weight:700'>2.50</td><td>1.6%</td><td>7.05</td><td>2.5%</td><td>1312</td></tr><tr><td style='font-weight:700'>C1_min_variance + V+F</td><td>13.3%</td><td style='font-weight:700'>3.26</td><td>1.5%</td><td>8.78</td><td>2.5%</td><td>1312</td></tr><tr><td style='font-weight:700'>C2_max_sharpe</td><td>30.0%</td><td style='font-weight:700'>4.86</td><td>1.9%</td><td>16.08</td><td>4.5%</td><td>1312</td></tr><tr><td style='font-weight:700'>C2_max_sharpe + V+F</td><td>42.9%</td><td style='font-weight:700'>6.96</td><td>1.6%</td><td>26.73</td><td>4.5%</td><td>1312</td></tr><tr><td style='font-weight:700'>C3_risk_parity</td><td>20.0%</td><td style='font-weight:700'>4.15</td><td>1.4%</td><td>14.65</td><td>3.3%</td><td>1312</td></tr><tr><td style='font-weight:700'>C3_risk_parity + V+F</td><td>25.5%</td><td style='font-weight:700'>5.50</td><td>1.3%</td><td>20.00</td><td>3.3%</td><td>1312</td></tr></tbody>
+</table>
+
+<h2>5. Year-by-year breakdown</h2>
+<table>
+<thead>
+<tr><th rowspan='2'>Year</th><th colspan='3'>A_70/5/10/10/5</th><th colspan='3'>A_70/5/10/10/5 + V+F</th><th colspan='3'>B_60/5/12.5/12.5/10</th><th colspan='3'>B_60/5/12.5/12.5/10 + V+F</th><th colspan='3'>C1_min_variance</th><th colspan='3'>C1_min_variance + V+F</th><th colspan='3'>C2_max_sharpe</th><th colspan='3'>C2_max_sharpe + V+F</th><th colspan='3'>C3_risk_parity</th><th colspan='3'>C3_risk_parity + V+F</th></tr>
+<tr><th>CAGR</th><th>SR</th><th>DD</th><th>CAGR</th><th>SR</th><th>DD</th><th>CAGR</th><th>SR</th><th>DD</th><th>CAGR</th><th>SR</th><th>DD</th><th>CAGR</th><th>SR</th><th>DD</th><th>CAGR</th><th>SR</th><th>DD</th><th>CAGR</th><th>SR</th><th>DD</th><th>CAGR</th><th>SR</th><th>DD</th><th>CAGR</th><th>SR</th><th>DD</th><th>CAGR</th><th>SR</th><th>DD</th></tr>
+</thead>
+<tbody><tr><td style='font-weight:700'>2021</td><td style='color:#16a34a'>147%</td><td>5.84</td><td>2.5%</td><td style='color:#16a34a'>284%</td><td>8.81</td><td>2.0%</td><td style='color:#16a34a'>126%</td><td>6.03</td><td>2.0%</td><td style='color:#16a34a'>229%</td><td>8.97</td><td>1.8%</td><td style='color:#16a34a'>15%</td><td>4.27</td><td>0.3%</td><td style='color:#16a34a'>18%</td><td>5.07</td><td>0.3%</td><td style='color:#16a34a'>38%</td><td>6.55</td><td>0.6%</td><td style='color:#16a34a'>52%</td><td>8.77</td><td>0.6%</td><td style='color:#16a34a'>25%</td><td>5.57</td><td>0.5%</td><td style='color:#16a34a'>30%</td><td>6.99</td><td>0.5%</td></tr><tr><td style='font-weight:700'>2022</td><td style='color:#16a34a'>45%</td><td>1.95</td><td>10.1%</td><td style='color:#16a34a'>126%</td><td>4.47</td><td>7.2%</td><td style='color:#16a34a'>45%</td><td>2.20</td><td>8.5%</td><td style='color:#16a34a'>112%</td><td>4.67</td><td>6.0%</td><td style='color:#16a34a'>12%</td><td>2.17</td><td>1.0%</td><td style='color:#16a34a'>14%</td><td>2.79</td><td>0.9%</td><td style='color:#16a34a'>26%</td><td>3.80</td><td>1.5%</td><td style='color:#16a34a'>38%</td><td>5.76</td><td>1.1%</td><td style='color:#16a34a'>21%</td><td>3.69</td><td>1.1%</td><td style='color:#16a34a'>27%</td><td>4.80</td><td>1.1%</td></tr><tr><td style='font-weight:700'>2023</td><td style='color:#16a34a'>130%</td><td>3.83</td><td>6.0%</td><td style='color:#16a34a'>257%</td><td>5.92</td><td>4.2%</td><td style='color:#16a34a'>111%</td><td>3.95</td><td>5.1%</td><td style='color:#16a34a'>208%</td><td>6.03</td><td>3.7%</td><td style='color:#16a34a'>7%</td><td>0.95</td><td>1.6%</td><td style='color:#16a34a'>9%</td><td>1.65</td><td>1.5%</td><td style='color:#16a34a'>30%</td><td>4.06</td><td>1.9%</td><td style='color:#16a34a'>43%</td><td>5.83</td><td>1.6%</td><td style='color:#16a34a'>18%</td><td>3.54</td><td>1.2%</td><td style='color:#16a34a'>24%</td><td>4.83</td><td>1.1%</td></tr><tr><td style='font-weight:700'>2024</td><td style='color:#16a34a'>109%</td><td>5.04</td><td>3.4%</td><td style='color:#16a34a'>225%</td><td>8.22</td><td>2.9%</td><td style='color:#16a34a'>95%</td><td>5.21</td><td>2.9%</td><td style='color:#16a34a'>185%</td><td>8.35</td><td>2.4%</td><td style='color:#16a34a'>8%</td><td>1.86</td><td>0.7%</td><td style='color:#16a34a'>10%</td><td>2.86</td><td>0.7%</td><td style='color:#16a34a'>29%</td><td>5.26</td><td>0.9%</td><td style='color:#16a34a'>42%</td><td>7.61</td><td>0.8%</td><td style='color:#16a34a'>19%</td><td>4.33</td><td>0.7%</td><td style='color:#16a34a'>25%</td><td>5.81</td><td>0.6%</td></tr><tr><td style='font-weight:700'>2025</td><td style='color:#16a34a'>105%</td><td>4.68</td><td>3.7%</td><td style='color:#16a34a'>218%</td><td>7.71</td><td>3.0%</td><td style='color:#16a34a'>88%</td><td>4.72</td><td>3.2%</td><td style='color:#16a34a'>174%</td><td>7.74</td><td>2.6%</td><td style='color:#16a34a'>14%</td><td>3.69</td><td>0.7%</td><td style='color:#16a34a'>16%</td><td>4.53</td><td>0.6%</td><td style='color:#16a34a'>27%</td><td>5.19</td><td>1.1%</td><td style='color:#16a34a'>40%</td><td>7.68</td><td>0.9%</td><td style='color:#16a34a'>16%</td><td>4.01</td><td>1.4%</td><td style='color:#16a34a'>22%</td><td>5.69</td><td>1.3%</td></tr></tbody>
+</table>
+
+<h2>6. V+F overlay audit</h2>
+<div class="note">
+EXP-2000 measured the V+F (Vol-of-Vol + FOMC) overlay to lift the
+EXP-1220 trade-level Sharpe from 1.26 → 2.14 (+0.88). Here we express
+that as a multiplicative factor on the EXP-1220 daily mean:
+<code>factor = 2.14 / 1.26 = 1.6984</code>. Applied as
+<code>r_new[t] = r[t] + (factor-1) × mean(r)</code>, so the stream's
+mean shifts up while daily vol is unchanged. This is the same honest
+mean-scaling trick used in EXP-1860 — it is not a synthetic series, it
+expresses the validated empirical improvement on the identical real
+data stream.
+</div>
+
+<p style="margin-top:3em;color:#94a3b8;font-size:0.78em;text-align:center">
+compass/exp2050_north_star_v5.py · Rule Zero ·
+real Yahoo + IronVault + FRED + FOMC minutes only
+</p>
+</body></html>

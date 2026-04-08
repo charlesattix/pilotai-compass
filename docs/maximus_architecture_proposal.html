@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-Experiment Paper Trading Architecture — PilotAI</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fff; color: #1a1a1a; line-height: 1.7; padding: 40px 24px; max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 28px; margin-bottom: 6px; color: #1a1a1a; }
+  h2 { font-size: 20px; margin: 36px 0 14px; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 6px; }
+  h3 { font-size: 16px; margin: 24px 0 10px; color: #34495e; }
+  h4 { font-size: 14px; margin: 16px 0 6px; color: #555; }
+  .subtitle { color: #7f8c8d; font-size: 14px; margin-bottom: 28px; }
+  p { margin: 10px 0; font-size: 14px; }
+  code { background: #f0f4f8; padding: 2px 6px; border-radius: 3px; font-size: 13px; font-family: 'SF Mono', Monaco, Consolas, monospace; color: #c0392b; }
+  pre { background: #1e2433; color: #e0e6ed; padding: 18px; border-radius: 8px; overflow-x: auto; margin: 14px 0; font-size: 13px; line-height: 1.6; }
+  pre .comment { color: #6b7d9e; }
+  pre .keyword { color: #c792ea; }
+  pre .string { color: #c3e88d; }
+  pre .fn { color: #82aaff; }
+  pre .type { color: #ffcb6b; }
+  pre .highlight { color: #ff5370; font-weight: bold; }
+  ul, ol { margin: 10px 0 10px 24px; font-size: 14px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+  th { background: #2c3e50; color: #fff; text-align: left; padding: 10px 14px; font-weight: 600; }
+  td { padding: 10px 14px; border-bottom: 1px solid #ecf0f1; }
+  tr:nth-child(even) { background: #f8fafe; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .current { background: #e74c3c; color: #fff; }
+  .proposed { background: #27ae60; color: #fff; }
+  .shared { background: #3498db; color: #fff; }
+  .new { background: #8e44ad; color: #fff; }
+  .box { border-radius: 8px; padding: 16px 20px; margin: 14px 0; }
+  .problem { background: #fef2f2; border-left: 4px solid #e74c3c; }
+  .solution { background: #f0fdf4; border-left: 4px solid #27ae60; }
+  .info { background: #eff6ff; border-left: 4px solid #3498db; }
+  .warning { background: #fffbeb; border-left: 4px solid #f59e0b; }
+  .diagram { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 16px 0; font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; line-height: 1.8; white-space: pre; overflow-x: auto; }
+  .phase { background: #f0f4ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px 20px; margin: 14px 0; }
+  .phase-header { font-size: 15px; font-weight: 700; color: #1e40af; margin-bottom: 8px; }
+  .effort { float: right; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  hr { border: none; border-top: 1px solid #e2e8f0; margin: 32px 0; }
+  .toc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px 28px; margin: 20px 0; }
+  .toc a { color: #3498db; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { margin: 8px 0 0 20px; }
+  .toc li { margin: 3px 0; font-size: 13px; }
+  .verdict { font-size: 15px; font-weight: 600; color: #27ae60; }
+</style>
+</head>
+<body>
+
+<h1>🏗️ Multi-Experiment Paper Trading Architecture</h1>
+<p class="subtitle">PilotAI Credit Spreads — Architectural Analysis & Proposal · Maximus Cruz · March 13, 2026</p>
+
+<div class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#current">Current State Analysis</a></li>
+    <li><a href="#problems">Problems with Current Approach</a></li>
+    <li><a href="#target">Target Architecture</a></li>
+    <li><a href="#components">Component Design</a></li>
+    <li><a href="#registry">Experiment Registry</a></li>
+    <li><a href="#isolation">Isolation Model</a></li>
+    <li><a href="#lifecycle">Experiment Lifecycle</a></li>
+    <li><a href="#centralized">Centralized Services</a></li>
+    <li><a href="#monitoring">Monitoring & Comparison</a></li>
+    <li><a href="#implementation">Implementation Plan</a></li>
+  </ol>
+</div>
+
+<hr>
+
+<h2 id="current">1. Current State Analysis</h2>
+
+<h3>How Experiments Run Today</h3>
+<p>Each experiment is a separate <strong>OS process</strong> launched with its own YAML config:</p>
+<pre>
+python main.py scheduler --config configs/paper_exp401.yaml --env-file .env.exp401
+python main.py scheduler --config configs/paper_champion.yaml --env-file .env.champion
+</pre>
+
+<h3>Current Component Ownership</h3>
+<table>
+  <tr><th>Component</th><th>Per-Experiment?</th><th>Status</th></tr>
+  <tr><td>SQLite Database</td><td>✅ Yes (after Bug #1 fix)</td><td><span class="badge current">Recently Fixed</span></td></tr>
+  <tr><td>Config (YAML)</td><td>✅ Yes</td><td>Working</td></tr>
+  <tr><td>Log Files</td><td>⚠️ Configurable but not enforced</td><td>Fragile</td></tr>
+  <tr><td>Alpaca Connection</td><td>❌ Shared credentials</td><td><span class="badge current">Problem</span></td></tr>
+  <tr><td>Alert Files (JSON/CSV)</td><td>⚠️ Configurable</td><td>Easy to collide</td></tr>
+  <tr><td>Telegram Notifications</td><td>❌ Same chat</td><td><span class="badge current">Problem</span></td></tr>
+  <tr><td>Options Data Cache</td><td>❌ Shared <code>data/options_cache</code></td><td>OK (read-only, idempotent)</td></tr>
+  <tr><td>Scheduler</td><td>✅ Yes (one per process)</td><td>Working</td></tr>
+  <tr><td>Circuit Breaker</td><td>✅ Yes (in-memory per process)</td><td>Working</td></tr>
+  <tr><td>Healthcheck Server</td><td>⚠️ Port collision if &gt;1</td><td>Fragile</td></tr>
+  <tr><td>Heartbeat File</td><td>❌ Shared <code>data/heartbeat.json</code></td><td><span class="badge current">Problem</span></td></tr>
+  <tr><td>Experiment Registry</td><td>N/A</td><td><span class="badge current">Doesn't Exist</span></td></tr>
+</table>
+
+<hr>
+
+<h2 id="problems">2. Problems with Current Approach</h2>
+
+<div class="box problem">
+  <strong>🔴 P1 — No Experiment Registry</strong><br>
+  There's no central place that knows which experiments exist, what state they're in, or how to compare them. Configs are manually named files. Starting/stopping experiments requires remembering CLI commands. No way to list "what's running right now?"
+</div>
+
+<div class="box problem">
+  <strong>🔴 P2 — Alpaca Account Collision</strong><br>
+  All experiments share the same Alpaca paper account. If EXP-400 opens a bull put spread on SPY and EXP-401 opens a bear call spread, neither knows about the other's positions. The <code>PositionMonitor</code> in EXP-400 might try to manage EXP-401's positions. Worse: <code>PositionReconciler</code> runs on startup and syncs <strong>all</strong> Alpaca positions into the local DB — cross-contaminating everything.
+</div>
+
+<div class="box problem">
+  <strong>🔴 P3 — No Process Orchestration</strong><br>
+  Each experiment is a standalone <code>python main.py scheduler</code> process. There's no supervisor to: (a) start all experiments together, (b) restart crashed ones, (c) stop all gracefully, (d) show status of all experiments, (e) coordinate shared resources.
+</div>
+
+<div class="box problem">
+  <strong>🟡 P4 — No Centralized Comparison Dashboard</strong><br>
+  Each experiment writes to its own DB. To compare performance across experiments, you'd need to manually query each DB and join the results. There's no unified view of "EXP-400 is up 12% and EXP-401 is up 8% this week."
+</div>
+
+<div class="box problem">
+  <strong>🟡 P5 — Configuration Drift</strong><br>
+  Configs are manually created YAML files with 200+ lines. Easy to forget a field, use stale defaults, or create configs that pass <code>validate_config()</code> but don't match the backtested parameters. No config inheritance or templates.
+</div>
+
+<div class="box problem">
+  <strong>🟡 P6 — Heartbeat & Healthcheck Collision</strong><br>
+  The heartbeat file (<code>data/heartbeat.json</code>) and the healthcheck HTTP server (port 8080) are singletons. Multiple experiments overwrite each other's heartbeats. Multiple healthcheck servers can't bind the same port.
+</div>
+
+<hr>
+
+<h2 id="target">3. Target Architecture</h2>
+
+<div class="diagram">
+┌─────────────────────────────────────────────────────────────────────┐
+│                      <strong>EXPERIMENT ORCHESTRATOR</strong>                        │
+│                    (pilotctl / experiment_manager.py)                │
+│                                                                     │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
+│  │ Registry │  │ Process  │  │ Config   │  │ Compare  │           │
+│  │ (SQLite) │  │ Manager  │  │ Factory  │  │ Engine   │           │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘           │
+└────────────────────────┬────────────────────────────────────────────┘
+                         │ spawns / monitors / stops
+         ┌───────────────┼───────────────┐
+         ▼               ▼               ▼
+┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│  EXP-400    │  │  EXP-401    │  │  EXP-402    │    ← Isolated Worker Processes
+│             │  │             │  │             │
+│ ┌─────────┐ │  │ ┌─────────┐ │  │ ┌─────────┐ │
+│ │Scheduler│ │  │ │Scheduler│ │  │ │Scheduler│ │
+│ │ Scanner │ │  │ │ Scanner │ │  │ │ Scanner │ │
+│ │Execution│ │  │ │Execution│ │  │ │Execution│ │
+│ │ Monitor │ │  │ │ Monitor │ │  │ │ Monitor │ │
+│ └─────────┘ │  │ └─────────┘ │  │ └─────────┘ │
+│             │  │             │  │             │
+│ DB: exp400  │  │ DB: exp401  │  │ DB: exp402  │    ← Isolated DBs
+│ Log: exp400 │  │ Log: exp401 │  │ Log: exp402 │    ← Isolated Logs
+│ HB: exp400  │  │ HB: exp401  │  │ HB: exp402  │    ← Isolated Heartbeats
+└──────┬──────┘  └──────┬──────┘  └──────┬──────┘
+       │                │                │
+       └────────────────┼────────────────┘
+                        ▼
+         ┌──────────────────────────┐
+         │   SHARED SERVICES        │
+         │                          │
+         │  • Alpaca Connection     │    ← Single connection, tagged orders
+         │  • Polygon Data Cache    │    ← Read-only, safe to share
+         │  • Telegram Router       │    ← Routes alerts by experiment
+         │  • Healthcheck Mux       │    ← One port, per-experiment status
+         │  • Comparison Dashboard  │    ← Reads all experiment DBs
+         └──────────────────────────┘
+</div>
+
+<hr>
+
+<h2 id="components">4. Component Design</h2>
+
+<h3>4.1 Experiment Orchestrator (<code>pilotctl</code>)</h3>
+<p>A CLI tool and Python module that manages the experiment lifecycle. Think of it as <code>docker-compose</code> for experiments.</p>
+
+<pre>
+<span class="comment"># Create a new experiment from a template</span>
+pilotctl create --name "EXP-402" \
+    --base champion.json \
+    --override "risk.max_risk_per_trade=10" \
+    --override "strategy.straddle_strangle.enabled=false"
+
+<span class="comment"># List all experiments</span>
+pilotctl list
+<span class="comment"># ┌────────┬────────────┬─────────┬───────────┬──────────┐</span>
+<span class="comment"># │ ID     │ Name       │ Status  │ Trades    │ P&L      │</span>
+<span class="comment"># ├────────┼────────────┼─────────┼───────────┼──────────┤</span>
+<span class="comment"># │ 400    │ Champion   │ RUNNING │ 12        │ +$1,240  │</span>
+<span class="comment"># │ 401    │ CS+SS Blend│ RUNNING │ 8         │ +$890    │</span>
+<span class="comment"># │ 402    │ Low Risk   │ STOPPED │ 0         │ $0       │</span>
+<span class="comment"># └────────┴────────────┴─────────┴───────────┴──────────┘</span>
+
+<span class="comment"># Start / stop / restart</span>
+pilotctl start 400 401
+pilotctl stop 402
+pilotctl restart 401
+
+<span class="comment"># Compare experiments head-to-head</span>
+pilotctl compare 400 401 --metric sharpe,return,drawdown
+
+<span class="comment"># View logs</span>
+pilotctl logs 401 --follow
+
+<span class="comment"># Nuke an experiment (DB, logs, config — with confirmation)</span>
+pilotctl destroy 402
+</pre>
+
+<h3>4.2 Config Factory</h3>
+<p>Generates complete, validated configs from a base template + overrides. Eliminates config drift.</p>
+
+<pre>
+<span class="comment"># configs/templates/base.yaml — shared defaults for ALL experiments</span>
+<span class="keyword">paper_mode</span>: <span class="string">true</span>
+<span class="keyword">alpaca</span>:
+  <span class="keyword">enabled</span>: <span class="string">true</span>
+  <span class="keyword">paper</span>: <span class="string">true</span>
+  <span class="keyword">base_url</span>: <span class="string">"https://paper-api.alpaca.markets"</span>
+<span class="keyword">data</span>:
+  <span class="keyword">provider</span>: <span class="string">polygon</span>
+  <span class="keyword">cache_dir</span>: <span class="string">"data/options_cache"</span>    <span class="comment"># shared — safe</span>
+<span class="keyword">logging</span>:
+  <span class="keyword">level</span>: <span class="string">"INFO"</span>
+  <span class="keyword">console</span>: <span class="string">true</span>
+  <span class="comment"># file: auto-set by orchestrator → logs/exp_{id}.log</span>
+
+<span class="comment"># The factory deep-merges: base.yaml ← strategy.json ← overrides</span>
+<span class="comment"># Then auto-populates:</span>
+<span class="comment">#   db_path: data/pilotai_exp{id}.db</span>
+<span class="comment">#   logging.file: logs/exp_{id}.log</span>
+<span class="comment">#   alerts.json_file: output/alerts_exp{id}.json</span>
+<span class="comment">#   heartbeat_path: data/heartbeat_exp{id}.json</span>
+</pre>
+
+<h3>4.3 Process Manager</h3>
+<p>Starts experiments as supervised child processes with automatic restart, clean shutdown, and health monitoring.</p>
+
+<pre>
+<span class="keyword">class</span> <span class="type">ExperimentProcess</span>:
+    <span class="string">"""Wraps a single experiment scheduler process."""</span>
+    
+    <span class="keyword">def</span> <span class="fn">__init__</span>(self, exp_id: str, config_path: str, env_path: str):
+        self.exp_id = exp_id
+        self.process: subprocess.Popen = None
+        self.restart_count = 0
+        self.max_restarts = 5
+        self.backoff_seconds = [10, 30, 60, 120, 300]
+    
+    <span class="keyword">def</span> <span class="fn">start</span>(self):
+        self.process = subprocess.Popen(
+            ["python", "main.py", "scheduler",
+             "--config", self.config_path,
+             "--env-file", self.env_path],
+            stdout=open(f"logs/exp_{self.exp_id}_stdout.log", "a"),
+            stderr=subprocess.STDOUT,
+        )
+    
+    <span class="keyword">def</span> <span class="fn">is_healthy</span>(self) -> bool:
+        <span class="comment"># Check process alive + heartbeat file freshness</span>
+        ...
+
+<span class="keyword">class</span> <span class="type">ProcessSupervisor</span>:
+    <span class="string">"""Manages all experiment processes with health monitoring."""</span>
+    
+    <span class="keyword">def</span> <span class="fn">run_forever</span>(self):
+        <span class="keyword">while</span> True:
+            <span class="keyword">for</span> exp <span class="keyword">in</span> self.experiments:
+                <span class="keyword">if</span> <span class="keyword">not</span> exp.is_healthy():
+                    exp.restart()     <span class="comment"># with backoff</span>
+                    self.notify(f"⚠️ {exp.exp_id} restarted")
+            time.sleep(30)
+</pre>
+
+<hr>
+
+<h2 id="registry">5. Experiment Registry</h2>
+
+<p>Central SQLite database (<code>data/experiment_registry.db</code>) that tracks all experiments:</p>
+
+<pre>
+<span class="keyword">CREATE TABLE</span> experiments (
+    id          TEXT PRIMARY KEY,           <span class="comment">-- "EXP-400"</span>
+    name        TEXT NOT NULL,              <span class="comment">-- "Champion CS+IC"</span>
+    status      TEXT DEFAULT 'created',     <span class="comment">-- created|running|stopped|archived</span>
+    config_path TEXT NOT NULL,              <span class="comment">-- "configs/generated/exp_400.yaml"</span>
+    env_path    TEXT,                       <span class="comment">-- ".env.exp400"</span>
+    db_path     TEXT NOT NULL,              <span class="comment">-- "data/pilotai_exp400.db"</span>
+    base_config TEXT,                       <span class="comment">-- "champion.json" (source strategy)</span>
+    overrides   JSON,                       <span class="comment">-- {"risk.max_risk_per_trade": 10}</span>
+    
+    <span class="comment">-- Tracking</span>
+    created_at  TEXT DEFAULT (datetime('now')),
+    started_at  TEXT,
+    stopped_at  TEXT,
+    pid         INTEGER,                    <span class="comment">-- OS process ID when running</span>
+    
+    <span class="comment">-- Performance snapshot (updated by comparison engine)</span>
+    total_trades    INTEGER DEFAULT 0,
+    total_pnl       REAL DEFAULT 0.0,
+    win_rate        REAL,
+    sharpe          REAL,
+    max_drawdown    REAL,
+    last_updated    TEXT
+);
+
+<span class="keyword">CREATE TABLE</span> experiment_events (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    exp_id      TEXT NOT NULL REFERENCES experiments(id),
+    event_type  TEXT NOT NULL,              <span class="comment">-- started|stopped|crashed|trade|alert</span>
+    details     JSON,
+    created_at  TEXT DEFAULT (datetime('now'))
+);
+</pre>
+
+<hr>
+
+<h2 id="isolation">6. Isolation Model</h2>
+
+<h3>What MUST Be Isolated (Per-Experiment)</h3>
+<table>
+  <tr><th>Resource</th><th>Isolation Strategy</th><th>Implementation</th></tr>
+  <tr>
+    <td><strong>Database</strong></td>
+    <td>Separate SQLite file per experiment</td>
+    <td><code>data/pilotai_exp{id}.db</code> — already implemented (Bug #1 fix)</td>
+  </tr>
+  <tr>
+    <td><strong>Log Files</strong></td>
+    <td>Separate log file per experiment</td>
+    <td><code>logs/exp_{id}.log</code> — auto-set by Config Factory</td>
+  </tr>
+  <tr>
+    <td><strong>Heartbeat</strong></td>
+    <td>Separate heartbeat file</td>
+    <td><code>data/heartbeat_exp{id}.json</code> — needs scheduler change</td>
+  </tr>
+  <tr>
+    <td><strong>Alert Files</strong></td>
+    <td>Namespaced output files</td>
+    <td><code>output/alerts_exp{id}.{json,csv,txt}</code></td>
+  </tr>
+  <tr>
+    <td><strong>Trade Tagging</strong></td>
+    <td>All orders tagged with experiment ID</td>
+    <td><code>client_order_id</code> prefix: <code>exp400-cs-abc123</code></td>
+  </tr>
+  <tr>
+    <td><strong>Position Filtering</strong></td>
+    <td>Each experiment only manages its own trades</td>
+    <td>Filter by <code>client_order_id</code> prefix in PositionMonitor</td>
+  </tr>
+</table>
+
+<h3>What CAN Be Shared (Centralized)</h3>
+<table>
+  <tr><th>Resource</th><th>Why Shareable</th><th>Notes</th></tr>
+  <tr>
+    <td><strong>Polygon Data Cache</strong></td>
+    <td>Read-only market data, idempotent</td>
+    <td>Saves API calls; safe for concurrent reads</td>
+  </tr>
+  <tr>
+    <td><strong>Alpaca Credentials</strong></td>
+    <td>One paper account, order-tagged</td>
+    <td>Use <code>client_order_id</code> prefix to partition</td>
+  </tr>
+  <tr>
+    <td><strong>Economic Calendar</strong></td>
+    <td>Static reference data</td>
+    <td>FOMC/CPI/NFP dates don't change</td>
+  </tr>
+  <tr>
+    <td><strong>VIX/Regime Data</strong></td>
+    <td>Same market regime for all</td>
+    <td>Could cache centrally, but per-process is fine too</td>
+  </tr>
+</table>
+
+<h3>🔑 The Alpaca Problem — Solved with Order Tagging</h3>
+
+<div class="box solution">
+  <strong>Solution: Prefix all <code>client_order_id</code> values with the experiment ID.</strong>
+  <br><br>
+  Currently: <code>cs-a1b2c3d4e5f6g7h8</code><br>
+  Proposed: <code><strong>exp400</strong>-cs-a1b2c3d4e5f6g7h8</code>
+  <br><br>
+  Then the <code>PositionMonitor</code> and <code>PositionReconciler</code> filter by prefix:
+  <pre>
+<span class="comment"># position_monitor.py — only manage our experiment's trades</span>
+orders = alpaca.list_orders(status='all')
+my_orders = [o <span class="keyword">for</span> o <span class="keyword">in</span> orders 
+             <span class="keyword">if</span> o.client_order_id.startswith(f"<span class="highlight">{self.exp_id}</span>-")]</pre>
+  This lets multiple experiments safely share one Alpaca paper account without cross-contamination.
+</div>
+
+<hr>
+
+<h2 id="lifecycle">7. Experiment Lifecycle</h2>
+
+<div class="diagram">
+  CREATE                 START                  STOP                 ARCHIVE
+    │                      │                     │                     │
+    ▼                      ▼                     ▼                     ▼
+┌────────┐           ┌─────────┐           ┌─────────┐          ┌──────────┐
+│CREATED │──start──▶ │ RUNNING │──stop───▶ │ STOPPED │──arch──▶ │ ARCHIVED │
+│        │           │         │           │         │          │          │
+│• Config│           │• Process│           │• DB kept│          │• DB kept │
+│  gen'd │           │  alive  │           │• Config │          │• Frozen  │
+│• DB    │           │• Scans  │           │  kept   │          │• Compare │
+│  init'd│           │  active │           │• Can    │          │  only    │
+│        │           │• Trades │           │  restart│          │          │
+└────────┘           └────┬────┘           └─────────┘          └──────────┘
+                          │
+                     crash│restart
+                          │
+                     ┌────▼────┐
+                     │ CRASHED │──auto──▶ RUNNING (with backoff)
+                     │         │
+                     │• Logged │
+                     │• Alert  │
+                     │  sent   │
+                     └─────────┘
+</div>
+
+<h3>Lifecycle Operations</h3>
+<ol>
+  <li><strong>CREATE</strong> — Config Factory generates YAML from base + overrides. Registry entry created. DB initialized (empty). Validated.</li>
+  <li><strong>START</strong> — Process Manager spawns <code>python main.py scheduler</code>. PID recorded. Heartbeat monitoring begins.</li>
+  <li><strong>RUNNING</strong> — Scheduler scans on market schedule. Trades executed. Positions monitored. Heartbeat written every scan.</li>
+  <li><strong>STOP</strong> — SIGTERM sent. Process exits gracefully. Status updated. DB preserved for analysis.</li>
+  <li><strong>RESTART</strong> — Stop then start. Dedup persistence ensures no duplicate trades on restart.</li>
+  <li><strong>ARCHIVE</strong> — Experiment frozen. No more trades. DB and logs preserved. Available for comparison.</li>
+  <li><strong>DESTROY</strong> — Everything deleted (DB, logs, config). Requires <code>--confirm</code> flag.</li>
+</ol>
+
+<hr>
+
+<h2 id="centralized">8. Centralized Services</h2>
+
+<h3>8.1 Telegram Alert Router</h3>
+<p>Instead of each experiment sending raw alerts to the same chat, a centralized router prefixes messages with the experiment ID and can route to different chats/threads:</p>
+
+<pre>
+<span class="keyword">class</span> <span class="type">ExperimentAlertRouter</span>:
+    <span class="string">"""Routes alerts from multiple experiments to the right destination."""</span>
+    
+    <span class="keyword">def</span> <span class="fn">format_alert</span>(self, exp_id: str, alert: dict) -> str:
+        <span class="keyword">return</span> f"<span class="string">[{exp_id}] {alert['emoji']} {alert['message']}</span>"
+    
+    <span class="keyword">def</span> <span class="fn">route</span>(self, exp_id: str, alert: dict):
+        <span class="comment"># Option A: All experiments → one chat, prefixed</span>
+        <span class="comment"># Option B: Each experiment → its own Telegram thread</span>
+        <span class="comment"># Option C: Summary alerts only → main chat</span>
+        ...
+</pre>
+
+<div class="box info">
+  <strong>Telegram Threading:</strong> Use Telegram's <code>message_thread_id</code> (forum topics) to give each experiment its own thread in a group. Keeps the main chat clean while preserving per-experiment detail.
+</div>
+
+<h3>8.2 Unified Healthcheck</h3>
+<p>One HTTP server (port 8080) that aggregates health from all experiments:</p>
+
+<pre>
+GET /health
+{
+  "status": "healthy",
+  "experiments": {
+    "EXP-400": {"status": "running", "last_scan": "2026-03-13 14:30", "trades": 12},
+    "EXP-401": {"status": "running", "last_scan": "2026-03-13 14:30", "trades": 8},
+    "EXP-402": {"status": "stopped"}
+  }
+}
+
+GET /health/exp/400   <span class="comment">← per-experiment detail</span>
+GET /compare/400/401  <span class="comment">← head-to-head comparison</span>
+</pre>
+
+<h3>8.3 Comparison Engine</h3>
+<p>Reads trade data from all experiment DBs and produces unified metrics:</p>
+
+<pre>
+<span class="keyword">class</span> <span class="type">ComparisonEngine</span>:
+    <span class="string">"""Cross-experiment performance comparison."""</span>
+    
+    <span class="keyword">def</span> <span class="fn">compare</span>(self, exp_ids: List[str]) -> ComparisonReport:
+        results = {}
+        <span class="keyword">for</span> exp_id <span class="keyword">in</span> exp_ids:
+            db = self.registry.get_db_path(exp_id)
+            trades = get_trades(path=db)
+            results[exp_id] = {
+                "total_trades": len(trades),
+                "total_pnl": sum(t["pnl"] <span class="keyword">for</span> t <span class="keyword">in</span> trades <span class="keyword">if</span> t["pnl"]),
+                "win_rate": ...,
+                "sharpe": ...,
+                "max_drawdown": ...,
+                "avg_days_held": ...,
+            }
+        <span class="keyword">return</span> ComparisonReport(results)
+    
+    <span class="keyword">def</span> <span class="fn">daily_summary</span>(self) -> str:
+        <span class="string">"""Generate a daily comparison summary for all active experiments."""</span>
+        ...
+</pre>
+
+<hr>
+
+<h2 id="monitoring">9. Monitoring & Comparison Dashboard</h2>
+
+<h3>Daily Digest (Telegram)</h3>
+<p>Sent automatically at market close (4:15 PM ET):</p>
+
+<pre>
+📊 <strong>Daily Paper Trading Digest — March 13, 2026</strong>
+
+┌──────────┬────────┬────────┬─────────┬──────────┬─────────┐
+│ Exp      │ Trades │ Today  │ Total   │ Win Rate │ DD      │
+├──────────┼────────┼────────┼─────────┼──────────┼─────────┤
+│ EXP-400  │ 12     │ +$340  │ +$1,580 │ 75%      │ -2.1%   │
+│ EXP-401  │ 8      │ +$520  │ +$2,210 │ 80%      │ -1.3%   │
+│ EXP-402  │ 3      │ -$120  │ +$180   │ 60%      │ -4.2%   │
+└──────────┴────────┴────────┴─────────┴──────────┴─────────┘
+
+🏆 Leader: EXP-401 (CS+SS Blend) — +2.2% total return
+</pre>
+
+<h3>Comparison HTML Report</h3>
+<p>Weekly auto-generated HTML with charts, equity curves, trade distributions, regime performance breakdowns. Sent via Telegram as a file.</p>
+
+<hr>
+
+<h2 id="implementation">10. Implementation Plan</h2>
+
+<div class="phase">
+  <div class="phase-header">Phase 1: Foundation <span class="effort">~2 days</span></div>
+  <ul>
+    <li>Create <code>experiment_manager.py</code> — the orchestrator core</li>
+    <li>Create <code>experiment_registry.py</code> — SQLite registry with CRUD</li>
+    <li>Create <code>config_factory.py</code> — config generation from base + overrides</li>
+    <li>Create <code>configs/templates/base.yaml</code> — shared default template</li>
+    <li>Add experiment ID to <code>client_order_id</code> prefix in <code>execution_engine.py</code></li>
+    <li>Add experiment ID filter to <code>position_monitor.py</code> and <code>reconciler.py</code></li>
+    <li>Make heartbeat path configurable (per-experiment)</li>
+  </ul>
+</div>
+
+<div class="phase">
+  <div class="phase-header">Phase 2: CLI Tool (<code>pilotctl</code>) <span class="effort">~1 day</span></div>
+  <ul>
+    <li>Build <code>pilotctl</code> CLI with: <code>create</code>, <code>list</code>, <code>start</code>, <code>stop</code>, <code>restart</code>, <code>logs</code>, <code>destroy</code></li>
+    <li>Process supervision with auto-restart and backoff</li>
+    <li>Status display with live PID/heartbeat checking</li>
+  </ul>
+</div>
+
+<div class="phase">
+  <div class="phase-header">Phase 3: Centralized Services <span class="effort">~1 day</span></div>
+  <ul>
+    <li>Unified healthcheck server (multiplexed across experiments)</li>
+    <li>Telegram alert router with experiment prefixing</li>
+    <li>Per-experiment heartbeat file paths</li>
+  </ul>
+</div>
+
+<div class="phase">
+  <div class="phase-header">Phase 4: Comparison & Reporting <span class="effort">~1 day</span></div>
+  <ul>
+    <li>Build <code>ComparisonEngine</code> — reads all experiment DBs</li>
+    <li>Daily digest (Telegram) at market close</li>
+    <li><code>pilotctl compare</code> CLI command</li>
+    <li>Weekly HTML comparison report</li>
+  </ul>
+</div>
+
+<div class="phase">
+  <div class="phase-header">Phase 5: Polish & Hardening <span class="effort">~1 day</span></div>
+  <ul>
+    <li>Config validation against base template (detect drift)</li>
+    <li>Experiment cloning (<code>pilotctl clone 400 --name "EXP-403" --override ...</code>)</li>
+    <li>Graceful shutdown coordination (stop all experiments together)</li>
+    <li>Archive + export functionality</li>
+    <li>Integration tests for multi-experiment scenarios</li>
+  </ul>
+</div>
+
+<hr>
+
+<h2>Summary — File Structure</h2>
+
+<pre>
+pilotai-credit-spreads/
+├── pilotctl.py                       <span class="comment"># CLI entry point</span>
+├── orchestrator/
+│   ├── __init__.py
+│   ├── experiment_manager.py         <span class="comment"># Core orchestration logic</span>
+│   ├── experiment_registry.py        <span class="comment"># SQLite experiment registry</span>
+│   ├── config_factory.py             <span class="comment"># Config generation from templates</span>
+│   ├── process_supervisor.py         <span class="comment"># Process management + auto-restart</span>
+│   ├── comparison_engine.py          <span class="comment"># Cross-experiment analysis</span>
+│   └── alert_router.py              <span class="comment"># Centralized Telegram routing</span>
+├── configs/
+│   ├── templates/
+│   │   └── base.yaml                <span class="comment"># Shared defaults</span>
+│   ├── strategies/
+│   │   ├── champion.json            <span class="comment"># Champion strategy params</span>
+│   │   └── blend_cs_ss.json         <span class="comment"># CS+SS blend params</span>
+│   └── generated/                   <span class="comment"># Auto-generated per-experiment configs</span>
+│       ├── exp_400.yaml
+│       ├── exp_401.yaml
+│       └── ...
+├── data/
+│   ├── experiment_registry.db       <span class="comment"># Central registry</span>
+│   ├── pilotai_exp400.db            <span class="comment"># Per-experiment trade DB</span>
+│   ├── pilotai_exp401.db
+│   ├── heartbeat_exp400.json        <span class="comment"># Per-experiment heartbeat</span>
+│   ├── heartbeat_exp401.json
+│   └── options_cache/               <span class="comment"># Shared (read-only)</span>
+├── logs/
+│   ├── orchestrator.log             <span class="comment"># Orchestrator log</span>
+│   ├── exp_400.log                  <span class="comment"># Per-experiment logs</span>
+│   └── exp_401.log
+└── output/
+    ├── comparison_weekly.html        <span class="comment"># Weekly comparison report</span>
+    └── alerts_exp400.json           <span class="comment"># Per-experiment alerts</span>
+</pre>
+
+<hr>
+
+<h2>Key Design Decisions</h2>
+
+<table>
+  <tr><th>Decision</th><th>Choice</th><th>Rationale</th></tr>
+  <tr>
+    <td>Process model</td>
+    <td>Separate OS processes (not threads)</td>
+    <td>Full isolation: if one experiment crashes, others survive. SQLite WAL handles concurrent reads. No GIL contention.</td>
+  </tr>
+  <tr>
+    <td>Config management</td>
+    <td>Template + overrides (not manual YAML)</td>
+    <td>Eliminates config drift. One source of truth for defaults. Easy to create variations.</td>
+  </tr>
+  <tr>
+    <td>Alpaca sharing</td>
+    <td>One account, order-tagged</td>
+    <td>Alpaca paper accounts are limited. Tagging is deterministic and filterable.</td>
+  </tr>
+  <tr>
+    <td>Registry storage</td>
+    <td>SQLite (not YAML/JSON)</td>
+    <td>Queryable, atomic updates, supports concurrent access from CLI + orchestrator.</td>
+  </tr>
+  <tr>
+    <td>Supervision</td>
+    <td>Built-in Python (not systemd/supervisor)</td>
+    <td>Portable. Runs on Mac, Linux, Docker. No external dependencies.</td>
+  </tr>
+  <tr>
+    <td>Comparison</td>
+    <td>Read from experiment DBs directly</td>
+    <td>No data duplication. Each experiment's DB is the source of truth. Comparison is read-only.</td>
+  </tr>
+</table>
+
+<div class="box solution">
+  <p class="verdict">Total estimated effort: ~6 days of focused development.</p>
+  <p>After this, adding a new paper trading experiment becomes a one-liner:</p>
+  <pre>pilotctl create --name "EXP-403 Gamma Lotto" --base gamma_lotto.json --override "risk.max_risk_per_trade=2"
+pilotctl start 403</pre>
+  <p>Fully isolated. Auto-supervised. Auto-compared. Production-grade.</p>
+</div>
+
+<hr>
+<p style="color: #95a5a6; font-size: 12px; margin-top: 24px;">Prepared by Maximus Cruz · March 13, 2026 · PilotAI Credit Spreads — Operation Crack The Code</p>
+
+</body>
+</html>

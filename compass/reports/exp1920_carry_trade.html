@@ -1,0 +1,44 @@
+<!doctype html><html><head><meta charset='utf-8'>
+<title>EXP-1920 — Carry Trade ETF Strategy</title>
+<style>
+ body{font-family:-apple-system,Segoe UI,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;color:#1a1a1a;line-height:1.5}
+ h1{border-bottom:2px solid #222;padding-bottom:.3em} h2{margin-top:1.6em;border-bottom:1px solid #ccc}
+ table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.93em}
+ th,td{border:1px solid #bbb;padding:5px 8px;text-align:left} th{background:#f0f0f0}
+ .ok{color:#0a7a0a;font-weight:600} .warn{color:#b86b00;font-weight:600} .bad{color:#b80000;font-weight:600}
+ .small{color:#555;font-size:.88em}
+</style></head><body>
+<h1>EXP-1920 — Carry Trade / Rate-Differential ETF Strategy</h1>
+<p class='small'>Generated 2026-04-07T13:31:43 · Universe: 6 FX + 6 commodity ETFs ·
+   Real Yahoo Finance only · Live window: 2021-01-01 → 2025-12-31</p>
+
+<h2>Sleeve performance</h2>
+<table>
+<tr><th>Sleeve</th><th>Days</th><th>CAGR</th><th>Sharpe</th><th>Sortino</th><th>Max DD</th><th>Vol</th><th>Calmar</th></tr>
+<tr><td>fx_sleeve</td><td>1255</td><td>4.57%</td><td>0.58</td><td>0.82</td><td>11.83%</td><td>8.30%</td><td>0.39</td></tr><tr><td>commodity_sleeve</td><td>1255</td><td>4.44%</td><td>0.30</td><td>0.48</td><td>59.18%</td><td>36.98%</td><td>0.07</td></tr><tr><td>combined</td><td>1255</td><td>6.41%</td><td>0.42</td><td>0.67</td><td>36.22%</td><td>18.87%</td><td>0.18</td></tr>
+</table>
+<p>Target Sharpe ≥ 2.0: <span class='warn'>NOT MET</span></p>
+
+<h2>Walk-forward (combined sleeve, by year)</h2>
+<table>
+<tr><th>Year</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th></tr>
+<tr><td>2021</td><td>9.62%</td><td>0.65</td><td>15.71%</td></tr><tr><td>2022</td><td>2.04%</td><td>0.20</td><td>23.76%</td></tr><tr><td>2023</td><td>10.72%</td><td>0.65</td><td>20.13%</td></tr><tr><td>2024</td><td>15.72%</td><td>0.85</td><td>19.33%</td></tr><tr><td>2025</td><td>-4.87%</td><td>-0.21</td><td>17.24%</td></tr>
+</table>
+
+<h2>Correlation to EXP-1220 credit spreads</h2>
+<table>
+<tr><th>Sleeve</th><th>n months</th><th>Pearson</th><th>Spearman</th></tr>
+<tr><td>combined</td><td>60</td><td>-0.077</td><td>-0.018</td></tr>
+<tr><td>fx</td><td>60</td><td>-0.136</td><td>0.014</td></tr>
+<tr><td>commodity</td><td>60</td><td>-0.048</td><td>0.019</td></tr>
+</table>
+
+<h2>Method notes</h2>
+<ul>
+<li>FX carry signal: trailing 12m total-return minus trailing 12m price-return — that residual is the dividend distribution, which for grantor-trust FX ETFs <i>is</i> the interest income paid through from the underlying currency deposit.</li>
+<li>Commodity carry signal: 3m TR annualised − 12m TR. Erb & Harvey 2006 style roll-yield proxy.</li>
+<li>Monthly rebalance, long top-2 / short bottom-2 in each sleeve, equal weight, 50/50 blend across sleeves. Decision-to-execution lag of one month avoids look-ahead.</li>
+<li>EXP-1220 daily-return series built from the same trade engine on real IronVault SPY chains.</li>
+<li>All data Yahoo Finance with <code>auto_adjust=False</code>; no synthetic prices anywhere.</li>
+</ul>
+</body></html>

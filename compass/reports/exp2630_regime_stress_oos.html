@@ -1,0 +1,111 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>EXP-2630 OOS Regime Stress Test</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1200px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.55; }
+  h1 { color:#0f172a; } h2 { color:#334155; margin-top:2.2em;
+         padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:16px; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:18px 0; }
+  .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;
+          padding:18px; text-align:center; flex:1; min-width:140px; }
+  .kpi .value { font-size:1.5em; font-weight:800; color:#0f172a; }
+  .kpi .label { font-size:0.72em; color:#64748b; margin-top:4px; text-transform:uppercase; }
+  .good { color:#16a34a; font-weight:700; }
+  .bad  { color:#dc2626; font-weight:700; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.82em; }
+  th { background:#f1f5f9; padding:9px 12px; text-align:right; font-weight:600;
+       color:#475569; border-bottom:2px solid #cbd5e1; font-size:0.7em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  .note { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;
+            padding:14px; margin:14px 0; font-size:0.85rem; }
+</style></head><body>
+
+<h1>EXP-2630 — Out-of-Sample Regime Stress Test</h1>
+<div class="subtitle">7-stream North Star v6 · 3 unprecedented stress scenarios · DD circuit breaker | 2026-04-08T06:34:47.548693Z</div>
+
+<div class="note">
+    <strong>Scenarios:</strong> (a) 60-day correlation shock ρ=0.80,
+    (b) 90-day extended vol stress at 95th-pct vol and 5th-pct mean,
+    (c) 63-day forced losing run sampled from each stream's bottom
+    10th percentile. Real portfolio stream from exp2280_v6_sparse.pkl;
+    stress windows inserted mid-sample while the rest of the path is
+    real observed returns. <strong>Circuit breaker:</strong> EXP-2370
+    drawdown model — 10% soft → 0.5× leverage, 12% hard → flatten,
+    recovery at 6% DD.
+</div>
+
+<h2>Baseline (no stress, 3× gross)</h2>
+<div class="kpi-row">
+    <div class="kpi"><div class="value">13.08%</div><div class="label">CAGR</div></div>
+    <div class="kpi"><div class="value">4.54</div><div class="label">Sharpe</div></div>
+    <div class="kpi"><div class="value">-3.73%</div><div class="label">Max DD</div></div>
+    <div class="kpi"><div class="value">2.72%</div><div class="label">Vol</div></div>
+</div>
+
+<h2>Stress Scenario Comparison</h2>
+<table>
+    <thead><tr>
+        <th>Scenario</th>
+        <th>Raw CAGR</th><th>Raw Sh</th><th>Raw DD</th>
+        <th>CB CAGR</th><th>CB Sh</th><th>CB DD</th>
+        <th>Cond Sh (inside)</th><th>Worst day</th>
+        <th>% WARN</th><th>% HALT</th>
+    </tr></thead>
+    <tbody><tr>
+            <td><strong>(a) corr shock ρ=0.80 × 60d</strong></td>
+            <td>13.04%</td>
+            <td>4.26</td>
+            <td class="good">-3.73%</td>
+            <td>13.04%</td>
+            <td>4.26</td>
+            <td class="good">-3.73%</td>
+            <td>2.11</td>
+            <td>-0.94%</td>
+            <td>0.0%</td>
+            <td>0.0%</td>
+        </tr><tr>
+            <td><strong>(b) VIX high 90d (p95/p05)</strong></td>
+            <td>8.61%</td>
+            <td>2.75</td>
+            <td class="bad">-18.71%</td>
+            <td>2.86%</td>
+            <td>1.21</td>
+            <td class="bad">-12.12%</td>
+            <td>-12.72</td>
+            <td>-0.89%</td>
+            <td>0.8%</td>
+            <td>55.6%</td>
+        </tr><tr>
+            <td><strong>(c) 3-month losing run</strong></td>
+            <td>10.17%</td>
+            <td>3.48</td>
+            <td class="bad">-12.19%</td>
+            <td>9.17%</td>
+            <td>3.31</td>
+            <td class="good">-11.23%</td>
+            <td>-25.82</td>
+            <td>-0.74%</td>
+            <td>20.6%</td>
+            <td>0.0%</td>
+        </tr></tbody>
+</table>
+
+<h2>Sign-Off</h2>
+<div class="kpi-row">
+    <div class="kpi"><div class="value bad">REJECT</div><div class="label">Decision</div></div>
+    <div class="kpi"><div class="value">1/3</div><div class="label">Gates</div></div>
+</div>
+<ul>
+    <li>(a) corr shock ρ=0.80 × 60d: raw DD -3.73%  CB DD -3.73%  CB activity WARN 0.0% HALT 0.0%  [PASS]</li><li>(b) VIX high 90d (p95/p05): raw DD -18.71%  CB DD -12.12%  CB activity WARN 0.8% HALT 55.6%  [FAIL]</li><li>(c) 3-month losing run: raw DD -12.19%  CB DD -11.23%  CB activity WARN 20.6% HALT 0.0%  [PASS]</li>
+</ul>
+
+<div style="margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0;
+            font-size:0.78em; color:#94a3b8; text-align:center;">
+EXP-2630 — compass/exp2630_regime_stress_oos.py · Real 7-stream cache · EXP-2370 circuit breaker
+</div>
+
+</body></html>

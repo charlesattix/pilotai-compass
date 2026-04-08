@@ -1,0 +1,149 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EXP-1220 Paper Trading — 2× Static Leverage
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# One of 4 leverage-sweep configs (2x / 3x / 4x / 5x) Carlos wants to
+# paper trade simultaneously. Each runs on its own Alpaca paper sub-account
+# with namespaced state/journal/health files. Sweep goal: measure real
+# paper-trading variance vs backtest expectations across leverage levels.
+#
+# Validated backtest (commit dcf617c, real Yahoo/IronVault data):
+#   1.5x:  CAGR 99.2%, Sharpe 3.83, Max DD 11.2%
+#   2.0x:  CAGR ~130% (extrapolated linearly from 1.5x validation)
+#   3.0x:  CAGR ~195% (extrapolated — WARNING: leverage-DD multiplier risk)
+#   4.0x:  CAGR ~260% (extrapolated — approaches margin-call territory)
+#   5.0x:  CAGR ~325% (extrapolated — high blow-up risk)
+#
+# Reality check: leverage multiplies DD as much as returns. At 5x, a 10%
+# adverse move in the underlying spread = 50% account drawdown. These
+# configs include progressively tighter DD halts.
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: "EXP-1220 Paper Trading — 2× Static Leverage"
+version: "1.0.0"
+mode: paper
+created: "2026-04-06"
+leverage_sweep_id: "2x"
+
+# ─── Account ─────────────────────────────────────────────────────────────
+account:
+  broker: alpaca
+  environment: paper
+  starting_capital: 100000
+  currency: USD
+  margin_type: reg_t
+
+# ─── Instrument ──────────────────────────────────────────────────────────
+instrument:
+  ticker: SPY
+  asset_class: options
+  strategy_type: bull_put_spread
+  fallback_type: bear_call_spread
+
+# ─── Leverage ────────────────────────────────────────────────────────────
+leverage:
+  mode: static
+  multiplier: 2.0
+  dynamic_leverage: false
+  hedge_overlay: false
+
+# ─── Entry Cadence ───────────────────────────────────────────────────────
+cadence:
+  frequency: 7d
+  scan_day: monday
+  scan_time: "09:35"
+  max_concurrent: 5
+  min_spacing_days: 5
+
+# ─── Position Sizing ────────────────────────────────────────────────────
+sizing:
+  base_risk_pct: 1.0       # 1% base risk per trade
+  leveraged_risk_pct: 2.0  # = base × 2.0 multiplier = 2% risk per trade
+  max_portfolio_risk_pct: 10.0  # allow higher aggregate risk at 2x
+  contracts_min: 1
+  contracts_max: 15
+  # Example: $100K account, 2% risk = $2,000 per trade
+  # $5 spread, ~$4.50 max loss → 4 contracts ($1,800 risk)
+
+# ─── Spread Construction ────────────────────────────────────────────────
+spread:
+  width: 5.0
+  target_dte: 30
+  min_dte: 21
+  max_dte: 45
+  otm_pct: 0.05
+  min_credit: 0.30
+  min_credit_pct: 0.06
+
+# ─── Entry Signals ──────────────────────────────────────────────────────
+entry_signals:
+  vix_max_entry: 35.0
+  vix_min_entry: 10.0
+  ts_max_ratio: 1.15
+  trend_filter: true
+  trend_ma_period: 20
+
+# ─── Exit Rules ──────────────────────────────────────────────────────────
+exits:
+  profit_target_pct: 50
+  stop_loss_multiplier: 2.0
+  max_hold_days: 21
+  dte_exit: 5
+  vix_emergency_exit: 45
+
+# ─── Risk Management (2x calibration) ────────────────────────────────────
+# DD halt is tighter than 1.5x to account for higher leverage sensitivity.
+risk:
+  # Position-sizing fields read by alerts/alert_position_sizer.py.
+  # These mirror the values in `sizing:` above (which uses legacy aliases)
+  # so the canonical and legacy keys stay in sync.
+  max_risk_per_trade: 2.0       # 2% of starting_capital per trade
+  max_contracts: 15
+  min_contracts: 1
+  sizing_mode: flat             # base = backtest.starting_capital
+  max_daily_loss_pct: 4.0       # vs 3.0 at 1.5x
+  max_weekly_loss_pct: 7.0      # vs 5.0 at 1.5x
+  max_drawdown_halt_pct: 13.0   # vs 10.0 at 1.5x
+  drawdown_recovery_pct: 6.5    # vs 5.0 at 1.5x
+  correlation_check: true
+
+# ─── Backtest reference (used by sizer for starting_capital) ─────────────
+backtest:
+  starting_capital: 100000
+
+# ─── Monitoring & Alerts ─────────────────────────────────────────────────
+monitoring:
+  check_interval_minutes: 15
+  daily_report_time: "16:05"
+  alert_channels:
+    - telegram
+  alerts:
+    position_opened: true
+    position_closed: true
+    stop_loss_hit: true
+    profit_target_hit: true
+    vix_spike_above: 28          # earlier warning at 2x
+    daily_loss_above_pct: 2.5
+    drawdown_above_pct: 6.0
+
+# ─── Data Sources ────────────────────────────────────────────────────────
+data:
+  price_source: alpaca
+  vix_source: yahoo
+  options_source: alpaca
+  historical_cache: data/options_cache.db
+
+# ─── Logging ─────────────────────────────────────────────────────────────
+logging:
+  level: INFO
+  file: logs/paper_exp1220_2x.log
+  max_size_mb: 50
+  backup_count: 5
+  trade_journal: logs/paper_exp1220_2x_trade_journal.csv
+
+# ─── Rule Zero ───────────────────────────────────────────────────────────
+rule_zero:
+  enforced: true
+  statement: |
+    ZERO SYNTHETIC DATA. Every price and fill traces to Alpaca live quotes
+    or Yahoo Finance VIX/SPY. No np.random. No Black-Scholes pricing.

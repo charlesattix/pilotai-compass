@@ -1,0 +1,145 @@
+# ============================================================================
+# compass_c001.yaml — COMPASS macro sizing enabled
+# ============================================================================
+# Purpose: Phase 4 validation. Tests macro score → position sizing impact.
+#
+# What's ON:
+#   - macro_sizing: true → queries macro_db for composite macro score.
+#     Score < 45 (fear)  → RiskGate sets 'boost' flag → sizer increases position.
+#     Score > 75 (greed) → RiskGate sets 'reduce' flag → sizer decreases position.
+#     Score 45-75         → neutral, no sizing adjustment.
+#
+# What's OFF:
+#   - rrg_filter: false → no RRG quadrant blocking
+#   - portfolio_mode: false → no multi-underlying limits
+#
+# Expected outcome: slightly better risk-adjusted returns in volatile periods
+# (2020 COVID, 2022 bear) due to counter-cyclical sizing.
+#
+# Base: EXP-401 (CS 12% + SS 3%, regime-adaptive)
+# ============================================================================
+
+experiment_id: "COMPASS-C001"
+
+tickers:
+  - SPY
+
+# ── COMPASS extensions: MACRO SIZING ON ─────────────────────────────────────
+compass:
+  macro_sizing: true        # Query macro_db, set boost/reduce sizing flags
+  rrg_filter: false         # RRG filter OFF
+  portfolio_mode: false     # Portfolio limits OFF
+
+# ── Credit Spread Strategy (12% risk, regime-adaptive) ──────────────────────
+strategy:
+  min_dte: 15
+  max_dte: 25
+  target_dte: 15
+  manage_dte: 0
+  direction: regime_adaptive
+  otm_pct: 0.02
+  use_delta_selection: false
+  target_delta: 0.12
+  min_delta: 0.08
+  max_delta: 0.18
+  spread_width: 12
+  spread_width_high_iv: 12
+  spread_width_low_iv: 12
+  min_iv_rank: 0
+  min_iv_percentile: 0
+
+  iron_condor:
+    enabled: true
+    rsi_min: 35
+    rsi_max: 60
+    min_iv_rank: 45.0
+    target_dte: 30
+    min_dte: 20
+    otm_pct_put: 0.04
+    otm_pct_call: 0.03
+    spread_width: 12
+    min_combined_credit_pct: 0.25
+    profit_target_pct: 0.30
+    stop_loss_multiplier: 2.5
+    max_risk_pct: 3.5
+
+  straddle_strangle:
+    enabled: true
+    mode: short_post_event
+    target_dte: 5
+    otm_pct: 0.04
+    event_iv_boost: 0.15
+    iv_crush_pct: 0.5
+    profit_target_pct: 0.55
+    stop_loss_pct: 0.45
+    max_risk_pct: 3.0
+    event_types: fomc_cpi
+
+  technical:
+    use_trend_filter: true
+    use_rsi_filter: false
+    use_support_resistance: false
+    fast_ma: 50
+    slow_ma: 80
+    rsi_period: 14
+    rsi_oversold: 30
+    rsi_overbought: 70
+
+  regime_mode: combo
+  regime_config:
+    signals:
+      - price_vs_ma200
+      - rsi_momentum
+      - vix_structure
+    ma_slow_period: 80
+    ma200_neutral_band_pct: 0.5
+
+# ── Risk Management ─────────────────────────────────────────────────────────
+risk:
+  account_size: 100000
+  max_risk_per_trade: 12.0
+  straddle_strangle_risk_pct: 3.0
+  sizing_mode: flat
+  compound: false
+  min_contracts: 1
+  max_contracts: 25
+  max_positions: 12
+  max_positions_per_ticker: 3
+  scan_days: [0, 1, 2, 3, 4]
+  profit_target: 55
+  stop_loss_multiplier: 1.25
+  stop_loss_pct_of_width: 90
+  delta_threshold: 0.30
+  min_credit_pct: 5
+  momentum_filter_pct: 2.0
+
+  portfolio_risk:
+    max_portfolio_risk_pct: 40
+    max_single_ticker_pct: 40
+    max_same_expiration: 4
+
+  drawdown_cb_pct: 40
+  cooldown_bars: 3
+  enable_rolling: false
+  max_rolls_per_position: 0
+
+  # Regime scales (EXP-401 optimized)
+  regime_scale_bull: 1.0
+  regime_scale_bear: 0.3
+  regime_scale_high_vol: 0.3
+  regime_scale_low_vol: 0.8
+  regime_scale_crash: 0.0
+
+  ss_regime_scale_bull: 1.5
+  ss_regime_scale_bear: 1.5
+  ss_regime_scale_high_vol: 2.5
+  ss_regime_scale_low_vol: 1.0
+  ss_regime_scale_crash: 0.5
+
+# ── Backtester Reference ────────────────────────────────────────────────────
+backtest:
+  starting_capital: 100000
+  commission_per_contract: 0.65
+  slippage: 0.05
+  exit_slippage: 0.10
+  score_threshold: 25

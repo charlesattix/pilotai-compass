@@ -1,0 +1,124 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>EXP-2540 Regime-Conditional TC Model</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1200px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.55; }
+  h1 { color:#0f172a; } h2 { color:#334155; margin-top:2.2em;
+         padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:16px; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:18px 0; }
+  .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;
+          padding:18px; text-align:center; flex:1; min-width:150px; }
+  .kpi .value { font-size:1.5em; font-weight:800; color:#0f172a; }
+  .kpi .label { font-size:0.72em; color:#64748b; margin-top:4px; text-transform:uppercase; }
+  .good { color:#16a34a; font-weight:700; }
+  .bad  { color:#dc2626; font-weight:700; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.85em; }
+  th { background:#f1f5f9; padding:9px 12px; text-align:right; font-weight:600;
+       color:#475569; border-bottom:2px solid #cbd5e1; font-size:0.74em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  .note { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;
+            padding:14px; margin:14px 0; font-size:0.85rem; }
+</style></head><body>
+
+<h1>EXP-2540 — Regime-Conditional Transaction Cost Model</h1>
+<div class="subtitle">Real SPY option friction from IronVault · 7-stream portfolio | 2026-04-08T05:35:37.808462Z</div>
+
+<div class="note">
+    <strong>Friction proxy:</strong> median (High-Low)/Close per contract per
+    day across 1,508 SPY option-day rows in IronVault.
+    Scaled so LOW-VIX regime = 5.0 bps baseline
+    (Almgren-Chriss liquid-SPY estimate). The scaling factor is preserved,
+    so the relative structure across regimes is real-data-derived.
+</div>
+
+<h2>Real-Data Regime Friction</h2>
+<table>
+    <thead><tr><th>Regime</th><th>Days</th><th>Median (H-L)/C</th>
+    <th>p25</th><th>p75</th><th>Calibrated bps</th><th>× LOW</th></tr></thead>
+    <tbody><tr>
+            <td><strong>LOW</strong></td>
+            <td>279</td>
+            <td>11.111%</td>
+            <td>8.109%</td>
+            <td>13.504%</td>
+            <td>5.0</td>
+            <td>1.0×</td>
+        </tr><tr>
+            <td><strong>NORMAL</strong></td>
+            <td>895</td>
+            <td>15.457%</td>
+            <td>11.273%</td>
+            <td>20.487%</td>
+            <td>7.0</td>
+            <td>1.4×</td>
+        </tr><tr>
+            <td><strong>HIGH</strong></td>
+            <td>275</td>
+            <td>22.208%</td>
+            <td>16.295%</td>
+            <td>28.931%</td>
+            <td>10.0</td>
+            <td>2.0×</td>
+        </tr><tr>
+            <td><strong>CRISIS</strong></td>
+            <td>59</td>
+            <td>27.301%</td>
+            <td>19.319%</td>
+            <td>33.613%</td>
+            <td>12.3</td>
+            <td>2.5×</td>
+        </tr></tbody>
+</table>
+
+<h2>Variant Comparison</h2>
+<table>
+    <thead><tr><th>Variant</th><th>CAGR</th><th>Sharpe</th>
+    <th>Max DD</th><th>Vol</th><th>WF mean Sharpe</th><th>% folds +</th></tr></thead>
+    <tbody><tr>
+            <td><strong>gross</strong></td>
+            <td>8.55%</td>
+            <td>2.99</td>
+            <td>-4.14%</td>
+            <td>2.76%</td>
+            <td>4.83</td>
+            <td>95%</td>
+        </tr><tr>
+            <td><strong>regime_tc_applied</strong></td>
+            <td>0.95%</td>
+            <td>0.36</td>
+            <td>-5.45%</td>
+            <td>2.74%</td>
+            <td>1.16</td>
+            <td>70%</td>
+        </tr><tr>
+            <td><strong>regime_filtered_high_crisis</strong></td>
+            <td>1.73%</td>
+            <td>1.19</td>
+            <td>-1.88%</td>
+            <td>1.45%</td>
+            <td>1.62</td>
+            <td>85%</td>
+        </tr></tbody>
+</table>
+
+<h2>Verdict</h2>
+<div class="kpi-row">
+    <div class="kpi"><div class="value good">IMPROVES</div><div class="label">Skip high-cost trades?</div></div>
+    <div class="kpi"><div class="value">+0.83</div><div class="label">ΔSharpe (skip vs TC-only)</div></div>
+    <div class="kpi"><div class="value">+0.78%</div><div class="label">ΔCAGR</div></div>
+    <div class="kpi"><div class="value">+3.57%</div><div class="label">ΔMaxDD</div></div>
+</div>
+<ul>
+    <li>NET Sharpe with TC: 0.36. NET Sharpe with TC+filter: 1.19. ΔSharpe = +0.83.</li><li>Filter earns a slot: ≥ +0.05 Sharpe improvement.</li><li>Activity split: 2679 stream-days in LOW+NORMAL, 996 in HIGH+CRISIS (27.1% high-cost regime).</li><li>TC cost structure: LOW 5.0 bps, NORMAL 7.0 bps, HIGH 10.0 bps, CRISIS 12.3 bps.</li>
+</ul>
+
+<div style="margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0;
+            font-size:0.78em; color:#94a3b8; text-align:center;">
+EXP-2540 — compass/exp2540_regime_tc_model.py · Real IronVault SPY options + Yahoo ^VIX
+</div>
+
+</body></html>

@@ -1,0 +1,56 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EXP-2300 sleeve 5 — GLD roll-yield harvest (2.44% weight)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Reference: compass.exp1770_commodity_calendars walk-forward GLD − GC=F
+# Validated: trade Sharpe 2.70, yearly corr to EXP-1220 = −0.61
+# Weight: 2.44% (equal_risk_15% from EXP-2200)
+# Mode: SIGNAL_ONLY
+#
+# Why signal-only: the strategy is ETF−front-futures roll-yield harvesting,
+# which requires FUTURES execution (long GLD ETF, short GC=F futures).
+# Alpaca paper does not provide futures execution. This sleeve therefore
+# runs in SIGNAL mode: it computes the daily target position and writes
+# it to the portfolio log + Telegram, but does NOT submit any orders.
+# Charles must manually execute (or add a futures broker) to go live.
+# ═══════════════════════════════════════════════════════════════════════════
+
+sleeve_id: gld_calendar
+portfolio_weight: 0.0244
+mode: signal_only
+
+strategy:
+  module: compass.exp1770_commodity_calendars
+  runner: live_signal
+  description: "GLD ETF − GC=F front futures roll-yield harvest, z-score entries"
+
+pair:
+  etf: GLD
+  future: GC=F
+  signal_window: 60
+  z_entry: 1.0
+  z_exit: 0.0
+
+cadence:
+  rebalance_frequency_days: 1
+  scan_time: "09:35 ET"
+
+execution:
+  requires_futures_broker: true
+  broker_status: NOT_CONFIGURED
+  action_on_signal: "log + telegram alert"
+
+data:
+  underlying_source: yahoo
+  futures_source: yahoo
+
+logging:
+  level: INFO
+  file: logs/exp2300/sleeve_gld_calendar.log
+  journal: logs/exp2300/journal_gld_calendar.csv
+
+deployment_notes: |
+  Upgrade path to 'live' mode: add Interactive Brokers or TradeStation
+  futures connectivity, set execution.broker_status = READY,
+  flip sleeve mode = live. Paper phase can remain signal_only
+  indefinitely without affecting the tradeable sleeves.

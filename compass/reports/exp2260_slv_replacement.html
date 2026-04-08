@@ -1,0 +1,69 @@
+<!doctype html><html><head><meta charset='utf-8'><title>EXP-2260 SLV Replacement</title><style>
+    body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;margin:2em;max-width:1200px;color:#111}
+    h1{border-bottom:3px solid #2a4a77}
+    h2{margin-top:2em;color:#2a4a77}
+    h3{margin-top:1.2em;color:#444}
+    table{border-collapse:collapse;margin:1em 0;width:100%}
+    th,td{border:1px solid #ccc;padding:6px 10px;text-align:right;font-size:13px}
+    th{background:#2a4a77;color:#fff;text-align:center}
+    td.l{text-align:left}
+    .pos{color:#0a7d1f;font-weight:600}
+    .neg{color:#c0392b;font-weight:600}
+    .muted{color:#666;font-size:12px}
+    .pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;color:#fff;background:#2a4a77}
+    .pill.ok{background:#0a7d1f}
+    .pill.bad{background:#c0392b}
+    </style></head><body><h1>EXP-2260 — SLV Replacement (capacity solution)</h1><p class='muted'>SLV calendar saturates at ≈$82M. Task: find a replacement sleeve with Sharpe &gt; 2.0, |corr| to EXP-1220 &lt; 0.30, and capacity &gt; $500M.</p><p><span class='pill'>Rule Zero ✓ real IronVault + Yahoo data only</span></p><h2>Candidate summary</h2><table><tr><th>Candidate</th><th>Status</th><th>n trades / days</th><th>Win rate</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Corr vs EXP-1220</th><th>Capacity</th><th>Targets</th></tr><tr><td class='l'><b>TLT_put_credit_spread</b></td><td>run</td><td>237</td><td>73.8%</td><td class='neg'>-4.59%</td><td>-0.74</td><td class='neg'>-41.38%</td><td>+0.68</td><td class='l'>~367 ctr/month ≈ $0M</td><td><span class='pill bad'>Sh✗ ρ✗ cap✗</span></td></tr><tr><td class='l'><b>GDX_put_credit_spread</b></td><td><span class='pill bad'>BLOCKED</span></td><td colspan='7' class='l muted'>0 IronVault contracts (coverage: {'n_contracts': 0, 'n_snapshot_dates': 0})</td><td class='muted'>—</td></tr><tr><td class='l'><b>GLD_calendar_2x_weight</b></td><td>run</td><td>1566</td><td>—</td><td class='pos'>18.07%</td><td>2.72</td><td class='neg'>-2.50%</td><td>-0.61</td><td class='l'>~$3B/month (GLD ETF ADV × 10%)</td><td><span class='pill bad'>Sh✓ ρ✗ cap✓</span></td></tr><tr><td class='l'><b>SPY_unhedged_weekly_straddle</b></td><td>run</td><td>301</td><td>57.1%</td><td class='pos'>0.08%</td><td>0.06</td><td class='neg'>-3.47%</td><td>-0.16</td><td class='l'>~1,544 ctr/month ≈ $77M</td><td><span class='pill bad'>Sh✗ ρ✓ cap✗</span></td></tr></table><p class='muted'>Targets: Sharpe &gt; 2.0, |corr vs EXP-1220| &lt; 0.30, capacity &gt; $500M. All three must pass.</p><h2>— TLT_put_credit_spread —</h2><pre>{
+  "n": 237,
+  "win_rate": 0.7383966244725738,
+  "cagr": -0.04594359318007557,
+  "sharpe_per_trade": -0.7402272036227839,
+  "max_dd": -0.41376000525580037,
+  "total_return": -0.24587330592839451,
+  "avg_pnl": -0.0011426509719615903
+}</pre><h3>Diagnostics</h3><pre>{
+  "n_attempted": 312,
+  "n_dropped_no_exp": 14,
+  "n_dropped_thin_chain": 0,
+  "n_real_exits": 237,
+  "n_intrinsic_exits": 0
+}</pre><h3>Capacity (real IronVault volumes, 10% participation)</h3><pre>{
+  "n_observations": 237,
+  "participation_rate": 0.1,
+  "median_daily_volume": 919.0,
+  "p5_daily_volume": 102.0,
+  "median_max_contracts_per_entry": 91,
+  "monthly_cap_contracts": 367,
+  "monthly_dollar_vega": 36760.0
+}</pre><h2>— GDX_put_credit_spread —</h2><p class='muted'><b>Blocked:</b> 0 IronVault contracts (coverage: {'n_contracts': 0, 'n_snapshot_dates': 0})</p><p class='muted'>Unblock: Polygon Starter + OCC symbol construction backfill — same path as the TLT Dec-2025 backfill, per MASTERPLAN scripts/backfill_tlt.py</p><h2>— GLD_calendar_2x_weight —</h2><pre>{
+  "n_days": 1566,
+  "cagr": 0.1807366232382166,
+  "sharpe_per_trade": 2.7159010230259253,
+  "max_dd": -0.02500598503936953,
+  "total_return": 1.0844197394292996,
+  "win_rate": null,
+  "avg_pnl": null
+}</pre><h3>Capacity (real IronVault volumes, 10% participation)</h3><pre>{
+  "note": "GLD ETF 20d median ADV \u2248 $1.5B/day, GC=F futures notional \u2248 $50B/day. Binding leg is the GLD ETF at 10% participation = $150M/day of ETF flow, \u2248 $3B/month total capacity. Doubling the existing 20% SLV allocation into GLD (to 40%) is well inside that ceiling. Source: public Yahoo daily volumes \u00d7 median 2024 close, rule-of-thumb numbers.",
+  "effective_monthly_capacity_usd": 3000000000
+}</pre><h2>— SPY_unhedged_weekly_straddle —</h2><pre>{
+  "n": 301,
+  "win_rate": 0.5714285714285714,
+  "cagr": 0.0008175096883331623,
+  "sharpe_per_trade": 0.05678079158636528,
+  "max_dd": -0.03467959522872026,
+  "total_return": 0.004915093895254019,
+  "avg_pnl": 1.9132302054211923e-05
+}</pre><h3>Diagnostics</h3><pre>{
+  "n_attempted": 314,
+  "n_dropped_no_exp": 0,
+  "n_dropped_thin": 13
+}</pre><h3>Capacity (real IronVault volumes, 10% participation)</h3><pre>{
+  "n_observations": 301,
+  "participation_rate": 0.1,
+  "median_daily_volume": 3860.0,
+  "p5_daily_volume": 203.0,
+  "median_max_contracts_per_entry": 386,
+  "monthly_cap_contracts": 1544,
+  "monthly_dollar_notional": 308800.0
+}</pre><h2>Methodology & caveats</h2><ul><li><b>Slippage per EXP-2210 lesson:</b> credit-spread variants include $10/spread round-trip; straddle uses $4/contract round-trip (SPY has tight bid-ask). EXP-2210 showed XLF alpha evaporates at $25+/spread — TLT is tested at a conservative $10 floor with the explicit understanding that $20-$30 is more realistic for a thin-chain name.</li><li><b>GDX BLOCKED:</b> 0 IronVault contracts. Needs Polygon Starter backfill from scratch. Not substituted with a synthetic — Rule Zero.</li><li><b>GLD 2×-weight:</b> the standalone CAGR/Sharpe stays identical to the 1×-weight GLD calendar; the change is on the portfolio-construction side (reallocate 20% SLV → 20% extra GLD). The capacity heuristic is from public Yahoo ADV numbers, not a backtest output.</li><li><b>SPY unhedged straddle:</b> different instrument from the EXP-2160 delta-hedged version. This one IS a short-vol directional trade with real crash risk — reported for completeness because Carlos named it, but expect a negative tail. The calm-market Sharpe can look attractive while a single VIX-spike week wipes out months of premium.</li><li><b>Capacity numbers:</b> heuristics from real option_daily volumes × 10% participation rate, plus rule-of-thumb dollar-per-contract for the GLD ETF leg. Not precision market-impact models — good enough to distinguish $50M-capacity from $5B-capacity.</li></ul><h2>Recommendation</h2><ul><li><b>NO candidate clears all three targets simultaneously.</b></li><li>Partial passes:</li><ul><li>TLT_put_credit_spread: Sharpe -0.74 ✗; corr +0.68 ✗; cap $0M ✗</li><li>GLD_calendar_2x_weight: Sharpe 2.72 ✓; corr -0.61 ✗; cap $3000M ✓</li><li>SPY_unhedged_weekly_straddle: Sharpe 0.06 ✗; corr -0.16 ✓; cap $77M ✗</li></ul><li><b>Practical recommendation:</b> the cleanest capacity fix for the SLV allocation is to reweight into GLD (already validated, same thesis, 40× more liquid). The 2× allocation hypothesis needs to be stress-tested in the EXP-1870 combined-portfolio model to confirm correlation stays low once the weight doubles.</li></ul></body></html>

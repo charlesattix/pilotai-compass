@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>EXP-2500 — True Net Backtest</title>
+<style>
+body { font-family:-apple-system,sans-serif;max-width:1200px;margin:0 auto;padding:28px;background:#fff;color:#1e293b; }
+h1 { font-size:1.8em;color:#0f172a; }
+h2 { margin-top:2em;border-bottom:2px solid #e2e8f0;padding-bottom:8px;color:#334155; }
+.sources { background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px;font-size:0.84rem;line-height:1.6; }
+.verdict { background:#fff;border:2px solid #dc2626;border-radius:10px;padding:18px;margin:16px 0; }
+.verdict h3 { margin-top:0;color:#dc2626; }
+.note { background:#fefce8;border:1px solid #fde047;border-radius:6px;padding:12px 16px;font-size:0.86rem;margin:14px 0; }
+table { width:100%;border-collapse:collapse;margin:12px 0;font-size:0.86em; }
+th { background:#f1f5f9;padding:9px 11px;text-align:right;border-bottom:2px solid #cbd5e1;font-size:0.72em;text-transform:uppercase; }
+th:first-child { text-align:left; }
+td { padding:7px 11px;text-align:right;border-bottom:1px solid #e2e8f0; }
+td:first-child { text-align:left; }
+</style></head><body>
+
+<h1>EXP-2500 — TRUE Net Backtest with Cost-Aware Parameters</h1>
+<p style="color:#64748b">Actual per-trade cost + cost-aware EXP-1220 parameters
+(21d cadence, 0.93 OTM) · 7-stream Ledoit-Wolf walk-forward ·
+2026-04-08 05:37</p>
+
+<div class="sources">
+<strong>Rule Zero — real data, real per-trade costs:</strong><br>
+Cost-aware EXP-1220: compass.exp1220_standalone fork with
+<code>min_spacing_days=21</code> and <code>otm_pct=0.93</code> on real
+IronVault SPY chains<br>
+Per-trade cost: EXP-2420 model ($0.65/contract commission × 4 fills +
+$1.70 bid-ask per leg per contract × 4 + $3.58/contract slippage)<br>
+Other streams: sparse XLF/XLI (exit-date), v5/gld/slv/cross_vol from
+compass.exp2080_corr_regime cache<br>
+Other-stream drag: EXP-2420 measured annual drag at equal_risk weights,
+applied as daily deduction<br>
+Walk-forward: compass.exp2400_combined_best_of.walk_forward_combined
+(Ledoit-Wolf + risk-parity + 15% vol target, no circuit breaker),
+20 folds 2020-2025
+</div>
+
+<div class="verdict">
+<h3>Key question: does net Sharpe cross 6.0?</h3>
+<strong>NO ✗</strong><br>
+Net Sharpe: <strong>3.89</strong> ·
+Net CAGR: <strong>+32.1%</strong> ·
+Net DD: <strong>4.3%</strong><br>
+Δ vs EXP-2450 gross LW (6.87): <strong>-2.98</strong><br>
+Δ vs EXP-2420 published net (4.49): <strong>-0.60</strong>
+</div>
+
+<h2>1. Cost-aware EXP-1220 trade tape</h2>
+<table>
+<thead><tr><th>Metric</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>N trades</td><td>95</td></tr>
+<tr><td>Trades/year</td><td>16.35</td></tr>
+<tr><td>Avg hold days</td><td>5.2</td></tr>
+<tr><td>Gross avg P&L / trade</td><td>$20.13</td></tr>
+<tr><td>Avg cost / trade</td><td>$51.92</td></tr>
+<tr><td>Net avg P&L / trade</td><td>$-31.79</td></tr>
+<tr><td>Gross total P&L</td><td>$1,912.0</td></tr>
+<tr><td>Total cost</td><td>$4,932.4</td></tr>
+<tr><td>Net total P&L</td><td>$-3,020.4</td></tr>
+<tr><td>Gross win rate</td><td>89.5%</td></tr>
+<tr><td>Net win rate</td><td>35.8%</td></tr>
+</tbody>
+</table>
+
+<h2>2. 7-stream walk-forward (Ledoit-Wolf, 20 folds)</h2>
+<table>
+<thead><tr><th>Cube</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Vol</th><th>Calmar</th></tr></thead>
+<tbody>
+<tr><td><strong>gross (sanity)</strong></td>
+<td>101.8%</td><td>6.87</td>
+<td>4.2%</td><td>10.3%</td>
+<td>24.2</td></tr>
+<tr><td><strong>net (cost-aware)</strong></td>
+<td>32.1%</td>
+<td style='color:#dc2626;font-weight:700'>3.89</td>
+<td>4.3%</td><td>7.2%</td>
+<td>7.5</td></tr>
+<tr><td>EXP-2450 gross LW reference</td>
+<td>101.8%</td><td>6.87</td>
+<td>4.2%</td><td>—</td><td>—</td></tr>
+<tr><td>EXP-2420 published net</td>
+<td>124.0%</td><td>4.49</td>
+<td>—</td><td>—</td><td>—</td></tr>
+</tbody>
+</table>
+
+<h2>3. Net yearly breakdown</h2>
+<table>
+<thead><tr><th>Year</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th></tr></thead>
+<tbody><tr><td>2021</td><td style='color:#16a34a'>34.9%</td><td>4.53</td><td>0.9%</td></tr><tr><td>2022</td><td style='color:#16a34a'>42.7%</td><td>3.97</td><td>3.1%</td></tr><tr><td>2023</td><td style='color:#16a34a'>30.5%</td><td>3.52</td><td>2.7%</td></tr><tr><td>2024</td><td style='color:#16a34a'>29.0%</td><td>4.58</td><td>1.5%</td></tr><tr><td>2025</td><td style='color:#16a34a'>20.3%</td><td>2.97</td><td>4.3%</td></tr></tbody>
+</table>
+
+<h2>4. Per-stream gross vs net (standalone pooled)</h2>
+<table>
+<thead><tr><th>Stream</th><th>Gross SR</th><th>Gross CAGR</th>
+<th>Net SR</th><th>Net CAGR</th><th>ΔSR</th></tr></thead>
+<tbody><tr><td><strong>exp1220</strong></td><td>4.00</td><td>+56.1%</td><td>-0.56</td><td>-0.5%</td><td>-4.56</td></tr><tr><td><strong>v5_hedge</strong></td><td>-0.13</td><td>-1.0%</td><td>-0.29</td><td>-2.1%</td><td>-0.16</td></tr><tr><td><strong>gld_cal</strong></td><td>2.72</td><td>+17.4%</td><td>1.95</td><td>+12.1%</td><td>-0.77</td></tr><tr><td><strong>slv_cal</strong></td><td>2.31</td><td>+31.5%</td><td>1.74</td><td>+22.6%</td><td>-0.57</td></tr><tr><td><strong>cross_vol</strong></td><td>2.14</td><td>+7.8%</td><td>0.54</td><td>+1.9%</td><td>-1.60</td></tr><tr><td><strong>xlf_cs</strong></td><td>4.96</td><td>+17.7%</td><td>4.38</td><td>+15.5%</td><td>-0.58</td></tr><tr><td><strong>xli_cs</strong></td><td>3.36</td><td>+17.2%</td><td>3.14</td><td>+16.0%</td><td>-0.22</td></tr></tbody>
+</table>
+
+<h2>5. Honest caveats</h2>
+<ul>
+<li>Per-trade cost uses EXP-2420's per-contract rates, applied to the NEW trade contract counts. Real broker fills may have different bid-ask at the time of trade; IronVault p25 spread is an average.</li><li>The cost-aware EXP-1220 variant (21d cadence, 0.93 otm_pct) may have different chain liquidity and slippage than the EXP-2420 baseline measurement.</li><li>Other 6 streams' drag is applied at equal_risk baseline weights. The walk-forward optimizer reweights per fold, so actual stream weights differ from baseline — drag is approximately linear in weight but not exactly.</li><li>Longer holds (21d) and wider strikes (0.93) may reduce per-trade alpha. The backtest measures the actual impact.</li><li>Gross cube sanity check should reproduce EXP-2450 ledoit_only (6.87 / 101.8%). If it does not, there is a cube-build mismatch.</li>
+</ul>
+
+<p style="margin-top:3em;color:#94a3b8;font-size:0.78em;text-align:center">
+compass/exp2500_true_net_backtest.py · Rule Zero · real data + real costs
+</p>
+</body></html>

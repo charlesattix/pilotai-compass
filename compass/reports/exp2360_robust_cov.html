@@ -1,0 +1,44 @@
+<!doctype html><html><head><meta charset='utf-8'>
+<title>EXP-2360 — Robust Covariance</title>
+<style>
+ body{font-family:-apple-system,Segoe UI,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;color:#1a1a1a;line-height:1.5;background:#fff}
+ h1{border-bottom:2px solid #222;padding-bottom:.3em} h2{margin-top:1.6em;border-bottom:1px solid #ccc}
+ table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.93em}
+ th,td{border:1px solid #bbb;padding:5px 8px;text-align:left} th{background:#f0f0f0}
+ .ok{color:#0a7a0a;font-weight:600} .warn{color:#b86b00;font-weight:600}
+ .small{color:#555;font-size:.88em}
+</style></head><body>
+<h1>EXP-2360 — Robust Covariance on 7-Stream Portfolio</h1>
+<p class='small'>Generated 2026-04-08T04:03:45 · Risk-parity allocator · 15% vol target ·
+  WF 252d train / 63d test · 1566 days · Rule Zero clean</p>
+
+<p>Baseline reference: EXP-2280 pooled OOS Sharpe = <b>4.429</b>
+   (sample covariance).</p>
+
+<h2>Pooled OOS ranking</h2>
+<table>
+<tr><th>#</th><th>Estimator</th><th>Pooled Sharpe</th><th>CAGR</th>
+    <th>Pooled DD</th><th>Median fold</th><th>Std fold</th></tr>
+<tr><td>1</td><td>one_factor</td><td>19.14</td><td>109.22%</td><td>2.72%</td><td>26.75</td><td>10.92</td></tr><tr><td>2</td><td>oas</td><td>13.73</td><td>104.23%</td><td>1.94%</td><td>16.11</td><td>5.93</td></tr><tr><td>3</td><td>ledoit_wolf</td><td>11.73</td><td>103.92%</td><td>2.24%</td><td>13.31</td><td>4.76</td></tr><tr><td>4</td><td>sample</td><td>8.30</td><td>87.05%</td><td>10.83%</td><td>21.63</td><td>13.16</td></tr><tr><td>5</td><td>min_cov_det</td><td>2.47</td><td>54.25%</td><td>21.71%</td><td>5.06</td><td>27.84</td></tr>
+</table>
+
+<h2>Stability ranking (lowest per-fold std wins)</h2>
+<table>
+<tr><th>#</th><th>Estimator</th><th>Std(Sharpe)</th><th>IQR(Sharpe)</th><th>Pooled Sharpe</th></tr>
+<tr><td>1</td><td>ledoit_wolf</td><td>4.76</td><td>6.26</td><td>11.73</td></tr><tr><td>2</td><td>oas</td><td>5.93</td><td>6.26</td><td>13.73</td></tr><tr><td>3</td><td>one_factor</td><td>10.92</td><td>12.30</td><td>19.14</td></tr><tr><td>4</td><td>sample</td><td>13.16</td><td>18.18</td><td>8.30</td></tr><tr><td>5</td><td>min_cov_det</td><td>27.84</td><td>10.93</td><td>2.47</td></tr>
+</table>
+
+<h2>Per-fold distribution</h2>
+<table>
+<tr><th>Estimator</th><th>n</th><th>mean</th><th>median</th><th>std</th>
+    <th>min</th><th>max</th><th>frac≥6</th><th>frac≥4</th><th>frac&lt;3</th></tr>
+<tr><td>sample</td><td>20</td><td>20.91</td><td>21.63</td><td>13.16</td><td>0.10</td><td>42.77</td><td>80%</td><td>85%</td><td>15%</td></tr><tr><td>ledoit_wolf</td><td>20</td><td>13.53</td><td>13.31</td><td>4.76</td><td>6.44</td><td>23.29</td><td>100%</td><td>100%</td><td>0%</td></tr><tr><td>oas</td><td>20</td><td>16.22</td><td>16.11</td><td>5.93</td><td>6.99</td><td>28.30</td><td>100%</td><td>100%</td><td>0%</td></tr><tr><td>min_cov_det</td><td>20</td><td>16.21</td><td>5.06</td><td>27.84</td><td>-0.15</td><td>104.00</td><td>40%</td><td>70%</td><td>25%</td></tr><tr><td>one_factor</td><td>20</td><td>25.75</td><td>26.75</td><td>10.92</td><td>5.57</td><td>46.89</td><td>95%</td><td>100%</td><td>0%</td></tr>
+</table>
+
+<h2>Does it improve pooled OOS above 4.429?</h2>
+<table><tr><th>Estimator</th><th>Above baseline</th></tr><tr><td>sample</td><td><span class="ok">YES</span></td></tr><tr><td>ledoit_wolf</td><td><span class="ok">YES</span></td></tr><tr><td>oas</td><td><span class="ok">YES</span></td></tr><tr><td>min_cov_det</td><td><span class="warn">no</span></td></tr><tr><td>one_factor</td><td><span class="ok">YES</span></td></tr></table>
+
+<h2>Conclusions</h2>
+<p>Best by pooled Sharpe: <b>one_factor</b>
+ · Best by stability (lowest fold std): <b>ledoit_wolf</b></p>
+</body></html>

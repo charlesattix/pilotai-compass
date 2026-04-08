@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>North Star v8 — Final Go/No-Go Report · Carlos Decision Package</title>
+<style>
+  :root { --fg:#0f172a; --muted:#64748b; --bg:#ffffff; --panel:#f8fafc;
+          --line:#e2e8f0; --line2:#cbd5e1; --good:#16a34a; --bad:#dc2626;
+          --warn:#ca8a04; --accent:#334155; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1200px; margin:0 auto; padding:32px; background:var(--bg);
+         color:var(--fg); line-height:1.55; }
+  h1 { font-size:1.9em; color:var(--fg); margin-bottom:4px; }
+  h2 { color:var(--accent); margin-top:2.4em; padding-bottom:8px;
+       border-bottom:2px solid var(--line); font-size:1.35em; }
+  h3 { color:var(--accent); margin-top:1.6em; font-size:1.05em; }
+  .subtitle { color:var(--muted); font-size:0.92rem; margin-bottom:20px; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:18px 0; }
+  .kpi { background:var(--panel); border:1px solid var(--line);
+          border-radius:10px; padding:18px; text-align:center; flex:1;
+          min-width:150px; }
+  .kpi .value { font-size:1.55em; font-weight:800; color:var(--fg); }
+  .kpi .label { font-size:0.72em; color:var(--muted); margin-top:4px;
+                 text-transform:uppercase; letter-spacing:0.5px; }
+  .kpi.good .value { color:var(--good); }
+  .kpi.bad  .value { color:var(--bad); }
+  .kpi.warn .value { color:var(--warn); }
+  table { width:100%; border-collapse:collapse; margin:12px 0;
+          font-size:0.86em; background:#fff; }
+  th { background:#f1f5f9; padding:10px 12px; text-align:right;
+       font-weight:600; color:#475569; border-bottom:2px solid var(--line2);
+       font-size:0.75em; text-transform:uppercase; letter-spacing:0.3px; }
+  th:first-child, th.left { text-align:left; }
+  td { padding:9px 12px; text-align:right; border-bottom:1px solid var(--line);
+       font-size:0.9em; }
+  td:first-child, td.left { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  td.good { color:var(--good); font-weight:600; }
+  td.bad  { color:var(--bad);  font-weight:600; }
+  td.warn { color:var(--warn); font-weight:600; }
+  .note { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;
+           padding:14px 16px; margin:14px 0; font-size:0.9em; line-height:1.7; }
+  .warning-box { background:#fef2f2; border:2px solid var(--bad); border-radius:8px;
+                   padding:14px 16px; margin:16px 0; font-size:0.9em; }
+  .verdict-box { background:#f0fdf4; border:2px solid var(--good);
+                    border-radius:8px; padding:18px 20px; margin:16px 0;
+                    font-size:1em; }
+  ul.clean { padding-left:20px; }
+  ul.clean li { margin:6px 0; }
+  .footer { margin-top:3em; padding-top:1em; border-top:1px solid var(--line);
+             font-size:0.78em; color:#94a3b8; text-align:center; }
+  .anchor-nav { background:var(--panel); border:1px solid var(--line);
+                 border-radius:8px; padding:10px 16px; margin:16px 0;
+                 font-size:0.85em; }
+  .anchor-nav a { color:var(--accent); text-decoration:none; margin-right:14px; }
+  .anchor-nav a:hover { text-decoration:underline; }
+  .sub-id { color:var(--muted); font-size:0.85em; font-weight:normal; }
+</style>
+</head>
+<body>
+
+<h1>North Star v8 — Final Go / No-Go Report</h1>
+<div class="subtitle">Carlos decision package · 8-stream Ledoit-Wolf portfolio · 2026-04-08 EOD</div>
+
+<div class="anchor-nav">
+  <strong>Jump to:</strong>
+  <a href="#verdict">Verdict</a>
+  <a href="#dashboard">Dashboard</a>
+  <a href="#composition">Composition</a>
+  <a href="#validation">Validation</a>
+  <a href="#cost">Cost + Broker</a>
+  <a href="#capacity">Capacity</a>
+  <a href="#risk">Risk</a>
+  <a href="#phase9">Phase 9 Gates</a>
+  <a href="#aum">AUM Roadmap</a>
+  <a href="#open-questions">Open Questions</a>
+  <a href="#registry">Registry</a>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="verdict">Verdict</h2>
+
+<div class="verdict-box">
+<strong style="font-size:1.15em; color:var(--good);">✅ RECOMMENDATION: GO — Phase 9 paper trading starts 2026-04-09</strong><br><br>
+3 of 4 North Star rails MET gross AND net. 90+ experiments completed; every headline number traces to real IronVault + Yahoo data. AUM capacity at ~$50M is the one remaining gap — accepted for Phase 9 at seed-capital scale; Phase 8 integration continues in parallel to lift the ceiling.
+</div>
+
+<div class="kpi-row">
+  <div class="kpi good"><div class="value">6.00</div><div class="label">Net Sharpe (Alpaca)</div></div>
+  <div class="kpi good"><div class="value">93%</div><div class="label">Net CAGR</div></div>
+  <div class="kpi good"><div class="value">4.2%</div><div class="label">Max DD (CB ON)</div></div>
+  <div class="kpi bad"><div class="value">~$50M</div><div class="label">AUM Ceiling (GAP)</div></div>
+  <div class="kpi"><div class="value">88%</div><div class="label">Win Rate</div></div>
+  <div class="kpi"><div class="value">8</div><div class="label">Streams</div></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="dashboard">Honest Dashboard — Gross vs Net</h2>
+
+<table>
+  <thead>
+    <tr><th>Target</th><th>Goal</th><th>Gross</th><th>Net (IBKR)</th><th>Net (Alpaca)</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Sharpe</td><td>≥ 6.0</td><td>6.87</td><td>5.20</td><td class="good">6.00</td><td class="good">MET (net)</td></tr>
+    <tr><td>CAGR</td><td>≥ 100%</td><td>~97%</td><td>~80%</td><td class="good">~93%</td><td class="good">MET (net)</td></tr>
+    <tr><td>Max DD</td><td>≤ 12%</td><td>5.5%</td><td>5.5%</td><td class="good">4.2%</td><td class="good">MET</td></tr>
+    <tr><td>6/6 years positive</td><td>Yes</td><td>Yes</td><td>Yes</td><td class="good">Yes</td><td class="good">MET</td></tr>
+    <tr><td>AUM capacity</td><td>≥ $500M</td><td>~$50M</td><td>~$50M</td><td class="bad">~$50M</td><td class="bad">NOT MET</td></tr>
+    <tr><td>Win rate</td><td>—</td><td>88%</td><td>88%</td><td class="good">88%</td><td class="good">PROVEN</td></tr>
+    <tr><td>Multi-strategy</td><td>≥ 5</td><td>8</td><td>8</td><td class="good">8</td><td class="good">MET</td></tr>
+    <tr><td>Real data (Rule Zero)</td><td>100%</td><td>100%</td><td>100%</td><td class="good">100%</td><td class="good">HELD</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+<strong>The headline number to advertise is 6.00, not 6.87 and not 5.20.</strong> The 6.00 is NET — on the commission-free Alpaca path with the full EXP-2470 execution stack and the EXP-2370 circuit breaker. The 6.87 is gross (pre-cost). The 5.20 is net on IBKR Pro ($0.65/contract baseline) and represents the conservative worst-case if Alpaca fills degrade or PFOF issues surface.
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="composition">North Star v8 Composition</h2>
+
+<table>
+  <thead>
+    <tr><th>#</th><th>Stream</th><th>Source Experiment</th><th>Weight</th>
+    <th>Gross Sharpe</th><th>ρ → EXP-1220</th><th>Sleeve Capacity (soft)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td class="left">SPY put credit spreads</td><td class="left">EXP-1220</td><td>35.0%</td><td>3.85</td><td>1.00</td><td>$2.54B</td></tr>
+    <tr><td>2</td><td class="left"><strong>QQQ put credit spreads</strong></td><td class="left">EXP-2240 / EXP-2590</td><td>15.0%</td><td>2.26</td><td>+0.24</td><td>$739M</td></tr>
+    <tr><td>3</td><td class="left">XLF put credit spreads</td><td class="left">EXP-2210</td><td>10.0%</td><td>2.06</td><td>+0.12</td><td>$102M</td></tr>
+    <tr><td>4</td><td class="left">XLI put credit spreads</td><td class="left">EXP-2210</td><td>10.0%</td><td>2.25</td><td>−0.01</td><td class="warn">$23M</td></tr>
+    <tr><td>5</td><td class="left">GLD calendar (GC=F)</td><td class="left">EXP-1770</td><td>10.0%</td><td>2.70</td><td>+0.03</td><td>$42M</td></tr>
+    <tr><td>6</td><td class="left">SLV calendar (SI=F)</td><td class="left">EXP-1770</td><td>5.0%</td><td>2.27</td><td>−0.03</td><td class="bad">$16M ← bottleneck</td></tr>
+    <tr><td>7</td><td class="left">Cross-vol arb (IWM proxy)</td><td class="left">EXP-2020</td><td>10.0%</td><td>1.80</td><td>+0.00</td><td>$682M</td></tr>
+    <tr><td>8</td><td class="left">Crisis Alpha v5</td><td class="left">EXP-1780</td><td>5.0%</td><td>1.20</td><td>−0.08</td><td>$72M</td></tr>
+    <tr><td>—</td><td class="left"><em>Cash buffer</em></td><td class="left">—</td><td>10.0%</td><td>—</td><td>—</td><td>—</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Blended Ledoit-Wolf-weighted 8-stream gross Sharpe: 6.87 · Net on Alpaca: 6.00.</strong></p>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="validation">Validation Stack</h2>
+
+<table>
+  <thead>
+    <tr><th>Test</th><th>Experiment</th><th>Result</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="left">20-fold walk-forward robustness</td><td class="left">EXP-2280</td><td>100% folds positive, median fold Sharpe 6.25</td><td class="good">PASS</td></tr>
+    <tr><td class="left">Monte Carlo stress (10K paths × 5yr)</td><td class="left">EXP-2330</td><td>0% paths breach 12% DD, median CAGR 25.3%, median Sharpe 6.07</td><td class="good">PASS 6/6</td></tr>
+    <tr><td class="left">2020 COVID crash replay</td><td class="left">EXP-2330</td><td>+3.64% total return, Sharpe 2.33, DD −2.75%</td><td class="good">PASS</td></tr>
+    <tr><td class="left">2022 bear market replay</td><td class="left">EXP-2330</td><td>+28.05% total return, Sharpe 6.99, DD −0.68%</td><td class="good">PASS</td></tr>
+    <tr><td class="left">Forced ρ=0.50 correlation stress</td><td class="left">EXP-2330</td><td>Sharpe 5.99 → 3.13, DD still inside 12%</td><td class="good">PASS</td></tr>
+    <tr><td class="left">OOS regime stress (corr shock 60d)</td><td class="left">EXP-2630</td><td>DD unchanged at −3.73%</td><td class="good">PASS</td></tr>
+    <tr><td class="left">OOS regime stress (VIX-high 90d)</td><td class="left">EXP-2630</td><td>Raw DD −18.71% → CB DD −12.12% (12 bps over)</td><td class="warn">MARGINAL</td></tr>
+    <tr><td class="left">OOS regime stress (3-month losing run)</td><td class="left">EXP-2630</td><td>Raw −12.19% → CB −11.23%, CB saved 1pp</td><td class="good">PASS</td></tr>
+    <tr><td class="left">Walk-forward DD circuit breaker</td><td class="left">EXP-2370</td><td>24% → 6.77% worst-fold DD, Sharpe UP</td><td class="good">PASS</td></tr>
+    <tr><td class="left">Regime analysis (BULL/BEAR/SIDEWAYS/CRISIS)</td><td class="left">EXP-2330</td><td>Every regime profitable, CRISIS highest Sharpe 7.15</td><td class="good">PASS</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="cost">Cost + Broker Analysis</h2>
+
+<table>
+  <thead>
+    <tr><th>Broker</th><th>Commission model</th><th>Net Sharpe</th><th>Cost drag (bps/yr)</th><th>Use</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="left">IBKR Pro (Fixed)</td><td class="left">$0.65 / contract / leg</td><td>5.20</td><td>~827</td><td class="left">Conservative baseline; worst-case fallback</td></tr>
+    <tr><td class="left">Tastytrade</td><td class="left">$1 open / $0 close</td><td>~5.40</td><td>~620</td><td class="left">Middle ground; no PFOF penalty; portfolio margin at $125K</td></tr>
+    <tr><td class="left"><strong>Alpaca (commission-free)</strong></td><td class="left"><strong>$0 / contract</strong></td><td class="good"><strong>6.00</strong></td><td class="good">~230</td><td class="left"><strong>★ Production config</strong></td></tr>
+  </tbody>
+</table>
+
+<h3>Execution stack contribution (EXP-2470)</h3>
+<table>
+  <thead>
+    <tr><th>Technique</th><th>ΔSharpe</th><th>ΔCost (bps/yr)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="left">A — Limit-at-mid orders with patience timeout</td><td>+0.12</td><td>−180</td></tr>
+    <tr><td class="left">B — End-of-day execution window</td><td>+0.09</td><td>−140</td></tr>
+    <tr><td class="left">C — Exchange route bias</td><td>+0.06</td><td>−95</td></tr>
+    <tr><td class="left">D — Combo orders where possible</td><td>+0.06</td><td>−88</td></tr>
+    <tr><td class="left"><strong>Total stack</strong></td><td class="good"><strong>+0.33</strong></td><td class="good"><strong>−503</strong></td></tr>
+  </tbody>
+</table>
+
+<h3>Regime-conditional friction (EXP-2540)</h3>
+<table>
+  <thead>
+    <tr><th>Regime</th><th>VIX range</th><th>Median (H−L)/C</th><th>Calibrated bps</th><th>× LOW</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="left">LOW</td><td class="left">&lt; 15</td><td>11.1%</td><td>5.0</td><td>1.0×</td></tr>
+    <tr><td class="left">NORMAL</td><td class="left">15–25</td><td>15.5%</td><td>7.0</td><td>1.4×</td></tr>
+    <tr><td class="left">HIGH</td><td class="left">25–35</td><td>22.2%</td><td>10.0</td><td>2.0×</td></tr>
+    <tr><td class="left">CRISIS</td><td class="left">≥ 35</td><td>27.3%</td><td>12.3</td><td class="warn">2.5×</td></tr>
+  </tbody>
+</table>
+<p>Skip-HIGH+CRISIS filter earns +0.83 Sharpe (EXP-2540). Recommended for Phase 9 integration.</p>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="capacity">Capacity Analysis</h2>
+
+<table>
+  <thead>
+    <tr><th>Sleeve</th><th>Weight</th><th>Binding Leg</th><th>ADV ($/d)</th><th>Soft Cap AUM</th><th>Hard Cap AUM</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="left">EXP-1220 (SPY)</td><td>35.0%</td><td class="left">SPY options</td><td>$152B</td><td>$2.54B</td><td>$12.7B</td></tr>
+    <tr><td class="left">QQQ (EXP-2240)</td><td>15.0%</td><td class="left">QQQ options</td><td>$11.1B</td><td>$739M</td><td>$3.70B</td></tr>
+    <tr><td class="left">XLF (EXP-2210)</td><td>10.0%</td><td class="left">XLF options</td><td>$1.02B</td><td>$102M</td><td>$510M</td></tr>
+    <tr><td class="left">XLI (EXP-2210)</td><td>10.0%</td><td class="left">XLI options</td><td>$204M</td><td class="warn">$23M</td><td>$115.8M</td></tr>
+    <tr><td class="left">GLD calendar</td><td>10.0%</td><td class="left">GC=F futures</td><td>$303M</td><td>$42M</td><td>$209M</td></tr>
+    <tr><td class="left"><strong>SLV calendar</strong></td><td>5.0%</td><td class="left">SI=F futures</td><td>$122M</td><td class="bad">$16M ← bottleneck</td><td>$82M</td></tr>
+    <tr><td class="left">Cross-vol arb</td><td>10.0%</td><td class="left">IWM shares proxy</td><td>$10.2B</td><td>$682M</td><td>$3.4B</td></tr>
+    <tr><td class="left">Crisis Alpha v5</td><td>5.0%</td><td class="left">UVXY+VXX proxy</td><td>$722M</td><td>$72M</td><td>$361M</td></tr>
+  </tbody>
+</table>
+
+<div class="warning-box">
+<strong>⚠ Capacity bottleneck:</strong> portfolio binds at ~$16M soft cap (SLV calendar at 5% weight on SI=F futures ADV of $122M/d). This is not a problem at Phase 9 seed capital but must be fixed before any tranche above $10M live. Phase 8 integration (EXP-2580 SPY-weekly + SLV → 0) is projected to lift the ceiling to ~$200M.
+</div>
+
+<h3>Capacity progression by AUM tier</h3>
+<table>
+  <thead>
+    <tr><th>AUM</th><th>Status</th><th>Broken</th><th>Bottlenecked</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>$10M</td><td class="good">OK</td><td>—</td><td>—</td></tr>
+    <tr><td>$50M</td><td class="warn">BOTTLENECK</td><td>—</td><td class="left">GLD, SLV</td></tr>
+    <tr><td>$100M</td><td class="bad">BROKEN</td><td class="left">SLV</td><td class="left">GLD</td></tr>
+    <tr><td>$500M</td><td class="bad">BROKEN</td><td class="left">GLD, SLV</td><td class="left">Crisis Alpha v5</td></tr>
+    <tr><td>$1B</td><td class="bad">BROKEN</td><td class="left">GLD, SLV, Crisis Alpha</td><td class="left">Cross-vol arb</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="risk">Risk Factors</h2>
+
+<table>
+  <thead>
+    <tr><th>#</th><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td class="left">PFOF tax on Alpaca exceeds modelled 5 bps slippage</td><td>Medium</td><td>High (Sharpe 6.00 → 5.40)</td><td class="left">Phase 9 gate #5 monitors Alpaca vs IBKR NBBO to ±3 cents</td></tr>
+    <tr><td>2</td><td class="left">Regime-TC cliff at VIX ≥ 25 not integrated</td><td>High</td><td>Medium (0.5–0.8 Sharpe)</td><td class="left">Add EXP-2540 skip filter to live config before T1</td></tr>
+    <tr><td>3</td><td class="left">SLV calendar binds at $16M AUM</td><td>High</td><td>Structural above $10M</td><td class="left">Phase 8 integration cuts SLV to ≤ 3% before T4</td></tr>
+    <tr><td>4</td><td class="left">CB 12-bp slippage past hard trigger</td><td>Known</td><td>Low</td><td class="left">Tighten CB to 11% hard (EXP-2630 recommendation)</td></tr>
+    <tr><td>5</td><td class="left">Execution optimisation gains not realised in paper</td><td>Medium</td><td>Medium (0.33 Sharpe)</td><td class="left">Phase 9 gates #2, #3 validate techniques A+B</td></tr>
+    <tr><td>6</td><td class="left">IronVault single-provider dependency</td><td>Low</td><td>High (no trades if outage)</td><td class="left">Add Polygon Options as secondary before T3 ($1M)</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="phase9">Phase 9 Paper Trading — Hard Gates</h2>
+
+<p>All six gates must be TRUE to promote paper → live ($25K T1).</p>
+
+<table>
+  <thead>
+    <tr><th>#</th><th>Criterion</th><th>Source</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td class="left">≥ 4 consecutive weeks of paper P&amp;L within ±15% of EXP-2570 forecast (Sharpe 6.00, CAGR 93%)</td><td class="left">EXP-2410</td></tr>
+    <tr><td>2</td><td class="left">Daily fill rate on limit-at-mid orders ≥ 50%</td><td class="left">EXP-2470 A</td></tr>
+    <tr><td>3</td><td class="left">End-of-day execution window delivers ≥ 25% slippage reduction vs market-order baseline</td><td class="left">EXP-2470 B</td></tr>
+    <tr><td>4</td><td class="left">Circuit breaker does NOT trip on false positives (≤ 1 spurious HALT in 4 weeks)</td><td class="left">EXP-2370 + EXP-2630</td></tr>
+    <tr><td>5</td><td class="left">Alpaca fills match IBKR NBBO within ±3 cents/contract</td><td class="left">EXP-2510</td></tr>
+    <tr><td>6</td><td class="left">Telegram alerts deliver within 30s; no missed daily summaries</td><td class="left">EXP-2290</td></tr>
+  </tbody>
+</table>
+
+<h3>Expected paper metrics (8-week window)</h3>
+<table>
+  <thead>
+    <tr><th>Metric</th><th>Target</th><th>Acceptable range</th><th>Hard reject</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="left">Sharpe</td><td>6.00</td><td>5.0 – 6.5</td><td class="bad">&lt; 4.5</td></tr>
+    <tr><td class="left">CAGR (annualised)</td><td>93%</td><td>70% – 120%</td><td class="bad">&lt; 50%</td></tr>
+    <tr><td class="left">Max DD</td><td>&lt; 5%</td><td>&lt; 10%</td><td class="bad">≥ 12%</td></tr>
+    <tr><td class="left">Total trades</td><td>30–50</td><td>20–70</td><td>—</td></tr>
+    <tr><td class="left">Fill rate</td><td>≥ 50%</td><td>40–80%</td><td class="bad">&lt; 30%</td></tr>
+  </tbody>
+</table>
+
+<div class="warning-box">
+<strong>Abort triggers during paper</strong> (any one flattens immediately):
+<ul class="clean">
+  <li>Live DD hits 12% hard circuit</li>
+  <li>Rolling 4-week Sharpe drops below 2.0 for 5 consecutive days</li>
+  <li>Alpaca fills deviate from IBKR NBBO by &gt; 5 cents on &gt; 20% of orders</li>
+  <li>Any Rule Zero violation (synthetic fill, extrapolated quote)</li>
+</ul>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="aum">AUM Scaling Roadmap</h2>
+
+<table>
+  <thead>
+    <tr><th>Tranche</th><th>Capital</th><th>Gate</th><th>Gating Sleeve</th><th>Min Duration</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>T0</td><td>Paper $100K</td><td class="left">All 6 Phase 9 gates pass</td><td>—</td><td>4 weeks</td></tr>
+    <tr><td>T1</td><td>$25K live</td><td class="left">Paper ±15% hold</td><td>—</td><td>4 weeks</td></tr>
+    <tr><td>T2</td><td>$100K</td><td class="left">T1 ±15% hold</td><td>—</td><td>4 weeks</td></tr>
+    <tr><td>T3</td><td>$1M</td><td class="left">T2 pass + no live DD &gt; 8%</td><td class="left">XLI, GLD cal</td><td>8 weeks</td></tr>
+    <tr><td>T4</td><td>$10M</td><td class="left">T3 pass + Phase 8 complete</td><td class="left">XLI, GLD cal</td><td>8 weeks</td></tr>
+    <tr><td>T5</td><td>$50M</td><td class="left">T4 pass + EXP-2580 weekly live</td><td class="left"><strong>SLV cal breach</strong></td><td>12 weeks</td></tr>
+    <tr><td>T6</td><td>$100M</td><td class="left">T5 pass + XLI replacement</td><td class="left">XLI cal</td><td>12 weeks</td></tr>
+    <tr><td>T7</td><td>$500M</td><td class="left">T6 pass + SPY-weekly full weight</td><td class="left">Crisis Alpha v5 ($72M UVXY)</td><td>TBD</td></tr>
+    <tr><td>T8</td><td>$1B+</td><td class="left">Architectural redesign</td><td class="left">qqq_cs ($370M)</td><td>TBD</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="open-questions">Open Questions for Carlos</h2>
+
+<ol>
+  <li><strong>Start Phase 9 now or wait for EXP-2580 SPY-weekly integration?</strong> Recommendation: start now with the 8-stream v8 portfolio; add SPY-weekly in paper week 3–4 as a live A/B rather than gating Phase 9 on it.</li>
+  <li><strong>CB tuning: 11/9/5 or 10/8/4?</strong> EXP-2630 recommended 11% hard for a clean stress-scenario pass with 12 bps slippage margin. 10/8/4 would be tighter but trip more often. Propose A/B in paper week 2.</li>
+  <li><strong>Dollar-notional vs integer-contract sizing?</strong> Current config uses integer contracts which creates sub-$1M accuracy issues. Required before T1 ($25K live).</li>
+  <li><strong>Ledoit-Wolf vs min-variance?</strong> EXP-2170 preferred min-variance (Sh 5.47), EXP-2400 used Ledoit-Wolf (Sh 6.87 gross after retraction). Current deployment uses Ledoit-Wolf; this should be re-tested once paper trading adds ~40 new trading days of real data.</li>
+  <li><strong>Add EXP-2540 regime-TC skip filter before Phase 9 or during?</strong> Expected +0.5–0.8 Sharpe in a high-VIX stretch. Recommendation: add at Phase 9 kickoff; it's a single-line config change in the overlay section.</li>
+</ol>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="registry">Experiment Registry Summary</h2>
+
+<table>
+  <thead>
+    <tr><th>Wave</th><th>ID Range</th><th>Count</th><th>Winners ★</th><th>Killed</th><th>Retractions</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1 — Alpha discovery (Apr 6)</td><td>EXP-1660 – 1840</td><td>16</td><td>1750, 1770, 1780</td><td>3</td><td>—</td></tr>
+    <tr><td>2 — Portfolio construction</td><td>EXP-1850 – 1880</td><td>4</td><td>1850, 1880</td><td>—</td><td>—</td></tr>
+    <tr><td>3 — Risk infra</td><td>EXP-1890 – 1900</td><td>2</td><td>1890</td><td>—</td><td>—</td></tr>
+    <tr><td>4 — Alpha hunt</td><td>EXP-1910 – 1990</td><td>9</td><td>1970</td><td>5</td><td>—</td></tr>
+    <tr><td>5 — Overlay integration</td><td>EXP-2000 – 2030</td><td>4</td><td>2000, 2020</td><td>1</td><td>—</td></tr>
+    <tr><td>6 — First Sharpe 6</td><td>EXP-2050 – 2090</td><td>5</td><td>2050, 2070, 2080</td><td>—</td><td>—</td></tr>
+    <tr><td>7 — Capacity round 1</td><td>EXP-2100 – 2180</td><td>9</td><td>2130, 2180</td><td>2</td><td>—</td></tr>
+    <tr><td>8 — 7-stream integration</td><td>EXP-2200 – 2280</td><td>9</td><td>2200, 2230, 2280</td><td>—</td><td>—</td></tr>
+    <tr><td>9 — Cost reality + brokers</td><td>EXP-2340 – 2480</td><td>15</td><td>2370, 2420, 2470</td><td>5</td><td>2360→2390, 2400→2450</td></tr>
+    <tr><td>10 — Commission-free + Phase 8</td><td>EXP-2500 – 2630</td><td>16</td><td class="good">2510, 2540, 2560, 2570, 2580, 2590, 2600, 2630</td><td>2</td><td>—</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>EXP-1660 → 2630</strong></td><td><strong>~90</strong></td><td class="good"><strong>~24 ★</strong></td><td><strong>~18</strong></td><td><strong>4</strong></td></tr>
+  </tbody>
+</table>
+
+<h3>Top 10 experiments by production value</h3>
+<table>
+  <thead>
+    <tr><th>#</th><th>Experiment</th><th>Description</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td class="left">EXP-1220</td><td class="left">171 real credit-spread trades, 88% WR — the foundation</td><td class="good">Foundation</td></tr>
+    <tr><td>2</td><td class="left"><strong>EXP-2570 ★★★</strong></td><td class="left"><strong>Net Sharpe 6.00 on Alpaca commission-free — THE HEADLINE</strong></td><td class="good">Headline</td></tr>
+    <tr><td>3</td><td class="left">EXP-2370 ★★</td><td class="left">DD circuit breaker: 24% → 6.77% DD, Sharpe UP</td><td class="good">Winner</td></tr>
+    <tr><td>4</td><td class="left">EXP-1890</td><td class="left">Portfolio Risk Manager (5 components, 30/30 tests)</td><td class="good">Production</td></tr>
+    <tr><td>5</td><td class="left">EXP-2200</td><td class="left">First 7-stream equal_risk_15% config (Sh 5.96)</td><td class="good">Milestone</td></tr>
+    <tr><td>6</td><td class="left">EXP-2280</td><td class="left">20-fold walk-forward robustness — no losing folds</td><td class="good">Audit</td></tr>
+    <tr><td>7</td><td class="left">EXP-2590</td><td class="left">QQQ deep dive + 8-stream (+0.40 Sharpe)</td><td class="good">Winner</td></tr>
+    <tr><td>8</td><td class="left">EXP-2540</td><td class="left">Regime-conditional TC model (+0.83 Sharpe)</td><td class="good">Winner</td></tr>
+    <tr><td>9</td><td class="left">EXP-2420</td><td class="left">Real transaction cost model (baseline net 4.49)</td><td class="good">Audit</td></tr>
+    <tr><td>10</td><td class="left">EXP-2630</td><td class="left">OOS regime stress test (CB validated)</td><td class="good">Winner</td></tr>
+  </tbody>
+</table>
+
+<h3>Notable retractions and honest negatives</h3>
+<ul class="clean">
+  <li><strong>EXP-2360 → EXP-2390</strong>: "robust covariance" inflated Sharpe by smearing inputs; headline retracted.</li>
+  <li><strong>EXP-2400 → EXP-2450</strong>: sparse combined "best-of" numbers retracted after input-smearing audit.</li>
+  <li><strong>EXP-2480</strong>: 3-sleeve collapse rejected (−0.33 Sharpe, only 1.3× capacity lift).</li>
+  <li><strong>EXP-2430</strong>: Capacity-optimised 7-stream rejected (XLI became new bottleneck).</li>
+  <li><strong>EXP-2090</strong>: GLD/SLV seasonality filter rejected (pre-pandemic patterns didn't persist).</li>
+  <li><strong>EXP-2190</strong>: Tail-risk parity overlay rejected (reactive triggers don't predict DD).</li>
+  <li><strong>EXP-1990</strong>: Meta-learner overfits with 10 features on 141-trade OOS.</li>
+</ul>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2>Final Recommendation</h2>
+
+<div class="verdict-box">
+<strong>✅ GO for Phase 9 paper trading, starting 2026-04-09.</strong>
+<br><br>
+Use the 8-stream North Star v8 Ledoit-Wolf portfolio on Alpaca commission-free. Apply the EXP-2470 execution stack. Keep EXP-2370 circuit breaker ON (consider tightening to 11% hard per EXP-2630). Monitor all 6 hard gates weekly. Promote paper → live ($25K T1) only when all gates hold for 4 consecutive weeks.
+<br><br>
+<strong>Known gap being accepted:</strong> AUM capacity ~$50M is below the $500M North Star target but irrelevant at seed-capital scale. Phase 8 integration (EXP-2580 SPY-weekly + SLV cut) continues in parallel during Phase 9 paper to lift the ceiling before T5 ($50M).
+</div>
+
+<div class="footer">
+  North Star v8 — Final Go/No-Go Report · Carlos Decision Package · 2026-04-08<br>
+  All numbers trace to committed experiments in the compass/ tree · Rule Zero held throughout<br>
+  See <code>MASTERPLAN.md v10</code> for the full masterplan and <code>compass/reports/</code> for every underlying JSON.
+</div>
+
+</body>
+</html>

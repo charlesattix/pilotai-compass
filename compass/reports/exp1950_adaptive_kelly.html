@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>EXP-1950 — Adaptive Kelly Sizing</title>
+<style>
+body { font-family:-apple-system,sans-serif;max-width:1100px;margin:0 auto;padding:28px;background:#fff;color:#1e293b; }
+h1 { font-size:1.75em;color:#0f172a; }
+h2 { margin-top:2em;border-bottom:2px solid #e2e8f0;padding-bottom:8px;color:#334155; }
+.verdict { background:#fff;border:2px solid #dc2626;border-radius:10px;padding:18px;margin:20px 0; }
+.verdict h3 { margin-top:0;color:#dc2626; }
+.sources { background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px;font-size:0.84rem;line-height:1.6; }
+table { width:100%;border-collapse:collapse;margin:12px 0;font-size:0.86em; }
+th { background:#f1f5f9;padding:9px 11px;text-align:right;border-bottom:2px solid #cbd5e1;font-size:0.74em;text-transform:uppercase; }
+th:first-child { text-align:left; }
+td { padding:7px 11px;text-align:right;border-bottom:1px solid #e2e8f0; }
+td:first-child { text-align:left; }
+</style></head><body>
+<h1>EXP-1950 — Adaptive Kelly Position Sizing</h1>
+<p style="color:#64748b">EXP-1220 dynamic stream · rolling Kelly × regime multiplier ·
+2020-2025 real Yahoo · 2026-04-07 14:01</p>
+
+<div class="sources">
+<strong>Rule Zero — real data only:</strong><br>
+exp1220: scripts.ultimate_portfolio.load_exp1220_dynamic<br>
+regime: compass.regime.RegimeClassifier on Yahoo SPY+^VIX<br>
+Sharpe: compass.metrics.full_metrics (mean/std × √252, canonical)<br>
+Rolling estimator shifted by 1 day → no look-ahead
+</div>
+
+<div class="verdict">
+<h3>KILL: Sharpe lift +0.03 < +0.2 — below kill threshold</h3>
+Best: <code>kelly0.25_lb90_noregime</code><br>
+CAGR +270.2% vs +149.0% baseline<br>
+Sharpe 3.92 vs 3.89 baseline (lift +0.03)<br>
+Max DD 20.1% vs 14.7% baseline
+</div>
+
+<h2>Variants sorted by Sharpe</h2>
+<table>
+<thead><tr><th>Variant</th><th>CAGR</th><th>Sharpe</th><th>Δ Sharpe</th><th>Max DD</th><th>Calmar</th><th>Avg Lev</th></tr></thead>
+<tbody><tr><td>kelly0.25_lb90_noregime</td><td>270.2%</td><td style='font-weight:700'>3.92</td><td style='color:#0f172a;font-weight:700'>+0.03</td><td>20.1%</td><td>13.41</td><td>2.93</td></tr><tr><td>kelly0.5_lb90_noregime</td><td>276.3%</td><td style='font-weight:700'>3.92</td><td style='color:#0f172a;font-weight:700'>+0.03</td><td>21.8%</td><td>12.69</td><td>2.96</td></tr><tr><td>kelly0.5_lb120_noregime</td><td>276.6%</td><td style='font-weight:700'>3.92</td><td style='color:#0f172a;font-weight:700'>+0.03</td><td>21.5%</td><td>12.87</td><td>2.96</td></tr><tr><td>kelly0.75_lb90_noregime</td><td>276.6%</td><td style='font-weight:700'>3.92</td><td style='color:#0f172a;font-weight:700'>+0.03</td><td>21.5%</td><td>12.87</td><td>2.96</td></tr><tr><td>kelly0.75_lb120_noregime</td><td>276.6%</td><td style='font-weight:700'>3.92</td><td style='color:#0f172a;font-weight:700'>+0.03</td><td>21.5%</td><td>12.87</td><td>2.96</td></tr><tr><td>kelly0.25_lb120_noregime</td><td>273.8%</td><td style='font-weight:700'>3.91</td><td style='color:#0f172a;font-weight:700'>+0.02</td><td>21.5%</td><td>12.74</td><td>2.95</td></tr><tr><td>kelly0.75_lb60_noregime</td><td>263.5%</td><td style='font-weight:700'>3.91</td><td style='color:#0f172a;font-weight:700'>+0.02</td><td>21.5%</td><td>12.26</td><td>2.93</td></tr><tr><td>kelly0.5_lb60_noregime</td><td>260.2%</td><td style='font-weight:700'>3.89</td><td style='color:#0f172a;font-weight:700'>+0.00</td><td>21.5%</td><td>12.10</td><td>2.91</td></tr><tr><td>kelly0.25_lb60_noregime</td><td>245.4%</td><td style='font-weight:700'>3.85</td><td style='color:#dc2626;font-weight:700'>-0.04</td><td>19.7%</td><td>12.47</td><td>2.85</td></tr><tr><td>kelly0.25_lb90_regime</td><td>239.5%</td><td style='font-weight:700'>3.83</td><td style='color:#dc2626;font-weight:700'>-0.06</td><td>20.1%</td><td>11.89</td><td>2.65</td></tr><tr><td>kelly0.5_lb90_regime</td><td>244.5%</td><td style='font-weight:700'>3.83</td><td style='color:#dc2626;font-weight:700'>-0.06</td><td>21.8%</td><td>11.23</td><td>2.68</td></tr><tr><td>kelly0.5_lb120_regime</td><td>244.8%</td><td style='font-weight:700'>3.83</td><td style='color:#dc2626;font-weight:700'>-0.06</td><td>21.5%</td><td>11.39</td><td>2.68</td></tr><tr><td>kelly0.75_lb90_regime</td><td>244.8%</td><td style='font-weight:700'>3.83</td><td style='color:#dc2626;font-weight:700'>-0.06</td><td>21.5%</td><td>11.39</td><td>2.68</td></tr><tr><td>kelly0.75_lb120_regime</td><td>244.8%</td><td style='font-weight:700'>3.83</td><td style='color:#dc2626;font-weight:700'>-0.06</td><td>21.5%</td><td>11.39</td><td>2.68</td></tr><tr><td>kelly0.25_lb120_regime</td><td>242.9%</td><td style='font-weight:700'>3.82</td><td style='color:#dc2626;font-weight:700'>-0.07</td><td>21.5%</td><td>11.30</td><td>2.67</td></tr><tr><td>kelly0.75_lb60_regime</td><td>238.6%</td><td style='font-weight:700'>3.79</td><td style='color:#dc2626;font-weight:700'>-0.10</td><td>21.5%</td><td>11.10</td><td>2.66</td></tr><tr><td>kelly0.5_lb60_regime</td><td>236.0%</td><td style='font-weight:700'>3.78</td><td style='color:#dc2626;font-weight:700'>-0.11</td><td>21.5%</td><td>10.98</td><td>2.65</td></tr><tr><td>kelly0.25_lb60_regime</td><td>223.7%</td><td style='font-weight:700'>3.74</td><td style='color:#dc2626;font-weight:700'>-0.15</td><td>19.7%</td><td>11.37</td><td>2.59</td></tr></tbody>
+</table>
+
+<h2>Baseline reference</h2>
+<p><code>static_2.0x</code>: CAGR +149.0% · Sharpe 3.89 ·
+DD 14.7% · Calmar 10.11 · Vol 23.0%</p>
+
+<p style="margin-top:3em;color:#94a3b8;font-size:0.78em;text-align:center">
+compass/exp1950_adaptive_kelly.py · Rule Zero · real Yahoo only
+</p>
+</body></html>

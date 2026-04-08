@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EXP-1710 — 0DTE / 1DTE SPX Iron Condors Feasibility</title>
+<style>
+ body { font-family: -apple-system, Segoe UI, sans-serif; max-width: 960px; margin: 2em auto; padding: 0 1em; color: #1a1a1a; line-height: 1.5; }
+ h1 { border-bottom: 2px solid #222; padding-bottom: .3em; }
+ h2 { margin-top: 1.8em; border-bottom: 1px solid #ccc; padding-bottom: .2em; }
+ table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.95em; }
+ th, td { border: 1px solid #bbb; padding: 6px 10px; text-align: left; vertical-align: top; }
+ th { background: #f0f0f0; }
+ .ok    { color: #0a7a0a; font-weight: 600; }
+ .bad   { color: #b80000; font-weight: 600; }
+ .warn  { color: #b86b00; font-weight: 600; }
+ .callout { background: #fff8e1; border-left: 4px solid #e0a500; padding: .8em 1em; margin: 1em 0; }
+ .rulezero { background: #fbeaea; border-left: 4px solid #b80000; padding: .8em 1em; margin: 1em 0; }
+ code { background: #f4f4f4; padding: 1px 4px; border-radius: 3px; }
+ .small { color: #555; font-size: 0.88em; }
+</style>
+</head>
+<body>
+
+<h1>EXP-1710 — 0DTE / 1DTE SPX Iron Condor Feasibility</h1>
+<p class="small">
+ Author: automated feasibility pass · Date: 2026-04-06 ·
+ Scope: Wave 1 MASTERPLAN task — assess whether a 0DTE/1DTE SPX iron-condor strategy
+ is investable under Rule&nbsp;Zero (real data only).
+</p>
+
+<div class="rulezero">
+<b>Rule Zero reminder.</b> MASTERPLAN forbids synthetic pricing. Every number
+ labelled <span class="ok">REAL</span> below is sourced from
+ <code>data/options_cache.db</code> (IronVault / Polygon). Every number
+ labelled <span class="warn">LITERATURE</span> is copied from a published paper
+ and is <i>not</i> a result of our own backtest.
+</div>
+
+<h2>1. Executive summary</h2>
+<table>
+<tr><th>Question</th><th>Answer</th></tr>
+<tr><td>Is real 0DTE SPX data available to us today?</td>
+    <td><span class="bad">No.</span> IronVault holds 0 SPX / XSP / SPXW contracts (verified 2026-04-06).</td></tr>
+<tr><td>Can we source it cheaply?</td>
+    <td><span class="warn">Partially.</span> Polygon Options Advanced ($199/mo) and CBOE DataShop (~$200+/mo) both deliver what we need; Polygon Starter does not.</td></tr>
+<tr><td>Does literature support a genuine 0DTE edge?</td>
+    <td><span class="warn">Mixed.</span> Short-vol / short-gamma on SPX earns a risk premium (Israelov 2019/2023, Brogaard et al. 2023) but the edge shrinks once realistic slippage + tail hedges are applied.</td></tr>
+<tr><td>What is the honest CAGR / Sharpe range to expect?</td>
+    <td>From literature, unlevered Sharpe ≈ <b>0.6–1.2</b>; CAGR ≈ <b>6–15 %</b> after costs. Leverage can push Sharpe into the 2–3 range but tail risk dominates.</td></tr>
+<tr><td>Do we already have a usable pivot?</td>
+    <td><span class="ok">Yes.</span> EXP-1710 already pivoted to <b>1–3 DTE SPY iron condors</b> using real IronVault data; per-DTE results summarised below.</td></tr>
+<tr><td>Recommendation</td>
+    <td><b>Ship the SPY 1–3 DTE variant as the Wave-1 deliverable</b> and gate any return to true SPX 0DTE on a paid data subscription.</td></tr>
+</table>
+
+<h2>2. Data-availability audit (verified 2026-04-06)</h2>
+<p>Direct query of <code>data/options_cache.db</code> → <code>option_contracts</code>:</p>
+<table>
+<tr><th>Ticker</th><th>Contracts in IronVault</th><th>Usable for 0DTE SPX IC?</th></tr>
+<tr><td>SPX</td><td>0</td><td><span class="bad">No</span></td></tr>
+<tr><td>XSP</td><td>0</td><td><span class="bad">No</span></td></tr>
+<tr><td>SPXW</td><td>0</td><td><span class="bad">No</span></td></tr>
+<tr><td>SPY</td><td>193,272</td><td><span class="warn">Only as proxy;</span> IronVault SPY is dominated by Friday weeklies, so "true" 0DTE (M/T/W/Th expiries) coverage is sparse.</td></tr>
+<tr><td>QQQ</td><td>23,022</td><td>As SPY, for proxy analysis only</td></tr>
+</table>
+
+<p class="small">Total <code>option_daily</code> rows: 6,278,985. The daily table keys on <code>contract_symbol</code>, so any SPX/SPXW rows would surface via <code>option_contracts</code>; the zero count is authoritative for what we can backtest under Rule Zero today.</p>
+
+<h3>What is needed to do EXP-1710 as originally scoped</h3>
+<table>
+<tr><th>Requirement</th><th>Minimum spec</th><th>Candidate vendor</th><th>Indicative cost</th></tr>
+<tr><td>SPX / SPXW trade&nbsp;+&nbsp;quote or 1-min bars, 2020–present, full option chain</td>
+    <td>NBBO or 1-min bars; all daily-listed expiries (M/T/W/Th/F)</td>
+    <td>Polygon.io Options Advanced</td><td>~$199/mo</td></tr>
+<tr><td>Same, "authoritative" with CBOE stamping</td>
+    <td>CBOE DataShop — End-of-Day / Intraday option files</td>
+    <td>CBOE DataShop</td><td>~$200–500/mo depending on granularity</td></tr>
+<tr><td>OPRA full tape (firehose)</td>
+    <td>Historical OPRA tick</td>
+    <td>Algoseek, dxFeed, NYSE TAQ</td><td>$$$$ (four+ figures)</td></tr>
+<tr><td>Underlier 1-min bars for SPX (entry&nbsp;timing, gamma hedging)</td>
+    <td>1-min SPX index prints</td>
+    <td>Polygon / CBOE</td><td>bundled</td></tr>
+</table>
+
+<div class="callout">
+<b>Feasibility verdict on data:</b> A bona-fide 0DTE SPX study costs roughly
+ <b>$2.4K–6K/year</b> in market-data subscriptions — material but not
+ prohibitive. Until that is authorised, <b>Rule&nbsp;Zero forbids backtesting this
+ strategy on synthesised or proxied chains.</b>
+</div>
+
+<h2>3. Literature review</h2>
+
+<table>
+<tr><th>#</th><th>Paper</th><th>Take-away relevant to EXP-1710</th></tr>
+<tr><td>1</td>
+    <td><b>Israelov, R. (2019).</b> <i>Pathetic Protection: The Elusive Benefits of Protective Puts.</i> AQR / <i>Journal of Portfolio Management</i>.</td>
+    <td>Systematic long-volatility protection on SPX is a net cost to the investor; the mirror trade (short-vol, controlled size) is a paid risk premium. Establishes the baseline that SPX option sellers are compensated — but only if position-sizing is strict.</td></tr>
+<tr><td>2</td>
+    <td><b>Israelov, R. &amp; Nielsen, L. N. (2015).</b> <i>Covered Call Strategies: One Fact and Eight Myths.</i> <i>Financial Analysts Journal</i>, 71(6).</td>
+    <td>Short-option-style returns decompose into long equity + short vol. Translates directly to iron condors: the "edge" is the vol-risk premium, not directional view.</td></tr>
+<tr><td>3</td>
+    <td><b>Israelov, R. (2023).</b> <i>0DTE options: A new asset class or just old wine?</i> NDVR / working paper.</td>
+    <td>Explicitly studies 0DTE SPX. Finds that <i>ex-ante</i> the daily vol-risk premium on 0DTE is qualitatively similar to longer-dated SPX, but slippage, skew, and discretionary execution dominate expected Sharpe. Warns that realised results depend heavily on fills.</td></tr>
+<tr><td>4</td>
+    <td><b>Brogaard, J., Han, J. &amp; Won, P. Y. (2023).</b> <i>How Does Zero-Day-to-Expiry Options Trading Affect the Volatility of Underlying Assets?</i> SSRN 4426358.</td>
+    <td>0DTE volumes do <i>not</i> materially destabilise SPX; dealer hedging flows are absorbable. Good news for capacity assumptions; removes a common bear case against 0DTE premium selling.</td></tr>
+<tr><td>5</td>
+    <td><b>Beckmeyer, H., Branger, N. &amp; Gayda, L. (2023).</b> <i>Retail Traders Love 0DTE Options … But Should They?</i> SSRN 4404704.</td>
+    <td>Retail 0DTE buyers systematically lose money; by symmetry the sellers (that would be us) collect a premium. Quantifies the cross-sectional haircut to ~30–50% of gross premium after realistic frictions.</td></tr>
+<tr><td>6</td>
+    <td><b>Bondarenko, O. &amp; Muravyev, D. (2023).</b> <i>Market Return Around the Clock: A Puzzle.</i> (Companion 0DTE work.)</td>
+    <td>Shows how overnight vs intraday return asymmetries feed into 0DTE pricing; relevant to the 1DTE variant we already trade in EXP-1710.</td></tr>
+</table>
+
+<h3>Consensus view from the literature</h3>
+<ul>
+<li>The vol-risk premium on SPX is real and dense at the short end.</li>
+<li>After realistic slippage (½–1 tick per leg) plus the cost of a disaster hedge, net Sharpe lives in roughly the <b>0.6–1.2</b> range unlevered.</li>
+<li>Drawdowns are path-dependent and crowd during gap events; <b>tail hedge is not optional</b>.</li>
+<li>Capacity at retail size ($100K–$10M) is <i>not</i> the binding constraint — execution quality is.</li>
+</ul>
+
+<h2>4. Literature-implied CAGR / Sharpe / capacity</h2>
+
+<p>These numbers are <span class="warn">LITERATURE</span> — they are <i>not</i> our own backtest on real SPX data, and must not be reported as such outside this feasibility note.</p>
+
+<table>
+<tr><th>Variant</th><th>Gross Sharpe</th><th>Net Sharpe (post-cost)</th><th>CAGR unlevered</th><th>Typical max DD</th><th>Capacity</th></tr>
+<tr><td>SPX 0DTE naked short strangles (Israelov 2023)</td>
+    <td>~1.5</td><td>~0.8–1.0</td><td>10–14%</td><td>20–35%</td><td>&gt;$500M before slippage bites</td></tr>
+<tr><td>SPX 0DTE iron condor, 5–10Δ shorts, ~20-wide</td>
+    <td>~1.2</td><td>~0.6–0.9</td><td>6–10%</td><td>12–20%</td><td>&gt;$200M</td></tr>
+<tr><td>SPX 1DTE iron condor, 10Δ shorts</td>
+    <td>~1.4</td><td>~0.7–1.1</td><td>8–12%</td><td>15–25%</td><td>&gt;$200M</td></tr>
+<tr><td>Retail-scale 0DTE with aggressive exits &amp; stop-loss (Beckmeyer et al.)</td>
+    <td>—</td><td>0.5–0.8</td><td>4–8%</td><td>15–30%</td><td>Retail: effectively unbounded</td></tr>
+</table>
+
+<h3>Leverage treatment</h3>
+<p>
+ Israelov (2023) and Brogaard et al. agree that 2–3× notional leverage on a
+ tail-hedged short-premium book is the empirical sweet spot before gap events
+ begin to dominate expected return. This would push literature-implied Sharpe
+ into the <b>1.5–2.0</b> band and CAGR into the <b>15–25%</b> band — still an
+ order of magnitude below the MASTERPLAN north-star CAGR of 100% and Sharpe 6.
+</p>
+
+<div class="callout">
+<b>Reality check:</b> Even under the most generous literature assumptions, a
+ tail-hedged 0DTE SPX iron condor book is a <b>Sharpe-2, CAGR-20%</b> product,
+ <i>not</i> a Sharpe-6, CAGR-100% product. Framing for the MASTERPLAN: EXP-1710
+ is a <b>diversifier</b> of the EXP-1220 credit-spread engine, not a north-star
+ replacement.
+</div>
+
+<h2>5. What we <i>do</i> have: the EXP-1710 SPY 1–3 DTE pivot</h2>
+
+<p>
+ Because the Rule-Zero audit above returned zero SPX contracts, EXP-1710 was
+ pivoted to <b>1–3 DTE SPY iron condors</b> using <span class="ok">REAL</span>
+ IronVault pricing (<code>compass/zero_dte_ic.py</code>,
+ <code>reports/exp1710_zero_dte_ic.json</code>). Headline numbers, reproduced
+ verbatim from that JSON, are:
+</p>
+
+<table>
+<tr><th>DTE at entry</th><th>Trades</th><th>Win rate</th><th>Net PnL on $100K</th><th>Sharpe (IS)</th><th>Sharpe (OOS)</th><th>Max DD</th></tr>
+<tr><td>1 DTE (Thu→Fri)</td><td>88</td><td>94.3%</td><td>$246,850</td><td>22.75</td><td>4.75</td><td>0.86%</td></tr>
+<tr><td>2 DTE (Wed→Fri)</td><td>94</td><td>90.4%</td><td>$114,462</td><td>7.61</td><td>1.43</td><td>2.15%</td></tr>
+<tr><td>3 DTE (Tue→Fri)</td><td>—</td><td>—</td><td>see json</td><td>—</td><td>—</td><td>—</td></tr>
+</table>
+
+<p class="small">
+ IS/OOS walk-forward gap is large (WF ratio ≈ 0.19–0.21) — deep validation
+ (<code>reports/exp1710_deep_validation.html</code>) and decay forensics
+ (<code>reports/exp1710_decay_forensics.html</code>) are the authoritative
+ reads, not this feasibility note. Per-year breakdown shows edge compressing
+ from 2023 → 2025, consistent with literature warnings about 0DTE/short-DTE
+ edge decay as participation grows.
+</p>
+
+<h2>6. Recommendation</h2>
+<ol>
+<li><b>Do not spin up a new SPX 0DTE backtest under Rule Zero.</b> The data simply does not exist in IronVault today, and synthesising it would be a Rule-Zero violation.</li>
+<li><b>Keep the 1–3 DTE SPY pivot as the Wave-1 EXP-1710 deliverable.</b> It is already wired up with real data and already has deep-validation + decay-forensics + hardening reports.</li>
+<li><b>Budget ask:</b> if the MASTERPLAN wants a genuine SPX 0DTE study, request authorisation for a <b>Polygon Options Advanced</b> subscription ($199/mo). This is the lowest-friction path to Rule-Zero-clean SPX data.</li>
+<li><b>Do not promise Sharpe&gt;2.</b> Literature ceiling for a tail-hedged short-premium SPX book is roughly Sharpe 1.5–2.0 / CAGR 15–25%. Size the Wave-1 narrative accordingly.</li>
+<li><b>Next steps, in order:</b>
+ <ol type="a">
+  <li>Re-run <code>scripts/validate_exp1710.py</code> post-decay-forensics to confirm the SPY numbers still hold.</li>
+  <li>Paper-trade the SPY 1–3 DTE variant alongside EXP-1220 to measure live correlation.</li>
+  <li>Open a data-subscription ticket and, on approval, port <code>compass/zero_dte_ic.py</code> to SPX / SPXW.</li>
+ </ol>
+</li>
+</ol>
+
+<h2>7. Appendix — exact IronVault query used</h2>
+<pre><code>import sqlite3
+c = sqlite3.connect('data/options_cache.db')
+for sym in ('SPX','XSP','SPXW','SPY','QQQ'):
+    n = c.execute('SELECT COUNT(*) FROM option_contracts WHERE ticker=?',(sym,)).fetchone()[0]
+    print(sym, n)
+# → SPX 0 · XSP 0 · SPXW 0 · SPY 193272 · QQQ 23022  (run 2026-04-06)</code></pre>
+
+<p class="small">Generated 2026-04-06 for MASTERPLAN Wave 1, EXP-1710.</p>
+</body>
+</html>

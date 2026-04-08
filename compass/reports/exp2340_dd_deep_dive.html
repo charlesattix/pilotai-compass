@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>EXP-2340 — Walk-Forward DD Deep Dive</title>
+<style>
+body { font-family:-apple-system,sans-serif;max-width:1200px;margin:0 auto;padding:28px;background:#fff;color:#1e293b; }
+h1 { font-size:1.8em;color:#0f172a; }
+h2 { margin-top:2em;border-bottom:2px solid #e2e8f0;padding-bottom:8px;color:#334155; }
+.sources { background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px;font-size:0.84rem;line-height:1.6; }
+.problem { background:#fef2f2;border:2px solid #dc2626;border-radius:10px;padding:16px;margin:16px 0; }
+.problem h3 { margin-top:0;color:#991b1b; }
+.winner { background:#ecfdf5;border:2px solid #16a34a;border-radius:10px;padding:16px;margin:16px 0; }
+.winner h3 { margin-top:0;color:#065f46; }
+.fail { background:#fff7ed;border:2px solid #f59e0b;border-radius:10px;padding:16px;margin:16px 0; }
+.fail h3 { margin-top:0;color:#b45309; }
+.note { background:#fefce8;border:1px solid #fde047;border-radius:6px;padding:12px 16px;font-size:0.86rem;margin:14px 0; }
+table { width:100%;border-collapse:collapse;margin:12px 0;font-size:0.84em; }
+th { background:#f1f5f9;padding:9px 11px;text-align:right;border-bottom:2px solid #cbd5e1;font-size:0.72em;text-transform:uppercase; }
+th:first-child { text-align:left; }
+td { padding:7px 11px;text-align:right;border-bottom:1px solid #e2e8f0; }
+td:first-child { text-align:left; }
+</style></head><body>
+
+<h1>EXP-2340 — Walk-Forward DD Deep Dive and Fix</h1>
+<p style="color:#64748b">Investigating the 24.4% pooled OOS DD on
+7-stream equal_risk_15% · 2026-04-08 04:04</p>
+
+<div class="sources">
+<strong>Rule Zero:</strong> reuses compass/cache/exp2280_v6_sparse.pkl
+(7-stream sparse frame from EXP-2200 build_streams on real IronVault +
+real Yahoo data). Walk-forward via compass.exp2280_wf_robustness.
+Canonical metrics: mean/std × √252.
+</div>
+
+<div class="problem">
+<h3>Problem</h3>
+EXP-2280 pooled OOS DD: <strong>24.4%</strong><br>
+EXP-2200 full-sample DD: 5.7%<br>
+Target DD: &lt; 12%<br>
+Gap: <strong>+12.4pp over target</strong>
+</div>
+
+<h2>1. Baseline 15% vol target — yearly pooled OOS DD</h2>
+<table>
+<thead><tr><th>Year</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Vol</th></tr></thead>
+<tbody><tr><td>2021</td><td>122.5%</td><td>5.23</td><td style='color:#16a34a;font-weight:700'>6.3%</td><td>15.5%</td></tr><tr><td>2022</td><td>301.9%</td><td>3.86</td><td style='color:#dc2626;font-weight:700'>24.4%</td><td>38.0%</td></tr><tr><td>2023</td><td>138.3%</td><td>5.68</td><td style='color:#16a34a;font-weight:700'>4.5%</td><td>15.5%</td></tr><tr><td>2024</td><td>145.0%</td><td>5.26</td><td style='color:#16a34a;font-weight:700'>9.8%</td><td>17.4%</td></tr><tr><td>2025</td><td>173.7%</td><td>5.05</td><td style='color:#16a34a;font-weight:700'>10.8%</td><td>20.4%</td></tr></tbody>
+</table>
+<div class="note">
+2022 is the single catastrophic year. Its realised vol
+(38.0%) is 2.5× the 15%
+target. The DD (24.4%) is
+entirely a 2022 event. 2021/2023/2024/2025 all stayed inside the
+target DD range.
+</div>
+
+<h2>2. Worst 5 folds by test-period DD</h2>
+<table>
+<thead><tr>
+<th>Fold</th><th>Test window</th><th>Train vol</th><th>Scale</th>
+<th>CAGR</th><th>Sharpe</th><th>DD</th><th>Vol</th>
+</tr></thead>
+<tbody><tr><td>4</td><td>2021-12-07 → 2022-03-03</td><td>0.5%</td><td>29.76</td><td>+450.7%</td><td>2.89</td><td style='color:#dc2626;font-weight:700'>24.4%</td><td>66.7%</td></tr><tr><td>17</td><td>2025-01-27 → 2025-04-23</td><td>0.8%</td><td>18.89</td><td>+126.3%</td><td>2.86</td><td style='color:#dc2626;font-weight:700'>10.8%</td><td>30.1%</td></tr><tr><td>13</td><td>2024-02-08 → 2024-05-06</td><td>0.5%</td><td>28.33</td><td>+58.2%</td><td>2.19</td><td style='color:#dc2626;font-weight:700'>9.8%</td><td>22.0%</td></tr><tr><td>3</td><td>2021-09-09 → 2021-12-06</td><td>0.6%</td><td>23.36</td><td>+101.6%</td><td>3.71</td><td style='color:#dc2626;font-weight:700'>6.3%</td><td>19.4%</td></tr><tr><td>16</td><td>2024-10-30 → 2025-01-24</td><td>0.8%</td><td>19.56</td><td>+82.2%</td><td>3.88</td><td style='color:#dc2626;font-weight:700'>5.8%</td><td>15.8%</td></tr></tbody>
+</table>
+
+<h2>3. Root cause</h2>
+<div class="note">
+<strong>Vol targeting scale factor is computed on TRAIN window realised vol and applied unchanged to TEST window. When test window has regime shift (2022 bear), stale low-vol scale factor over-leverages the portfolio. 2022 pooled vol hit 38.0% vs 15% target (2.5× over budget), driving the 24.4% pooled DD.</strong>
+</div>
+
+<h2>4. Vol-target sweep</h2>
+<table>
+<thead><tr>
+<th>Label</th><th>Target vol</th><th>CAGR</th><th>Sharpe</th>
+<th>DD</th><th>Realised vol</th><th>Worst fold DD</th><th># folds DD&gt;12%</th>
+</tr></thead>
+<tbody><tr><td style='color:#0f172a;font-weight:700'>vt_5</td><td>5%</td><td>+40.2%</td><td>4.43</td><td>8.6%</td><td>7.7%</td><td>8.6%</td><td>0</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_8</td><td>8%</td><td>+71.2%</td><td>4.43</td><td>13.5%</td><td>12.3%</td><td>13.5%</td><td>1</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_10</td><td>10%</td><td>+95.3%</td><td>4.43</td><td>16.7%</td><td>15.4%</td><td>16.7%</td><td>1</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_12</td><td>12%</td><td>+122.6%</td><td>4.43</td><td>19.8%</td><td>18.5%</td><td>19.8%</td><td>1</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_15</td><td>15%</td><td>+170.4%</td><td>4.43</td><td>24.4%</td><td>23.1%</td><td>24.4%</td><td>1</td></tr></tbody>
+</table>
+
+<h2>5. DD-reactive deleveraging sweep (cut to 0.5× on DD breach)</h2>
+<table>
+<thead><tr>
+<th>Label</th><th>Target vol</th><th>DD cut</th><th>DD resume</th>
+<th>CAGR</th><th>Sharpe</th><th>DD</th><th>Avg exposure</th><th>Defensive days</th>
+</tr></thead>
+<tbody><tr><td style='color:#0f172a;font-weight:700'>vt_8_dd4cut2res</td><td>8%</td><td>4%</td><td>2.0%</td><td>+66.8%</td><td>4.68</td><td>11.0%</td><td>0.98</td><td>41</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_8_dd5cut2res</td><td>8%</td><td>5%</td><td>2.5%</td><td>+66.9%</td><td>4.68</td><td>11.0%</td><td>0.98</td><td>40</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_8_dd6cut3res</td><td>8%</td><td>6%</td><td>3.0%</td><td>+69.6%</td><td>4.64</td><td>11.0%</td><td>0.99</td><td>17</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_8_dd8cut4res</td><td>8%</td><td>8%</td><td>4.0%</td><td>+69.6%</td><td>4.64</td><td>11.0%</td><td>0.99</td><td>17</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_10_dd4cut2res</td><td>10%</td><td>4%</td><td>2.0%</td><td>+88.0%</td><td>4.65</td><td>13.6%</td><td>0.98</td><td>58</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_10_dd5cut2res</td><td>10%</td><td>5%</td><td>2.5%</td><td>+89.1%</td><td>4.68</td><td>13.6%</td><td>0.98</td><td>41</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_10_dd6cut3res</td><td>10%</td><td>6%</td><td>3.0%</td><td>+89.3%</td><td>4.68</td><td>13.6%</td><td>0.98</td><td>40</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_10_dd8cut4res</td><td>10%</td><td>8%</td><td>4.0%</td><td>+93.1%</td><td>4.64</td><td>13.6%</td><td>0.99</td><td>17</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_12_dd4cut2res</td><td>12%</td><td>4%</td><td>2.0%</td><td>+110.9%</td><td>4.61</td><td>16.2%</td><td>0.97</td><td>78</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_12_dd5cut2res</td><td>12%</td><td>5%</td><td>2.5%</td><td>+112.8%</td><td>4.65</td><td>16.2%</td><td>0.98</td><td>58</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_12_dd6cut3res</td><td>12%</td><td>6%</td><td>3.0%</td><td>+114.3%</td><td>4.68</td><td>16.2%</td><td>0.98</td><td>41</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_12_dd8cut4res</td><td>12%</td><td>8%</td><td>4.0%</td><td>+115.5%</td><td>4.71</td><td>16.2%</td><td>0.99</td><td>26</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_15_dd4cut2res</td><td>15%</td><td>4%</td><td>2.0%</td><td>+156.7%</td><td>4.87</td><td>14.6%</td><td>0.96</td><td>99</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_15_dd5cut2res</td><td>15%</td><td>5%</td><td>2.5%</td><td>+153.0%</td><td>4.61</td><td>19.9%</td><td>0.97</td><td>78</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_15_dd6cut3res</td><td>15%</td><td>6%</td><td>3.0%</td><td>+155.9%</td><td>4.65</td><td>19.9%</td><td>0.98</td><td>58</td></tr><tr><td style='color:#0f172a;font-weight:700'>vt_15_dd8cut4res</td><td>15%</td><td>8%</td><td>4.0%</td><td>+158.1%</td><td>4.68</td><td>19.9%</td><td>0.98</td><td>41</td></tr></tbody>
+</table>
+
+<div class='winner'><h3>★ Winner: vt+scale_cap — vt_15_cap13x</h3>CAGR <strong>+118.3%</strong> · Sharpe <strong>5.14</strong> · Max DD <strong>11.2%</strong> · Calmar <strong>10.58</strong></div>
+
+<h2>6. Gates tested</h2>
+<ul>
+<li>CAGR &gt; 100%</li>
+<li>Sharpe &gt; 5.0</li>
+<li>Max DD &lt; 12.0%</li>
+</ul>
+
+<p style="margin-top:3em;color:#94a3b8;font-size:0.78em;text-align:center">
+compass/exp2340_dd_deep_dive.py · Rule Zero · real IronVault + Yahoo only
+</p>
+</body></html>

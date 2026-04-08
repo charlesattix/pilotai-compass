@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔒 Iron Vault — Data Architecture Documentation</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fff; color: #1a1a1a; max-width: 900px; margin: 0 auto; padding: 24px; line-height: 1.6; }
+  h1 { color: #1a1a1a; border-bottom: 3px solid #2563eb; padding-bottom: 12px; }
+  h2 { color: #1e40af; margin-top: 32px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+  h3 { color: #374151; margin-top: 24px; }
+  .banner { background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; padding: 20px 24px; border-radius: 12px; margin-bottom: 24px; }
+  .banner h1 { color: white; border: none; margin: 0; padding: 0; }
+  .banner p { margin: 8px 0 0; opacity: 0.9; }
+  .rule-box { background: #fef2f2; border-left: 4px solid #dc2626; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+  .rule-box strong { color: #dc2626; }
+  .ok-box { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+  .info-box { background: #eff6ff; border-left: 4px solid #2563eb; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+  code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  pre { background: #1e293b; color: #e2e8f0; padding: 16px 20px; border-radius: 8px; overflow-x: auto; font-size: 0.85em; }
+  pre code { background: none; padding: 0; color: inherit; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+  th { background: #f8fafc; color: #374151; font-weight: 600; text-align: left; padding: 10px 14px; border: 1px solid #e5e7eb; }
+  td { padding: 10px 14px; border: 1px solid #e5e7eb; }
+  tr:nth-child(even) { background: #f9fafb; }
+  .file-tree { background: #f8fafc; padding: 16px 20px; border-radius: 8px; font-family: monospace; font-size: 0.85em; line-height: 1.8; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 600; }
+  .badge-red { background: #fecaca; color: #991b1b; }
+  .badge-green { background: #bbf7d0; color: #166534; }
+  .badge-blue { background: #bfdbfe; color: #1e40af; }
+  .flow-diagram { background: #f8fafc; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 0.85em; line-height: 1.8; }
+</style>
+</head>
+<body>
+
+<div class="banner">
+  <h1>🔒 Iron Vault</h1>
+  <p>Centralized Data Architecture for PilotAI Credit Spreads</p>
+  <p style="font-size: 0.85em; opacity: 0.8;">Generated: March 16, 2026 — Operation Iron Vault</p>
+</div>
+
+<div class="rule-box">
+  <strong>🚨 THE GOLDEN RULE:</strong> ALL pricing data must come from IronVault. Synthetic/heuristic pricing is permanently banned. Any code path that generates an option price without querying real <code>options_cache.db</code> is a critical bug. This is a Carlos directive — no exceptions.
+</div>
+
+<h2>📋 What Is Iron Vault?</h2>
+<p>Iron Vault is a <strong>singleton data provider</strong> (<code>shared/iron_vault.py</code>) that serves as the single access point for all options and market data in the PilotAI system. It wraps <code>HistoricalOptionsData</code> in offline mode — meaning it only reads from the local SQLite cache, never makes live Polygon API calls during backtests.</p>
+
+<div class="ok-box">
+  <strong>Key Principle:</strong> Cache miss → skip trade (return <code>None</code>). Cache miss → fabricate price = <span class="badge badge-red">CRITICAL BUG</span>
+</div>
+
+<h2>📊 Data Sources</h2>
+
+<table>
+  <tr><th>Source</th><th>File</th><th>Size</th><th>Contents</th></tr>
+  <tr><td><strong>Options Cache</strong></td><td><code>data/options_cache.db</code></td><td>~905 MB</td><td>168K contracts, 5.67M daily bars, 1.59M intraday bars</td></tr>
+  <tr><td><strong>Macro State</strong></td><td><code>data/macro_state.db</code></td><td>~1 MB</td><td>COMPASS scores, regime signals, economic calendar</td></tr>
+  <tr><td><strong>Live Prices</strong></td><td>Yahoo Finance (curl)</td><td>—</td><td>SPY/VIX underlying prices only (real market data)</td></tr>
+</table>
+
+<h3>options_cache.db Schema</h3>
+<table>
+  <tr><th>Table</th><th>Rows</th><th>Description</th></tr>
+  <tr><td><code>option_contracts</code></td><td>~226K</td><td>Strike/expiration reference data per ticker</td></tr>
+  <tr><td><code>option_daily</code></td><td>~5.67M</td><td>Daily OHLCV bars per option contract (2020–2026)</td></tr>
+  <tr><td><code>option_intraday</code></td><td>~1.59M</td><td>5-min intraday bars per option contract</td></tr>
+</table>
+
+<h3>Coverage Map</h3>
+<table>
+  <tr><th>Ticker</th><th>Contracts</th><th>Daily Bars</th><th>Intraday</th><th>Years</th></tr>
+  <tr><td><strong>SPY</strong></td><td>~166K</td><td>~5.6M</td><td>~1.59M</td><td>2020–2026</td></tr>
+  <tr><td>XLE</td><td>~1K</td><td>~15K</td><td>0</td><td>2020–2025</td></tr>
+  <tr><td>XLK</td><td>~1.8K</td><td>0</td><td>0</td><td>fetching</td></tr>
+  <tr><td>SOXX</td><td>~70</td><td>0</td><td>0</td><td>monthly only</td></tr>
+</table>
+
+<h2>🏗️ Architecture — How Data Flows</h2>
+
+<div class="flow-diagram">
+IronVault.instance() &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="badge badge-blue">ENTRY POINT</span><br>
+&nbsp;&nbsp;└── HistoricalOptionsData(offline_mode=True)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── options_cache.db<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── option_contracts &nbsp;(strike lookup)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── option_daily &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(entry/exit prices)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── option_intraday &nbsp;&nbsp;(intraday exits)<br>
+<br>
+Backtester<br>
+&nbsp;&nbsp;├── historical_data = IronVault.instance()<br>
+&nbsp;&nbsp;├── _find_real_spread() → get_available_strikes() → get_spread_prices()<br>
+&nbsp;&nbsp;├── _manage_positions() → get_spread_prices() / get_intraday_spread_prices()<br>
+&nbsp;&nbsp;└── _close_at_expiration_real() → get_spread_prices() → intrinsic fallback
+</div>
+
+<h2>🔧 Usage</h2>
+
+<h3>In Code</h3>
+<pre><code>from shared.iron_vault import IronVault, IronVaultError
+
+# Get the singleton (validates DB on first call)
+hd = IronVault.instance()
+
+# Pass to Backtester — drop-in replacement for HistoricalOptionsData
+bt = Backtester(config, historical_data=hd)
+
+# Coverage check
+report = hd.coverage_report()
+print(f"Contracts: {report['contracts_total']:,}")
+print(f"Daily bars: {report['daily_bars_total']:,}")</code></pre>
+
+<h3>Available Methods</h3>
+<table>
+  <tr><th>Method</th><th>Returns</th><th>Description</th></tr>
+  <tr><td><code>instance()</code></td><td><code>IronVault</code></td><td>Singleton factory — validates DB on first call</td></tr>
+  <tr><td><code>get_contract_price(symbol, date)</code></td><td><code>float | None</code></td><td>Daily close price for an option contract</td></tr>
+  <tr><td><code>get_available_strikes(ticker, exp, as_of, type)</code></td><td><code>List[float]</code></td><td>Available strikes for a given expiration</td></tr>
+  <tr><td><code>get_spread_prices(ticker, exp, short, long, type, date)</code></td><td><code>Dict | None</code></td><td>Spread entry/exit prices</td></tr>
+  <tr><td><code>get_intraday_spread_prices(...)</code></td><td><code>Dict | None</code></td><td>Intraday spread prices (5-min bars)</td></tr>
+  <tr><td><code>get_prev_daily_volume(symbol, date)</code></td><td><code>int | None</code></td><td>Previous day's volume</td></tr>
+  <tr><td><code>get_prev_daily_oi(symbol, date)</code></td><td><code>int | None</code></td><td>Previous day's open interest</td></tr>
+  <tr><td><code>coverage_report()</code></td><td><code>Dict</code></td><td>DB coverage summary</td></tr>
+  <tr><td><code>reset()</code></td><td>—</td><td>Reset singleton (for tests)</td></tr>
+</table>
+
+<h2>🚀 Setup From Scratch</h2>
+
+<h3>Step 1: Set API Key</h3>
+<pre><code>echo "POLYGON_API_KEY=your_key_here" >> .env</code></pre>
+
+<h3>Step 2: Validate Setup</h3>
+<pre><code>python scripts/iron_vault_setup.py --verbose</code></pre>
+<p>This checks: API key presence, DB existence/size, per-ticker coverage, and flags gaps.</p>
+
+<h3>Step 3: Backfill Missing Data</h3>
+<pre><code># SPY (main backtest ticker)
+python scripts/fetch_polygon_options.py --ticker SPY --resume
+
+# Bulk daily bar backfill (fast — ~2 min)
+python scripts/backfill_polygon_cache.py --workers 8
+
+# Sector ETFs (for COMPASS portfolio backtests)
+python scripts/fetch_sector_options.py --ticker XLE --resume</code></pre>
+
+<h3>Step 4: Run a Backtest</h3>
+<pre><code>python scripts/run_optimization.py --config configs/champion.json</code></pre>
+<div class="info-box">
+  There is no <code>--heuristic</code> flag. All backtests use real data. Always.
+</div>
+
+<h2>📁 File Map</h2>
+
+<div class="file-tree">
+🔒 Iron Vault (Centralized Data Layer):<br>
+├── <strong>shared/iron_vault.py</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← THE single data provider<br>
+├── <strong>scripts/iron_vault_setup.py</strong> &nbsp;&nbsp;&nbsp;&nbsp;← Bootstrap &amp; validation<br>
+├── <strong>docs/DATA_ARCHITECTURE.md</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← This document (markdown version)<br>
+├── data/options_cache.db &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← 905MB source of truth<br>
+├── data/macro_state.db &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← Regime/sector data<br>
+├── backtest/historical_data.py &nbsp;&nbsp;&nbsp;&nbsp;← Raw DB queries (wrapped by IronVault)<br>
+├── backtest/backtester.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← Consumer (uses IronVault)<br>
+├── scripts/run_optimization.py &nbsp;&nbsp;&nbsp;&nbsp;← Consumer (IronVault.instance())<br>
+└── scripts/run_portfolio_backtest.py ← Consumer (IronVault.instance())
+</div>
+
+<h2>🛡️ Cache Miss Behavior</h2>
+
+<table>
+  <tr><th>Scenario</th><th>Behavior</th><th>Status</th></tr>
+  <tr><td>Contract exists in cache with price</td><td>Return real price</td><td><span class="badge badge-green">CORRECT</span></td></tr>
+  <tr><td>Contract in cache but no data for date</td><td>Return <code>None</code> → skip trade</td><td><span class="badge badge-green">CORRECT</span></td></tr>
+  <tr><td>Contract not in cache at all</td><td>Return <code>None</code> → skip trade</td><td><span class="badge badge-green">CORRECT</span></td></tr>
+  <tr><td>DB missing entirely</td><td><code>IronVaultError</code> raised</td><td><span class="badge badge-green">CORRECT</span></td></tr>
+  <tr><td style="text-decoration: line-through;">Cache miss → Black-Scholes estimate</td><td style="text-decoration: line-through;">Return fabricated price</td><td><span class="badge badge-red">BANNED</span></td></tr>
+  <tr><td style="text-decoration: line-through;">Cache miss → fixed % of spread width</td><td style="text-decoration: line-through;">Return heuristic credit</td><td><span class="badge badge-red">BANNED</span></td></tr>
+</table>
+
+<h2>🔗 Where Iron Vault Is Referenced</h2>
+
+<table>
+  <tr><th>File</th><th>What It Says</th></tr>
+  <tr><td><code>MASTERPLAN.md</code> (North Star)</td><td>No synthetic data ban + links to Iron Vault, setup script, and docs</td></tr>
+  <tr><td><code>MASTERPLAN.md</code> (Key Files)</td><td>Iron Vault section at top of file tree</td></tr>
+  <tr><td><code>CLAUDE.md</code></td><td>"NEVER use heuristic or synthetic data. All pricing must come from IronVault."</td></tr>
+  <tr><td><code>README.md</code></td><td>Banner linking to DATA_ARCHITECTURE.md and setup script</td></tr>
+</table>
+
+<div class="rule-box" style="margin-top: 32px;">
+  <strong>Remember:</strong> If you're writing code that touches option prices — it goes through <code>IronVault.instance()</code>. No exceptions. No shortcuts. No "just this once." The vault is sealed. 🔒
+</div>
+
+</body>
+</html>

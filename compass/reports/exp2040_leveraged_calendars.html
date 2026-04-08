@@ -1,0 +1,344 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>EXP-2040 Leveraged GLD/SLV Calendar Scaling</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1200px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.55; }
+  h1 { color:#0f172a; } h2 { color:#334155; margin-top:2.5em;
+         padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:16px; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:18px 0; }
+  .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;
+          padding:18px; text-align:center; flex:1; min-width:140px; }
+  .kpi .value { font-size:1.7em; font-weight:800; color:#0f172a; }
+  .kpi .label { font-size:0.72em; color:#64748b; margin-top:4px; text-transform:uppercase; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.86em; }
+  th { background:#f1f5f9; padding:9px 12px; text-align:right; font-weight:600;
+       color:#475569; border-bottom:2px solid #cbd5e1; font-size:0.78em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  td.good { color:#16a34a; font-weight:600; }
+  td.bad  { color:#dc2626; font-weight:600; }
+  .note { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;
+            padding:14px; margin:14px 0; font-size:0.85rem; }
+</style></head><body>
+
+<h1>EXP-2040 — Leveraged GLD/SLV Calendar Spread Scaling</h1>
+<div class="subtitle">Real Yahoo Finance data, 2015-2025, walk-forward via EXP-1770
+| 2026-04-07T15:30:52.923759Z</div>
+
+<div class="note">
+    <strong>Question:</strong> Can the GLD+SLV sleeve be lifted from 7.5% per leg
+    to 15-25% combined, levered to 1.5×-2×, to lift portfolio Sharpe while
+    holding max DD &lt; 12%?<br>
+    <strong>Data:</strong> EXP-1770 walk-forward OOS daily streams (real Yahoo
+    GLD/SLV/GC=F/SI=F), and the canonical EXP-1220 dynamic-leverage daily
+    return series. No synthetic data, no random fills.
+</div>
+
+<h2>Baseline (100% EXP-1220 over overlap window)</h2>
+<div class="kpi-row">
+    <div class="kpi"><div class="value">58.89%</div><div class="label">CAGR</div></div>
+    <div class="kpi"><div class="value">4.09</div><div class="label">Sharpe</div></div>
+    <div class="kpi"><div class="value">-7.58%</div><div class="label">Max DD</div></div>
+    <div class="kpi"><div class="value">11.50%</div><div class="label">Vol</div></div>
+    <div class="kpi"><div class="value">1507</div><div class="label">Overlap Days</div></div>
+</div>
+
+<h2>(a/b) Solo leverage sweep — GLD and SLV calendars</h2>
+<table>
+    <thead><tr><th>Pair</th><th>Lev</th><th>CAGR</th><th>Sharpe</th>
+    <th>Max DD</th><th>Vol</th><th>≤12% DD?</th></tr></thead>
+    <tbody><tr>
+                <td><strong>GLD</strong></td><td>1.0×</td>
+                <td>15.20%</td>
+                <td>2.70</td>
+                <td class="good">-2.50%</td>
+                <td>5.29%</td>
+                <td>✅</td>
+            </tr><tr>
+                <td><strong>GLD</strong></td><td>1.5×</td>
+                <td>23.51%</td>
+                <td>2.70</td>
+                <td class="good">-3.74%</td>
+                <td>7.93%</td>
+                <td>✅</td>
+            </tr><tr>
+                <td><strong>GLD</strong></td><td>2.0×</td>
+                <td>32.33%</td>
+                <td>2.70</td>
+                <td class="good">-4.97%</td>
+                <td>10.58%</td>
+                <td>✅</td>
+            </tr><tr>
+                <td><strong>SLV</strong></td><td>1.0×</td>
+                <td>24.89%</td>
+                <td>2.27</td>
+                <td class="good">-6.08%</td>
+                <td>10.04%</td>
+                <td>✅</td>
+            </tr><tr>
+                <td><strong>SLV</strong></td><td>1.5×</td>
+                <td>39.05%</td>
+                <td>2.27</td>
+                <td class="good">-9.14%</td>
+                <td>15.06%</td>
+                <td>✅</td>
+            </tr><tr>
+                <td><strong>SLV</strong></td><td>2.0×</td>
+                <td>54.41%</td>
+                <td>2.27</td>
+                <td class="bad">-12.22%</td>
+                <td>20.08%</td>
+                <td>❌</td>
+            </tr></tbody>
+</table>
+
+<h2>(c) GLD/SLV mix sweep</h2>
+<table>
+    <thead><tr><th>Mix</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th>
+    <th>Vol</th><th>≤12% DD?</th></tr></thead>
+    <tbody><tr>
+            <td>equal_50_50 ×1.0</td>
+            <td>20.10%</td>
+            <td>2.93</td>
+            <td class="good">-3.04%</td>
+            <td>6.31%</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>equal_50_50 ×1.5</td>
+            <td>31.41%</td>
+            <td>2.93</td>
+            <td class="good">-4.55%</td>
+            <td>9.47%</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>equal_50_50 ×2.0</td>
+            <td>43.65%</td>
+            <td>2.93</td>
+            <td class="good">-6.05%</td>
+            <td>12.62%</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>gld_heavy_60_40 ×1.0</td>
+            <td>19.12%</td>
+            <td>3.05</td>
+            <td class="good">-2.87%</td>
+            <td>5.79%</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>gld_heavy_60_40 ×1.5</td>
+            <td>29.85%</td>
+            <td>3.05</td>
+            <td class="good">-4.30%</td>
+            <td>8.69%</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>gld_heavy_60_40 ×2.0</td>
+            <td>41.42%</td>
+            <td>3.05</td>
+            <td class="good">-5.71%</td>
+            <td>11.58%</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>slv_heavy_40_60 ×1.0</td>
+            <td>21.06%</td>
+            <td>2.79</td>
+            <td class="good">-3.22%</td>
+            <td>6.93%</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>slv_heavy_40_60 ×1.5</td>
+            <td>32.96%</td>
+            <td>2.79</td>
+            <td class="good">-4.81%</td>
+            <td>10.40%</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>slv_heavy_40_60 ×2.0</td>
+            <td>45.85%</td>
+            <td>2.79</td>
+            <td class="good">-6.41%</td>
+            <td>13.87%</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>vol_weight (0.65/0.35) ×1.0</td>
+            <td>18.59%</td>
+            <td>3.10</td>
+            <td class="good">-2.78%</td>
+            <td>5.56%</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>vol_weight (0.65/0.35) ×1.5</td>
+            <td>28.99%</td>
+            <td>3.10</td>
+            <td class="good">-4.16%</td>
+            <td>8.34%</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>vol_weight (0.65/0.35) ×2.0</td>
+            <td>40.19%</td>
+            <td>3.10</td>
+            <td class="good">-5.52%</td>
+            <td>11.12%</td>
+            <td>✅</td>
+        </tr></tbody>
+</table>
+
+<h2>(d) Portfolio integration with EXP-1220</h2>
+<table>
+    <thead><tr><th>Sleeve %</th><th>Lev</th><th>CAGR</th><th>Sharpe</th>
+    <th>Max DD</th><th>Vol</th><th>ΔSharpe</th><th>ΔCAGR</th>
+    <th>ρ vs base</th><th>≤12% DD?</th></tr></thead>
+    <tbody><tr>
+            <td>10%</td>
+            <td>1.0×</td>
+            <td>55.03%</td>
+            <td>4.29</td>
+            <td class="good">-6.68%</td>
+            <td>10.36%</td>
+            <td>+0.20</td>
+            <td>-3.86%</td>
+            <td>0.998</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>10%</td>
+            <td>1.5×</td>
+            <td>56.66%</td>
+            <td>4.38</td>
+            <td class="good">-6.64%</td>
+            <td>10.38%</td>
+            <td>+0.29</td>
+            <td>-2.22%</td>
+            <td>0.9955</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>10%</td>
+            <td>2.0×</td>
+            <td>58.32%</td>
+            <td>4.47</td>
+            <td class="good">-6.61%</td>
+            <td>10.41%</td>
+            <td>+0.38</td>
+            <td>-0.57%</td>
+            <td>0.9921</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>15%</td>
+            <td>1.0×</td>
+            <td>53.12%</td>
+            <td>4.40</td>
+            <td class="good">-6.28%</td>
+            <td>9.81%</td>
+            <td>+0.31</td>
+            <td>-5.77%</td>
+            <td>0.995</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>15%</td>
+            <td>1.5×</td>
+            <td>55.55%</td>
+            <td>4.53</td>
+            <td class="good">-6.23%</td>
+            <td>9.86%</td>
+            <td>+0.45</td>
+            <td>-3.33%</td>
+            <td>0.9888</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>15%</td>
+            <td>2.0×</td>
+            <td>58.02%</td>
+            <td>4.66</td>
+            <td class="good">-6.18%</td>
+            <td>9.94%</td>
+            <td>+0.57</td>
+            <td>-0.87%</td>
+            <td>0.9803</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>20%</td>
+            <td>1.0×</td>
+            <td>51.23%</td>
+            <td>4.51</td>
+            <td class="good">-5.88%</td>
+            <td>9.27%</td>
+            <td>+0.42</td>
+            <td>-7.66%</td>
+            <td>0.99</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>20%</td>
+            <td>1.5×</td>
+            <td>54.44%</td>
+            <td>4.69</td>
+            <td class="good">-5.81%</td>
+            <td>9.38%</td>
+            <td>+0.60</td>
+            <td>-4.45%</td>
+            <td>0.9778</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>20%</td>
+            <td>2.0×</td>
+            <td>57.71%</td>
+            <td>4.83</td>
+            <td class="good">-5.74%</td>
+            <td>9.53%</td>
+            <td>+0.75</td>
+            <td>-1.18%</td>
+            <td>0.9614</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>25%</td>
+            <td>1.0×</td>
+            <td>49.36%</td>
+            <td>4.63</td>
+            <td class="good">-5.47%</td>
+            <td>8.75%</td>
+            <td>+0.54</td>
+            <td>-9.53%</td>
+            <td>0.9823</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>25%</td>
+            <td>1.5×</td>
+            <td>53.32%</td>
+            <td>4.83</td>
+            <td class="good">-5.39%</td>
+            <td>8.93%</td>
+            <td>+0.75</td>
+            <td>-5.56%</td>
+            <td>0.9614</td>
+            <td>✅</td>
+        </tr><tr>
+            <td>25%</td>
+            <td>2.0×</td>
+            <td>57.38%</td>
+            <td>4.99</td>
+            <td class="good">-5.31%</td>
+            <td>9.18%</td>
+            <td>+0.90</td>
+            <td>-1.50%</td>
+            <td>0.9342</td>
+            <td>✅</td>
+        </tr></tbody>
+</table>
+
+<h2>Best portfolio variant (passes DD ceiling, max Sharpe)</h2>
+<div class="kpi-row">
+    <div class="kpi"><div class="value">alloc_25_lev_2.0x</div><div class="label">Variant</div></div>
+    <div class="kpi"><div class="value">57.38%</div><div class="label">CAGR</div></div>
+    <div class="kpi"><div class="value">4.99</div><div class="label">Sharpe</div></div>
+    <div class="kpi"><div class="value">-5.31%</div><div class="label">Max DD</div></div>
+    <div class="kpi"><div class="value">+0.90</div><div class="label">vs Baseline</div></div>
+</div>
+
+<div style="margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0;
+            font-size:0.78em; color:#94a3b8; text-align:center;">
+EXP-2040 — compass/exp2040_leveraged_calendars.py · Real Yahoo data via EXP-1770
+walk-forward · Linear leverage on dollar-neutral calendar spreads
+</div>
+
+</body></html>

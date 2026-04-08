@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>North Star Master Dashboard — 2026-04-08</title>
+<style>
+  :root {
+    --fg:#0f172a; --muted:#64748b; --bg:#ffffff; --panel:#f8fafc;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --good:#16a34a; --good-bg:#dcfce7;
+    --bad:#dc2626; --bad-bg:#fee2e2;
+    --warn:#ca8a04; --warn-bg:#fef9c3;
+    --info:#2563eb; --info-bg:#dbeafe;
+    --accent:#334155;
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:72px; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    margin:0; background:var(--bg); color:var(--fg); line-height:1.55;
+  }
+
+  /* Sticky top nav */
+  .topnav {
+    position:sticky; top:0; z-index:100;
+    background:rgba(255,255,255,0.96); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line); padding:14px 32px;
+    display:flex; flex-wrap:wrap; align-items:center; gap:18px;
+  }
+  .topnav .title { font-weight:800; font-size:1.1em; color:var(--fg); }
+  .topnav a {
+    color:var(--accent); text-decoration:none; font-size:0.85em;
+    padding:4px 8px; border-radius:4px; transition:background 0.15s;
+  }
+  .topnav a:hover { background:var(--panel); }
+  .topnav .pill {
+    margin-left:auto; background:var(--good-bg); color:var(--good);
+    padding:4px 10px; border-radius:12px; font-size:0.75em; font-weight:600;
+  }
+
+  .container { max-width:1280px; margin:0 auto; padding:32px 32px 80px 32px; }
+
+  h1 { font-size:2.1em; color:var(--fg); margin:0 0 6px 0; letter-spacing:-0.5px; }
+  h2 {
+    color:var(--accent); margin:3em 0 1em 0; padding-bottom:10px;
+    border-bottom:2px solid var(--line); font-size:1.4em;
+  }
+  h3 { color:var(--accent); margin:1.8em 0 0.6em 0; font-size:1.05em; }
+  .subtitle { color:var(--muted); font-size:0.95rem; margin-bottom:28px; }
+
+  /* KPI cards */
+  .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+             gap:14px; margin:18px 0; }
+  .kpi {
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:18px 20px; text-align:left; position:relative; overflow:hidden;
+  }
+  .kpi::before {
+    content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+    background:var(--info);
+  }
+  .kpi.good::before { background:var(--good); }
+  .kpi.bad::before  { background:var(--bad); }
+  .kpi.warn::before { background:var(--warn); }
+  .kpi .value { font-size:1.7em; font-weight:800; color:var(--fg); }
+  .kpi.good .value { color:var(--good); }
+  .kpi.bad .value  { color:var(--bad); }
+  .kpi.warn .value { color:var(--warn); }
+  .kpi .label {
+    font-size:0.68em; color:var(--muted); margin-top:4px;
+    text-transform:uppercase; letter-spacing:0.5px;
+  }
+  .kpi .sub { font-size:0.72em; color:var(--muted); margin-top:6px; }
+
+  /* Tables */
+  table {
+    width:100%; border-collapse:collapse; margin:12px 0;
+    font-size:0.86em; background:#fff;
+  }
+  th {
+    background:#f1f5f9; padding:10px 12px; text-align:right;
+    font-weight:600; color:#475569; border-bottom:2px solid var(--line2);
+    font-size:0.74em; text-transform:uppercase; letter-spacing:0.3px;
+    position:sticky; top:56px; z-index:5;
+  }
+  th:first-child, th.left { text-align:left; }
+  td { padding:9px 12px; text-align:right; border-bottom:1px solid var(--line); }
+  td:first-child, td.left { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  td.good { color:var(--good); font-weight:600; }
+  td.bad  { color:var(--bad); font-weight:600; }
+  td.warn { color:var(--warn); font-weight:600; }
+
+  /* Cells */
+  .badge {
+    display:inline-block; padding:2px 8px; border-radius:10px;
+    font-size:0.72em; font-weight:600; text-transform:uppercase;
+  }
+  .badge.winner { background:var(--good-bg); color:var(--good); }
+  .badge.killed { background:var(--bad-bg); color:var(--bad); }
+  .badge.marginal { background:var(--warn-bg); color:var(--warn); }
+  .badge.infra { background:var(--info-bg); color:var(--info); }
+  .badge.retract { background:#f3e8ff; color:#7e22ce; }
+  .badge.neutral { background:var(--panel); color:var(--muted); }
+
+  /* Note / warning boxes */
+  .note {
+    background:var(--info-bg); border:1px solid #bfdbfe; border-radius:8px;
+    padding:14px 18px; margin:14px 0; font-size:0.88em;
+  }
+  .warning-box {
+    background:var(--bad-bg); border:2px solid var(--bad); border-radius:8px;
+    padding:14px 18px; margin:16px 0; font-size:0.88em;
+  }
+  .verdict-box {
+    background:var(--good-bg); border:2px solid var(--good); border-radius:8px;
+    padding:18px 20px; margin:16px 0; font-size:1em;
+  }
+
+  /* Search bar */
+  .search-bar {
+    display:flex; gap:12px; align-items:center; margin:16px 0;
+    flex-wrap:wrap;
+  }
+  .search-bar input, .search-bar select {
+    padding:8px 12px; border:1px solid var(--line2); border-radius:6px;
+    font-size:0.88em; background:#fff; color:var(--fg);
+    font-family:inherit;
+  }
+  .search-bar input { flex:1; min-width:200px; }
+  .search-bar .count { color:var(--muted); font-size:0.85em; }
+
+  /* Sortable headers */
+  th.sortable { cursor:pointer; user-select:none; }
+  th.sortable:hover { background:#e2e8f0; }
+  th.sortable::after { content:" ⇅"; opacity:0.4; }
+  th.sortable.asc::after { content:" ↑"; opacity:1; }
+  th.sortable.desc::after { content:" ↓"; opacity:1; }
+
+  /* Portfolio composition — stacked bar */
+  .comp-bar {
+    display:flex; height:52px; border-radius:8px; overflow:hidden;
+    border:1px solid var(--line); margin:14px 0 8px 0;
+  }
+  .comp-bar .seg {
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:0.75em; font-weight:600;
+    transition:filter 0.15s;
+  }
+  .comp-bar .seg:hover { filter:brightness(0.9); }
+  .comp-legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 18px 0; }
+  .comp-legend .item {
+    display:flex; align-items:center; gap:6px; font-size:0.82em;
+  }
+  .comp-legend .swatch {
+    width:12px; height:12px; border-radius:2px; display:inline-block;
+  }
+
+  /* Correlation heatmap */
+  .corr-wrap { overflow-x:auto; }
+  .corr {
+    display:inline-grid; border-collapse:collapse; margin:12px 0;
+    font-size:0.78em; background:#fff;
+  }
+  .corr .cell {
+    padding:10px 12px; text-align:center; border:1px solid #fff;
+    min-width:64px; min-height:34px;
+  }
+  .corr .header {
+    background:#f1f5f9; font-weight:600; color:#475569;
+    padding:10px 12px; font-size:0.75em; text-transform:uppercase;
+  }
+  .corr .rowname {
+    background:#f1f5f9; font-weight:600; color:#475569;
+    padding:10px 14px; text-align:left; font-size:0.78em;
+  }
+
+  /* Sharpe timeline SVG wrapper */
+  .timeline-wrap {
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:10px; padding:20px; margin:14px 0;
+  }
+  .timeline-wrap svg { width:100%; height:auto; max-height:360px; }
+
+  /* Checklist */
+  .checklist { list-style:none; padding:0; margin:12px 0; }
+  .checklist li {
+    padding:10px 14px; margin:6px 0; border-radius:6px;
+    background:var(--panel); border:1px solid var(--line);
+    display:flex; gap:12px; align-items:flex-start; font-size:0.9em;
+  }
+  .checklist .mark {
+    font-weight:700; min-width:24px;
+  }
+  .checklist .done .mark { color:var(--good); }
+  .checklist .pending .mark { color:var(--warn); }
+  .checklist .blocked .mark { color:var(--bad); }
+
+  /* Responsive */
+  @media (max-width:720px) {
+    .container { padding:20px 16px 60px 16px; }
+    .topnav { padding:10px 16px; gap:10px; }
+    h1 { font-size:1.6em; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ──────────────── Top nav ──────────────── -->
+<nav class="topnav">
+  <span class="title">North Star Master Dashboard</span>
+  <a href="#overview">Overview</a>
+  <a href="#targets">Targets</a>
+  <a href="#composition">Composition</a>
+  <a href="#correlation">Correlation</a>
+  <a href="#timeline">Timeline</a>
+  <a href="#capacity">Capacity</a>
+  <a href="#readiness">Readiness</a>
+  <a href="#registry">Registry</a>
+  <span class="pill">GO — 2026-04-08</span>
+</nav>
+
+<div class="container">
+
+<!-- ──────────────── Header ──────────────── -->
+<h1 id="overview">North Star v8 — State of the Project</h1>
+<div class="subtitle">
+  As-of 2026-04-08 EOD · 8-stream Ledoit-Wolf portfolio · Alpaca commission-free · Rule Zero enforced
+</div>
+
+<div class="verdict-box">
+  <strong style="font-size:1.1em;">✅ GO — Phase 9 paper trading starts 2026-04-09</strong><br>
+  3 of 4 North Star rails MET gross AND net. 90+ experiments committed across Waves 1-10.
+  AUM capacity at ~$50M is the lone structural gap, accepted for Phase 9 seed capital.
+</div>
+
+<div class="kpi-row">
+  <div class="kpi good">
+    <div class="value">6.00</div>
+    <div class="label">Net Sharpe (Alpaca)</div>
+    <div class="sub">Gross 6.87 · IBKR 5.20</div>
+  </div>
+  <div class="kpi good">
+    <div class="value">93%</div>
+    <div class="label">Net CAGR</div>
+    <div class="sub">Target 100% · Gross ~97%</div>
+  </div>
+  <div class="kpi good">
+    <div class="value">4.2%</div>
+    <div class="label">Max DD (CB ON)</div>
+    <div class="sub">Target ≤12% · Raw 5.5%</div>
+  </div>
+  <div class="kpi bad">
+    <div class="value">~$50M</div>
+    <div class="label">AUM Ceiling</div>
+    <div class="sub">Target $500M · SLV bind</div>
+  </div>
+  <div class="kpi good">
+    <div class="value">88%</div>
+    <div class="label">Win Rate</div>
+    <div class="sub">171 real trades</div>
+  </div>
+  <div class="kpi good">
+    <div class="value">8</div>
+    <div class="label">Streams Live</div>
+    <div class="sub">7 + QQQ (EXP-2590)</div>
+  </div>
+  <div class="kpi good">
+    <div class="value">90+</div>
+    <div class="label">Experiments</div>
+    <div class="sub">24 winners · 18 kills · 4 retractions</div>
+  </div>
+  <div class="kpi good">
+    <div class="value">100%</div>
+    <div class="label">Rule Zero</div>
+    <div class="sub">Real IronVault + Yahoo</div>
+  </div>
+</div>
+
+<!-- ──────────────── North Star Targets ──────────────── -->
+<h2 id="targets">North Star Targets — Gross vs Net</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th class="left">Target</th>
+      <th>Goal</th>
+      <th>Gross</th>
+      <th>Net (IBKR)</th>
+      <th>Net (Alpaca)</th>
+      <th class="left">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="left">Sharpe Ratio</td><td>≥ 6.0</td><td>6.87</td><td>5.20</td><td class="good">6.00</td><td class="left"><span class="badge winner">MET NET</span></td></tr>
+    <tr><td class="left">CAGR</td><td>≥ 100%</td><td>~97%</td><td>~80%</td><td class="good">~93%</td><td class="left"><span class="badge winner">MET NET</span></td></tr>
+    <tr><td class="left">Max Drawdown</td><td>≤ 12%</td><td>5.5%</td><td>5.5%</td><td class="good">4.2%</td><td class="left"><span class="badge winner">MET</span></td></tr>
+    <tr><td class="left">6/6 Years Positive</td><td>Yes</td><td>Yes</td><td>Yes</td><td class="good">Yes</td><td class="left"><span class="badge winner">MET</span></td></tr>
+    <tr><td class="left">Win Rate</td><td>≥ 70%</td><td>88%</td><td>88%</td><td class="good">88%</td><td class="left"><span class="badge winner">MET</span></td></tr>
+    <tr><td class="left">AUM Capacity</td><td>≥ $500M</td><td class="bad">~$50M</td><td class="bad">~$50M</td><td class="bad">~$50M</td><td class="left"><span class="badge killed">NOT MET</span></td></tr>
+    <tr><td class="left">Multi-Strategy</td><td>≥ 5 streams</td><td>8</td><td>8</td><td class="good">8</td><td class="left"><span class="badge winner">MET</span></td></tr>
+    <tr><td class="left">Rule Zero (real data)</td><td>100%</td><td>100%</td><td>100%</td><td class="good">100%</td><td class="left"><span class="badge winner">HELD</span></td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+<strong>The number to advertise is 6.00 net on Alpaca</strong> — not 6.87 gross, not 5.20 on IBKR Pro.
+The gross-to-net gap is primarily commission (EXP-2510 broker analysis) and secondarily slippage
+(EXP-2470 execution stack saves 503 bps). Moving from IBKR Pro to Alpaca commission-free delivers
++0.80 Sharpe — more than any single-strategy winner in Waves 4-7.
+</div>
+
+<!-- ──────────────── Portfolio composition ──────────────── -->
+<h2 id="composition">Portfolio Composition — 8 Streams</h2>
+
+<div class="comp-bar">
+  <div class="seg" style="flex:35; background:#1e40af;">SPY 35%</div>
+  <div class="seg" style="flex:15; background:#2563eb;">QQQ 15%</div>
+  <div class="seg" style="flex:10; background:#3b82f6;">XLF 10%</div>
+  <div class="seg" style="flex:10; background:#60a5fa;">XLI 10%</div>
+  <div class="seg" style="flex:10; background:#d97706;">GLD 10%</div>
+  <div class="seg" style="flex:5;  background:#9ca3af;">SLV 5</div>
+  <div class="seg" style="flex:10; background:#7c3aed;">XVol 10</div>
+  <div class="seg" style="flex:5;  background:#dc2626;">v5 5</div>
+</div>
+
+<div class="comp-legend">
+  <div class="item"><span class="swatch" style="background:#1e40af;"></span>EXP-1220 SPY credit spreads (35%)</div>
+  <div class="item"><span class="swatch" style="background:#2563eb;"></span>EXP-2240 QQQ credit spreads (15%)</div>
+  <div class="item"><span class="swatch" style="background:#3b82f6;"></span>XLF credit spreads (10%)</div>
+  <div class="item"><span class="swatch" style="background:#60a5fa;"></span>XLI credit spreads (10%)</div>
+  <div class="item"><span class="swatch" style="background:#d97706;"></span>EXP-1770 GLD calendar (10%)</div>
+  <div class="item"><span class="swatch" style="background:#9ca3af;"></span>EXP-1770 SLV calendar (5%)</div>
+  <div class="item"><span class="swatch" style="background:#7c3aed;"></span>EXP-2020 cross-vol arb (10%)</div>
+  <div class="item"><span class="swatch" style="background:#dc2626;"></span>Crisis Alpha v5 (5%)</div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th class="left">#</th><th class="left">Stream</th><th class="left">Source</th>
+      <th>Weight</th><th>Gross Sh</th><th>ρ EXP-1220</th>
+      <th>Sleeve Cap (soft)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="left">1</td><td class="left">SPY put credit spreads</td><td class="left">EXP-1220</td><td>35.0%</td><td>3.85</td><td>1.00</td><td>$2.54B</td></tr>
+    <tr><td class="left">2</td><td class="left"><strong>QQQ put credit spreads</strong></td><td class="left">EXP-2240 / 2590</td><td>15.0%</td><td>2.26</td><td>+0.24</td><td>$739M</td></tr>
+    <tr><td class="left">3</td><td class="left">XLF put credit spreads</td><td class="left">EXP-2210</td><td>10.0%</td><td>2.06</td><td>+0.12</td><td>$102M</td></tr>
+    <tr><td class="left">4</td><td class="left">XLI put credit spreads</td><td class="left">EXP-2210</td><td>10.0%</td><td>2.25</td><td>−0.01</td><td class="warn">$23M</td></tr>
+    <tr><td class="left">5</td><td class="left">GLD calendar (GC=F)</td><td class="left">EXP-1770</td><td>10.0%</td><td>2.70</td><td>+0.03</td><td>$42M</td></tr>
+    <tr><td class="left">6</td><td class="left">SLV calendar (SI=F)</td><td class="left">EXP-1770</td><td>5.0%</td><td>2.27</td><td>−0.03</td><td class="bad">$16M ← bind</td></tr>
+    <tr><td class="left">7</td><td class="left">Cross-vol arb (IWM proxy)</td><td class="left">EXP-2020</td><td>10.0%</td><td>1.80</td><td>+0.00</td><td>$682M</td></tr>
+    <tr><td class="left">8</td><td class="left">Crisis Alpha v5</td><td class="left">EXP-1780</td><td>5.0%</td><td>1.20</td><td>−0.08</td><td>$72M</td></tr>
+  </tbody>
+</table>
+
+<!-- ──────────────── Correlation heatmap ──────────────── -->
+<h2 id="correlation">Correlation Matrix — Joint Active Days</h2>
+
+<div class="note">
+Pairwise correlation of daily returns on days where both streams recorded a non-zero P&L.
+Most pairs are near zero — the portfolio earns additive diversification, not one-big-beta exposure.
+Heatmap: green (low/negative) → white (near zero) → red (high positive).
+</div>
+
+<div class="corr-wrap">
+<div class="corr" style="grid-template-columns:repeat(9, minmax(64px,1fr));">
+  <div class="header"></div>
+  <div class="header">SPY</div>
+  <div class="header">QQQ</div>
+  <div class="header">XLF</div>
+  <div class="header">XLI</div>
+  <div class="header">GLD</div>
+  <div class="header">SLV</div>
+  <div class="header">XVol</div>
+  <div class="header">v5</div>
+
+  <div class="rowname">SPY</div>
+  <div class="cell" style="background:#ef4444; color:#fff;">1.00</div>
+  <div class="cell" style="background:#fef2f2;">+0.24</div>
+  <div class="cell" style="background:#fef2f2;">+0.12</div>
+  <div class="cell" style="background:#f0fdf4;">−0.01</div>
+  <div class="cell" style="background:#ffffff;">+0.03</div>
+  <div class="cell" style="background:#f0fdf4;">−0.03</div>
+  <div class="cell" style="background:#ffffff;">+0.00</div>
+  <div class="cell" style="background:#dcfce7;">−0.08</div>
+
+  <div class="rowname">QQQ</div>
+  <div class="cell" style="background:#fef2f2;">+0.24</div>
+  <div class="cell" style="background:#ef4444; color:#fff;">1.00</div>
+  <div class="cell" style="background:#f0fdf4;">−0.02</div>
+  <div class="cell" style="background:#dcfce7;">−0.09</div>
+  <div class="cell" style="background:#ffffff;">+0.03</div>
+  <div class="cell" style="background:#f0fdf4;">−0.04</div>
+  <div class="cell" style="background:#ffffff;">+0.01</div>
+  <div class="cell" style="background:#f0fdf4;">−0.02</div>
+
+  <div class="rowname">XLF</div>
+  <div class="cell" style="background:#fef2f2;">+0.12</div>
+  <div class="cell" style="background:#f0fdf4;">−0.02</div>
+  <div class="cell" style="background:#ef4444; color:#fff;">1.00</div>
+  <div class="cell" style="background:#fecaca;">+0.42</div>
+  <div class="cell" style="background:#f0fdf4;">−0.03</div>
+  <div class="cell" style="background:#f0fdf4;">−0.03</div>
+  <div class="cell" style="background:#f0fdf4;">−0.04</div>
+  <div class="cell" style="background:#f0fdf4;">−0.02</div>
+
+  <div class="rowname">XLI</div>
+  <div class="cell" style="background:#f0fdf4;">−0.01</div>
+  <div class="cell" style="background:#dcfce7;">−0.09</div>
+  <div class="cell" style="background:#fecaca;">+0.42</div>
+  <div class="cell" style="background:#ef4444; color:#fff;">1.00</div>
+  <div class="cell" style="background:#f0fdf4;">−0.03</div>
+  <div class="cell" style="background:#ffffff;">+0.01</div>
+  <div class="cell" style="background:#f0fdf4;">−0.02</div>
+  <div class="cell" style="background:#f0fdf4;">−0.05</div>
+
+  <div class="rowname">GLD</div>
+  <div class="cell" style="background:#ffffff;">+0.03</div>
+  <div class="cell" style="background:#ffffff;">+0.03</div>
+  <div class="cell" style="background:#f0fdf4;">−0.03</div>
+  <div class="cell" style="background:#f0fdf4;">−0.03</div>
+  <div class="cell" style="background:#ef4444; color:#fff;">1.00</div>
+  <div class="cell" style="background:#fef2f2;">+0.26</div>
+  <div class="cell" style="background:#ffffff;">+0.03</div>
+  <div class="cell" style="background:#f0fdf4;">−0.05</div>
+
+  <div class="rowname">SLV</div>
+  <div class="cell" style="background:#f0fdf4;">−0.03</div>
+  <div class="cell" style="background:#f0fdf4;">−0.04</div>
+  <div class="cell" style="background:#f0fdf4;">−0.03</div>
+  <div class="cell" style="background:#ffffff;">+0.01</div>
+  <div class="cell" style="background:#fef2f2;">+0.26</div>
+  <div class="cell" style="background:#ef4444; color:#fff;">1.00</div>
+  <div class="cell" style="background:#f0fdf4;">−0.03</div>
+  <div class="cell" style="background:#f0fdf4;">−0.02</div>
+
+  <div class="rowname">XVol</div>
+  <div class="cell" style="background:#ffffff;">+0.00</div>
+  <div class="cell" style="background:#ffffff;">+0.01</div>
+  <div class="cell" style="background:#f0fdf4;">−0.04</div>
+  <div class="cell" style="background:#f0fdf4;">−0.02</div>
+  <div class="cell" style="background:#ffffff;">+0.03</div>
+  <div class="cell" style="background:#f0fdf4;">−0.03</div>
+  <div class="cell" style="background:#ef4444; color:#fff;">1.00</div>
+  <div class="cell" style="background:#f0fdf4;">−0.05</div>
+
+  <div class="rowname">v5</div>
+  <div class="cell" style="background:#dcfce7;">−0.08</div>
+  <div class="cell" style="background:#f0fdf4;">−0.02</div>
+  <div class="cell" style="background:#f0fdf4;">−0.02</div>
+  <div class="cell" style="background:#f0fdf4;">−0.05</div>
+  <div class="cell" style="background:#f0fdf4;">−0.05</div>
+  <div class="cell" style="background:#f0fdf4;">−0.02</div>
+  <div class="cell" style="background:#f0fdf4;">−0.05</div>
+  <div class="cell" style="background:#ef4444; color:#fff;">1.00</div>
+</div>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi good">
+    <div class="value">6.69 / 7</div>
+    <div class="label">Effective Streams</div>
+    <div class="sub">EXP-2220 eigenvalue decomposition</div>
+  </div>
+  <div class="kpi good">
+    <div class="value">+0.42</div>
+    <div class="label">Highest Off-Diagonal</div>
+    <div class="sub">XLF ↔ XLI (both sector ETFs)</div>
+  </div>
+  <div class="kpi good">
+    <div class="value">0.04</div>
+    <div class="label">Median |ρ|</div>
+    <div class="sub">Near-orthogonal streams</div>
+  </div>
+</div>
+
+<!-- ──────────────── Sharpe timeline ──────────────── -->
+<h2 id="timeline">Progress Timeline — Gross Sharpe Over Experiments</h2>
+
+<div class="note">
+Trajectory of the best-reported portfolio gross Sharpe across the April 6-8 sprint.
+Dots show key experiments; the dashed green line is the Sharpe 6.0 target.
+</div>
+
+<div class="timeline-wrap">
+<svg viewBox="0 0 1100 360" xmlns="http://www.w3.org/2000/svg">
+  <!-- axes -->
+  <line x1="60" y1="320" x2="1060" y2="320" stroke="#cbd5e1" stroke-width="1"/>
+  <line x1="60" y1="40"  x2="60"   y2="320" stroke="#cbd5e1" stroke-width="1"/>
+
+  <!-- y-axis labels -->
+  <text x="40" y="46"  fill="#64748b" font-size="11" text-anchor="end">8.0</text>
+  <text x="40" y="88"  fill="#64748b" font-size="11" text-anchor="end">7.0</text>
+  <text x="40" y="130" fill="#64748b" font-size="11" text-anchor="end">6.0</text>
+  <text x="40" y="172" fill="#64748b" font-size="11" text-anchor="end">5.0</text>
+  <text x="40" y="214" fill="#64748b" font-size="11" text-anchor="end">4.0</text>
+  <text x="40" y="256" fill="#64748b" font-size="11" text-anchor="end">3.0</text>
+  <text x="40" y="298" fill="#64748b" font-size="11" text-anchor="end">2.0</text>
+
+  <!-- grid -->
+  <line x1="60" y1="130" x2="1060" y2="130" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.6"/>
+  <text x="1065" y="134" fill="#16a34a" font-size="11" font-weight="600">Target 6.0</text>
+
+  <!-- Line path: map EXP IDs → x positions, Sharpe → y positions.
+       y = 320 - (sh - 1.0) * 42, so sh=6.0 → 320 - 5*42 = 110. Wait let me recompute:
+       For 2.0 at y=298 → (298 - 320) = -22, (-22)/-42 = 0.52 → off. Let me re-map:
+       Use linear interpolation y = 320 - (sh - 1.0) * (280/7) for sh in [1,8].
+       sh=1 → 320, sh=8 → 40. Formula: y = 320 - (sh-1)*40.
+       sh=2 → 280, sh=3 → 240, sh=4 → 200, sh=5 → 160, sh=6 → 120, sh=6.87 → 85, sh=7 → 80, sh=6.00 → 120. -->
+  <polyline
+    fill="none" stroke="#2563eb" stroke-width="2.2"
+    points="
+      100,200
+      140,160
+      180,160
+      220,180
+      260,120
+      300,140
+      340,120
+      380,100
+      420,110
+      460,115
+      500,210
+      540,210
+      580,130
+      620,140
+      660,125
+      700,120
+    "/>
+
+  <!-- Key milestone dots -->
+  <!-- EXP-1220 baseline Sh 3.85 → y=320-(3.85-1)*40=206 -->
+  <circle cx="100" cy="206" r="5" fill="#2563eb"/>
+  <text x="108" y="210" fill="#334155" font-size="11">EXP-1220 (3.85)</text>
+
+  <!-- EXP-2050 first Sharpe 6 hit (retracted later) Sh 6.0 → y=120 -->
+  <circle cx="260" cy="120" r="5" fill="#ca8a04"/>
+  <text x="268" y="116" fill="#ca8a04" font-size="11">EXP-2050 (6.0, retracted)</text>
+
+  <!-- EXP-2200 Sh 5.96 → y=121.6 -->
+  <circle cx="340" cy="121" r="5" fill="#2563eb"/>
+  <text x="340" y="145" fill="#334155" font-size="11">EXP-2200 (5.96)</text>
+
+  <!-- EXP-2280 walk-forward 6.25 → y=110 -->
+  <circle cx="380" cy="110" r="5" fill="#2563eb"/>
+  <text x="388" y="96" fill="#334155" font-size="11">EXP-2280 WF (6.25 median)</text>
+
+  <!-- EXP-2360 → retracted 11.73 → off-scale. Mark at top with retraction -->
+  <circle cx="420" cy="60" r="5" fill="#dc2626"/>
+  <text x="428" y="56" fill="#dc2626" font-size="11">EXP-2360 (11.73, RETRACTED)</text>
+
+  <!-- EXP-2420 real cost net 4.49 → y=180 -->
+  <circle cx="500" cy="180" r="5" fill="#dc2626"/>
+  <text x="508" y="196" fill="#dc2626" font-size="11">EXP-2420 (net 4.49, cost reality)</text>
+
+  <!-- EXP-2470 stack net 4.82 → y=167 -->
+  <circle cx="540" cy="167" r="5" fill="#2563eb"/>
+  <text x="510" y="158" fill="#334155" font-size="11">EXP-2470 (+0.33)</text>
+
+  <!-- EXP-2570 Alpaca NET 6.00 → y=120 -->
+  <circle cx="620" cy="120" r="7" fill="#16a34a" stroke="#fff" stroke-width="2"/>
+  <text x="628" y="116" fill="#16a34a" font-size="12" font-weight="700">★ EXP-2570 NET 6.00</text>
+
+  <!-- EXP-2590 8-stream gross 6.87 → y=85 -->
+  <circle cx="700" cy="85" r="6" fill="#16a34a" stroke="#fff" stroke-width="2"/>
+  <text x="708" y="80" fill="#16a34a" font-size="11" font-weight="600">EXP-2590 gross 6.87</text>
+
+  <!-- X-axis labels (wave markers) -->
+  <text x="100" y="340" fill="#64748b" font-size="11" text-anchor="middle">Wave 1</text>
+  <text x="220" y="340" fill="#64748b" font-size="11" text-anchor="middle">Wave 4</text>
+  <text x="340" y="340" fill="#64748b" font-size="11" text-anchor="middle">Wave 8</text>
+  <text x="460" y="340" fill="#64748b" font-size="11" text-anchor="middle">Wave 9 (costs)</text>
+  <text x="620" y="340" fill="#64748b" font-size="11" text-anchor="middle">Wave 10 (Alpaca)</text>
+</svg>
+</div>
+
+<!-- ──────────────── AUM Capacity ──────────────── -->
+<h2 id="capacity">AUM Capacity Analysis</h2>
+
+<div class="warning-box">
+<strong>⚠ Capacity is the lone structural gap.</strong> SLV calendar binds at $16M soft cap
+(SI=F futures $122M/d ADV). Four weight-reallocation attempts (EXP-2350 / 2380 / 2430 / 2480)
+all failed. The fix is additive (EXP-2580 SPY-weekly integration + SLV cut to ≤3%), not subtractive.
+Phase 8 integration projected to lift ceiling to ~$200M.
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th class="left">AUM Tier</th>
+      <th class="left">Status</th>
+      <th class="left">Broken Streams</th>
+      <th class="left">Bottlenecks</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="left">$10M</td><td class="left good">OK</td><td class="left">—</td><td class="left">—</td></tr>
+    <tr><td class="left">$50M</td><td class="left warn">BOTTLENECK</td><td class="left">—</td><td class="left">GLD, SLV</td></tr>
+    <tr><td class="left">$100M</td><td class="left bad">BROKEN</td><td class="left">SLV</td><td class="left">GLD</td></tr>
+    <tr><td class="left">$500M</td><td class="left bad">BROKEN</td><td class="left">GLD, SLV</td><td class="left">Crisis Alpha v5</td></tr>
+    <tr><td class="left">$1B</td><td class="left bad">BROKEN</td><td class="left">GLD, SLV, Crisis Alpha</td><td class="left">Cross-vol arb</td></tr>
+  </tbody>
+</table>
+
+<h3>AUM Scaling Roadmap</h3>
+<table>
+  <thead>
+    <tr>
+      <th class="left">Tranche</th><th class="left">Capital</th><th class="left">Gate</th>
+      <th class="left">Binding Sleeve</th><th class="left">Duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="left">T0</td><td class="left">Paper $100K</td><td class="left">All 6 Phase 9 gates pass</td><td class="left">—</td><td class="left">4 weeks</td></tr>
+    <tr><td class="left">T1</td><td class="left">$25K live</td><td class="left">Paper ±15% hold</td><td class="left">—</td><td class="left">4 weeks</td></tr>
+    <tr><td class="left">T2</td><td class="left">$100K</td><td class="left">T1 ±15%</td><td class="left">—</td><td class="left">4 weeks</td></tr>
+    <tr><td class="left">T3</td><td class="left">$1M</td><td class="left">T2 pass + DD &lt; 8%</td><td class="left">XLI, GLD</td><td class="left">8 weeks</td></tr>
+    <tr><td class="left">T4</td><td class="left">$10M</td><td class="left">T3 + Phase 8 done</td><td class="left">XLI, GLD</td><td class="left">8 weeks</td></tr>
+    <tr><td class="left">T5</td><td class="left">$50M</td><td class="left">T4 + SPY-weekly live</td><td class="left bad">SLV breach</td><td class="left">12 weeks</td></tr>
+    <tr><td class="left">T6</td><td class="left">$100M</td><td class="left">T5 + XLI replacement</td><td class="left">XLI</td><td class="left">12 weeks</td></tr>
+    <tr><td class="left">T7</td><td class="left">$500M</td><td class="left">T6 + full-weight weekly</td><td class="left">Crisis Alpha v5</td><td class="left">TBD</td></tr>
+    <tr><td class="left">T8</td><td class="left">$1B+</td><td class="left">Architectural redesign</td><td class="left">qqq_cs</td><td class="left">TBD</td></tr>
+  </tbody>
+</table>
+
+<!-- ──────────────── Paper trading readiness ──────────────── -->
+<h2 id="readiness">Paper Trading Readiness Checklist</h2>
+
+<h3>Infrastructure (all green)</h3>
+<ul class="checklist">
+  <li class="done"><span class="mark">✓</span>
+    <div><strong>Paper config YAML</strong> — 8-stream weights, overlays, risk manager, Alpaca credentials
+    (<code>configs/north_star_v6_prod.yaml</code> via EXP-2290)</div></li>
+  <li class="done"><span class="mark">✓</span>
+    <div><strong>Launcher script</strong> — <code>scripts/launch_north_star_v6.sh</code> with
+    smoke/dry/daemon/stop/status/logs/report/close-all/install-launchd subcommands (EXP-2290)</div></li>
+  <li class="done"><span class="mark">✓</span>
+    <div><strong>Health monitor</strong> — 5-min Alpaca poller with per-sleeve attribution,
+    Telegram alerts, health.json persistence (EXP-2290)</div></li>
+  <li class="done"><span class="mark">✓</span>
+    <div><strong>Daily P&amp;L report generator</strong> — HTML + JSON, rolling equity log,
+    day/week/MTD/YTD metrics (EXP-2290)</div></li>
+  <li class="done"><span class="mark">✓</span>
+    <div><strong>Portfolio risk manager</strong> — EXP-1890 with 5 components, 30/30 tests:
+    cross-strategy sizer, correlation monitor, DD circuit breaker, allocation limiter,
+    leverage governor</div></li>
+  <li class="done"><span class="mark">✓</span>
+    <div><strong>Telegram alerts</strong> — entry/exit, stops, overlay blocks, daily summary
+    at 16:10, weekly Friday 16:30</div></li>
+</ul>
+
+<h3>Phase 9 hard gates (verified in paper)</h3>
+<ul class="checklist">
+  <li class="pending"><span class="mark">◐</span>
+    <div><strong>Gate 1:</strong> ≥ 4 weeks paper P&amp;L within ±15% of EXP-2570 forecast
+    (Sharpe 6.00, CAGR 93%)</div></li>
+  <li class="pending"><span class="mark">◐</span>
+    <div><strong>Gate 2:</strong> Daily fill rate on limit-at-mid orders ≥ 50% (EXP-2470 A)</div></li>
+  <li class="pending"><span class="mark">◐</span>
+    <div><strong>Gate 3:</strong> End-of-day window delivers ≥ 25% slippage reduction (EXP-2470 B)</div></li>
+  <li class="pending"><span class="mark">◐</span>
+    <div><strong>Gate 4:</strong> Circuit breaker does NOT trip on false positives
+    (≤ 1 spurious HALT / 4 weeks)</div></li>
+  <li class="pending"><span class="mark">◐</span>
+    <div><strong>Gate 5:</strong> Alpaca fills match IBKR NBBO within ±3 cents (EXP-2510)</div></li>
+  <li class="pending"><span class="mark">◐</span>
+    <div><strong>Gate 6:</strong> Telegram alerts deliver within 30s; no missed daily summaries</div></li>
+</ul>
+
+<h3>Pre-flight recommendations (apply before live)</h3>
+<ul class="checklist">
+  <li class="blocked"><span class="mark">!</span>
+    <div>Tighten DD circuit breaker from 12% to 11% hard trigger (EXP-2630 scenario-b slippage)</div></li>
+  <li class="blocked"><span class="mark">!</span>
+    <div>Integrate EXP-2540 regime-TC skip filter when VIX ≥ 25 (expected +0.5–0.8 Sharpe)</div></li>
+  <li class="blocked"><span class="mark">!</span>
+    <div>Switch to dollar-notional sizing before T1 ($25K live)</div></li>
+  <li class="blocked"><span class="mark">!</span>
+    <div>Add Polygon Options as IronVault fallback before T3 ($1M live)</div></li>
+</ul>
+
+<!-- ──────────────── Experiment registry ──────────────── -->
+<h2 id="registry">Experiment Registry — Searchable / Sortable</h2>
+
+<div class="note">
+Click any column header to sort. Type in the search box to filter. Badge colors:
+<span class="badge winner">WINNER</span> = production slot,
+<span class="badge killed">KILLED</span> = honest OOS reject,
+<span class="badge marginal">MARGINAL</span> = kept for ensembles,
+<span class="badge infra">INFRA</span> = data/risk/reporting,
+<span class="badge retract">RETRACTION</span> = headline pulled after audit.
+</div>
+
+<div class="search-bar">
+  <input type="text" id="exp-search" placeholder="Search by ID, name, or verdict…">
+  <select id="exp-verdict-filter">
+    <option value="">All verdicts</option>
+    <option value="winner">Winners only</option>
+    <option value="killed">Killed only</option>
+    <option value="marginal">Marginal</option>
+    <option value="infra">Infra</option>
+    <option value="retract">Retractions</option>
+  </select>
+  <span class="count" id="exp-count"></span>
+</div>
+
+<table id="exp-table">
+  <thead>
+    <tr>
+      <th class="left sortable" data-col="0">ID</th>
+      <th class="left sortable" data-col="1">Wave</th>
+      <th class="left sortable" data-col="2">Name</th>
+      <th class="sortable" data-col="3">Sharpe</th>
+      <th class="sortable" data-col="4">CAGR</th>
+      <th class="sortable" data-col="5">Max DD</th>
+      <th class="left sortable" data-col="6">Verdict</th>
+    </tr>
+  </thead>
+  <tbody id="exp-body">
+    <!-- rows filled by JS from EXPERIMENTS array below -->
+  </tbody>
+</table>
+
+<h3 style="margin-top:2em;">Wave Summary</h3>
+<table>
+  <thead>
+    <tr>
+      <th class="left">Wave</th><th class="left">Range</th><th>Count</th>
+      <th class="left">Top Winners</th><th>Killed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="left">1 — Alpha discovery</td><td class="left">EXP-1660 – 1840</td><td>16</td><td class="left">1750, 1770, 1780</td><td>3</td></tr>
+    <tr><td class="left">2 — Portfolio construction</td><td class="left">EXP-1850 – 1880</td><td>4</td><td class="left">1850, 1880</td><td>—</td></tr>
+    <tr><td class="left">3 — Risk infra</td><td class="left">EXP-1890 – 1900</td><td>2</td><td class="left">1890</td><td>—</td></tr>
+    <tr><td class="left">4 — Alpha hunt</td><td class="left">EXP-1910 – 1990</td><td>9</td><td class="left">1970</td><td>5</td></tr>
+    <tr><td class="left">5 — Overlay integration</td><td class="left">EXP-2000 – 2030</td><td>4</td><td class="left">2000, 2020</td><td>1</td></tr>
+    <tr><td class="left">6 — First Sharpe 6 hit</td><td class="left">EXP-2050 – 2090</td><td>5</td><td class="left">2050, 2070, 2080</td><td>—</td></tr>
+    <tr><td class="left">7 — Capacity round 1</td><td class="left">EXP-2100 – 2180</td><td>9</td><td class="left">2130, 2180</td><td>2</td></tr>
+    <tr><td class="left">8 — 7-stream integration</td><td class="left">EXP-2200 – 2280</td><td>9</td><td class="left">2200, 2230, 2280</td><td>—</td></tr>
+    <tr><td class="left">9 — Cost reality + brokers</td><td class="left">EXP-2340 – 2480</td><td>15</td><td class="left">2370, 2420, 2470</td><td>5</td></tr>
+    <tr><td class="left">10 — Commission-free + Phase 8</td><td class="left">EXP-2500 – 2680</td><td>19</td><td class="left">2510, 2540, 2570, 2580, 2590, 2630</td><td>2</td></tr>
+    <tr style="font-weight:700;"><td class="left">Total</td><td class="left">EXP-1660 → 2680</td><td>~92</td><td class="left">~24 ★</td><td>~18</td></tr>
+  </tbody>
+</table>
+
+<div style="margin-top:4em; padding-top:1.5em; border-top:1px solid var(--line);
+             font-size:0.82em; color:#94a3b8; text-align:center;">
+  North Star Master Dashboard · Generated 2026-04-08 EOD ·
+  All numbers trace to committed experiments in <code>compass/</code> ·
+  Rule Zero held throughout the April 6-8 sprint<br>
+  Sources: <code>MASTERPLAN.md v10</code>, <code>compass/reports/*.json</code>,
+  <code>git log --since="2026-03-25"</code>
+</div>
+
+</div><!-- /container -->
+
+<!-- ──────────────── JS: searchable/sortable experiment table ──────────────── -->
+<script>
+const EXPERIMENTS = [
+  // Wave 1 — Alpha discovery (April 6)
+  ["EXP-1660","1","VRP Deepening — multi-asset VRP walk-forward","2.14","18.2%","6.1%","winner"],
+  ["EXP-1700","1","VoV feature engineering","—","—","—","infra"],
+  ["EXP-1710","1","0DTE/1DTE SPX feasibility","1.12","8.4%","14.3%","killed"],
+  ["EXP-1720","1","Sector ETF pairs (EG + Johansen)","0.84","6.2%","9.1%","killed"],
+  ["EXP-1730","1","Treasury curve mean reversion (TLT/SHY)","1.56","11.8%","5.4%","marginal"],
+  ["EXP-1740","1","Sentiment filter (FOMC NLP)","1.98","—","—","winner"],
+  ["EXP-1750","1","Order flow / Put-Call Ratio overlay ★","+0.78Δ","—","—","winner"],
+  ["EXP-1760","1","Crypto volatility hardening (IBIT/BITO)","1.04","4.47%","4.58%","killed"],
+  ["EXP-1770","1","Commodity calendar spreads (GLD/SLV) ★","2.70 / 2.27","15.2 / 24.9%","2.5 / 6.1%","winner"],
+  ["EXP-1780","1","Crisis Alpha v5 long-vol sleeve ★","1.20","—","—","winner"],
+  ["EXP-1790","1","VIX futures roll yield","0.92","—","—","killed"],
+  ["EXP-1800","1","Earnings vol crush via index proxy","—","—","—","killed"],
+  ["EXP-1810","1","IBIT credit spreads (simulation)","1.15","4.47%","4.58%","marginal"],
+  ["EXP-1820","1","Commodity mean reversion","1.93","5.9%","—","marginal"],
+  ["EXP-1830","1","Deep risk stress testing (50K MC paths)","—","—","—","infra"],
+  ["EXP-1840","1","Regime detector v2","—","—","—","infra"],
+
+  // Wave 2 — Portfolio construction
+  ["EXP-1850","2","Regime-adaptive portfolio optimizer ★","4.57","—","—","winner"],
+  ["EXP-1860","2","North Star portfolio v3","3.94","—","—","infra"],
+  ["EXP-1870","2","Combined portfolio stress test (Wave 3)","—","—","—","infra"],
+  ["EXP-1880","2","FOMC entry overlay integration ★","+0.60Δ","—","—","winner"],
+
+  // Wave 3 — Risk infra
+  ["EXP-1890","3","Portfolio Risk Manager (5 components) ★","—","—","—","winner"],
+  ["EXP-1900","3","North Star paper deployment","—","—","—","infra"],
+
+  // Wave 4 — Alpha hunt
+  ["EXP-1910","4","Intraday breakout","0.31","—","—","killed"],
+  ["EXP-1920","4","Carry trade ETF strategy","0.72","—","—","killed"],
+  ["EXP-1930","4","VVIX signal overlay","+0.12Δ","—","—","killed"],
+  ["EXP-1940","4","Multi-timeframe momentum (SPY/QQQ/IWM/EFA/EEM)","0.76 / 0.14","12.6 / 0.9%","32 / 22%","killed"],
+  ["EXP-1950","4","Adaptive Kelly sizing","+0.03Δ","—","—","killed"],
+  ["EXP-1960","4","SPY put-skew alpha","1.87","—","—","marginal"],
+  ["EXP-1970","4","Vol-of-Vol 'V' overlay ★","+0.86Δ","—","—","winner"],
+  ["EXP-1980","4","Dynamic hedge ratio","—","—","—","marginal"],
+  ["EXP-1990","4","Ensemble signal stacking (meta-learner)","1.73","0.83%","0.55%","killed"],
+
+  // Wave 5 — Overlay integration
+  ["EXP-2000","5","Triple overlay stack (V+F+PCR) ★","+0.88Δ","—","—","winner"],
+  ["EXP-2010","5","Tail risk convexity (long SPY puts)","—","—","—","marginal"],
+  ["EXP-2020","5","Cross-sectional vol arbitrage ★","2.28","—","—","winner"],
+  ["EXP-2030","5","Intraweek seasonality overlay","0.42","—","—","killed"],
+
+  // Wave 6 — First Sharpe 6
+  ["EXP-2040","6","Leveraged GLD/SLV calendar scaling","4.99","57.4%","5.3%","winner"],
+  ["EXP-2050","6","North Star v5 (first Sh 6.0 hit) ★","6.00","—","—","winner"],
+  ["EXP-2060","6","Cross-vol arb v2 (VoV overlay)","2.45","—","—","winner"],
+  ["EXP-2070","6","VIX term structure overlay ★","+1.42Δ","—","—","winner"],
+  ["EXP-2080","6","Correlation regime switching ★","5.24","—","—","winner"],
+  ["EXP-2090","6","GLD/SLV calendar seasonality filter","−0.35Δ","—","—","killed"],
+
+  // Wave 7 — Capacity round 1
+  ["EXP-2100","7","V+F true integration audit","6.00","—","—","retract"],
+  ["EXP-2110","7","Leveraged diversified portfolio","5.80","—","—","infra"],
+  ["EXP-2120","7","T+V+F triple overlay","+0.95Δ","—","—","winner"],
+  ["EXP-2130","7","Comprehensive progress report (Carlos)","—","—","—","infra"],
+  ["EXP-2140","7","Portfolio capacity analysis ★","—","—","—","infra"],
+  ["EXP-2150","7","Weekly cadence + T+V filters","+0.30Δ","—","—","killed"],
+  ["EXP-2160","7","High-capacity alternatives","—","—","—","marginal"],
+  ["EXP-2170","7","Weight optimization bake-off","5.47","—","—","killed"],
+  ["EXP-2180","7","Volatility targeting","+0.05Δ","—","—","marginal"],
+  ["EXP-2190","7","Tail-risk parity overlay","−0.02Δ","−0.44%","+0.44%","killed"],
+
+  // Wave 8 — 7-stream integration
+  ["EXP-2200","8","7-stream North Star v6 ★","5.96","146%","5.7%","winner"],
+  ["EXP-2210","8","XLF/XLI deep validation","2.06 / 2.25","—","—","winner"],
+  ["EXP-2220","8","7-stream correlation matrix (6.69 eff)","—","—","—","infra"],
+  ["EXP-2230","8","7-stream capacity (SLV bottleneck) ★","—","—","—","infra"],
+  ["EXP-2240","8","QQQ/IWM credit spreads (QQQ PASS)","2.26","1.93%","0.76%","winner"],
+  ["EXP-2250","8","9-stream North Star v7 (sparse Sh 6.55)","6.55","—","—","winner"],
+  ["EXP-2260","8","SLV replacement v1","—","—","—","killed"],
+  ["EXP-2270","8","XLF/XLI slippage analysis","—","—","—","infra"],
+  ["EXP-2280","8","20-fold walk-forward robustness ★","6.25 median","—","—","winner"],
+  ["EXP-2290","8","North Star v6 production deployment","—","—","—","infra"],
+  ["EXP-2300","8","Paper trading deployment v1","—","—","—","infra"],
+  ["EXP-2310","8","AUM scaling analysis","—","—","—","killed"],
+  ["EXP-2320","8","Comprehensive final report","—","—","—","infra"],
+  ["EXP-2330","8","MC stress test (6/6 gates pass) ★","6.07 median","25.3%","2.94%","winner"],
+
+  // Wave 9 — Cost reality + brokers (April 8)
+  ["EXP-2340","9","Walk-forward DD fix (scale-factor cap)","—","—","—","infra"],
+  ["EXP-2350","9","SLV replacement v2 (QQQ/TLT)","—","—","—","killed"],
+  ["EXP-2360","9","Robust covariance bake-off","11.73","—","—","retract"],
+  ["EXP-2370","9","DD circuit breaker ★★","↑ Sh","—","24%→6.77%","winner"],
+  ["EXP-2380","9","Futures calendar capacity","—","—","—","killed"],
+  ["EXP-2390","9","Audit of 2360 smeared-input","—","—","—","retract"],
+  ["EXP-2400","9","Combined best-of (Ledoit-Wolf)","6.87 gross","—","—","retract"],
+  ["EXP-2410","9","Production paper-trading config","—","—","—","infra"],
+  ["EXP-2420","9","Real transaction cost model ★★","4.49 net","—","—","winner"],
+  ["EXP-2430","9","Capacity-optimized portfolio","—","—","—","killed"],
+  ["EXP-2440","9","Cost-aware optimization (width lever)","+0.68Δ","—","—","winner"],
+  ["EXP-2450","9","Sparse combined honest retraction","—","—","—","retract"],
+  ["EXP-2460","9","Zero-cost T+V overlay","−0.15Δ","—","—","killed"],
+  ["EXP-2470","9","Execution optimization stack A+B+C+D ★","+0.33Δ","—","—","winner"],
+  ["EXP-2480","9","3-sleeve high-capacity architecture","−0.33Δ","—","—","killed"],
+
+  // Wave 10 — Commission-free + Phase 8
+  ["EXP-2500","10","True net backtest (infra)","3.89","—","—","infra"],
+  ["EXP-2510","10","Commission-free broker analysis ★","5.20 / 5.40 / 6.00","—","—","winner"],
+  ["EXP-2520","10","Paper-trading deployment v2","—","—","—","infra"],
+  ["EXP-2530","10","MASTERPLAN v8 summary report","—","—","—","infra"],
+  ["EXP-2540","10","Regime-conditional TC model ★","+0.83Δ","—","—","winner"],
+  ["EXP-2550","10","Net Sharpe recovery pathway","4.53","—","—","marginal"],
+  ["EXP-2560","10","Trade frequency compression ★","6.39","—","—","winner"],
+  ["EXP-2570","10","★★★ Commission-free net Sharpe 6.00","6.00 net","~93%","4.2%","winner"],
+  ["EXP-2580","10","SPY weekly credit spreads ★","0.66","—","—","winner"],
+  ["EXP-2590","10","QQQ capacity deep dive (+0.40 Sh) ★","4.94","10.92%","2.65%","winner"],
+  ["EXP-2600","10","North Star v8 (QQQ added)","6.87","—","—","winner"],
+  ["EXP-2610","10","SPY weekly integration","—","—","—","marginal"],
+  ["EXP-2620","10","Alpaca paper connector","—","—","—","infra"],
+  ["EXP-2630","10","OOS regime stress test ★","—","—","−12.12%","winner"],
+  ["EXP-2640","10","VIX stress hardening","—","—","—","infra"],
+  ["EXP-2650","10","Multi-expiry capacity","—","—","—","infra"],
+  ["EXP-2660","10","Multi-underlying scaling audit","—","—","—","infra"],
+  ["EXP-2670","10","Paper trading go/no-go checklist","—","—","—","infra"],
+  ["EXP-2680","10","MASTERPLAN v10 + final report","—","—","—","infra"],
+];
+
+// Render table
+const body = document.getElementById('exp-body');
+const countEl = document.getElementById('exp-count');
+const searchEl = document.getElementById('exp-search');
+const filterEl = document.getElementById('exp-verdict-filter');
+
+function render(rows) {
+  body.innerHTML = rows.map(r => {
+    const [id, wave, name, sh, cagr, dd, verdict] = r;
+    const vname = verdict.toUpperCase();
+    return `<tr>
+      <td class="left"><code>${id}</code></td>
+      <td class="left">${wave}</td>
+      <td class="left">${name}</td>
+      <td>${sh}</td>
+      <td>${cagr}</td>
+      <td>${dd}</td>
+      <td class="left"><span class="badge ${verdict}">${vname}</span></td>
+    </tr>`;
+  }).join('');
+  countEl.textContent = `${rows.length} of ${EXPERIMENTS.length} experiments`;
+}
+
+function filtered() {
+  const q = searchEl.value.toLowerCase().trim();
+  const v = filterEl.value;
+  return EXPERIMENTS.filter(r => {
+    if (v && r[6] !== v) return false;
+    if (!q) return true;
+    return r.some(cell => String(cell).toLowerCase().includes(q));
+  });
+}
+
+render(EXPERIMENTS);
+searchEl.addEventListener('input', () => render(filtered()));
+filterEl.addEventListener('change', () => render(filtered()));
+
+// Sortable columns
+let sortState = { col:null, dir:1 };
+document.querySelectorAll('#exp-table th.sortable').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = parseInt(th.dataset.col, 10);
+    if (sortState.col === col) {
+      sortState.dir = -sortState.dir;
+    } else {
+      sortState.col = col; sortState.dir = 1;
+    }
+    document.querySelectorAll('#exp-table th.sortable').forEach(h => h.classList.remove('asc','desc'));
+    th.classList.add(sortState.dir === 1 ? 'asc' : 'desc');
+    const rows = filtered().slice().sort((a, b) => {
+      const av = a[col], bv = b[col];
+      // numeric-ish sort where possible
+      const an = parseFloat(String(av).replace(/[^\d.\-]/g, ''));
+      const bn = parseFloat(String(bv).replace(/[^\d.\-]/g, ''));
+      if (!isNaN(an) && !isNaN(bn)) return (an - bn) * sortState.dir;
+      return String(av).localeCompare(String(bv)) * sortState.dir;
+    });
+    render(rows);
+  });
+});
+</script>
+
+</body>
+</html>

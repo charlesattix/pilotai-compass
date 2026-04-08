@@ -1,0 +1,67 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EXP-2300 sleeve 1 — EXP-1220 SPY put-credit-spreads (31.64% weight)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Reference: compass.exp1220_standalone.run_exp1220_trades
+# Validated: 171 real IronVault trades, 88% win rate, trade Sharpe 1.26
+# Weight: 31.64% (equal_risk_15% from EXP-2200)
+# Mode: LIVE (fully tradeable via Alpaca paper)
+# ═══════════════════════════════════════════════════════════════════════════
+
+sleeve_id: exp1220_spy
+portfolio_weight: 0.3164
+mode: live
+
+strategy:
+  module: compass.exp1220_standalone
+  runner: run_exp1220_trades
+  description: "Bull put credit spread, 28-day DTE, 5%-OTM, width=5, biweekly cadence"
+
+instrument:
+  ticker: SPY
+  asset_class: options
+  strategy_type: bull_put_spread
+
+cadence:
+  entry_frequency_days: 10     # baseline biweekly (EXP-2150 showed weekly +0.30
+                                # at sleeve level, but destabilises the equal_risk
+                                # weights; stick with biweekly for paper phase)
+  scan_window: "monday 09:35-10:00 ET"
+  max_concurrent: 3
+
+spread:
+  width: 5.0
+  target_dte: 28
+  min_dte: 21
+  max_dte: 45
+  otm_pct: 0.05
+  min_credit: 0.30
+
+entry_filters:
+  vix_max_entry: 40.0          # baseline; no tighter filter (EXP-2150 showed
+                                # filtered variants lower portfolio Sharpe)
+  vix_min_entry: 10.0
+
+exits:
+  profit_target_pct: 50
+  stop_loss_multiplier: 2.0
+  max_hold_days: 28
+  dte_exit: 7
+
+sizing:
+  base: starting_capital        # flat, non-compounding
+  risk_per_trade_pct: 3.0       # 3% of $100K = $3K
+  min_contracts: 1
+  max_contracts: 4
+  # Adjusted by portfolio layer by portfolio_weight × vol_target_scalar
+
+data:
+  options_source: ironvault
+  options_db: data/options_cache.db
+  underlying_source: alpaca
+  vix_source: yahoo
+
+logging:
+  level: INFO
+  file: logs/exp2300/sleeve_exp1220_spy.log
+  journal: logs/exp2300/journal_exp1220_spy.csv

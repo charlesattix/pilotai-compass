@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2× + Crisis Alpha Hedge — v4 vs v5 Comparison</title>
+<style>
+* { box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+       max-width:1200px;margin:0 auto;padding:28px;background:#fff;color:#1e293b;line-height:1.5; }
+h1 { font-size:1.8em;color:#0f172a;margin-bottom:4px; }
+h2 { color:#334155;margin-top:2.4em;padding-bottom:8px;border-bottom:2px solid #e2e8f0; }
+h3 { color:#475569;margin-top:1.6em; }
+.subtitle { color:#64748b;font-size:0.92rem;margin-bottom:24px; }
+.verdict { background:#ecfdf5;border:2px solid #16a34a;border-radius:10px;padding:20px;margin:24px 0; }
+.verdict h3 { margin-top:0;color:#065f46; }
+.sources { background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:16px;margin:16px 0;font-size:0.84rem;line-height:1.7; }
+.kpi-row { display:flex;gap:14px;flex-wrap:wrap;margin:20px 0; }
+.kpi { background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;text-align:center;flex:1;min-width:130px; }
+.kpi .value { font-size:1.55em;font-weight:800;color:#0f172a; }
+.kpi .label { font-size:0.72em;color:#64748b;margin-top:4px;text-transform:uppercase; }
+table { width:100%;border-collapse:collapse;margin:14px 0;font-size:0.84em; }
+th { background:#f1f5f9;padding:10px 12px;text-align:right;font-weight:600;color:#475569;
+     border-bottom:2px solid #cbd5e1;font-size:0.74em;text-transform:uppercase; }
+th:first-child { text-align:left; }
+td { padding:8px 12px;text-align:right;border-bottom:1px solid #e2e8f0; }
+td:first-child { text-align:left; }
+tr:hover { background:#f8fafc; }
+.grid2 { display:grid;grid-template-columns:1fr 1fr;gap:20px; }
+.footer { margin-top:3em;padding-top:1em;border-top:1px solid #e2e8f0;font-size:0.78em;color:#94a3b8;text-align:center; }
+.note { background:#fefce8;border:1px solid #fde047;border-radius:6px;padding:12px 16px;font-size:0.86rem;margin:12px 0; }
+</style></head><body>
+
+<h1>2× EXP-1220 + Crisis Alpha Hedge — v4 vs v5</h1>
+<div class="subtitle">Hedge parameter sweep + leverage sweep · Crisis Alpha v5 hedge-optimized
+objective vs v4 baseline · 2026-04-06 22:17</div>
+
+<div class="sources">
+<strong>Rule Zero — all data real:</strong><br>
+EXP-1220 stream: <code>scripts.ultimate_portfolio.load_exp1220_dynamic</code>
+(real Yahoo SPY + ^VIX + ^VIX3M, TailRiskProtector-scaled)<br>
+v4 hedge: <code>compass.crisis_alpha_v4.ConfigV4(v2_round,vt=0.05,l=1.0,brake 0.05+0.03)</code>
+— the baseline referenced in <code>compass/crisis_alpha_v5.py</code><br>
+v5 hedge: <code>compass.crisis_alpha_v5.search_hedge_configs+select_best_hedge</code>
+— grid optimized on <code>hedge_score = corr_dd − 5·downside_capture</code><br>
+Metrics via <code>compass.metrics.full_metrics</code> (correct arithmetic-mean Sharpe)
+</div>
+
+<div class="verdict">
+<h3>Headline: does v5 actually reduce 2× EXP-1220 drawdown?</h3>
+At 2× leverage + 10% hedge (the reference point):<br>
+&nbsp;&nbsp;• <strong>Unhedged 2×:</strong> DD = 14.7% · Sharpe 3.89 · CAGR 149.0%<br>
+&nbsp;&nbsp;• <strong>+ 10% v4 hedge:</strong> DD = 13.3% (Δ -1.4pp) · Sharpe 3.85 · CAGR 129.0%<br>
+&nbsp;&nbsp;• <strong>+ 10% v5 hedge:</strong> DD = 13.3% (Δ -1.4pp) · Sharpe 3.88 · CAGR 127.7%<br>
+<strong>Winner on DD reduction: v5</strong>
+(v5 beats v4 by +0.0pp of DD at the 10% hedge point).
+</div>
+
+<h2>1. Hedge stream metrics (standalone)</h2>
+<div class="grid2">
+<div>
+<h3>v4 baseline</h3>
+<div class="kpi-row">
+<div class="kpi"><div class="value">+0.239</div><div class="label">Full corr</div></div>
+<div class="kpi"><div class="value">+0.229</div><div class="label">Stress corr</div></div>
+<div class="kpi"><div class="value">-0.197%</div><div class="label">Downside cap</div></div>
+</div>
+<p><code>v4_baseline</code></p>
+</div>
+<div>
+<h3>v5 hedge-optimized</h3>
+<div class="kpi-row">
+<div class="kpi"><div class="value">-0.151</div><div class="label">Full corr</div></div>
+<div class="kpi"><div class="value">-0.160</div><div class="label">Stress corr</div></div>
+<div class="kpi"><div class="value">+0.041%</div><div class="label">Downside cap</div></div>
+</div>
+<p><code>slow/v0.05/l1.0/sg0.05/sh2.0/sho</code></p>
+</div>
+</div>
+<div class="note">
+<strong>Interpretation:</strong> The stress-period correlation (<code>corr_dd</code>) is the key
+number — it is the correlation computed only on days when EXP-1220 is in ≥3% drawdown.
+A hedge is useful <em>only</em> on these days; a strategy that is negatively correlated
+with EXP-1220 overall but positively correlated during stress is not a real hedge.
+</div>
+
+<h2>2. Hedge % sweep at 2× leverage — side-by-side</h2>
+<table>
+<thead><tr>
+<th rowspan="2">Hedge %</th>
+<th colspan="3">v4 baseline</th>
+<th colspan="3">v5 hedge-optimized</th>
+<th colspan="3">Delta (v5 − v4)</th>
+</tr><tr>
+<th>CAGR</th><th>Sharpe</th><th>DD</th>
+<th>CAGR</th><th>Sharpe</th><th>DD</th>
+<th>ΔCAGR</th><th>ΔSharpe</th><th>ΔDD</th>
+</tr></thead>
+<tbody><tr><td>5.0%</td><td>138.8%</td><td>3.87</td><td>14.1%</td><td>138.1%</td><td>3.89</td><td>14.0%</td><td style='color:#dc2626'>-0.7</td><td style='color:#16a34a'>+0.02</td><td style='color:#16a34a;font-weight:700'>-0.0</td></tr><tr><td>7.5%</td><td>133.8%</td><td>3.86</td><td>13.7%</td><td>132.9%</td><td>3.89</td><td>13.7%</td><td style='color:#dc2626'>-1.0</td><td style='color:#16a34a'>+0.03</td><td style='color:#16a34a;font-weight:700'>-0.0</td></tr><tr><td>10.0%</td><td>129.0%</td><td>3.85</td><td>13.3%</td><td>127.7%</td><td>3.88</td><td>13.3%</td><td style='color:#dc2626'>-1.3</td><td style='color:#16a34a'>+0.03</td><td style='color:#16a34a;font-weight:700'>-0.0</td></tr><tr><td>12.5%</td><td>124.2%</td><td>3.84</td><td>13.0%</td><td>122.6%</td><td>3.88</td><td>12.9%</td><td style='color:#dc2626'>-1.6</td><td style='color:#16a34a'>+0.04</td><td style='color:#16a34a;font-weight:700'>-0.0</td></tr><tr><td>15.0%</td><td>119.5%</td><td>3.82</td><td>12.6%</td><td>117.7%</td><td>3.88</td><td>12.6%</td><td style='color:#dc2626'>-1.8</td><td style='color:#16a34a'>+0.06</td><td style='color:#16a34a;font-weight:700'>-0.1</td></tr><tr><td>17.5%</td><td>114.9%</td><td>3.81</td><td>12.3%</td><td>112.8%</td><td>3.87</td><td>12.2%</td><td style='color:#dc2626'>-2.1</td><td style='color:#16a34a'>+0.06</td><td style='color:#16a34a;font-weight:700'>-0.0</td></tr><tr><td>20.0%</td><td>110.4%</td><td>3.79</td><td>11.9%</td><td>108.1%</td><td>3.87</td><td>11.9%</td><td style='color:#dc2626'>-2.4</td><td style='color:#16a34a'>+0.08</td><td style='color:#16a34a;font-weight:700'>-0.1</td></tr><tr><td>22.5%</td><td>106.0%</td><td>3.77</td><td>11.6%</td><td>103.4%</td><td>3.86</td><td>11.5%</td><td style='color:#dc2626'>-2.6</td><td style='color:#16a34a'>+0.09</td><td style='color:#16a34a;font-weight:700'>-0.1</td></tr><tr><td>25.0%</td><td>101.7%</td><td>3.75</td><td>11.2%</td><td>98.9%</td><td>3.85</td><td>11.1%</td><td style='color:#dc2626'>-2.8</td><td style='color:#16a34a'>+0.10</td><td style='color:#16a34a;font-weight:700'>-0.1</td></tr><tr><td>27.5%</td><td>97.5%</td><td>3.73</td><td>10.8%</td><td>94.4%</td><td>3.85</td><td>10.8%</td><td style='color:#dc2626'>-3.1</td><td style='color:#16a34a'>+0.12</td><td style='color:#16a34a;font-weight:700'>-0.1</td></tr><tr><td>30.0%</td><td>93.3%</td><td>3.70</td><td>10.5%</td><td>90.0%</td><td>3.84</td><td>10.4%</td><td style='color:#dc2626'>-3.3</td><td style='color:#16a34a'>+0.14</td><td style='color:#16a34a;font-weight:700'>-0.1</td></tr></tbody>
+</table>
+
+<h3>v4 hedge sweep (2× leverage)</h3>
+<table>
+<thead><tr><th>Hedge %</th><th>CAGR</th><th>Sharpe</th><th>DD</th><th>Calmar</th><th>Vol</th></tr></thead>
+<tbody><tr style="background:#ecfdf5"><td>5.0%</td><td style='color:#16a34a;font-weight:600'>138.8%</td><td style='font-weight:700'>3.87</td><td>14.1%</td><td>9.88</td><td>22.0%</td></tr><tr><td>7.5%</td><td style='color:#16a34a;font-weight:600'>133.8%</td><td style='font-weight:700'>3.86</td><td>13.7%</td><td>9.77</td><td>21.4%</td></tr><tr><td>10.0%</td><td style='color:#16a34a;font-weight:600'>129.0%</td><td style='font-weight:700'>3.85</td><td>13.3%</td><td>9.67</td><td>20.9%</td></tr><tr><td>12.5%</td><td style='color:#16a34a;font-weight:600'>124.2%</td><td style='font-weight:700'>3.84</td><td>13.0%</td><td>9.56</td><td>20.4%</td></tr><tr><td>15.0%</td><td style='color:#16a34a;font-weight:600'>119.5%</td><td style='font-weight:700'>3.82</td><td>12.6%</td><td>9.46</td><td>19.9%</td></tr><tr><td>17.5%</td><td style='color:#16a34a;font-weight:600'>114.9%</td><td style='font-weight:700'>3.81</td><td>12.3%</td><td>9.36</td><td>19.4%</td></tr><tr><td>20.0%</td><td style='color:#16a34a;font-weight:600'>110.4%</td><td style='font-weight:700'>3.79</td><td>11.9%</td><td>9.26</td><td>18.9%</td></tr><tr><td>22.5%</td><td style='color:#16a34a;font-weight:600'>106.0%</td><td style='font-weight:700'>3.77</td><td>11.6%</td><td>9.16</td><td>18.4%</td></tr><tr><td>25.0%</td><td style='color:#16a34a;font-weight:600'>101.7%</td><td style='font-weight:700'>3.75</td><td>11.2%</td><td>9.07</td><td>18.0%</td></tr><tr><td>27.5%</td><td style='color:#16a34a;font-weight:600'>97.5%</td><td style='font-weight:700'>3.73</td><td>10.8%</td><td>8.98</td><td>17.5%</td></tr><tr><td>30.0%</td><td style='color:#16a34a;font-weight:600'>93.3%</td><td style='font-weight:700'>3.70</td><td>10.5%</td><td>8.89</td><td>17.0%</td></tr></tbody>
+</table>
+<p><strong>v4 optimal (max Sharpe, DD&lt;15%):</strong>
+5.0% hedge → CAGR 138.8%,
+Sharpe 3.87, DD 14.1%</p>
+
+<h3>v5 hedge sweep (2× leverage)</h3>
+<table>
+<thead><tr><th>Hedge %</th><th>CAGR</th><th>Sharpe</th><th>DD</th><th>Calmar</th><th>Vol</th></tr></thead>
+<tbody><tr style="background:#ecfdf5"><td>5.0%</td><td style='color:#16a34a;font-weight:600'>138.1%</td><td style='font-weight:700'>3.89</td><td>14.0%</td><td>9.85</td><td>21.8%</td></tr><tr><td>7.5%</td><td style='color:#16a34a;font-weight:600'>132.9%</td><td style='font-weight:700'>3.89</td><td>13.7%</td><td>9.72</td><td>21.2%</td></tr><tr><td>10.0%</td><td style='color:#16a34a;font-weight:600'>127.7%</td><td style='font-weight:700'>3.88</td><td>13.3%</td><td>9.59</td><td>20.6%</td></tr><tr><td>12.5%</td><td style='color:#16a34a;font-weight:600'>122.6%</td><td style='font-weight:700'>3.88</td><td>12.9%</td><td>9.47</td><td>20.0%</td></tr><tr><td>15.0%</td><td style='color:#16a34a;font-weight:600'>117.7%</td><td style='font-weight:700'>3.88</td><td>12.6%</td><td>9.35</td><td>19.4%</td></tr><tr><td>17.5%</td><td style='color:#16a34a;font-weight:600'>112.8%</td><td style='font-weight:700'>3.87</td><td>12.2%</td><td>9.23</td><td>18.8%</td></tr><tr><td>20.0%</td><td style='color:#16a34a;font-weight:600'>108.1%</td><td style='font-weight:700'>3.87</td><td>11.9%</td><td>9.11</td><td>18.2%</td></tr><tr><td>22.5%</td><td style='color:#16a34a;font-weight:600'>103.4%</td><td style='font-weight:700'>3.86</td><td>11.5%</td><td>8.99</td><td>17.6%</td></tr><tr><td>25.0%</td><td style='color:#16a34a;font-weight:600'>98.9%</td><td style='font-weight:700'>3.85</td><td>11.1%</td><td>8.88</td><td>17.1%</td></tr><tr><td>27.5%</td><td style='color:#16a34a;font-weight:600'>94.4%</td><td style='font-weight:700'>3.85</td><td>10.8%</td><td>8.77</td><td>16.5%</td></tr><tr><td>30.0%</td><td style='color:#16a34a;font-weight:600'>90.0%</td><td style='font-weight:700'>3.84</td><td>10.4%</td><td>8.66</td><td>15.9%</td></tr></tbody>
+</table>
+<p><strong>v5 optimal (max Sharpe, DD&lt;15%):</strong>
+5.0% hedge → CAGR 138.1%,
+Sharpe 3.89, DD 14.0%</p>
+
+<h2>3. Leverage sweep at each stream's optimal hedge %</h2>
+<div class="grid2">
+<div>
+<h3>v4 @ 5.0% hedge</h3>
+<table>
+<thead><tr><th>Lev</th><th>Hedge</th><th>CAGR</th><th>Sharpe</th><th>DD</th><th>Calmar</th></tr></thead>
+<tbody><tr><td style='font-weight:700'>1.5×</td><td>5.0%</td><td style='color:#16a34a;font-weight:600'>93.1%</td><td style='font-weight:700'>3.80</td><td>10.7%</td><td>8.72</td></tr><tr><td style='font-weight:700'>1.75×</td><td>5.0%</td><td style='color:#16a34a;font-weight:600'>114.8%</td><td style='font-weight:700'>3.84</td><td>12.4%</td><td>9.28</td></tr><tr><td style='font-weight:700'>2.0×</td><td>5.0%</td><td style='color:#16a34a;font-weight:600'>138.8%</td><td style='font-weight:700'>3.87</td><td>14.1%</td><td>9.88</td></tr><tr><td style='font-weight:700'>2.25×</td><td>5.0%</td><td style='color:#dc2626;font-weight:600'>165.2%</td><td style='font-weight:700'>3.90</td><td>15.7%</td><td>10.53</td></tr><tr><td style='font-weight:700'>2.5×</td><td>5.0%</td><td style='color:#dc2626;font-weight:600'>194.4%</td><td style='font-weight:700'>3.92</td><td>17.3%</td><td>11.22</td></tr></tbody>
+</table>
+</div>
+<div>
+<h3>v5 @ 5.0% hedge</h3>
+<table>
+<thead><tr><th>Lev</th><th>Hedge</th><th>CAGR</th><th>Sharpe</th><th>DD</th><th>Calmar</th></tr></thead>
+<tbody><tr><td style='font-weight:700'>1.5×</td><td>5.0%</td><td style='color:#16a34a;font-weight:600'>92.6%</td><td style='font-weight:700'>3.82</td><td>10.7%</td><td>8.68</td></tr><tr><td style='font-weight:700'>1.75×</td><td>5.0%</td><td style='color:#16a34a;font-weight:600'>114.2%</td><td style='font-weight:700'>3.86</td><td>12.4%</td><td>9.24</td></tr><tr><td style='font-weight:700'>2.0×</td><td>5.0%</td><td style='color:#16a34a;font-weight:600'>138.1%</td><td style='font-weight:700'>3.89</td><td>14.0%</td><td>9.85</td></tr><tr><td style='font-weight:700'>2.25×</td><td>5.0%</td><td style='color:#dc2626;font-weight:600'>164.5%</td><td style='font-weight:700'>3.91</td><td>15.7%</td><td>10.49</td></tr><tr><td style='font-weight:700'>2.5×</td><td>5.0%</td><td style='color:#dc2626;font-weight:600'>193.6%</td><td style='font-weight:700'>3.93</td><td>17.3%</td><td>11.18</td></tr></tbody>
+</table>
+</div>
+</div>
+
+<h2>4. EXP-1220 reference</h2>
+<div class="kpi-row">
+<div class="kpi"><div class="value">58.9%</div><div class="label">CAGR</div></div>
+<div class="kpi"><div class="value">3.70</div><div class="label">Sharpe</div></div>
+<div class="kpi"><div class="value">7.6%</div><div class="label">Max DD</div></div>
+<div class="kpi"><div class="value">11.5%</div><div class="label">Vol</div></div>
+<div class="kpi"><div class="value">1507</div><div class="label">Days</div></div>
+</div>
+
+<div class="footer">
+scripts/hedge_sweep_v5_comparison.py · Crisis Alpha v4 (d041b1d baseline) vs v5 ·
+Real Yahoo Finance + TailRiskProtector only · No synthetic data · Rule Zero.
+</div>
+</body></html>

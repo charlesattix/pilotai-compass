@@ -1,0 +1,448 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EXP-2290 — North Star v6 Production Deployment (7-stream portfolio)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Complete production config for the 7-stream North Star portfolio. Target:
+# Mac Studio deployment via `scripts/launch_north_star_v6.sh`. All strategy
+# sleeves reference experiments that have been validated on REAL IronVault
+# option data + real Yahoo underlying prices.
+#
+# 7 STREAMS (all Grade A/B OOS):
+#   1. EXP-1220   SPY put-credit-spreads           35%   IronVault SPY options
+#   2. EXP-2240Q  QQQ put-credit-spreads (Sh 2.26) 15%   IronVault QQQ options
+#   3. EXP-1630-XLF XLF put-credit-spreads (2.06)  10%   IronVault XLF options
+#   4. EXP-1630-XLI XLI put-credit-spreads (2.25)  10%   IronVault XLI options
+#   5. EXP-1770G  GLD calendar spread (Sh 2.70)    10%   Yahoo GLD/GC=F
+#   6. EXP-1770S  SLV calendar spread (Sh 2.27)     5%   Yahoo SLV/SI=F
+#   7. EXP-1780-v5 Crisis Alpha v5 long-vol sleeve  5%   SPY puts + VIX calls
+#   (remaining 10% cash buffer / T-bill)
+#
+# OVERLAYS:
+#   • FOMC / CPI / NFP event gate (sizing × 0.5 on event days)
+#   • EXP-1750 put/call sentiment overlay
+#
+# RISK: EXP-1890 PortfolioRiskManager binding at the sleeve and portfolio
+# levels (cross-strategy sizer, correlation monitor, drawdown circuit
+# breaker, allocation limiter, leverage governor).
+#
+# EXECUTION: Alpaca paper API (IEX feed, v2 REST). Promoted to live only
+# after 8 weeks of paper-trade vs backtest deviation < 30%.
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: "EXP-2290 North Star v6 Production"
+experiment_id: EXP-2290
+version: "6.0.0"
+mode: paper                    # flip to "live" only after paper validation
+created: "2026-04-07"
+description: |
+  7-stream North Star portfolio ready for Mac Studio deployment. All
+  streams validated on real IronVault + Yahoo data, both overlays
+  enabled, risk manager in binding mode, Telegram alerts, paper fills.
+
+# ─── Account ─────────────────────────────────────────────────────────────
+account:
+  broker: alpaca
+  environment: paper
+  starting_capital: 100000
+  currency: USD
+  margin_type: reg_t
+  api:
+    base_url: "https://paper-api.alpaca.markets"
+    data_url: "https://data.alpaca.markets"
+    key_env: ALPACA_API_KEY_PAPER
+    secret_env: ALPACA_API_SECRET_PAPER
+    feed: iex                 # 'sip' if subscribed
+    api_version: v2
+
+# ─── Portfolio target ────────────────────────────────────────────────────
+portfolio:
+  target_vol_annual_pct: 14.0     # annualized vol target
+  target_leverage: 2.0
+  max_leverage: 3.0
+  min_leverage: 0.5
+  rebalance_cadence: weekly
+  rebalance_day: monday
+  rebalance_time: "09:40"
+
+# ─── Strategy components ─────────────────────────────────────────────────
+strategies:
+
+  # ---- 1. EXP-1220 SPY put-credit-spreads ------------------------------
+  - id: exp1220_spy
+    enabled: true
+    weight: 0.35
+    module: compass.tail_risk_hedge
+    entrypoint: run_paper
+    reference_experiment: EXP-1220
+    baseline_sharpe: 3.85
+    instrument:
+      ticker: SPY
+      asset_class: options
+      strategy_type: bull_put_spread
+    cadence:
+      frequency: 7d
+      scan_day: monday
+      scan_time: "09:35"
+      max_concurrent: 5
+    spread:
+      width: 5.0
+      target_dte: 28
+      min_dte: 21
+      max_dte: 35
+      otm_pct: 0.05
+      min_credit: 0.30
+    sizing:
+      risk_per_trade_pct: 1.0
+      max_contracts: 15
+    exits:
+      profit_target_pct: 50
+      stop_loss_multiplier: 2.0
+      dte_exit: 5
+    journal: logs/north_star_v6/exp1220_journal.csv
+
+  # ---- 2. QQQ put-credit-spreads (EXP-2240) ----------------------------
+  - id: exp2240_qqq
+    enabled: true
+    weight: 0.15
+    module: compass.tail_risk_hedge       # same engine, different ticker
+    entrypoint: run_paper
+    reference_experiment: EXP-2240
+    baseline_sharpe: 2.26
+    instrument:
+      ticker: QQQ
+      asset_class: options
+      strategy_type: bull_put_spread
+    cadence:
+      frequency: 7d
+      scan_day: monday
+      scan_time: "09:36"
+      max_concurrent: 3
+    spread:
+      width: 5.0
+      target_dte: 28
+      min_dte: 21
+      max_dte: 35
+      otm_pct: 0.05
+      min_credit: 0.25
+    sizing:
+      risk_per_trade_pct: 0.75
+      max_contracts: 10
+    exits:
+      profit_target_pct: 50
+      stop_loss_multiplier: 2.0
+      dte_exit: 5
+    journal: logs/north_star_v6/exp2240_qqq_journal.csv
+
+  # ---- 3. XLF put-credit-spreads ---------------------------------------
+  - id: exp1630_xlf
+    enabled: true
+    weight: 0.10
+    module: compass.tail_risk_hedge
+    entrypoint: run_paper
+    reference_experiment: EXP-1630-XLF
+    baseline_sharpe: 2.06
+    instrument:
+      ticker: XLF
+      asset_class: options
+      strategy_type: bull_put_spread
+    cadence:
+      frequency: 7d
+      scan_day: tuesday
+      scan_time: "09:35"
+      max_concurrent: 3
+    spread:
+      width: 1.0
+      target_dte: 28
+      min_dte: 21
+      max_dte: 35
+      otm_pct: 0.04
+      min_credit: 0.08
+    sizing:
+      risk_per_trade_pct: 0.50
+      max_contracts: 15
+    exits:
+      profit_target_pct: 50
+      stop_loss_multiplier: 2.0
+      dte_exit: 5
+    journal: logs/north_star_v6/exp1630_xlf_journal.csv
+
+  # ---- 4. XLI put-credit-spreads ---------------------------------------
+  - id: exp1630_xli
+    enabled: true
+    weight: 0.10
+    module: compass.tail_risk_hedge
+    entrypoint: run_paper
+    reference_experiment: EXP-1630-XLI
+    baseline_sharpe: 2.25
+    instrument:
+      ticker: XLI
+      asset_class: options
+      strategy_type: bull_put_spread
+    cadence:
+      frequency: 7d
+      scan_day: wednesday
+      scan_time: "09:35"
+      max_concurrent: 3
+    spread:
+      width: 2.0
+      target_dte: 28
+      min_dte: 21
+      max_dte: 35
+      otm_pct: 0.04
+      min_credit: 0.12
+    sizing:
+      risk_per_trade_pct: 0.50
+      max_contracts: 12
+    exits:
+      profit_target_pct: 50
+      stop_loss_multiplier: 2.0
+      dte_exit: 5
+    journal: logs/north_star_v6/exp1630_xli_journal.csv
+
+  # ---- 5. GLD calendar spread ------------------------------------------
+  - id: exp1770_gld_calendar
+    enabled: true
+    weight: 0.10
+    module: compass.exp1770_commodity_calendars
+    entrypoint: run_paper
+    reference_experiment: EXP-1770-GLD
+    baseline_sharpe: 2.70
+    instrument:
+      pair: [GLD, GC=F]
+      asset_class: calendar_spread
+    cadence:
+      frequency: 1d
+      scan_time: "09:45"
+    sizing:
+      risk_per_trade_pct: 1.0
+    signal:
+      window_days: 60
+      z_threshold: 1.0
+      rule_selection: walk_forward
+    journal: logs/north_star_v6/gld_calendar_journal.csv
+
+  # ---- 6. SLV calendar spread ------------------------------------------
+  - id: exp1770_slv_calendar
+    enabled: true
+    weight: 0.05
+    module: compass.exp1770_commodity_calendars
+    entrypoint: run_paper
+    reference_experiment: EXP-1770-SLV
+    baseline_sharpe: 2.27
+    instrument:
+      pair: [SLV, SI=F]
+      asset_class: calendar_spread
+    cadence:
+      frequency: 1d
+      scan_time: "09:46"
+    sizing:
+      risk_per_trade_pct: 0.75
+    signal:
+      window_days: 60
+      z_threshold: 1.0
+      rule_selection: walk_forward
+    capacity_note: |
+      SLV is the portfolio capacity bottleneck (EXP-2140): SI=F ADV ~$120M/d.
+      Keep this sleeve small. Reduce weight before scaling AUM above $50M.
+    journal: logs/north_star_v6/slv_calendar_journal.csv
+
+  # ---- 7. Crisis Alpha v5 long-vol sleeve ------------------------------
+  - id: crisis_alpha_v5
+    enabled: true
+    weight: 0.05
+    module: compass.crisis_alpha_v5
+    entrypoint: run_paper
+    reference_experiment: EXP-1780-v5
+    baseline_sharpe: 1.20
+    instrument:
+      ticker: SPY
+      asset_class: options
+      strategy_type: long_put_plus_vix_call
+    cadence:
+      frequency: 5d
+      scan_day: monday
+      scan_time: "09:50"
+      max_concurrent: 3
+    sizing:
+      premium_budget_pct: 5.0
+      put_otm_pct: 0.05
+      put_target_dte: 60
+      vix_call_target_dte: 45
+      vix_call_strike_offset: 5.0
+    exits:
+      profit_target_pct: 200
+      stop_loss_pct: 100
+      crisis_unwind_score: 0.60
+      max_hold_days: 60
+    journal: logs/north_star_v6/crisis_alpha_journal.csv
+
+  # ---- 8. Cash buffer (passive, not capacity-bound) --------------------
+  - id: cash_buffer
+    enabled: true
+    weight: 0.10
+    module: passive
+    instrument:
+      ticker: CASH
+      asset_class: cash
+    yields:
+      source: alpaca_cash_interest
+
+# ─── Overlays (always on) ────────────────────────────────────────────────
+overlays:
+
+  fomc_event_gate:
+    enabled: true
+    module: compass.risk_overlay
+    config:
+      enable_event_gates: true
+      pre_event_days: 1
+      post_event_days: 0
+      event_sizing_multiplier: 0.5
+      events: [FOMC, CPI, NFP, PCE]
+
+  put_call_sentiment:
+    enabled: true
+    module: compass.exp1750_putcall_overlay
+    config:
+      pcr_lookback_days: 60
+      pcr_skip_quartile_low: true
+      pcr_size_quartile_high: true
+      pcr_size_high_multiplier: 1.5
+      vix_term_inversion_block: true
+      unusual_put_zscore_warn: 2.0
+      data_source: ironvault
+
+# ─── Risk manager (EXP-1890 PortfolioRiskManager) ────────────────────────
+risk_manager:
+  enabled: true
+  module: compass.portfolio_risk_manager
+  class: PortfolioRiskManager
+
+  cross_strategy_sizer:
+    mode: risk_parity_regime_tilt
+    inv_vol_lookback: 60
+    apply_kelly_cap: true
+    kelly_cap: 0.25
+
+  correlation_monitor:
+    window_days: 20
+    alert_threshold: 0.60
+    stress_regimes: [HIGH_VOL, BEAR, CRASH]
+
+  drawdown_circuit_breaker:
+    soft_pct: 0.10
+    hard_pct: 0.12
+    recovery_soft_pct: 0.06
+    warn_leverage: 0.5
+
+  allocation_limiter:
+    max_weight_per_strategy: 0.40
+    min_weight_per_strategy: 0.02
+    rebalance_drift_pct: 0.05
+
+  leverage_governor:
+    target_leverage: 2.0
+    max_leverage: 3.0
+    min_leverage: 0.5
+    vix_cap_table:
+      "15": 2.5
+      "20": 2.0
+      "25": 1.5
+      "30": 1.0
+      "35": 0.5
+
+  portfolio_limits:
+    max_daily_loss_pct: 3.0
+    max_weekly_loss_pct: 6.0
+    max_drawdown_halt_pct: 12.0
+    recovery_pct: 6.0
+    max_open_positions_total: 25
+    max_open_positions_per_strategy: 10
+    vix_crisis_block: 35.0
+    vix_emergency_exit_all: 45.0
+
+# ─── Paper trading (simulated fills) ─────────────────────────────────────
+paper:
+  fill_model: mid_minus_slippage
+  slippage_bps_equity: 5
+  slippage_bps_options: 25
+  bid_ask_spread_bps_equity: 8
+  bid_ask_spread_bps_options: 40
+  fill_probability: 0.97
+  partial_fill_frac: 0.10          # 10% chance of partial fill
+  reject_on_after_hours: true
+
+# ─── Telegram alerting ───────────────────────────────────────────────────
+alerts:
+  channel: telegram
+  module: shared.telegram_alerts
+  bot_token_env: TELEGRAM_BOT_TOKEN
+  chat_id_env: TELEGRAM_CHAT_ID
+  fallback: log
+  on_trade_entry: true
+  on_trade_exit: true
+  on_stop_loss: true
+  on_profit_target: true
+  on_overlay_block: true
+  on_risk_limit_breach: true
+  on_circuit_breaker: true
+  on_vix_spike: true
+  on_daily_summary: true
+  on_weekly_summary: true
+  on_deviation_alert: true          # paper vs backtest drift > 30%
+  cooldowns:
+    info: 300
+    warning: 60
+    critical: 0
+  daily_summary_time: "16:10"
+  weekly_summary_day: friday
+  weekly_summary_time: "16:30"
+
+# ─── Health monitor ──────────────────────────────────────────────────────
+monitoring:
+  check_interval_minutes: 5
+  monitor_script: scripts/north_star_v6_monitor.py
+  log_dir: logs/north_star_v6
+  health_file: logs/north_star_v6/health.json
+  state_file: logs/north_star_v6/state.json
+  pid_file: logs/north_star_v6/engine.pid
+  monitor_pid_file: logs/north_star_v6/monitor.pid
+  alert_on_stale_seconds: 600
+
+# ─── Daily P&L report ────────────────────────────────────────────────────
+reports:
+  daily_pnl:
+    enabled: true
+    script: scripts/north_star_v6_daily_report.py
+    output_dir: reports/north_star_v6
+    run_at: "16:15"
+    format: [html, json]
+
+# ─── Data sources ────────────────────────────────────────────────────────
+data:
+  price_source: alpaca
+  options_source: alpaca
+  vix_source: yahoo
+  fomc_calendar: data/events/fomc_calendar.csv
+  econ_calendar: data/events/econ_calendar.csv
+  ironvault_db: data/options_cache.db
+
+# ─── Logging ─────────────────────────────────────────────────────────────
+logging:
+  level: INFO
+  dir: logs/north_star_v6
+  main_log: logs/north_star_v6/engine.log
+  monitor_log: logs/north_star_v6/monitor.log
+  report_log: logs/north_star_v6/report.log
+  max_size_mb: 100
+  backup_count: 14
+
+# ─── Rule Zero ───────────────────────────────────────────────────────────
+rule_zero:
+  enforced: true
+  statement: |
+    ZERO SYNTHETIC DATA in production. Every executable quote traces to
+    Alpaca live, IronVault option_daily, or Yahoo ^VIX/^VIX3M. Paper-mode
+    fill simulation applies a calibrated slippage model around REAL quotes
+    — it does NOT fabricate prices. If a quote is missing the trade is
+    skipped, never extrapolated.

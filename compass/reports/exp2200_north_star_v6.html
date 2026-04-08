@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>EXP-2200 — North Star v6 (7 streams)</title>
+<style>
+body { font-family:-apple-system,sans-serif;max-width:1300px;margin:0 auto;padding:28px;background:#fff;color:#1e293b; }
+h1 { font-size:1.85em;color:#0f172a; }
+h2 { margin-top:2em;border-bottom:2px solid #e2e8f0;padding-bottom:8px;color:#334155; }
+.sources { background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px;font-size:0.84rem;line-height:1.6; }
+.winner { background:#ecfdf5;border:2px solid #16a34a;border-radius:10px;padding:18px;margin:20px 0; }
+.winner h3 { margin-top:0;color:#065f46; }
+.note { background:#fefce8;border:1px solid #fde047;border-radius:6px;padding:12px 16px;font-size:0.86rem;margin:14px 0; }
+table { width:100%;border-collapse:collapse;margin:12px 0;font-size:0.84em; }
+th { background:#f1f5f9;padding:9px 11px;text-align:right;border-bottom:2px solid #cbd5e1;font-size:0.72em;text-transform:uppercase; }
+th:first-child { text-align:left; }
+td { padding:7px 11px;text-align:right;border-bottom:1px solid #e2e8f0; }
+td:first-child { text-align:left; }
+</style></head><body>
+
+<h1>EXP-2200 — 7-Stream North Star Portfolio v6</h1>
+<p style="color:#64748b">EXP-1220 + XLF CS + XLI CS + GLD + SLV + vol_arb + v5_hedge ·
+walk-forward 2020-2025 · 2026-04-08 07:33</p>
+
+<div class="sources">
+<strong>Rule Zero — all real:</strong><br>
+exp1220: compass.exp1220_standalone on real IronVault SPY chains<br>
+xlf_cs / xli_cs: compass.exp2160_high_capacity_alts.run_put_credit_spreads on real IronVault chains<br>
+gld_cal / slv_cal: compass.exp1770_commodity_calendars walk-forward on real Yahoo<br>
+vol_arb: compass.exp2020_cross_vol_arb trade tape on real IronVault + Yahoo RV<br>
+v5_hedge: compass.crisis_alpha_v5 frozen best on real Yahoo 13-ETF<br>
+Trade → daily: uniform smearing across entry→exit (EXP-2160 method).
+Sharpe: compass.metrics.full_metrics (mean/std × √252)
+</div>
+
+<div class="winner">
+<h3>★ Winner: <code>max_sharpe_15%</code></h3>
+CAGR <strong>12223.0%</strong> ·
+Sharpe <strong>33.75</strong> ·
+Max DD <strong>10.9%</strong> ·
+Calmar <strong>1117.86</strong> ·
+Vol 14.3%
+</div>
+
+<div class="note">
+<strong>Methodology caveat — smearing inflation:</strong> EXP-2160's own
+report flagged that daily-smeared Sharpe is "method-inflated on high-
+win-rate strategies due to P&L smearing across the holding period".
+XLF standalone trade Sharpe 11.29 → smeared daily Sharpe 27.22 (2.4×
+inflation). All smeared-portfolio Sharpes below should be read as an
+UPPER BOUND. The sparse-tape (exit-date) lower bound is reported in
+Section 4 for sanity check.
+</div>
+
+<h2>1. Stream-level metrics (smeared, pre-portfolio)</h2>
+<table>
+<thead><tr><th>Stream</th><th>N trades</th><th>Trade SR</th><th>CAGR</th><th>Smeared Sharpe</th><th>Max DD</th><th>Vol</th></tr></thead>
+<tbody><tr><td>exp1220</td><td>171</td><td>1.26</td><td>1.2%</td><td style='font-weight:700'>-7.18</td><td>1.5%</td><td>0.5%</td></tr><tr><td>xlf_cs</td><td>248</td><td>11.19</td><td>17.6%</td><td style='font-weight:700'>19.67</td><td>1.4%</td><td>0.6%</td></tr><tr><td>xli_cs</td><td>248</td><td>6.04</td><td>17.7%</td><td style='font-weight:700'>15.52</td><td>1.4%</td><td>0.8%</td></tr><tr><td>gld_cal</td><td>None</td><td>—</td><td>17.4%</td><td style='font-weight:700'>1.96</td><td>2.5%</td><td>6.0%</td></tr><tr><td>slv_cal</td><td>None</td><td>—</td><td>31.5%</td><td style='font-weight:700'>1.94</td><td>6.1%</td><td>12.2%</td></tr><tr><td>vol_arb</td><td>271</td><td>2.28</td><td>7.9%</td><td style='font-weight:700'>3.92</td><td>3.8%</td><td>0.8%</td></tr><tr><td>v5_hedge</td><td>None</td><td>—</td><td>-1.0%</td><td style='font-weight:700'>-0.83</td><td>12.8%</td><td>6.4%</td></tr></tbody>
+</table>
+
+<h2>2. Correlation matrix (smeared daily)</h2>
+<table>
+<thead><tr><th></th><th>exp1220</th><th>xlf_cs</th><th>xli_cs</th><th>gld_cal</th><th>slv_cal</th><th>vol_arb</th><th>v5_hedge</th></tr></thead>
+<tbody><tr><td>exp1220</td><td style='color:#dc2626'>+1.000</td><td style='color:#0f172a'>+0.159</td><td style='color:#0f172a'>+0.168</td><td style='color:#16a34a'>-0.038</td><td style='color:#16a34a'>-0.031</td><td style='color:#0f172a'>+0.017</td><td style='color:#16a34a'>-0.089</td></tr><tr><td>xlf_cs</td><td style='color:#0f172a'>+0.159</td><td style='color:#dc2626'>+1.000</td><td style='color:#0f172a'>+0.224</td><td style='color:#0f172a'>+0.005</td><td style='color:#16a34a'>-0.027</td><td style='color:#0f172a'>+0.100</td><td style='color:#16a34a'>-0.052</td></tr><tr><td>xli_cs</td><td style='color:#0f172a'>+0.168</td><td style='color:#0f172a'>+0.224</td><td style='color:#dc2626'>+1.000</td><td style='color:#16a34a'>-0.003</td><td style='color:#16a34a'>-0.011</td><td style='color:#16a34a'>-0.103</td><td style='color:#16a34a'>-0.054</td></tr><tr><td>gld_cal</td><td style='color:#16a34a'>-0.038</td><td style='color:#0f172a'>+0.005</td><td style='color:#16a34a'>-0.003</td><td style='color:#dc2626'>+1.000</td><td style='color:#0f172a'>+0.256</td><td style='color:#16a34a'>-0.003</td><td style='color:#16a34a'>-0.049</td></tr><tr><td>slv_cal</td><td style='color:#16a34a'>-0.031</td><td style='color:#16a34a'>-0.027</td><td style='color:#16a34a'>-0.011</td><td style='color:#0f172a'>+0.256</td><td style='color:#dc2626'>+1.000</td><td style='color:#16a34a'>-0.025</td><td style='color:#16a34a'>-0.018</td></tr><tr><td>vol_arb</td><td style='color:#0f172a'>+0.017</td><td style='color:#0f172a'>+0.100</td><td style='color:#16a34a'>-0.103</td><td style='color:#16a34a'>-0.003</td><td style='color:#16a34a'>-0.025</td><td style='color:#dc2626'>+1.000</td><td style='color:#16a34a'>-0.005</td></tr><tr><td>v5_hedge</td><td style='color:#16a34a'>-0.089</td><td style='color:#16a34a'>-0.052</td><td style='color:#16a34a'>-0.054</td><td style='color:#16a34a'>-0.049</td><td style='color:#16a34a'>-0.018</td><td style='color:#16a34a'>-0.005</td><td style='color:#dc2626'>+1.000</td></tr></tbody>
+</table>
+
+<h2>3. Optimizer weights</h2>
+<table>
+<thead><tr><th>Sleeve</th><th>equal_risk</th><th>max_sharpe</th><th>min_variance</th></tr></thead>
+<tbody><tr><td>exp1220</td><td>31.6%</td><td>0.0%</td><td>25.1%</td></tr><tr><td>xlf_cs</td><td>24.5%</td><td>50.0%</td><td>24.6%</td></tr><tr><td>xli_cs</td><td>19.2%</td><td>32.0%</td><td>24.5%</td></tr><tr><td>gld_cal</td><td>2.4%</td><td>0.5%</td><td>0.4%</td></tr><tr><td>slv_cal</td><td>1.2%</td><td>0.3%</td><td>0.2%</td></tr><tr><td>vol_arb</td><td>18.7%</td><td>16.8%</td><td>24.5%</td></tr><tr><td>v5_hedge</td><td>2.3%</td><td>0.5%</td><td>0.8%</td></tr></tbody>
+</table>
+
+<h2>4. Portfolio results (all configs × vol targets)</h2>
+<table>
+<thead><tr><th>Config</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th><th>Vol</th><th>Target vol</th></tr></thead>
+<tbody><tr><td><strong>equal_risk_none</strong></td><td>10.0%</td><td style='font-weight:700'>13.40</td><td>0.2%</td><td>59.39</td><td>0.4%</td><td>—</td></tr><tr><td><strong>equal_risk_12%</strong></td><td>1520.8%</td><td style='font-weight:700'>24.90</td><td>4.9%</td><td>313.18</td><td>11.1%</td><td>12%</td></tr><tr><td><strong>equal_risk_15%</strong></td><td>3130.5%</td><td style='font-weight:700'>24.98</td><td>6.0%</td><td>518.55</td><td>13.9%</td><td>15%</td></tr><tr><td><strong>max_sharpe_none</strong></td><td>15.6%</td><td style='font-weight:700'>23.49</td><td>0.3%</td><td>46.17</td><td>0.4%</td><td>—</td></tr><tr><td><strong>max_sharpe_12%</strong></td><td>4647.2%</td><td style='font-weight:700'>33.67</td><td>8.8%</td><td>527.21</td><td>11.4%</td><td>12%</td></tr><tr><td><strong>max_sharpe_15% ★</strong></td><td>12223.0%</td><td style='font-weight:700'>33.75</td><td>10.9%</td><td>1117.86</td><td>14.3%</td><td>15%</td></tr><tr><td><strong>min_variance_none</strong></td><td>10.7%</td><td style='font-weight:700'>16.92</td><td>0.2%</td><td>53.30</td><td>0.3%</td><td>—</td></tr><tr><td><strong>min_variance_12%</strong></td><td>2749.5%</td><td style='font-weight:700'>30.01</td><td>6.5%</td><td>424.78</td><td>11.1%</td><td>12%</td></tr><tr><td><strong>min_variance_15%</strong></td><td>6426.1%</td><td style='font-weight:700'>30.09</td><td>8.0%</td><td>800.35</td><td>13.9%</td><td>15%</td></tr></tbody>
+</table>
+
+<h3>Sparse-tape lower bound (same weights, exit-date conversion)</h3>
+<table>
+<thead><tr><th>Config</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th></tr></thead>
+<tbody><tr><td>equal_risk_none</td><td>10.3%</td><td>3.40</td><td>0.6%</td></tr><tr><td>equal_risk_12%</td><td>106.0%</td><td>5.89</td><td>4.6%</td></tr><tr><td>equal_risk_15%</td><td>146.2%</td><td>5.96</td><td>5.7%</td></tr><tr><td>max_sharpe_none</td><td>16.2%</td><td>3.88</td><td>1.0%</td></tr><tr><td>max_sharpe_12%</td><td>92.7%</td><td>5.16</td><td>4.4%</td></tr><tr><td>max_sharpe_15%</td><td>126.5%</td><td>5.23</td><td>5.5%</td></tr><tr><td>min_variance_none</td><td>11.0%</td><td>3.28</td><td>0.8%</td></tr><tr><td>min_variance_12%</td><td>93.2%</td><td>5.37</td><td>5.2%</td></tr><tr><td>min_variance_15%</td><td>127.3%</td><td>5.45</td><td>6.5%</td></tr></tbody>
+</table>
+<div class="note">
+Sparse Sharpe is the lower bound — no smearing, exit-date returns only.
+The gap between smeared (upper) and sparse (lower) Sharpe quantifies
+the methodology inflation for this specific portfolio.
+</div>
+
+<p style="margin-top:3em;color:#94a3b8;font-size:0.78em;text-align:center">
+compass/exp2200_north_star_v6.py · Rule Zero · all real data
+</p>
+</body></html>

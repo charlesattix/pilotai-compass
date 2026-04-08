@@ -1,0 +1,67 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EXP-2300 sleeve 2 — XLF put-credit-spreads (24.52% weight)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Reference: compass.exp2160_high_capacity_alts.run_put_credit_spreads("XLF")
+# Validated: 248 trades, 98.4% win rate, trade Sharpe 11.19
+# Weight: 24.52% (equal_risk_15% from EXP-2200)
+# Mode: LIVE (fully tradeable via Alpaca paper)
+#
+# Note: the 11.19 per-trade Sharpe is REAL; the smeared daily Sharpe of
+# 19.67 is inflated by the EXP-2160 smearing method and should not be
+# used for sleeve health checks — use trade-level metrics only.
+# ═══════════════════════════════════════════════════════════════════════════
+
+sleeve_id: xlf_cs
+portfolio_weight: 0.2452
+mode: live
+
+strategy:
+  module: compass.exp2160_high_capacity_alts
+  runner: run_put_credit_spreads
+  runner_arg_ticker: XLF
+  description: "Delta-targeted put credit spread, weekly cadence, BS-inversion strike selection"
+
+instrument:
+  ticker: XLF
+  asset_class: options
+  strategy_type: put_credit_spread
+
+cadence:
+  entry_frequency_days: 5       # weekly entries
+  scan_window: "monday 09:35-10:00 ET"
+  max_concurrent: 4
+
+spread:
+  short_delta: 0.15             # EXP-2160 CS_SHORT_DELTA
+  long_delta: 0.08              # EXP-2160 CS_LONG_DELTA
+  target_dte: 30                # EXP-2160 CS_TARGET_DTE
+  min_dte: 21
+  max_dte: 45
+  min_net_credit: 0.10
+
+entry_filters:
+  vix_max_entry: 40.0
+  spot_min_price: 20.0
+
+exits:
+  hold_to_expiration: true      # EXP-2160 method: exit at expiration
+  profit_target_pct: null       # disabled; let theta decay to expiry
+  stop_loss_multiplier: null
+  max_hold_days: 35
+
+sizing:
+  base: starting_capital
+  risk_per_trade_pct: 2.0       # conservative for paper phase
+  min_contracts: 1
+  max_contracts: 6
+
+data:
+  options_source: ironvault
+  options_db: data/options_cache.db
+  underlying_source: alpaca
+
+logging:
+  level: INFO
+  file: logs/exp2300/sleeve_xlf_cs.log
+  journal: logs/exp2300/journal_xlf_cs.csv

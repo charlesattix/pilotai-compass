@@ -1,0 +1,64 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>EXP-2470 Execution Optimization</title>
+<style>
+body{font-family:-apple-system,sans-serif;margin:0;padding:24px;background:#fff;color:#1e293b;max-width:1150px}
+h1{font-size:1.5rem;color:#0f172a} h2{font-size:1.05rem;color:#334155;border-bottom:1px solid #e2e8f0;padding-bottom:4px;margin-top:1.6rem}
+.meta{color:#64748b;font-size:0.82rem;margin-bottom:18px}
+.headline{background:#f0fdf4;border-left:5px solid #ca8a04;padding:14px 18px;border-radius:6px;margin:14px 0;font-size:0.95rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;text-align:center}
+.card .l{font-size:0.65rem;color:#64748b;text-transform:uppercase} .card .v{font-size:1.15rem;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:0.83rem;margin:10px 0}
+th{background:#f1f5f9;padding:6px 8px;text-align:right;font-size:0.68rem;color:#64748b;text-transform:uppercase;border-bottom:2px solid #e2e8f0}
+th:first-child{text-align:left} td{padding:5px 8px;text-align:right;border-bottom:1px solid #f1f5f9;vertical-align:top}
+td:first-child{text-align:left}
+</style></head><body>
+<h1>EXP-2470 — Execution Optimization</h1>
+<p class="meta">Stacked execution techniques applied to the EXP-2420 cost model.
+Baseline: EXP-2200 equal_risk_15%, 3× leverage, gross Sharpe 5.96.</p>
+
+<div class="headline"><strong>Best stack:</strong> Stack A+B+C+D →
+drag <strong>2221 bps → 1718 bps</strong>,
+net Sharpe <strong>4.49 → 4.82</strong> (Δ +0.33 vs baseline),
+net CAGR <strong>+129.0%</strong>.</div>
+
+<div class="grid">
+  <div class="card"><div class="l">Gross Sharpe</div><div class="v">5.96</div></div>
+  <div class="card"><div class="l">Baseline Net Sharpe</div><div class="v">4.49</div></div>
+  <div class="card"><div class="l">Best Net Sharpe</div><div class="v" style="color:#ca8a04">4.82</div></div>
+  <div class="card"><div class="l">Drag before</div><div class="v">2221 bps</div></div>
+  <div class="card"><div class="l">Drag after</div><div class="v">1718 bps</div></div>
+  <div class="card"><div class="l">Savings</div><div class="v">503 bps</div></div>
+</div>
+
+<h2>Technique catalogue</h2>
+<table><tr><th>Key</th><th>Technique</th><th>Bid-ask</th><th>Slippage</th><th>Comm</th><th>Mechanism</th></tr>
+<tr><td>A</td><td>Limit at mid (50% fill rate)</td><td>×0.50</td><td>×1.00</td><td>×1.00</td><td style='font-size:.78rem'>Limit orders at the midprice fill roughly half the time; unfilled orders are retried as market orders at the full spread. Net effective bid-ask cost is halved.</td></tr><tr><td>B</td><td>Patient execution (pre-close window)</td><td>×1.00</td><td>×0.75</td><td>×1.00</td><td style='font-size:.78rem'>Execute inside the 15-min pre-close window instead of the opening minutes. End-of-day option ADV is ~2x the open, which compresses √-impact by ~25%.</td></tr><tr><td>C</td><td>Route reallocation to XLI/XLF</td><td>×0.78</td><td>×1.05</td><td>×1.00</td><td style='font-size:.78rem'>EXP-2420 per-$10K round-trip cost ranks XLI $0.77 < XLF $1.48 ≈ SPY $1.50. Shifting 40% of SPY-heavy and 30% of GLD-heavy notional into XLI/XLF blends bid-ask × 0.78. Small 5% slippage penalty from XLI's thinner ADV.</td></tr><tr><td>D</td><td>Multi-leg combo orders</td><td>×0.75</td><td>×1.00</td><td>×1.00</td><td style='font-size:.78rem'>Submit verticals and calendars as single combo orders. Price improvement on combo fills is typically 20-30% of spread. Applied to credit-spread + calendar streams only.</td></tr></table>
+
+<h2>Scenario ladder (stacked cumulatively)</h2>
+<table><tr><th>Scenario</th><th>Techniques</th>
+<th>Bid-ask $</th><th>Slippage $</th><th>Commission $</th><th>Total $</th>
+<th>Drag bps</th><th>Net Sharpe</th><th>Net CAGR</th></tr>
+<tr><td><strong>baseline (EXP-2420)</strong></td><td>—</td><td>$4,175</td><td>$9,756</td><td>$8,273</td><td>$22,205</td><td>2221</td><td style='color:#0f172a;font-weight:700'>4.49</td><td>+124.0%</td></tr><tr><td><strong>Solo: A · Limit at mid (50% fill rate)</strong></td><td>A</td><td>$2,088</td><td>$9,756</td><td>$8,273</td><td>$20,117</td><td>2012</td><td style='color:#0f172a;font-weight:700'>4.63</td><td>+126.1%</td></tr><tr><td><strong>Solo: B · Patient execution (pre-close window)</strong></td><td>B</td><td>$4,175</td><td>$7,317</td><td>$8,273</td><td>$19,766</td><td>1977</td><td style='color:#0f172a;font-weight:700'>4.65</td><td>+126.4%</td></tr><tr><td><strong>Solo: C · Route reallocation to XLI/XLF</strong></td><td>C</td><td>$3,257</td><td>$10,244</td><td>$8,273</td><td>$21,774</td><td>2177</td><td style='color:#0f172a;font-weight:700'>4.52</td><td>+124.4%</td></tr><tr><td><strong>Solo: D · Multi-leg combo orders</strong></td><td>D</td><td>$3,132</td><td>$9,756</td><td>$8,273</td><td>$21,161</td><td>2116</td><td style='color:#0f172a;font-weight:700'>4.56</td><td>+125.0%</td></tr><tr><td><strong>Stack A</strong></td><td>A</td><td>$2,088</td><td>$9,756</td><td>$8,273</td><td>$20,117</td><td>2012</td><td style='color:#0f172a;font-weight:700'>4.63</td><td>+126.1%</td></tr><tr><td><strong>Stack A+B</strong></td><td>A+B</td><td>$2,088</td><td>$7,317</td><td>$8,273</td><td>$17,678</td><td>1768</td><td style='color:#0f172a;font-weight:700'>4.79</td><td>+128.5%</td></tr><tr><td><strong>Stack A+B+C</strong></td><td>A+B+C</td><td>$1,628</td><td>$7,683</td><td>$8,273</td><td>$17,585</td><td>1758</td><td style='color:#0f172a;font-weight:700'>4.80</td><td>+128.6%</td></tr><tr style=background:#f0fdf4><td><strong>Stack A+B+C+D ★</strong></td><td>A+B+C+D</td><td>$1,221</td><td>$7,683</td><td>$8,273</td><td>$17,178</td><td>1718</td><td style='color:#0f172a;font-weight:700'>4.82</td><td>+129.0%</td></tr></table>
+
+<h2>Cost decomposition before vs after (best stack)</h2>
+<p class="meta">Commissions are untouched because they are per-contract fees that
+cannot be reduced by execution technique — only by trade-frequency reduction,
+which is a Phase 8 (AUM scaling) lever.</p>
+<table><tr><th>Component</th><th>Baseline</th><th>Optimized</th><th>Savings</th><th>% reduction</th></tr>
+<tr><td>Bid-ask</td><td>$4,175</td><td>$1,221</td><td>$2,954</td><td>71%</td></tr><tr><td>Slippage</td><td>$9,756</td><td>$7,683</td><td>$2,073</td><td>21%</td></tr><tr><td>Commission</td><td>$8,273</td><td>$8,273</td><td>$0</td><td>0%</td></tr><tr style='font-weight:700;background:#f1f5f9'><td>TOTAL</td><td>$22,205</td><td>$17,178</td><td>$5,027</td><td>23%</td></tr></table>
+
+<h2>Method</h2>
+<ul>
+<li>Source: compass/reports/exp2420_transaction_costs.json (real IronVault
+    + Yahoo cost model).</li>
+<li>Each technique applied as a multiplicative factor on the relevant cost line.</li>
+<li>Techniques stack multiplicatively: final_bid_ask = baseline × ∏ ba_factor_i.</li>
+<li>Net Sharpe recomputed from gross 5.96 (ann vol 15.12%) minus drag/vol.</li>
+<li>Commission line is held fixed — no execution technique reduces Alpaca fees.
+    Trade-frequency reduction (Phase 8) is the only lever there.</li>
+</ul>
+<div style="color:#94a3b8;font-size:.75rem;margin-top:1.6rem;border-top:1px solid #e2e8f0;padding-top:8px">
+compass/exp2470_execution_optimization.py · consumes EXP-2420 REAL-data JSON
+</div>
+</body></html>

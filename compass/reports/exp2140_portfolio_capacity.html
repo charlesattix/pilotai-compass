@@ -1,0 +1,132 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>EXP-2140 North Star Portfolio Capacity Analysis</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1200px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.55; }
+  h1 { color:#0f172a; } h2 { color:#334155; margin-top:2.2em;
+         padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:16px; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:18px 0; }
+  .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;
+          padding:18px; text-align:center; flex:1; min-width:160px; }
+  .kpi .value { font-size:1.5em; font-weight:800; color:#0f172a; }
+  .kpi .label { font-size:0.72em; color:#64748b; margin-top:4px; text-transform:uppercase; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.84em; }
+  th { background:#f1f5f9; padding:9px 12px; text-align:right; font-weight:600;
+       color:#475569; border-bottom:2px solid #cbd5e1; font-size:0.74em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; font-size:0.85em; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  td.ok   { background:#dcfce7; }
+  td.warn { background:#fef9c3; }
+  td.bad  { background:#fee2e2; }
+  .note { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;
+            padding:14px; margin:14px 0; font-size:0.85rem; }
+  code { background:#f1f5f9; padding:1px 6px; border-radius:4px; font-size:0.88em; }
+</style></head><body>
+
+<h1>EXP-2140 — North Star Portfolio Capacity Analysis</h1>
+<div class="subtitle">5-stream capacity curve across $10M – $1B AUM | 2026-04-07T16:34:23.225470Z</div>
+
+<div class="note">
+    <strong>Model:</strong> square-root market impact <code>impact_bps = k·√participation</code>,
+    k = 100 bps (equity), 120 bps (futures), 150 bps (options). Hard cap
+    = 5% of median daily ADV; soft cap = 1%. Turnover = 50 round-trips/yr.
+    ADV data pulled live: Yahoo Finance for ETFs/futures, IronVault
+    <code>option_daily</code> (since 2024) for SPY options. All real data,
+    no synthetic volumes.
+</div>
+
+<h2>Executive Summary</h2>
+<div class="kpi-row">
+    <div class="kpi"><div class="value">$16.3M</div><div class="label">Soft Bottleneck AUM (1% ADV)</div></div>
+    <div class="kpi"><div class="value">$81.6M</div><div class="label">Hard Bottleneck AUM (5% ADV)</div></div>
+    <div class="kpi"><div class="value" style="font-size:1em">SLV calendar</div><div class="label">Binding Stream</div></div>
+</div>
+
+<h2>Per-Stream Capacity Caps</h2>
+<table>
+    <thead><tr><th>Stream</th><th>Weight</th><th>ADV $</th>
+    <th>Binding Leg</th><th>Soft Cap AUM</th><th>Hard Cap AUM</th></tr></thead>
+    <tbody><tr>
+            <td>EXP-1220 (SPY put credit spreads)</td>
+            <td>60.0%</td>
+            <td>$151.86B</td>
+            <td>SPY options (2,314,201 contracts/d × 100 × $656.19)</td>
+            <td>$2.53B</td>
+            <td>$12.65B</td>
+        </tr><tr>
+            <td>GLD calendar (GLD − GC=F)</td>
+            <td>7.5%</td>
+            <td>$313.7M</td>
+            <td>GC=F futures: GLD $5.29B/d  GC=F $0.31B/d</td>
+            <td>$41.8M</td>
+            <td>$209.1M</td>
+        </tr><tr>
+            <td>SLV calendar (SLV − SI=F)</td>
+            <td>7.5%</td>
+            <td>$122.4M</td>
+            <td>SI=F futures: SLV $4.35B/d  SI=F $0.12B/d</td>
+            <td>$16.3M</td>
+            <td>$81.6M</td>
+        </tr><tr>
+            <td>Cross-vol arb (SPY vs IWM)</td>
+            <td>15.0%</td>
+            <td>$10.23B</td>
+            <td>IWM ETF shares (options data absent from IronVault)</td>
+            <td>$682.2M</td>
+            <td>$3.41B</td>
+        </tr><tr>
+            <td>Crisis Alpha v5 (SPY puts + VIX calls)</td>
+            <td>5.0%</td>
+            <td>$751.1M</td>
+            <td>UVXY $0.409B/d + VXX $0.342B/d (VIX-call proxy)</td>
+            <td>$150.2M</td>
+            <td>$751.1M</td>
+        </tr></tbody>
+</table>
+
+<h2>Capacity Matrix (participation / post-impact Sharpe / flag)</h2>
+<table>
+    <thead><tr><th>Stream</th><th>$10M</th><th>$50M</th><th>$100M</th><th>$500M</th><th>$1,000M</th></tr></thead>
+    <tbody><tr><td>EXP-1220 (SPY put credit spreads)</td><td class="ok">0.00%<br><span style="font-size:0.85em">Sh 3.49</span><br><strong>OK</strong></td><td class="ok">0.02%<br><span style="font-size:0.85em">Sh 3.04</span><br><strong>OK</strong></td><td class="ok">0.04%<br><span style="font-size:0.85em">Sh 2.70</span><br><strong>OK</strong></td><td class="ok">0.20%<br><span style="font-size:0.85em">Sh 1.28</span><br><strong>OK</strong></td><td class="ok">0.40%<br><span style="font-size:0.85em">Sh 0.22</span><br><strong>OK</strong></td></tr><tr><td>GLD calendar (GLD − GC=F)</td><td class="ok">0.24%<br><span style="font-size:0.85em">Sh 2.18</span><br><strong>OK</strong></td><td class="warn">1.20%<br><span style="font-size:0.85em">Sh 1.53</span><br><strong>BOTTLENECK</strong></td><td class="warn">2.39%<br><span style="font-size:0.85em">Sh 1.05</span><br><strong>BOTTLENECK</strong></td><td class="bad">11.95%<br><span style="font-size:0.85em">Sh 0.00</span><br><strong>BROKEN</strong></td><td class="bad">23.91%<br><span style="font-size:0.85em">Sh 0.00</span><br><strong>BROKEN</strong></td></tr><tr><td>SLV calendar (SLV − SI=F)</td><td class="ok">0.61%<br><span style="font-size:0.85em">Sh 1.84</span><br><strong>OK</strong></td><td class="warn">3.06%<br><span style="font-size:0.85em">Sh 1.31</span><br><strong>BOTTLENECK</strong></td><td class="bad">6.13%<br><span style="font-size:0.85em">Sh 0.92</span><br><strong>BROKEN</strong></td><td class="bad">30.64%<br><span style="font-size:0.85em">Sh 0.00</span><br><strong>BROKEN</strong></td><td class="bad">61.28%<br><span style="font-size:0.85em">Sh 0.00</span><br><strong>BROKEN</strong></td></tr><tr><td>Cross-vol arb (SPY vs IWM)</td><td class="ok">0.01%<br><span style="font-size:0.85em">Sh 1.53</span><br><strong>OK</strong></td><td class="ok">0.07%<br><span style="font-size:0.85em">Sh 1.19</span><br><strong>OK</strong></td><td class="ok">0.15%<br><span style="font-size:0.85em">Sh 0.94</span><br><strong>OK</strong></td><td class="ok">0.73%<br><span style="font-size:0.85em">Sh 0.00</span><br><strong>OK</strong></td><td class="warn">1.47%<br><span style="font-size:0.85em">Sh 0.00</span><br><strong>BOTTLENECK</strong></td></tr><tr><td>Crisis Alpha v5 (SPY puts + VIX calls)</td><td class="ok">0.07%<br><span style="font-size:0.85em">Sh 0.04</span><br><strong>OK</strong></td><td class="ok">0.33%<br><span style="font-size:0.85em">Sh 0.00</span><br><strong>OK</strong></td><td class="ok">0.67%<br><span style="font-size:0.85em">Sh 0.00</span><br><strong>OK</strong></td><td class="warn">3.33%<br><span style="font-size:0.85em">Sh 0.00</span><br><strong>BOTTLENECK</strong></td><td class="bad">6.66%<br><span style="font-size:0.85em">Sh 0.00</span><br><strong>BROKEN</strong></td></tr></tbody>
+</table>
+
+<h2>Portfolio Status by AUM Tier</h2>
+<table>
+    <thead><tr><th>AUM</th><th>Status</th><th>Broken Streams</th><th>Bottleneck Streams</th></tr></thead>
+    <tbody><tr>
+            <td>$10M</td>
+            <td class="ok"><strong>OK</strong></td>
+            <td>—</td>
+            <td>—</td>
+        </tr><tr>
+            <td>$50M</td>
+            <td class="warn"><strong>BOTTLENECK</strong></td>
+            <td>—</td>
+            <td>GLD calendar (GLD − GC=F), SLV calendar (SLV − SI=F)</td>
+        </tr><tr>
+            <td>$100M</td>
+            <td class="bad"><strong>BROKEN</strong></td>
+            <td>SLV calendar (SLV − SI=F)</td>
+            <td>GLD calendar (GLD − GC=F)</td>
+        </tr><tr>
+            <td>$500M</td>
+            <td class="bad"><strong>BROKEN</strong></td>
+            <td>GLD calendar (GLD − GC=F), SLV calendar (SLV − SI=F)</td>
+            <td>Crisis Alpha v5 (SPY puts + VIX calls)</td>
+        </tr><tr>
+            <td>$1,000M</td>
+            <td class="bad"><strong>BROKEN</strong></td>
+            <td>GLD calendar (GLD − GC=F), SLV calendar (SLV − SI=F), Crisis Alpha v5 (SPY puts + VIX calls)</td>
+            <td>Cross-vol arb (SPY vs IWM)</td>
+        </tr></tbody>
+</table>
+
+<div style="margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0;
+            font-size:0.78em; color:#94a3b8; text-align:center;">
+EXP-2140 — compass/exp2140_portfolio_capacity.py · Real Yahoo + IronVault volume data
+</div>
+
+</body></html>

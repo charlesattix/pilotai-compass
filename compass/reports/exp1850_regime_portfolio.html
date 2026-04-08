@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EXP-1850 — Regime-Adaptive Portfolio Optimizer</title>
+<style>
+* { box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+       max-width:1200px;margin:0 auto;padding:28px;background:#fff;color:#1e293b;line-height:1.5; }
+h1 { font-size:1.85em;color:#0f172a;margin-bottom:4px; }
+h2 { color:#334155;margin-top:2.4em;padding-bottom:8px;border-bottom:2px solid #e2e8f0; }
+.subtitle { color:#64748b;font-size:0.92rem;margin-bottom:24px; }
+.sources { background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:16px;margin:16px 0;font-size:0.84rem;line-height:1.7; }
+.verdict { background:#ecfdf5;border:2px solid #dc2626;border-radius:10px;padding:20px;margin:24px 0; }
+.verdict h3 { margin-top:0;color:#dc2626; }
+.kpi-row { display:flex;gap:14px;flex-wrap:wrap;margin:18px 0; }
+.kpi { background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;text-align:center;flex:1;min-width:130px; }
+.kpi .value { font-size:1.5em;font-weight:800;color:#0f172a; }
+.kpi .label { font-size:0.72em;color:#64748b;margin-top:4px;text-transform:uppercase; }
+table { width:100%;border-collapse:collapse;margin:14px 0;font-size:0.86em; }
+th { background:#f1f5f9;padding:10px 12px;text-align:right;font-weight:600;color:#475569;
+     border-bottom:2px solid #cbd5e1;font-size:0.74em;text-transform:uppercase; }
+th:first-child { text-align:left; }
+td { padding:8px 12px;text-align:right;border-bottom:1px solid #e2e8f0; }
+td:first-child { text-align:left; }
+tr:hover { background:#f8fafc; }
+.note { background:#fefce8;border:1px solid #fde047;border-radius:6px;padding:12px 16px;font-size:0.86rem;margin:12px 0; }
+.footer { margin-top:3em;padding-top:1em;border-top:1px solid #e2e8f0;font-size:0.78em;color:#94a3b8;text-align:center; }
+</style></head><body>
+
+<h1>EXP-1850 — Regime-Adaptive Portfolio Optimizer</h1>
+<div class="subtitle">3 streams × 4 allocation methods · walk-forward 2020–2025
+on real Yahoo / FRED / IronVault data · 2026-04-07 11:58</div>
+
+<div class="sources">
+<strong>Rule Zero — all data real:</strong><br>
+<code>exp1220</code>: scripts.ultimate_portfolio.load_exp1220_dynamic
+(real Yahoo SPY+^VIX+^VIX3M, TailRiskProtector-scaled dynamic leverage)<br>
+<code>v5_hedge</code>: compass.crisis_alpha_v5 frozen best config
+(slow / vt=0.05 / l=1.0 / sg=0.05 / sh=2.0 / equity-short-only) on real Yahoo 13-ETF universe<br>
+<code>vrp</code>: compass.exp1660_vrp_deepening walk-forward on SPY/QQQ/IWM/EEM
+(real Yahoo + FRED CBOE indices), equal-weight, vol-targeted to 5%/yr<br>
+Regimes: compass.regime.RegimeClassifier on real Yahoo SPY+^VIX (50d MA, 5% trend threshold)<br>
+Walk-forward: 252-day train · 63-day OOS test · quarterly step (re-fit each step)
+</div>
+
+<div class="verdict">
+<h3>Best method: risk_parity_regime_tilt → Sharpe 4.57 (GAP +1.43 vs target 6.0)</h3>
+CAGR <strong>31.1%</strong> ·
+Max DD <strong>12.0%</strong> ·
+Calmar <strong>2.60</strong><br>
+Sharpe lift vs prior best (2× EXP-1220 + 5% v5 hedge = 3.82):
+<strong>+0.75</strong>
+</div>
+
+<h2>1. Stream-level performance (full sample, no leverage)</h2>
+<table>
+<thead><tr><th>Stream</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th><th>Vol</th><th>Days</th></tr></thead>
+<tbody><tr><td style='font-weight:700'>exp1220</td><td>58.8%</td><td style='color:#0f172a;font-weight:700'>3.70</td><td>7.6%</td><td>7.76</td><td>11.5%</td><td>1508</td></tr><tr><td style='font-weight:700'>v5_hedge</td><td>-1.1%</td><td style='color:#0f172a;font-weight:700'>-0.82</td><td>12.8%</td><td>-0.08</td><td>6.5%</td><td>1508</td></tr><tr><td style='font-weight:700'>vrp</td><td>15.1%</td><td style='color:#0f172a;font-weight:700'>1.98</td><td>30.8%</td><td>0.49</td><td>4.9%</td><td>1508</td></tr></tbody>
+</table>
+
+<h2>2. Stream correlation matrix</h2>
+<table>
+<thead><tr><th></th><th>exp1220</th><th>v5_hedge</th><th>vrp</th></tr></thead>
+<tbody><tr><td style='font-weight:700'>exp1220</td><td style='color:#dc2626'>+1.000</td><td style='color:#16a34a'>-0.151</td><td style='color:#16a34a'>-0.039</td></tr><tr><td style='font-weight:700'>v5_hedge</td><td style='color:#16a34a'>-0.151</td><td style='color:#dc2626'>+1.000</td><td style='color:#0f172a'>+0.028</td></tr><tr><td style='font-weight:700'>vrp</td><td style='color:#16a34a'>-0.039</td><td style='color:#0f172a'>+0.028</td><td style='color:#dc2626'>+1.000</td></tr></tbody>
+</table>
+<div class="note">
+Negative entries (green) are the diversification engine. The lower the
+off-diagonal, the larger the lift available from optimal allocation.
+</div>
+
+<h2>3. Walk-forward portfolio results (4 methods + benchmark)</h2>
+<table>
+<thead><tr><th>Method</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th><th>Vol</th><th>OOS days</th></tr></thead>
+<tbody><tr><td style='font-weight:700'>static</td><td>26.5%</td><td style='color:#0f172a;font-weight:700'>4.16</td><td>15.6%</td><td>1.70</td><td>4.6%</td><td>1197</td></tr><tr><td style='font-weight:700'>regime_conditional</td><td>42.8%</td><td style='color:#0f172a;font-weight:700'>4.39</td><td>23.8%</td><td>1.80</td><td>7.2%</td><td>1197</td></tr><tr><td style='font-weight:700'>risk_parity_regime_tilt</td><td>31.1%</td><td style='color:#0f172a;font-weight:700'>4.57</td><td>12.0%</td><td>2.60</td><td>5.0%</td><td>1197</td></tr><tr><td style='font-weight:700'>mvo_regime_tilt</td><td>78.6%</td><td style='color:#0f172a;font-weight:700'>3.94</td><td>17.3%</td><td>4.54</td><td>13.8%</td><td>1197</td></tr><tr><td style='font-weight:700'>benchmark_2x+5%v5</td><td>143.9%</td><td style='color:#0f172a;font-weight:700'>3.82</td><td>14.0%</td><td>10.26</td><td>22.9%</td><td>1256</td></tr></tbody>
+</table>
+<div class="note">
+Walk-forward setup: 252-day training window, 63-day out-of-sample test
+window, quarterly re-fit. The benchmark (90% × 2× EXP-1220 + 5% v5 hedge)
+uses no walk-forward — it is the static reference combo from prior work.
+Sharpe lift &gt; 0 means the optimizer beats the static benchmark on the
+identical data window.
+</div>
+
+<h2>4. Year-by-year comparison</h2>
+<table>
+<thead>
+<tr><th rowspan='2'>Year</th><th colspan='3'>static</th><th colspan='3'>regime_conditional</th><th colspan='3'>risk_parity_regime_tilt</th><th colspan='3'>mvo_regime_tilt</th><th colspan='3'>benchmark_2x+5%v5</th></tr>
+<tr><th>CAGR</th><th>Sharpe</th><th>DD</th><th>CAGR</th><th>Sharpe</th><th>DD</th><th>CAGR</th><th>Sharpe</th><th>DD</th><th>CAGR</th><th>Sharpe</th><th>DD</th><th>CAGR</th><th>Sharpe</th><th>DD</th></tr>
+</thead>
+<tbody><tr><td style='font-weight:700'>2021</td><td style='color:#16a34a'>38%</td><td>7.50</td><td>0.5%</td><td style='color:#16a34a'>73%</td><td>7.96</td><td>0.8%</td><td style='color:#16a34a'>39%</td><td>6.62</td><td>0.8%</td><td style='color:#16a34a'>142%</td><td>6.31</td><td>2.3%</td><td style='color:#16a34a'>217%</td><td>5.50</td><td>3.4%</td></tr><tr><td style='font-weight:700'>2022</td><td style='color:#16a34a'>17%</td><td>3.22</td><td>1.6%</td><td style='color:#16a34a'>17%</td><td>2.68</td><td>1.6%</td><td style='color:#16a34a'>13%</td><td>1.31</td><td>2.9%</td><td style='color:#16a34a'>16%</td><td>0.89</td><td>9.5%</td><td style='color:#16a34a'>42%</td><td>1.42</td><td>14.0%</td></tr><tr><td style='font-weight:700'>2023</td><td style='color:#16a34a'>39%</td><td>9.60</td><td>0.6%</td><td style='color:#16a34a'>61%</td><td>11.11</td><td>0.4%</td><td style='color:#16a34a'>74%</td><td>10.77</td><td>0.8%</td><td style='color:#16a34a'>93%</td><td>3.88</td><td>4.8%</td><td style='color:#16a34a'>187%</td><td>3.62</td><td>8.2%</td></tr><tr><td style='font-weight:700'>2024</td><td style='color:#16a34a'>25%</td><td>6.65</td><td>0.9%</td><td style='color:#16a34a'>48%</td><td>7.50</td><td>1.7%</td><td style='color:#16a34a'>27%</td><td>7.20</td><td>1.0%</td><td style='color:#16a34a'>110%</td><td>5.63</td><td>2.0%</td><td style='color:#16a34a'>149%</td><td>4.66</td><td>3.1%</td></tr><tr><td style='font-weight:700'>2025</td><td style='color:#16a34a'>12%</td><td>0.86</td><td>15.6%</td><td style='color:#16a34a'>16%</td><td>0.84</td><td>23.8%</td><td style='color:#16a34a'>6%</td><td>0.23</td><td>12.0%</td><td style='color:#16a34a'>54%</td><td>2.78</td><td>17.3%</td><td style='color:#16a34a'>166%</td><td>4.73</td><td>5.0%</td></tr></tbody>
+</table>
+
+<h2>5. Regime distribution (2020–2025 walk-forward sample)</h2>
+<p><strong>bull</strong> 81% · <strong>bear</strong> 8% · <strong>high_vol</strong> 8% · <strong>low_vol</strong> 1% · <strong>crash</strong> 1%</p>
+<div class="note">
+Regime classification uses VIX bands + SPY 50-day trend with shift-by-1
+look-ahead protection. CRASH triggers on VIX&gt;40 with sharp decline.
+</div>
+
+<h2>6. Regime-conditional leverage profile</h2>
+<table>
+<thead><tr><th>Regime</th><th>Leverage</th><th>Rationale</th></tr></thead>
+<tbody>
+<tr><td>BULL</td><td>1.80×</td><td>Press the trade — credit spreads earn fastest in calm uptrends</td></tr>
+<tr><td>LOW_VOL</td><td>1.60×</td><td>Constructive but no momentum kicker</td></tr>
+<tr><td>HIGH_VOL</td><td>1.00×</td><td>Neutral — let the hedge breathe</td></tr>
+<tr><td>BEAR</td><td>0.70×</td><td>Lean defensive, hedge starts contributing</td></tr>
+<tr><td>CRASH</td><td>0.50×</td><td>Cut risk hard — survival mode</td></tr>
+</tbody>
+</table>
+
+<h2>7. North Star gap analysis</h2>
+<div class="kpi-row">
+<div class="kpi"><div class="value">31%</div><div class="label">Best CAGR</div></div>
+<div class="kpi"><div class="value">4.57</div><div class="label">Best Sharpe</div></div>
+<div class="kpi"><div class="value">12.0%</div><div class="label">Best Max DD</div></div>
+<div class="kpi"><div class="value">6.00</div><div class="label">North Star Sharpe</div></div>
+<div class="kpi"><div class="value" style="color:#dc2626">GAP +1.43</div><div class="label">Status</div></div>
+</div>
+
+<div class="footer">
+compass/exp1850_regime_portfolio.py · 4 methods × walk-forward · Rule Zero
+(real Yahoo + FRED + IronVault, no synthetic data)
+</div>
+</body></html>
