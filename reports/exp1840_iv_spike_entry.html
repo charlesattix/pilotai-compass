@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>EXP-1840: IV Spike Entry</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e2e8f0;--text:#1a1a2e;--muted:#64748b;--green:#059669;--red:#dc2626;--blue:#2563eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;max-width:1100px;margin:0 auto;padding:28px}
+h1{font-size:1.55rem;font-weight:800;margin-bottom:4px}
+h2{font-size:1.15rem;font-weight:700;margin:32px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--border)}
+.sub{color:var(--muted);font-size:.86rem;margin-bottom:18px}
+.note{color:var(--muted);font-size:.82rem;font-style:italic;margin:6px 0}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.84rem}
+th{background:#f1f5f9;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:2px solid var(--border);font-size:.74rem;font-weight:600;text-transform:uppercase}
+td{padding:6px 10px;border-bottom:1px solid #f1f5f9;text-align:left}
+.r{text-align:right}
+tr:hover td{background:#fafafa}
+.hero{background:linear-gradient(135deg,#f1f5f9,#e2e8f0);border:2px solid #dc2626;border-radius:12px;padding:24px;margin:18px 0;text-align:center}
+.hero .big{font-size:1.5rem;font-weight:800;color:#dc2626;margin:6px 0}
+.hero p{color:#475569;font-size:.9rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:16px 0}
+.c{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:13px;text-align:center}
+.c .l{color:var(--muted);font-size:.72rem;text-transform:uppercase}
+.c .v{font-weight:700;font-size:1.1rem;margin-top:3px}
+.box{border:1px solid var(--border);border-radius:8px;padding:16px;margin:12px 0;background:var(--card)}
+.box-green{border-left:5px solid var(--green)} .box-red{border-left:5px solid var(--red)}
+.box-blue{border-left:5px solid var(--blue)}
+.box h4{margin:0 0 6px;font-size:.95rem}
+</style></head><body>
+
+<h1>EXP-1840: IV Spike Entry</h1>
+<p class="sub">Volatility-timed credit spread overlay on SPY &bull;
+Real IronVault data 2020-01-15 -> 2025-12-30 &bull; 2026-04-06</p>
+
+<div class="hero">
+<div class="big">EXP-1840 does NOT improve Sharpe vs EXP-1220 base</div>
+<p>EXP-1840 Sharpe: 0.59 &bull;
+EXP-1220 base Sharpe: 5.68 &bull;
+&Delta; -5.090</p>
+</div>
+
+<div class="cards">
+<div class="c"><div class="l">Trades</div><div class="v">8</div></div>
+<div class="c"><div class="l">Spike Days</div><div class="v">125 / 918</div></div>
+<div class="c"><div class="l">Win Rate</div><div class="v">88%</div></div>
+<div class="c"><div class="l">Total PnL</div><div class="v" style="color:#059669">$2,753</div></div>
+<div class="c"><div class="l">CAGR</div><div class="v" style="color:#059669">+0.47%</div></div>
+<div class="c"><div class="l">Sharpe</div><div class="v" style="color:#d97706">0.59</div></div>
+<div class="c"><div class="l">Max DD</div><div class="v">1.20%</div></div>
+<div class="c"><div class="l">Years</div><div class="v">5.8</div></div>
+</div>
+
+<h2>1. Strategy Logic</h2>
+<div class="box box-blue">
+<h4>Hypothesis</h4>
+<p>Credit spread sellers are paid to absorb volatility risk. Instead of entering on a
+fixed cadence (EXP-1220's 7d), time entries to moments when IV spikes above its 5-day
+rolling mean by &ge; 1.5&sigma;. These moments offer the richest premium.</p>
+<h4 style="margin-top:12px">Signal</h4>
+<ul style="padding-left:20px;font-size:.85rem;line-height:1.85;margin-top:4px">
+<li>IV proxy = (ATM put + ATM call) / SPY, from real IronVault front-month prices</li>
+<li>Rolling 5-day mean and std (causal — excludes today)</li>
+<li>Spike: z = (today - mean) / std &ge; 1.5</li>
+<li>Enter bull put spread: sell 3% OTM, buy $5 lower</li>
+<li>Exit: 50% profit, 2&times; stop, or 5 DTE</li>
+</ul>
+</div>
+
+<h2>2. Comparison vs EXP-1220 Base Strategy</h2>
+<table>
+<thead><tr><th>Metric</th><th class="r">EXP-1220 (1.2x base)</th><th class="r">EXP-1840 (IV spike)</th><th class="r">&Delta;</th></tr></thead>
+<tbody>
+<tr><td>CAGR</td><td class="r">99.03%</td><td class="r">0.47%</td><td class="r">-98.56%</td></tr>
+<tr><td>Sharpe</td><td class="r">5.68</td><td class="r">0.59</td><td class="r">-5.090</td></tr>
+<tr><td>Max DD</td><td class="r">7.85%</td><td class="r">1.20%</td><td class="r">&mdash;</td></tr>
+</tbody></table>
+
+<h2>3. Walk-Forward Validation</h2>
+<table>
+<thead><tr><th>Period</th><th class="r">CAGR</th><th class="r">Sharpe</th></tr></thead>
+<tbody>
+<tr><td>In-Sample (2020-2022)</td><td class="r">+0.00%</td><td class="r">0.00</td></tr>
+<tr><td>Out-of-Sample (2023-2025)</td><td class="r">+1.03%</td><td class="r">0.76</td></tr>
+</tbody></table>
+
+<h2>4. Yearly Performance</h2>
+<table>
+<thead><tr><th>Year</th><th class="r">Trades</th><th class="r">PnL</th><th class="r">Win Rate</th><th class="r">Return %</th></tr></thead>
+<tbody><tr><td>2020</td><td class="r">1</td><td class="r" style="color:#059669">$678</td><td class="r">100%</td><td class="r" style="color:#059669">+0.68%</td></tr>
+<tr><td>2024</td><td class="r">2</td><td class="r" style="color:#059669">$1,574</td><td class="r">100%</td><td class="r" style="color:#059669">+1.57%</td></tr>
+<tr><td>2025</td><td class="r">5</td><td class="r" style="color:#059669">$501</td><td class="r">80%</td><td class="r" style="color:#059669">+0.50%</td></tr>
+</tbody>
+</table>
+
+<h2>5. Recent Trades (first 30)</h2>
+<table>
+<thead><tr><th>Entry</th><th>Exit</th><th class="r">IV z</th><th class="r">Strikes</th><th class="r">Credit</th><th class="r">Qty</th><th class="r">Hold</th><th class="r">PnL</th><th>Reason</th></tr></thead>
+<tbody><tr><td>2020-03-18</td><td>2020-03-24</td><td class="r">+1.94</td><td class="r">213/208</td><td class="r">$2.01</td><td class="r">6</td><td class="r">4</td><td class="r" style="color:#059669">$678</td><td>profit_target</td></tr>
+<tr><td>2024-08-06</td><td>2024-08-07</td><td class="r">+1.54</td><td class="r">496/491</td><td class="r">$2.23</td><td class="r">7</td><td class="r">1</td><td class="r" style="color:#059669">$959</td><td>profit_target</td></tr>
+<tr><td>2024-12-18</td><td>2024-12-19</td><td class="r">+8.03</td><td class="r">559/554</td><td class="r">$1.11</td><td class="r">5</td><td class="r">1</td><td class="r" style="color:#059669">$615</td><td>profit_target</td></tr>
+<tr><td>2025-03-10</td><td>2025-03-11</td><td class="r">+1.83</td><td class="r">536/531</td><td class="r">$1.16</td><td class="r">5</td><td class="r">1</td><td class="r" style="color:#059669">$920</td><td>profit_target</td></tr>
+<tr><td>2025-04-03</td><td>2025-04-08</td><td class="r">+2.54</td><td class="r">515/510</td><td class="r">$0.87</td><td class="r">4</td><td class="r">3</td><td class="r" style="color:#dc2626">$-1,204</td><td>stop_loss</td></tr>
+<tr><td>2025-06-13</td><td>2025-06-16</td><td class="r">+2.47</td><td class="r">573/568</td><td class="r">$1.00</td><td class="r">5</td><td class="r">1</td><td class="r" style="color:#059669">$285</td><td>profit_target</td></tr>
+<tr><td>2025-10-10</td><td>2025-10-20</td><td class="r">+10.03</td><td class="r">630/625</td><td class="r">$0.84</td><td class="r">4</td><td class="r">6</td><td class="r" style="color:#059669">$240</td><td>profit_target</td></tr>
+<tr><td>2025-12-17</td><td>2025-12-18</td><td class="r">+2.05</td><td class="r">648/643</td><td class="r">$0.88</td><td class="r">4</td><td class="r">1</td><td class="r" style="color:#059669">$260</td><td>profit_target</td></tr>
+</tbody>
+</table>
+
+<h2>6. Rule Zero Compliance</h2>
+<div class="box box-green">
+<h4>ZERO SYNTHETIC DATA</h4>
+<ul style="padding-left:20px;font-size:.82rem">
+<li>IV proxy: real IronVault ATM front-month option prices</li>
+<li>Spread entry/exit: real IronVault get_spread_prices for every leg</li>
+<li>SPY daily: real Yahoo Finance closes</li>
+<li>No np.random. No Black-Scholes. No fabricated IV values.</li>
+</ul>
+</div>
+
+<p style="text-align:center;color:var(--muted);margin-top:36px;padding-top:14px;border-top:1px solid var(--border);font-size:.78rem">
+EXP-1840 IV Spike Entry &bull; compass/iv_spike_entry.py &bull;
+2026-04-06
+</p>
+</body></html>

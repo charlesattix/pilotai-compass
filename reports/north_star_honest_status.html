@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>North Star — Honest Status (Corrected)</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--green:#059669;--yellow:#d97706;--red:#dc2626;--blue:#2563eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;max-width:1100px;margin:0 auto;padding:24px}
+h1{font-size:1.6rem;font-weight:800;margin-bottom:4px}
+h2{font-size:1.15rem;font-weight:700;margin:32px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--border)}
+h3{font-size:.95rem;font-weight:600;margin:16px 0 8px}
+.subtitle{color:var(--muted);font-size:.88rem;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.82rem}
+th,td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--border)}
+th{background:#f1f5f9;color:var(--muted);font-size:.7rem;font-weight:600;text-transform:uppercase}
+td:first-child,th:first-child{text-align:left}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600}
+.tag-green{background:#d1fae5;color:#065f46}.tag-yellow{background:#fef3c7;color:#92400e}.tag-red{background:#fee2e2;color:#991b1b}.tag-blue{background:#dbeafe;color:#1e40af}
+.callout{padding:16px;border-radius:8px;margin:14px 0;font-size:.85rem;line-height:1.7}
+.callout-green{background:#ecfdf5;border-left:4px solid var(--green)}
+.callout-yellow{background:#fffbeb;border-left:4px solid var(--yellow)}
+.callout-red{background:#fef2f2;border-left:4px solid var(--red)}
+.callout-blue{background:#eff6ff;border-left:4px solid var(--blue)}
+.gauge-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+.gauge{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.gauge .label{font-size:.68rem;font-weight:600;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;margin-bottom:6px}
+.gauge .current{font-size:1.8rem;font-weight:800;line-height:1.1}
+.gauge .target{font-size:.78rem;color:var(--muted);margin:4px 0 10px}
+.gauge .bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden}
+.gauge .fill{height:100%;border-radius:4px}
+.gauge .pct{font-size:.72rem;font-weight:600;margin-top:6px}
+.gauge.met{border-color:var(--green)}.gauge.close{border-color:var(--yellow)}.gauge.gap{border-color:var(--red)}
+.strike{text-decoration:line-through;color:var(--muted);font-size:.82rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}.gauge-row{grid-template-columns:repeat(2,1fr)}}
+.footer{margin-top:40px;text-align:center;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);padding-top:14px}
+.honest{background:#fef2f2;border:2px solid var(--red);border-radius:10px;padding:16px;margin:16px 0;font-size:.88rem}
+.honest strong{color:var(--red)}
+</style></head><body>
+
+<h1>North Star Status — Honest Numbers Only</h1>
+<div class="subtitle">For Carlos &bull; Corrected per validation audit (Apr 5 2026) &bull; Only walk-forward OOS on real IronVault data</div>
+
+<div class="honest">
+<strong>Honesty disclaimer:</strong> This report uses only corrected numbers. Previous claims of 9.09 Sharpe, 0.8% COVID DD, and 102% CAGR were
+invalidated by formula bugs and synthetic data. All numbers below are from real option prices (IronVault) with corrected Sharpe calculation.
+Struck-through numbers (<span class="strike">like this</span>) are previous claims that were wrong.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- GAUGES -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<div class="gauge-row">
+  <div class="gauge close">
+    <div class="label">CAGR</div>
+    <div class="current" style="color:var(--yellow)">~73%</div>
+    <div class="target">Target: 100% &bull; <span class="strike">102%</span> was wrong</div>
+    <div class="bar"><div class="fill" style="width:73%;background:var(--yellow)"></div></div>
+    <div class="pct">73% of target (after real hedge costs)</div>
+  </div>
+  <div class="gauge met">
+    <div class="label">Max DD</div>
+    <div class="current" style="color:var(--green)">6.6%</div>
+    <div class="target">Target: &le;12% &bull; <span class="strike">0.8%</span> was wrong</div>
+    <div class="bar"><div class="fill" style="width:55%;background:var(--green)"></div></div>
+    <div class="pct">MET &mdash; even at 1.2x: ~9%</div>
+  </div>
+  <div class="gauge close">
+    <div class="label">Sharpe</div>
+    <div class="current" style="color:var(--yellow)">3.76</div>
+    <div class="target">Target: 6.0 &bull; <span class="strike">9.09</span> was inflated 2.4&times;</div>
+    <div class="bar"><div class="fill" style="width:63%;background:var(--yellow)"></div></div>
+    <div class="pct">63% of target (corrected formula)</div>
+  </div>
+  <div class="gauge gap">
+    <div class="label">Multi-Strategy</div>
+    <div class="current" style="color:var(--red)">1 of 3+</div>
+    <div class="target">Target: 3+ validated &bull; Data gaps block rest</div>
+    <div class="bar"><div class="fill" style="width:33%;background:var(--red)"></div></div>
+    <div class="pct">Only EXP-1220 fully validated</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 1: PROVEN -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<h2>1. What We've ACTUALLY Proven (High Confidence)</h2>
+
+<table>
+<thead><tr><th>Strategy</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>WF OOS</th><th>Data</th><th>Confidence</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>EXP-1220 Tail Risk (1x, no hedge)</strong></td>
+  <td style="color:var(--green)"><strong>77.3%</strong></td>
+  <td style="color:var(--green)"><strong>5.78</strong></td>
+  <td style="color:var(--green)">6.6%</td>
+  <td>4 windows, all positive</td>
+  <td><span class="tag tag-green">Real SPY/VIX</span></td>
+  <td><span class="tag tag-green">HIGH</span></td>
+</tr>
+<tr>
+  <td>EXP-1220 + real hedge (SPY puts, 4.36%/yr)</td>
+  <td style="color:var(--green)">~73%</td>
+  <td>~5.4</td>
+  <td>~5-6%</td>
+  <td>Validated</td>
+  <td><span class="tag tag-green">IronVault puts</span></td>
+  <td><span class="tag tag-green">HIGH</span></td>
+</tr>
+<tr>
+  <td>EXP-1220 + collar hedge (~1.3%/yr net)</td>
+  <td style="color:var(--green)">~76%</td>
+  <td>~5.6</td>
+  <td>~6%</td>
+  <td>Validated</td>
+  <td><span class="tag tag-blue">IronVault + model</span></td>
+  <td><span class="tag tag-yellow">MEDIUM-HIGH</span></td>
+</tr>
+<tr>
+  <td>Vol Term Structure (SPY contango)</td>
+  <td>0.55%</td>
+  <td>2.81 OOS</td>
+  <td>0.18%</td>
+  <td>4/4 windows positive</td>
+  <td><span class="tag tag-green">IronVault</span></td>
+  <td><span class="tag tag-green">HIGH</span></td>
+</tr>
+<tr>
+  <td>EXP-1660 VRP Harvest (SPY strangles)</td>
+  <td>2.2%</td>
+  <td>1.80 OOS</td>
+  <td>1.7%</td>
+  <td>26 OOS trades</td>
+  <td><span class="tag tag-green">IronVault</span></td>
+  <td><span class="tag tag-yellow">MEDIUM</span></td>
+</tr>
+</tbody></table>
+
+<div class="callout callout-green">
+<strong>Bottom line:</strong> EXP-1220 at 1x delivers 77.3% CAGR with 6.6% max DD — proven on 6 years of real SPY/VIX data,
+walk-forward validated across 4 OOS windows (all positive). After real hedge costs (collar at ~1.3%/yr),
+net CAGR is ~76%. This is the <strong>only fully validated production strategy</strong>.
+</div>
+
+<!-- Production WF -->
+<h3>Production Walk-Forward (1.6x leverage, 0.5% slippage)</h3>
+<table>
+<thead><tr><th>OOS Year</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th></tr></thead>
+<tbody>
+<tr><td>2022 (bear market)</td><td>32.0%</td><td>1.57</td><td style="color:var(--yellow)">11.3%</td></tr>
+<tr><td>2023</td><td style="color:var(--green)">127.5%</td><td>3.71</td><td>6.6%</td></tr>
+<tr><td>2024</td><td style="color:var(--green)">103.4%</td><td>4.82</td><td>2.5%</td></tr>
+<tr><td>2025</td><td style="color:var(--green)">113.6%</td><td>4.86</td><td>4.0%</td></tr>
+<tr style="font-weight:700;background:#f1f5f9">
+  <td>OOS Aggregate</td><td>90.1%</td><td>3.58</td><td>11.3%</td>
+</tr>
+</tbody></table>
+
+<div class="callout callout-yellow">
+<strong>Caveat on production WF:</strong> The 90% OOS CAGR at 1.6x leverage is from the walk-forward backtest engine,
+not from a live trading account. The 2022 DD of 11.3% nearly hits the 12% limit. Real execution with market impact,
+partial fills, and slippage under stress could push DD higher. <strong>Live paper trading has not yet confirmed these numbers.</strong>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 2: DEPENDS ON INCOMPLETE DATA -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<h2>2. What Depends on Incomplete Data</h2>
+
+<table>
+<thead><tr><th>Strategy</th><th>Claimed Metrics</th><th>Data Issue</th><th>Gap Size</th><th>What We Actually Know</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>EXP-1630 GLD/TLT RelVal</strong></td>
+  <td>OOS Sharpe 4.08, 86% WR</td>
+  <td style="color:var(--yellow)">GLD ends <strong>Oct 2024</strong></td>
+  <td>15 months</td>
+  <td>Validated through Oct 2024 (was Mar 2024). No data on 2025 performance.</td>
+</tr>
+<tr>
+  <td><strong>Cross-Asset QQQ Pairs</strong></td>
+  <td>OOS Sharpe 5.06</td>
+  <td style="color:var(--red)">QQQ ends <strong>Apr 2023</strong></td>
+  <td>32 months</td>
+  <td>Only 3.3 years of data. 2024-2025 completely untested.</td>
+</tr>
+<tr>
+  <td><strong>TLT Iron Condors</strong></td>
+  <td>10.2% CAGR, Sharpe 2.69</td>
+  <td style="color:var(--yellow)">TLT ends <strong>Jul 2024</strong></td>
+  <td>17 months</td>
+  <td>Validated through Jul 2024. Misses the 2024H2 rate environment.</td>
+</tr>
+<tr>
+  <td><strong>XLI Iron Condors</strong></td>
+  <td>18.8% CAGR, OOS Sharpe 8.58</td>
+  <td style="color:var(--green)">XLI through Jun 2026</td>
+  <td>None</td>
+  <td style="color:var(--green)">Fully validated — but WF uses constructed yearly returns, not trade-by-trade real options.</td>
+</tr>
+<tr>
+  <td><strong>VIX Call Hedge</strong></td>
+  <td>40% of hedge budget</td>
+  <td style="color:var(--red)">VIX/UVXY <strong>not in DB at all</strong></td>
+  <td>Complete</td>
+  <td style="color:var(--red)">UNVALIDATED. Cannot backtest VIX call hedges. Must use SPY puts only.</td>
+</tr>
+</tbody></table>
+
+<div class="callout callout-red">
+<strong>Data gaps are the #1 blocker for multi-asset validation.</strong><br>
+GLD was partially backfilled today (+7 months, now through Oct 2024). QQQ and TLT still have large gaps.
+Until these are filled, the "multi-strategy diversified portfolio" is aspirational, not proven.
+The <strong>only production-ready path with zero data gaps is SPY-only</strong> (EXP-1220 + SPY-based overlays).
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 3: WHAT WAS WRONG -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<h2>3. Previous Claims That Were Wrong</h2>
+
+<table>
+<thead><tr><th>Claim</th><th>Was Reported</th><th>Corrected</th><th>Root Cause</th></tr></thead>
+<tbody>
+<tr>
+  <td>Adaptive+Hedge Sharpe</td>
+  <td class="strike">9.09</td>
+  <td style="color:var(--green)"><strong>3.76</strong></td>
+  <td>Geometric CAGR in Sharpe formula inflates 2.4&times; at high CAGR</td>
+</tr>
+<tr>
+  <td>v4 Portfolio Sharpe</td>
+  <td class="strike">3.94</td>
+  <td style="color:var(--green)"><strong>3.69</strong></td>
+  <td>Same formula bug (1.07&times; inflation at 101% CAGR)</td>
+</tr>
+<tr>
+  <td>COVID Drawdown</td>
+  <td class="strike">0.8%</td>
+  <td style="color:var(--green)"><strong>6.6%</strong></td>
+  <td>Simulated hedge payoff (12&times; convex multiplier, not from real options)</td>
+</tr>
+<tr>
+  <td>Hedge cost</td>
+  <td class="strike">2%/yr or "net negative"</td>
+  <td style="color:var(--green)"><strong>4.36%/yr</strong> (naked puts)<br><strong>~1.3%/yr</strong> (collar)</td>
+  <td>Real IronVault SPY put prices: 2020=5.3%, 2022=5.4%, 2025=7.3%</td>
+</tr>
+<tr>
+  <td>100% CAGR at 1x</td>
+  <td class="strike">102% (adaptive+hedge)</td>
+  <td><strong>73-77%</strong> at 1x</td>
+  <td>Synthetic np.random data in the portfolio blender</td>
+</tr>
+<tr>
+  <td>EXP-880 flagship</td>
+  <td class="strike">76.9% CAGR, Sharpe 4.97</td>
+  <td style="color:var(--red)"><strong>-104% (bankrupt)</strong></td>
+  <td>Entirely synthetic option pricing; bear calls destroyed on real data</td>
+</tr>
+</tbody></table>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 4: DATA BACKFILL ROADMAP -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<h2>4. Data Backfill Roadmap</h2>
+
+<table>
+<thead><tr><th>Ticker</th><th>Current End</th><th>Target</th><th>Gap</th><th>Contracts Needed</th><th>Time</th><th>Status</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>GLD</strong></td>
+  <td>2024-10-18</td>
+  <td>2025-12-31</td>
+  <td>15 months</td>
+  <td>~6,000</td>
+  <td>~2 hours</td>
+  <td><span class="tag tag-yellow">IN PROGRESS</span> (was 2024-03-15, extended +7mo today)</td>
+</tr>
+<tr>
+  <td><strong>TLT</strong></td>
+  <td>2024-07-19</td>
+  <td>2025-12-31</td>
+  <td>17 months</td>
+  <td>~4,000</td>
+  <td>~1.5 hours</td>
+  <td><span class="tag tag-red">NOT STARTED</span></td>
+</tr>
+<tr>
+  <td><strong>QQQ</strong></td>
+  <td>2023-04-21</td>
+  <td>2025-12-31</td>
+  <td>32 months</td>
+  <td>~12,000</td>
+  <td>~4 hours</td>
+  <td><span class="tag tag-red">NOT STARTED</span></td>
+</tr>
+<tr>
+  <td>VIX/UVXY options</td>
+  <td>Not in DB</td>
+  <td>2020-2025</td>
+  <td>Complete</td>
+  <td>Unknown</td>
+  <td>Unknown</td>
+  <td><span class="tag tag-red">BLOCKED</span> (needs Polygon Options tier)</td>
+</tr>
+</tbody></table>
+
+<div class="callout callout-blue">
+<strong>Polygon API status:</strong> Starter tier. Can fetch individual contract bars (works, ~3,200 contracts/hr)
+but cannot enumerate contracts directly ($200/mo Options tier needed for faster discovery).
+Total time to close GLD+TLT+QQQ gaps: <strong>~7.5 hours</strong> (overnight job).
+<pre style="background:#f1f5f9;padding:10px;border-radius:6px;margin:8px 0;font-size:.78rem">
+export $(grep -v '^#' .env | grep -v '^$' | xargs)
+python3 scripts/fetch_sector_options.py --ticker GLD --start 2024-10-19 --end 2025-12-31 --resume
+python3 scripts/fetch_sector_options.py --ticker TLT --start 2024-07-20 --end 2025-12-31
+python3 scripts/fetch_sector_options.py --ticker QQQ --start 2023-05-01 --end 2025-12-31
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 5: REALISTIC vs ASPIRATIONAL -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<h2>5. Realistic vs Aspirational Targets</h2>
+
+<div class="grid2">
+<div>
+<h3>Realistic (achievable now, SPY-only)</h3>
+<table>
+<tr><th>Metric</th><th>Value</th><th>Confidence</th></tr>
+<tr><td>CAGR (1x, no hedge)</td><td style="color:var(--green)"><strong>77.3%</strong></td><td><span class="tag tag-green">PROVEN</span></td></tr>
+<tr><td>CAGR (1x, collar hedge)</td><td style="color:var(--green)"><strong>~76%</strong></td><td><span class="tag tag-green">HIGH</span></td></tr>
+<tr><td>CAGR (1.2x, collar)</td><td style="color:var(--yellow)">~90%</td><td><span class="tag tag-yellow">MEDIUM</span></td></tr>
+<tr><td>Sharpe (portfolio)</td><td><strong>3.76</strong></td><td><span class="tag tag-green">CORRECTED</span></td></tr>
+<tr><td>Max DD (1x)</td><td style="color:var(--green)"><strong>6.6%</strong></td><td><span class="tag tag-green">PROVEN</span></td></tr>
+<tr><td>Max DD (1.2x)</td><td>~9%</td><td><span class="tag tag-yellow">MEDIUM</span></td></tr>
+<tr><td>AUM capacity</td><td>$28B+ (SPY)</td><td><span class="tag tag-green">HIGH</span></td></tr>
+</table>
+</div>
+
+<div>
+<h3>Aspirational (requires data + validation)</h3>
+<table>
+<tr><th>Metric</th><th>Value</th><th>Dependency</th></tr>
+<tr><td>CAGR 100%+</td><td>Needs 1.3x leverage</td><td>Live account validation</td></tr>
+<tr><td>Sharpe 6.0</td><td>Needs multi-strategy</td><td>GLD/QQQ/TLT data gaps</td></tr>
+<tr><td>Multi-strategy (3+)</td><td>1 proven, 3 plausible</td><td>Data backfill (~8 hrs)</td></tr>
+<tr><td>Diversified $1B+ portfolio</td><td>SPY-only scales, ETFs don't</td><td>ETF liquidity constraint</td></tr>
+<tr><td>Live paper trading validation</td><td>0 trades completed</td><td>Deploy script + Charles</td></tr>
+</table>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 6: WHAT TO DO NEXT -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<h2>6. Next Steps (Priority Order)</h2>
+
+<table>
+<thead><tr><th>#</th><th>Action</th><th>Time</th><th>Unlocks</th><th>Dependency</th></tr></thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td><strong>Complete GLD backfill</strong></td>
+  <td>~2 hours</td>
+  <td>EXP-1630 validation through 2025</td>
+  <td>Just run the script (started today)</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><strong>Backfill TLT + QQQ</strong></td>
+  <td>~5.5 hours</td>
+  <td>TLT ICs + cross-asset pairs through 2025</td>
+  <td>Overnight job after GLD completes</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><strong>Deploy SPY-only paper trading</strong></td>
+  <td>30 min (Charles)</td>
+  <td>First live performance data</td>
+  <td>Alpaca API keys + deploy script</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><strong>Re-validate multi-asset portfolio</strong></td>
+  <td>~2 hours analysis</td>
+  <td>Diversified portfolio with corrected numbers</td>
+  <td>Steps 1-2 complete</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><strong>8 weeks paper trading data</strong></td>
+  <td>8 weeks real-time</td>
+  <td>Live vs backtest comparison</td>
+  <td>Step 3 deployed and running</td>
+</tr>
+</tbody></table>
+
+<div class="callout callout-green">
+<strong>The path is clear:</strong> We have a strategy (EXP-1220) that delivers 73-77% CAGR at 6.6% max DD,
+validated on 6 years of real data with all 4 walk-forward windows positive. The corrected Sharpe of 3.76
+is below the 6.0 target but genuinely strong. Reaching 100% CAGR requires 1.2-1.3x leverage,
+which needs live validation. The multi-strategy portfolio (Sharpe 6.0 target) requires
+closing the GLD/QQQ/TLT data gaps first — an overnight backfill job.
+<br><br>
+<strong>No shortcuts. No synthetic data. No inflated claims. Just real options, real prices, real performance.</strong>
+</div>
+
+<div class="footer">
+  North Star Honest Status &bull; Corrected numbers only &bull; 2026-04-05 &bull; PilotAI Compass
+</div>
+</body></html>

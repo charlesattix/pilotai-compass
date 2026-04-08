@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>EXP-1730 Wave 2 — Treasury Curve Mean Reversion</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e2e8f0;--text:#1a1a2e;--muted:#64748b;--green:#059669;--red:#dc2626;--blue:#2563eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;max-width:1100px;margin:0 auto;padding:28px}
+h1{font-size:1.55rem;font-weight:800;margin-bottom:4px}
+h2{font-size:1.15rem;font-weight:700;margin:30px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--border)}
+.sub{color:var(--muted);font-size:.86rem;margin-bottom:18px}
+.note{color:var(--muted);font-size:.82rem;font-style:italic;margin:6px 0}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.84rem}
+th{background:#f1f5f9;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:2px solid var(--border);font-size:.74rem;font-weight:600;text-transform:uppercase}
+td{padding:6px 10px;border-bottom:1px solid #f1f5f9;text-align:left}
+.r{text-align:right}
+tr:hover td{background:#fafafa}
+.hero{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #2563eb;border-radius:12px;padding:24px;margin:18px 0}
+.hero .title{font-size:1.05rem;font-weight:700;color:#1e40af}
+.hero .big{font-size:1.6rem;font-weight:800;color:#dc2626;margin:4px 0}
+.hero p{color:#1e3a8a;font-size:.88rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:16px 0}
+.c{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:13px;text-align:center}
+.c .l{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.3px}
+.c .v{font-weight:700;font-size:1.15rem;margin-top:3px}
+.box{border:1px solid var(--border);border-radius:8px;padding:16px;margin:12px 0;background:var(--card)}
+.box-green{border-left:5px solid var(--green)}
+.box-blue{border-left:5px solid var(--blue)}
+.box h4{margin:0 0 6px;font-size:.95rem}
+</style></head><body>
+
+<h1>EXP-1730 Wave 2 — Treasury Curve Mean Reversion</h1>
+<p class="sub">TLT/SHY (2s10s proxy) + TLT/IEF (5s30s proxy) &bull;
+real Yahoo Finance data 2015-01-02 -> 2026-04-02 &bull;
+2026-04-06</p>
+
+<div class="hero">
+<div class="title">Diversification-First Macro Strategy</div>
+<div class="big">-0.01% CAGR &bull; Sharpe -0.15</div>
+<p>SPY daily corr: <strong>+0.028</strong> &bull;
+EXP-1220 yearly corr: <strong>-0.385</strong> &bull;
+The KEY metric is correlation, not standalone CAGR.</p>
+</div>
+
+<div class="cards">
+<div class="c"><div class="l">Trades</div><div class="v">31</div></div>
+<div class="c"><div class="l">Total PnL</div><div class="v" style="color:#dc2626">$-208</div></div>
+<div class="c"><div class="l">Win Rate</div><div class="v">48%</div></div>
+<div class="c"><div class="l">CAGR</div><div class="v" style="color:#dc2626">-0.01%</div></div>
+<div class="c"><div class="l">Sharpe</div><div class="v" style="color:#dc2626">-0.15</div></div>
+<div class="c"><div class="l">Max DD</div><div class="v" style="color:#dc2626">0.28%</div></div>
+<div class="c"><div class="l">Years</div><div class="v">11.2</div></div>
+<div class="c"><div class="l">SPY Corr</div><div class="v" style="color:#059669">+0.028</div></div>
+</div>
+
+<h2>1. Strategy Overview</h2>
+<div class="box box-blue">
+<h4>Thesis</h4>
+<p style="font-size:.88rem">The US Treasury yield curve mean-reverts on
+multi-month horizons. Sustained steepness gets flattened by central bank
+hikes; deep inversions resolve via cuts. We trade two ETF-spread proxies
+in parallel:</p>
+<ul style="padding-left:20px;font-size:.85rem;line-height:1.85;margin-top:4px">
+<li><strong>2s10s proxy:</strong> log(TLT / SHY) — long end vs front end</li>
+<li><strong>5s30s proxy:</strong> log(TLT / IEF) — long end vs belly</li>
+</ul>
+<h4 style="margin-top:12px">Signal</h4>
+<ul style="padding-left:20px;font-size:.85rem;line-height:1.85;margin-top:4px">
+<li>Rolling 252-day z-score of each log spread</li>
+<li>Entry: |z| &gt; 2.0 (Wave 2: stricter than Wave 1's 1.5)</li>
+<li>z &gt; +2.0 → flatten trade (short long-leg, long short-leg)</li>
+<li>z &lt; -2.0 → steepen trade (long long-leg, short short-leg)</li>
+<li>Exit: z crosses zero (mean), or 60-day max hold</li>
+</ul>
+<h4 style="margin-top:12px">Sizing &amp; costs</h4>
+<p style="font-size:.85rem">2% notional risk per trade per pair, split equally
+between the two legs. $0.005/share commission and 2 bps round-trip slippage
+on each leg, applied at both entry and exit.</p>
+</div>
+
+<h2>2. Per-Pair Performance</h2>
+<table>
+<thead><tr><th>ID</th><th>Pair</th><th class="r">Trades</th><th class="r">Win Rate</th><th class="r">CAGR</th><th class="r">Sharpe</th><th class="r">Max DD</th></tr></thead>
+<tbody><tr><td>2s10s</td><td>TLT/SHY (2s10s proxy)</td><td class="r">16</td><td class="r">44%</td><td class="r" style="color:#dc2626">-0.02%</td><td class="r">-0.22</td><td class="r">0.43%</td></tr>
+<tr><td>5s30s</td><td>TLT/IEF (5s30s proxy)</td><td class="r">15</td><td class="r">53%</td><td class="r" style="color:#dc2626">-0.00%</td><td class="r">-0.03</td><td class="r">0.14%</td></tr>
+</tbody>
+</table>
+<p class="note">Pairs are combined 50/50 by capital weight into the
+portfolio metrics shown above.</p>
+
+<h2>3. Walk-Forward (Expanding Window)</h2>
+<table>
+<thead><tr>
+<th>Test Year</th><th>Train Period</th>
+<th class="r">Train Trades</th><th class="r">Train CAGR</th><th class="r">Train Sharpe</th>
+<th class="r">Test Trades</th><th class="r">Test CAGR</th><th class="r">Test Sharpe</th>
+</tr></thead>
+<tbody><tr><td>2017</td><td>2015-2016</td><td class="r">3</td><td class="r">-0.02%</td><td class="r">-0.93</td><td class="r">2</td><td class="r" style="color:#dc2626">+0.00%</td><td class="r">1.00</td></tr>
+<tr><td>2018</td><td>2015-2017</td><td class="r">5</td><td class="r">-0.01%</td><td class="r">-0.70</td><td class="r">4</td><td class="r" style="color:#059669">+0.06%</td><td class="r">1.95</td></tr>
+<tr><td>2019</td><td>2015-2018</td><td class="r">9</td><td class="r">+0.01%</td><td class="r">0.37</td><td class="r">4</td><td class="r" style="color:#dc2626">-0.07%</td><td class="r">-1.42</td></tr>
+<tr><td>2020</td><td>2015-2019</td><td class="r">13</td><td class="r">-0.01%</td><td class="r">-0.28</td><td class="r">2</td><td class="r" style="color:#dc2626">-0.03%</td><td class="r">-1.00</td></tr>
+<tr><td>2021</td><td>2015-2020</td><td class="r">15</td><td class="r">-0.01%</td><td class="r">-0.40</td><td class="r">2</td><td class="r" style="color:#dc2626">-0.05%</td><td class="r">-1.40</td></tr>
+<tr><td>2022</td><td>2015-2021</td><td class="r">17</td><td class="r">-0.02%</td><td class="r">-0.56</td><td class="r">5</td><td class="r" style="color:#dc2626">-0.06%</td><td class="r">-0.86</td></tr>
+<tr><td>2023</td><td>2015-2022</td><td class="r">22</td><td class="r">-0.02%</td><td class="r">-0.59</td><td class="r">5</td><td class="r" style="color:#059669">+0.07%</td><td class="r">0.43</td></tr>
+<tr><td>2024</td><td>2015-2023</td><td class="r">27</td><td class="r">-0.01%</td><td class="r">-0.18</td><td class="r">0</td><td class="r" style="color:#dc2626">+0.00%</td><td class="r">0.00</td></tr>
+<tr><td>2025</td><td>2015-2024</td><td class="r">27</td><td class="r">-0.01%</td><td class="r">-0.17</td><td class="r">4</td><td class="r" style="color:#059669">+0.01%</td><td class="r">0.24</td></tr>
+<tr><td>2026</td><td>2015-2025</td><td class="r">31</td><td class="r">-0.01%</td><td class="r">-0.15</td><td class="r">0</td><td class="r" style="color:#dc2626">+0.00%</td><td class="r">0.00</td></tr>
+</tbody>
+</table>
+<p class="note">Each test year uses an expanding training window that
+includes every prior year. The strategy is parameter-free at the year
+level (z-score uses a 252d rolling window), so the train segment is the
+record of accumulated history rather than a fitted model — the test row
+is the honest forward result for that year.</p>
+
+<h2>4. Yearly Performance</h2>
+<table>
+<thead><tr><th>Year</th><th class="r">Trades</th><th class="r">PnL</th><th class="r">Win Rate</th><th class="r">Return %</th></tr></thead>
+<tbody><tr><td>2015</td><td class="r">0</td><td class="r" style="color:#dc2626">$0</td><td class="r">0%</td><td class="r" style="color:#dc2626">+0.00%</td></tr>
+<tr><td>2016</td><td class="r">3</td><td class="r" style="color:#dc2626">$-69</td><td class="r">33%</td><td class="r" style="color:#dc2626">-0.03%</td></tr>
+<tr><td>2017</td><td class="r">2</td><td class="r" style="color:#059669">$5</td><td class="r">100%</td><td class="r" style="color:#059669">+0.00%</td></tr>
+<tr><td>2018</td><td class="r">4</td><td class="r" style="color:#059669">$127</td><td class="r">100%</td><td class="r" style="color:#059669">+0.06%</td></tr>
+<tr><td>2019</td><td class="r">4</td><td class="r" style="color:#dc2626">$-145</td><td class="r">25%</td><td class="r" style="color:#dc2626">-0.07%</td></tr>
+<tr><td>2020</td><td class="r">2</td><td class="r" style="color:#dc2626">$-60</td><td class="r">0%</td><td class="r" style="color:#dc2626">-0.03%</td></tr>
+<tr><td>2021</td><td class="r">2</td><td class="r" style="color:#dc2626">$-93</td><td class="r">0%</td><td class="r" style="color:#dc2626">-0.05%</td></tr>
+<tr><td>2022</td><td class="r">5</td><td class="r" style="color:#dc2626">$-128</td><td class="r">40%</td><td class="r" style="color:#dc2626">-0.06%</td></tr>
+<tr><td>2023</td><td class="r">5</td><td class="r" style="color:#059669">$145</td><td class="r">60%</td><td class="r" style="color:#059669">+0.07%</td></tr>
+<tr><td>2024</td><td class="r">0</td><td class="r" style="color:#dc2626">$0</td><td class="r">0%</td><td class="r" style="color:#dc2626">+0.00%</td></tr>
+<tr><td>2025</td><td class="r">4</td><td class="r" style="color:#059669">$10</td><td class="r">50%</td><td class="r" style="color:#059669">+0.01%</td></tr>
+<tr><td>2026</td><td class="r">0</td><td class="r" style="color:#dc2626">$0</td><td class="r">0%</td><td class="r" style="color:#dc2626">+0.00%</td></tr>
+</tbody>
+</table>
+
+<h2>5. Correlations — The Key Value</h2>
+<div class="box box-green">
+<h4>Diversification profile</h4>
+<table>
+<thead><tr><th>Reference</th><th class="r">Correlation</th><th>Interpretation</th></tr></thead>
+<tbody>
+<tr><td>SPY (daily portfolio returns)</td>
+<td class="r" style="color:#059669">+0.028</td>
+<td>Near-zero — uncorrelated to equity risk</td></tr>
+<tr><td>EXP-1220 (yearly returns)</td>
+<td class="r" style="color:#d97706">-0.385</td>
+<td>Moderate — partial overlap with credit spreads</td></tr>
+</tbody></table>
+<p class="note" style="margin-top:10px">If both correlations are near zero,
+this strategy earns its place in a multi-strategy portfolio purely on
+diversification grounds, even at modest standalone CAGR.</p>
+</div>
+
+<h2>6. Data Source &amp; Rule Zero</h2>
+<div class="box box-green">
+<h4>ZERO SYNTHETIC DATA</h4>
+<p style="font-size:.88rem">Every price in this report is a real Yahoo Finance
+daily close. No np.random, no Black-Scholes, no fabricated bars.</p>
+<ul style="padding-left:20px;font-size:.82rem;margin-top:6px">
+<li>Source: Yahoo Finance daily closes (TLT, IEF, SHY, TIP, SPY)</li>
+<li>Date range: 2015-01-02 -> 2026-04-02</li>
+<li>Tickers: TLT, IEF, SHY, TIP + SPY (correlation reference)</li>
+<li>EXP-1220 reference: reports/exp1220_dynamic_leverage.json (real backtest)</li>
+<li>Rule Zero compliant: TRUE</li>
+</ul>
+</div>
+
+<p style="text-align:center;color:var(--muted);margin-top:36px;padding-top:14px;border-top:1px solid var(--border);font-size:.78rem">
+EXP-1730 Wave 2 &bull; compass/treasury_curve.py &bull;
+2026-04-06
+</p>
+</body></html>

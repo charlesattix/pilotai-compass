@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>EXP-1700 v2: VIX Roll Yield Multi-Proxy</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--green:#059669;--red:#dc2626;--yellow:#d97706;--blue:#2563eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;max-width:1200px;margin:0 auto;padding:24px}
+h1{font-size:1.5rem;font-weight:800}
+h2{font-size:1.1rem;font-weight:700;margin:28px 0 12px;border-bottom:2px solid var(--border);padding-bottom:6px}
+.subtitle{color:var(--muted);font-size:.85rem;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.82rem}
+th,td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--border)}
+th{background:#f1f5f9;color:var(--muted);font-size:.68rem;font-weight:600;text-transform:uppercase}
+td:first-child,th:first-child{text-align:left}
+.callout{padding:14px;margin:14px 0;border-radius:8px;font-size:.88rem;line-height:1.7}
+.callout-blue{background:#eff6ff;border-left:4px solid var(--blue)}
+.callout-green{background:#ecfdf5;border-left:4px solid var(--green)}
+.callout-yellow{background:#fffbeb;border-left:4px solid var(--yellow)}
+.callout-red{background:#fef2f2;border-left:4px solid var(--red)}
+.footer{margin-top:40px;text-align:center;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);padding-top:14px}
+</style></head><body>
+
+<h1>EXP-1700 v2: VIX Roll Yield Multi-Proxy Test</h1>
+<div class="subtitle">2026-04-06 12:18 UTC &bull; Rule Zero: Yahoo Finance chart API real data &bull; Zero synthetic</div>
+
+<div class="callout callout-blue">
+<strong>Honest data reality:</strong> CBOE /VX futures (the actual tradeable VIX contracts) are
+NOT available via Yahoo Finance. Yahoo has the VIX INDEX constants (^VIX, ^VIX3M, ^VIX6M) which
+are non-tradeable calculations, plus the VIX ETF/ETN products (VXX, SVXY, UVXY). Real futures
+data would need a CBOE DataShop or Polygon futures subscription ($100-500/mo).
+<br><br>
+<strong>v1 failure (4f5b39c):</strong> Tested VXX short at a single 0.95 contango threshold and
+got full-period Sharpe 0.03. The Wave 1 post-mortem concluded VXX is too noisy a proxy — an ETN
+derivative of /VX futures with its own tracking error.
+<br><br>
+<strong>v2 expansion:</strong> Test THREE proxies (VXX short, SVXY long, UVXY short) at THREE
+thresholds (tight/medium/loose) = 9 configurations. If the edge is real, it should show up in
+at least one proxy × threshold combination even at the index-constant term-structure level.
+</div>
+
+<div class="callout callout-yellow">
+<strong>MARGINAL: all proxies OOS Sharpe &lt; 0.50. Best is SVXY_long @ medium with 0.33.</strong>
+</div>
+
+<h2>All Configurations</h2>
+<p class="subtitle">9 configurations (3 proxies × 3 thresholds), ranked by OOS Sharpe.
+Kill: OOS Sharpe &lt;= 0. Marginal: 0 &lt; OOS Sharpe &lt; 0.5. Live: OOS Sharpe &gt;= 0.5 AND
+Max DD &lt; 15%.</p>
+<table>
+<thead><tr>
+  <th>Proxy</th><th>Threshold</th><th>In Pos%</th>
+  <th>CAGR</th><th>Full Sharpe</th><th>OOS Sharpe</th>
+  <th>Max DD</th><th>Vol</th><th>1220 Corr</th><th>Verdict</th>
+</tr></thead>
+<tbody><tr><td><strong>SVXY_long</strong></td><td>medium</td><td>86%</td><td style="color:var(--green)">3.2%</td><td>-0.09</td><td>0.33</td><td>19.0%</td><td>9.5%</td><td>-0.382</td><td style="color:var(--yellow);font-weight:700">MARGINAL</td></tr>
+<tr><td><strong>UVXY_short</strong></td><td>medium</td><td>86%</td><td style="color:var(--green)">2.5%</td><td>-0.16</td><td>0.26</td><td>19.4%</td><td>9.7%</td><td>-0.352</td><td style="color:var(--yellow);font-weight:700">MARGINAL</td></tr>
+<tr><td><strong>VXX_short</strong></td><td>medium</td><td>86%</td><td style="color:var(--green)">3.4%</td><td>-0.07</td><td>0.21</td><td>20.0%</td><td>9.7%</td><td>-0.353</td><td style="color:var(--yellow);font-weight:700">MARGINAL</td></tr>
+<tr><td><strong>SVXY_long</strong></td><td>tight</td><td>76%</td><td style="color:var(--green)">0.5%</td><td>-0.56</td><td>-0.13</td><td>13.4%</td><td>6.8%</td><td>-0.462</td><td style="color:var(--red);font-weight:700">KILL</td></tr>
+<tr><td><strong>UVXY_short</strong></td><td>tight</td><td>76%</td><td style="color:var(--green)">0.1%</td><td>-0.58</td><td>-0.17</td><td>16.0%</td><td>7.1%</td><td>-0.439</td><td style="color:var(--red);font-weight:700">KILL</td></tr>
+<tr><td><strong>VXX_short</strong></td><td>tight</td><td>76%</td><td style="color:var(--green)">0.9%</td><td>-0.49</td><td>-0.26</td><td>11.2%</td><td>6.8%</td><td>-0.463</td><td style="color:var(--red);font-weight:700">KILL</td></tr>
+<tr><td><strong>SVXY_long</strong></td><td>loose</td><td>92%</td><td style="color:var(--green)">0.3%</td><td>-0.54</td><td>-0.60</td><td>15.5%</td><td>7.3%</td><td>-0.082</td><td style="color:var(--red);font-weight:700">KILL</td></tr>
+<tr><td><strong>UVXY_short</strong></td><td>loose</td><td>92%</td><td style="color:var(--red)">-1.0%</td><td>-0.59</td><td>-0.63</td><td>26.1%</td><td>8.6%</td><td>+0.001</td><td style="color:var(--red);font-weight:700">KILL</td></tr>
+<tr><td><strong>VXX_short</strong></td><td>loose</td><td>92%</td><td style="color:var(--green)">0.4%</td><td>-0.52</td><td>-0.71</td><td>14.9%</td><td>7.4%</td><td>-0.010</td><td style="color:var(--red);font-weight:700">KILL</td></tr>
+</tbody></table>
+
+<h2>Best Config Year-by-Year</h2>
+<table>
+<thead><tr><th>Year</th><th>CAGR</th><th>Sharpe</th></tr></thead>
+<tbody><tr><td>2018 (IS)</td><td style="color:var(--red)">-6.4%</td><td>-1.73</td></tr>
+<tr><td>2019 (IS)</td><td style="color:var(--green)">1.1%</td><td>-0.42</td></tr>
+<tr><td>2020 (IS)</td><td style="color:var(--red)">-2.3%</td><td>-0.95</td></tr>
+<tr><td>2021 (IS)</td><td style="color:var(--green)">8.0%</td><td>0.43</td></tr>
+<tr><td>2022 (IS)</td><td style="color:var(--green)">1.6%</td><td>-0.30</td></tr>
+<tr><td>2023 (OOS)</td><td style="color:var(--green)">39.9%</td><td>1.90</td></tr>
+<tr><td>2024 (OOS)</td><td style="color:var(--red)">-5.8%</td><td>-0.75</td></tr>
+<tr><td>2025 (OOS)</td><td style="color:var(--green)">4.4%</td><td>-0.02</td></tr>
+<tr><td>2026 (OOS)</td><td style="color:var(--red)">-24.2%</td><td>-3.37</td></tr>
+</tbody></table>
+
+<h2>Data Sources (Rule Zero)</h2>
+<table>
+<thead><tr><th>Symbol</th><th>Status</th></tr></thead>
+<tbody><tr><td>^VIX</td><td style="color:var(--green)">OK (Yahoo real)</td></tr>
+<tr><td>^VIX3M</td><td style="color:var(--green)">OK (Yahoo real)</td></tr>
+<tr><td>^VIX6M</td><td style="color:var(--green)">OK (Yahoo real)</td></tr>
+<tr><td>VXX</td><td style="color:var(--green)">OK (Yahoo real)</td></tr>
+<tr><td>SVXY</td><td style="color:var(--green)">OK (Yahoo real)</td></tr>
+<tr><td>UVXY</td><td style="color:var(--green)">OK (Yahoo real)</td></tr>
+</tbody></table>
+
+<h2>Missing Data (honest gap)</h2>
+<ul style="padding-left:20px;line-height:1.8">
+<li><strong>CBOE /VX futures front-month</strong> (VX1): needs CBOE DataShop ($100/mo) or
+Polygon futures ($199/mo). Real contract-level prices would eliminate VXX's ETN path dependency.</li>
+<li><strong>CBOE /VX futures calendar spreads</strong> (F1/F2 differential): the "pure" VRP play
+is a short F1 / long F2 calendar spread that's delta-hedged. Can't test this without futures data.</li>
+<li><strong>Intraday VIX</strong>: for same-day roll timing. Not in our stack.</li>
+</ul>
+
+<div class="footer">
+  EXP-1700 v2 &bull; compass/vix_roll_yield_v2.py &bull; Yahoo Finance real data &bull; 2026-04-06 12:18 UTC
+</div>
+</body></html>

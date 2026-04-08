@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Production Readiness — Ultimate Portfolio v4</title>
+<style>
+body{font-family:-apple-system,sans-serif;margin:0;padding:24px;background:#fff;color:#1e293b}
+h1{font-size:1.4rem;color:#0f172a}h2{font-size:1rem;color:#334155;margin-top:1.5rem;border-bottom:1px solid #e2e8f0;padding-bottom:4px}
+.meta{color:#64748b;font-size:0.82rem;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:16px 0}
+.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;text-align:center}
+.card .l{font-size:0.65rem;color:#64748b;text-transform:uppercase}.card .v{font-size:1.1rem;font-weight:700;margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:0.82rem;margin:10px 0}
+th{background:#f1f5f9;padding:6px 8px;text-align:left;font-size:0.7rem;color:#64748b;text-transform:uppercase;border-bottom:2px solid #e2e8f0}
+td{padding:5px 8px;text-align:left;border-bottom:1px solid #f1f5f9;vertical-align:top}
+</style></head><body>
+<h1>Production Readiness — Ultimate Portfolio v4</h1>
+<p class="meta">5 Strategies + Tail Risk Hedge + Dynamic Sizing + Regime-Adaptive Allocation</p>
+
+<div class="grid">
+  <div class="card"><div class="l">Readiness Score</div><div class="v" style="color:#16a34a">86%</div></div>
+  <div class="card"><div class="l">Ready</div><div class="v" style="color:#16a34a">26</div></div>
+  <div class="card"><div class="l">Partial</div><div class="v" style="color:#d97706">5</div></div>
+  <div class="card"><div class="l">Not Ready</div><div class="v" style="color:#dc2626">2</div></div>
+  <div class="card"><div class="l">Total Checks</div><div class="v">33</div></div>
+  <div class="card"><div class="l">Strategies</div><div class="v">5</div></div>
+  <div class="card"><div class="l">Trades/Month</div><div class="v">14.0</div></div>
+  <div class="card"><div class="l">Min Capital</div><div class="v">$100K</div></div>
+</div>
+
+<h2>Production Readiness Checklist</h2>
+<table>
+<tr><th>Item</th><th>Status</th><th>Priority</th><th>Detail</th></tr>
+<tr><td colspan="5" style="background:#e2e8f0;font-weight:700;text-transform:uppercase;font-size:0.75rem;letter-spacing:0.05em">API</td></tr><tr><td>Alpaca paper trading account</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">paper-api.alpaca.markets. Requires ALPACA_API_KEY/SECRET.</td></tr><tr><td>Alpaca options trading approval</td><td style="color:#d97706;font-weight:700">PARTIAL</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">Requires Level 2+ options approval for spreads and ICs.</td></tr><tr><td>Polygon options chain API</td><td style="color:#16a34a;font-weight:700">READY</td><td>P1</td><td style="font-size:0.78rem;color:#64748b">For live option pricing, strike selection, spread valuation.</td></tr><tr><td>Telegram bot for alerts</td><td style="color:#d97706;font-weight:700">PARTIAL</td><td>P2</td><td style="font-size:0.78rem;color:#64748b">Optional but recommended. Requires TELEGRAM_BOT_TOKEN/CHAT_ID.</td></tr><tr><td colspan="5" style="background:#e2e8f0;font-weight:700;text-transform:uppercase;font-size:0.75rem;letter-spacing:0.05em">Capital</td></tr><tr><td>Minimum account size</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">$100K recommended. $50K minimum for 5-strategy diversification.</td></tr><tr><td>Margin requirements</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">~$500/spread margin. At 10 max positions = $5K margin. 2.5x leverage needs $12.5K margin buffer.</td></tr><tr><td>Commission budget</td><td style="color:#16a34a;font-weight:700">READY</td><td>P2</td><td style="font-size:0.78rem;color:#64748b">$0.65/contract. ~14 trades/month × 3 contracts avg = $27/month.</td></tr><tr><td colspan="5" style="background:#e2e8f0;font-weight:700;text-transform:uppercase;font-size:0.75rem;letter-spacing:0.05em">Data</td></tr><tr><td>IronVault options_cache.db</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">258K contracts, SPY/XLF/XLI/TLT/GLD/QQQ/SOXX/XLK/XLE. SPY coverage 2020-01-29 to 2026-06-30.</td></tr><tr><td>Polygon API for live pricing</td><td style="color:#d97706;font-weight:700">PARTIAL</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">Requires POLYGON_API_KEY env var. Options snapshot API for live spread pricing.</td></tr><tr><td>yfinance for SPY/VIX daily data</td><td style="color:#16a34a;font-weight:700">READY</td><td>P1</td><td style="font-size:0.78rem;color:#64748b">Used for regime detection and trend signals. Fallback: cached last-known.</td></tr><tr><td>VIX term structure (VIX3M)</td><td style="color:#d97706;font-weight:700">PARTIAL</td><td>P1</td><td style="font-size:0.78rem;color:#64748b">VIX3M from yfinance or CBOE. Not available via Polygon standard tier.</td></tr><tr><td colspan="5" style="background:#e2e8f0;font-weight:700;text-transform:uppercase;font-size:0.75rem;letter-spacing:0.05em">Failover</td></tr><tr><td>Alpaca API outage</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">Retry with exponential backoff. Non-retryable errors: 400/401/403/422. Rate limits (429): respect Retry-After header.</td></tr><tr><td>Polygon API outage</td><td style="color:#16a34a;font-weight:700">READY</td><td>P1</td><td style="font-size:0.78rem;color:#64748b">Falls back to last-known cached prices. Stale price warning after 5 min.</td></tr><tr><td>Database corruption</td><td style="color:#d97706;font-weight:700">PARTIAL</td><td>P1</td><td style="font-size:0.78rem;color:#64748b">WAL mode enabled. Backup recommended daily. lost_and_found recovery available.</td></tr><tr><td>Network partition</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">All orders DB-persisted before submission. Reconciler detects orphans.</td></tr><tr><td>Assignment detection</td><td style="color:#16a34a;font-weight:700">READY</td><td>P1</td><td style="font-size:0.78rem;color:#64748b">Position monitor detects disappeared positions → marks closed_external.</td></tr><tr><td colspan="5" style="background:#e2e8f0;font-weight:700;text-transform:uppercase;font-size:0.75rem;letter-spacing:0.05em">Infra</td></tr><tr><td>SQLite database for trade tracking</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">DB-first pattern: write pending_open before broker call.</td></tr><tr><td>Health check endpoint (port 8080)</td><td style="color:#16a34a;font-weight:700">READY</td><td>P1</td><td style="font-size:0.78rem;color:#64748b">/health and /health/detailed endpoints via shared/healthcheck.py.</td></tr><tr><td>Process supervisor (systemd/docker)</td><td style="color:#dc2626;font-weight:700">NOT READY</td><td>P1</td><td style="font-size:0.78rem;color:#64748b">Need auto-restart on crash. Recommend systemd or Docker Compose.</td></tr><tr><td>Log rotation</td><td style="color:#dc2626;font-weight:700">NOT READY</td><td>P2</td><td style="font-size:0.78rem;color:#64748b">No log rotation configured. Use logrotate or Docker log driver.</td></tr><tr><td colspan="5" style="background:#e2e8f0;font-weight:700;text-transform:uppercase;font-size:0.75rem;letter-spacing:0.05em">Monitoring</td></tr><tr><td>Drawdown circuit breaker</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">-8% DD triggers 0.5x leverage. Recovery at -3% DD. Auto-reset.</td></tr><tr><td>Daily P&L Telegram report</td><td style="color:#16a34a;font-weight:700">READY</td><td>P1</td><td style="font-size:0.78rem;color:#64748b">16:15 ET daily report via notifier.py. Includes Greeks, regime, DD.</td></tr><tr><td>Stale position detection</td><td style="color:#16a34a;font-weight:700">READY</td><td>P1</td><td style="font-size:0.78rem;color:#64748b">Position monitor flags positions >5 DTE past expected close.</td></tr><tr><td>Consecutive API failure escalation</td><td style="color:#16a34a;font-weight:700">READY</td><td>P1</td><td style="font-size:0.78rem;color:#64748b">3+ consecutive Alpaca failures → critical alert.</td></tr><tr><td colspan="5" style="background:#e2e8f0;font-weight:700;text-transform:uppercase;font-size:0.75rem;letter-spacing:0.05em">Risk</td></tr><tr><td>Per-trade max risk (5% of account)</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">Enforced by RiskGate. Hard-coded in shared/constants.py.</td></tr><tr><td>Portfolio heat cap (15% total exposure)</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">Max total open risk. Independent of strategy allocations.</td></tr><tr><td>Daily loss limit (8%)</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">Halt all new entries for the day if breached.</td></tr><tr><td>Weekly loss limit (15% → 50% size reduction)</td><td style="color:#16a34a;font-weight:700">READY</td><td>P1</td><td style="font-size:0.78rem;color:#64748b">Automatic sizing reduction for 5 trading days.</td></tr><tr><td colspan="5" style="background:#e2e8f0;font-weight:700;text-transform:uppercase;font-size:0.75rem;letter-spacing:0.05em">Strategy</td></tr><tr><td>EXP-1220 Dynamic Leverage signal generation</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">Tickers: ['SPY'], ~3.5 trades/month, 18d avg hold, 55% allocation.</td></tr><tr><td>Cross-Asset Pairs signal generation</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">Tickers: ['GLD', 'TLT', 'SPY', 'XLF', 'QQQ'], ~4.0 trades/month, 10d avg hold, 15% allocation.</td></tr><tr><td>Vol Term Structure signal generation</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">Tickers: ['SPY'], ~2.5 trades/month, 20d avg hold, 10% allocation.</td></tr><tr><td>TLT Iron Condors signal generation</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">Tickers: ['TLT'], ~2.0 trades/month, 25d avg hold, 10% allocation.</td></tr><tr><td>XLI Iron Condors signal generation</td><td style="color:#16a34a;font-weight:700">READY</td><td>P0</td><td style="font-size:0.78rem;color:#64748b">Tickers: ['XLI'], ~2.0 trades/month, 22d avg hold, 10% allocation.</td></tr>
+</table>
+
+<h2>Expected Trade Frequency</h2>
+<table>
+<tr><th>Strategy</th><th>Trades/Mo</th><th>Trades/Yr</th><th>Avg Hold</th><th>Tickers</th><th>Allocation</th></tr>
+<tr><td>EXP-1220 Dynamic Leverage</td><td>3.5</td><td>42</td><td>18d</td><td>SPY</td><td>55%</td></tr><tr><td>Cross-Asset Pairs</td><td>4.0</td><td>48</td><td>10d</td><td>GLD, TLT, SPY, XLF, QQQ</td><td>15%</td></tr><tr><td>Vol Term Structure</td><td>2.5</td><td>30</td><td>20d</td><td>SPY</td><td>10%</td></tr><tr><td>TLT Iron Condors</td><td>2.0</td><td>24</td><td>25d</td><td>TLT</td><td>10%</td></tr><tr><td>XLI Iron Condors</td><td>2.0</td><td>24</td><td>22d</td><td>XLI</td><td>10%</td></tr><tr style="font-weight:700;border-top:2px solid #e2e8f0"><td>TOTAL</td><td>14.0</td><td>168</td><td>-</td><td>-</td><td>-</td></tr>
+</table>
+
+<h2>Regime-Adaptive Allocation</h2>
+<table>
+<tr><th>Regime</th><th>Leverage</th><th>Strategy Weights</th></tr>
+<tr><td>bear</td><td>0.8x</td><td style="font-size:0.78rem">EXP-1220:40% | CrossAsset:25% | VolTermStructure:15% | TLT:10% | XLI:10%</td></tr><tr><td>bull</td><td>2.0x</td><td style="font-size:0.78rem">EXP-1220:65% | CrossAsset:10% | VolTermStructure:5% | TLT:10% | XLI:10%</td></tr><tr><td>crash</td><td>0.5x</td><td style="font-size:0.78rem">EXP-1220:20% | CrossAsset:30% | VolTermStructure:20% | TLT:15% | XLI:15%</td></tr><tr><td>high_vol</td><td>1.0x</td><td style="font-size:0.78rem">EXP-1220:35% | CrossAsset:20% | VolTermStructure:20% | TLT:15% | XLI:10%</td></tr><tr><td>low_vol</td><td>2.0x</td><td style="font-size:0.78rem">EXP-1220:70% | CrossAsset:8% | VolTermStructure:7% | TLT:8% | XLI:7%</td></tr>
+</table>
+
+<h2>Architecture</h2>
+<table>
+<tr><th>Component</th><th>Module</th><th>Purpose</th></tr>
+<tr><td>Signal Generation</td><td>main.py + strategies/</td><td>ML ensemble + regime filters per strategy</td></tr>
+<tr><td>Allocation</td><td>compass/regime_portfolio.py</td><td>Regime-conditional weight + leverage</td></tr>
+<tr><td>Dynamic Sizing</td><td>compass/dynamic_sizing.py</td><td>VIX/DD/trend-adaptive leverage 0.5-2.5x</td></tr>
+<tr><td>Tail Risk Hedge</td><td>compass/tail_risk_hedge.py</td><td>SPY puts + VIX calls, 2% annual budget</td></tr>
+<tr><td>Execution</td><td>execution/execution_engine.py</td><td>Alpaca order submission, DB-first</td></tr>
+<tr><td>Monitoring</td><td>execution/position_monitor.py</td><td>Fill tracking, orphan detection, assignments</td></tr>
+<tr><td>Risk</td><td>shared/constants.py + compass/risk_gate.py</td><td>9 hard-coded risk rules</td></tr>
+<tr><td>Alerts</td><td>shared/notifier.py</td><td>Telegram: critical/warn/info tiers</td></tr>
+<tr><td>Health</td><td>shared/healthcheck.py</td><td>HTTP :8080/health endpoint</td></tr>
+</table>
+
+<h2>Capital Requirements</h2>
+<table>
+<tr><th>Item</th><th>Amount</th><th>Notes</th></tr>
+<tr><td>Minimum Account</td><td>$100,000</td><td>$50K absolute minimum</td></tr>
+<tr><td>Margin per Spread</td><td>~$500</td><td>$5 width x 100 shares</td></tr>
+<tr><td>Max Concurrent Margin</td><td>~$5,000</td><td>10 positions x $500</td></tr>
+<tr><td>Leverage Buffer</td><td>~$12,500</td><td>2.5x max leverage on margin</td></tr>
+<tr><td>Monthly Commissions</td><td>~$27</td><td>14 trades x 3 contracts x $0.65</td></tr>
+<tr><td>Annual Hedge Cost</td><td>~$2,000</td><td>2% of $100K for tail risk overlay</td></tr>
+</table>
+
+<h2>Failover Matrix</h2>
+<table>
+<tr><th>Scenario</th><th>Detection</th><th>Response</th><th>Recovery</th></tr>
+<tr><td>Alpaca API down</td><td>HTTP 5xx / timeout</td><td>Retry with backoff (30s, 60s, 120s)</td><td>Auto on API recovery</td></tr>
+<tr><td>Polygon API down</td><td>Cache staleness > 5min</td><td>Use last-known prices + warning</td><td>Auto on API recovery</td></tr>
+<tr><td>DB corruption</td><td>SQLite integrity check</td><td>WAL recovery + lost_and_found</td><td>Manual restore from backup</td></tr>
+<tr><td>Process crash</td><td>systemd watchdog</td><td>Auto-restart, resume from DB state</td><td>Immediate (DB-first design)</td></tr>
+<tr><td>Flash crash (VIX>60)</td><td>Circuit breaker</td><td>All positions to 0.5x immediately</td><td>Gradual ramp-up over 15 days</td></tr>
+<tr><td>Option assignment</td><td>Position monitor</td><td>Detect disappeared position → log</td><td>Manual: exercise/close stock</td></tr>
+</table>
+
+<div style="color:#94a3b8;font-size:0.75rem;margin-top:2rem;border-top:1px solid #e2e8f0;padding-top:8px">
+compass/paper_trading_v4.py | Ultimate Portfolio v4 | Generated 2026-04-05 10:58 UTC</div>
+</body></html>

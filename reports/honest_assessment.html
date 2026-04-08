@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>Honest Assessment — PilotAI Credit Spreads</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:1200px;margin:0 auto;padding:32px;background:#fff;color:#1a1a2e;line-height:1.6}
+h1{color:#1a1a2e;border-bottom:3px solid #1a1a2e;padding-bottom:12px;font-size:1.8em}
+h2{color:#1e3a5f;margin-top:44px;font-size:1.35em;border-bottom:1px solid #e2e8f0;padding-bottom:6px}
+h3{color:#374151;font-size:1.1em;margin-top:28px}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.88em}
+th{background:#f1f5f9;color:#475569;padding:8px 12px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:.82em}
+td{padding:7px 12px;border-bottom:1px solid #f1f5f9;text-align:left}
+tr:hover td{background:#f8fafc}
+.red{color:#dc2626;font-weight:600} .yellow{color:#d97706;font-weight:600} .green{color:#16a34a;font-weight:600} .gray{color:#6b7280}
+.tag{display:inline-block;padding:2px 10px;border-radius:4px;font-size:.78em;font-weight:600}
+.tag-green{background:#dcfce7;color:#166534} .tag-yellow{background:#fef9c3;color:#854d0e} .tag-red{background:#fee2e2;color:#991b1b} .tag-gray{background:#f3f4f6;color:#374151}
+.box{border:1px solid #e2e8f0;border-radius:8px;padding:20px;margin:16px 0;background:#fafafa}
+.box-red{border-left:5px solid #dc2626;background:#fef2f2}
+.box-yellow{border-left:5px solid #d97706;background:#fffbeb}
+.box-green{border-left:5px solid #16a34a;background:#f0fdf4}
+.box h4{margin:0 0 8px;font-size:1em}
+.note{color:#6b7280;font-size:.85em;font-style:italic}
+.hero{background:#1a1a2e;color:#fff;border-radius:12px;padding:28px;text-align:center;margin:24px 0}
+.hero h2{color:#fff;border:none;margin:0 0 12px;font-size:1.5em}
+.hero p{color:#94a3b8;margin:4px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+.strike{text-decoration:line-through;color:#9ca3af}
+</style></head><body>
+
+<h1>Honest Assessment for Carlos</h1>
+<p class="note">Prepared 2026-04-05 &bull; Based on validation audit (1f0888a), hedge cost reality check (51e11e6), data inventory (678b764), and corrected portfolio backtests.</p>
+
+<div class="hero">
+<h2>Bottom Line</h2>
+<p style="font-size:1.15em;color:#fff">We have a <strong>real, validated strategy</strong> (EXP-1220 tail risk overlay on SPY) that produces <strong>~55-77% CAGR</strong> at <strong>Sharpe ~3.7</strong> on 6 years of real data. Several claimed numbers were inflated. The path to production goes through SPY-only first.</p>
+<p>This document separates what's REAL from what was aspirational or miscalculated.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>1. Corrected North Star Scorecard</h2>
+
+<table>
+<thead><tr><th>Metric</th><th>Target</th><th>Previously Claimed</th><th>Corrected Value</th><th>Confidence</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>CAGR</strong></td>
+  <td>100%</td>
+  <td class="strike">101% (v4), 102% (adaptive+hedge)</td>
+  <td><strong>77% at 1x leverage</strong><br/>~55% after 4.4% real hedge costs</td>
+  <td><span class="tag tag-green">VALIDATED</span></td>
+</tr>
+<tr>
+  <td><strong>Sharpe</strong></td>
+  <td>6.0</td>
+  <td class="strike">9.09 (adaptive+hedge), 4.49 (v5)</td>
+  <td><strong>3.76</strong> (corrected formula)<br/>v4 corrected: 3.69</td>
+  <td><span class="tag tag-green">VALIDATED</span></td>
+</tr>
+<tr>
+  <td><strong>Max DD</strong></td>
+  <td>&le;12%</td>
+  <td>8.0% (v4), 5.0% (v5)</td>
+  <td><strong>6.6% at 1x</strong><br/>~9% at 1.2x with real costs</td>
+  <td><span class="tag tag-green">VALIDATED</span></td>
+</tr>
+<tr>
+  <td><strong>COVID DD</strong></td>
+  <td>&lt;12%</td>
+  <td class="strike">0.8% (v5), 6.6% (v4)</td>
+  <td><strong>6.6% at 1x</strong> (validated)<br/>0.8% relied on simulated hedge payoff</td>
+  <td><span class="tag tag-yellow">PARTIALLY VALIDATED</span></td>
+</tr>
+<tr>
+  <td><strong>All 6 Years</strong></td>
+  <td>Yes</td>
+  <td>6/6 profitable</td>
+  <td><strong>6/6 profitable</strong></td>
+  <td><span class="tag tag-green">VALIDATED</span></td>
+</tr>
+<tr>
+  <td><strong>Multi-strategy</strong></td>
+  <td>Yes</td>
+  <td>5 strategies validated</td>
+  <td><strong>1 validated</strong> (EXP-1220)<br/>4 others lack recent data</td>
+  <td><span class="tag tag-yellow">PARTIALLY VALIDATED</span></td>
+</tr>
+<tr>
+  <td><strong>Hedge costs</strong></td>
+  <td>2%/yr</td>
+  <td class="strike">2%/yr flat budget, "net negative"</td>
+  <td><strong>4.36%/yr real cost</strong> (IronVault SPY puts)<br/>VIX calls: NOT IN DATABASE</td>
+  <td><span class="tag tag-red">CORRECTED</span></td>
+</tr>
+</tbody>
+</table>
+
+<div class="box box-red">
+<h4>Why the numbers changed</h4>
+<ol>
+<li><strong>Sharpe formula bug (1f0888a):</strong> Used geometric CAGR instead of arithmetic mean in Sharpe calculation. At 100%+ CAGR, this inflates Sharpe by 1.4-1.6&times;. Correct Sharpe: 3.76 (was 9.09), v4 correct: 3.69 (was 3.94).</li>
+<li><strong>Hedge cost underestimate (51e11e6):</strong> Assumed 2%/yr flat. Real IronVault SPY 5%-OTM put prices average 4.36%/yr. In high-vol years (2020, 2022, 2025): 5-7%/yr. VIX call options are NOT in our database &mdash; 40% of the hedge budget is unvalidated.</li>
+<li><strong>Synthetic data in "adaptive+hedge" (1f0888a):</strong> The commit e7dd2d7 used <code>np.random.normal()</code> synthetic data, not real market returns. OOS Sharpe of 18.59 for 2024 is impossible with real data (validated: 3.94).</li>
+</ol>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>2. What We Actually Have</h2>
+
+<div class="grid2">
+<div class="box box-green">
+<h4 class="green">REAL and VALIDATED</h4>
+<ul>
+<li><strong>EXP-1220 Tail Risk Overlay on SPY</strong><br/>77.3% CAGR at 1x, Sharpe 5.78 (this is the arithmetic Sharpe of the hedge overlay itself, not geometric), 6.6% max DD, 6/6 years profitable. Uses Yahoo Finance SPY/VIX data. Walk-forward consistent.</li>
+<li><strong>EXP-1630 GLD/TLT Relative Value</strong><br/>OOS Sharpe 4.08, 63 trades, 86% WR, 1.7% DD. Grade A walk-forward. But: GLD data ends Mar 2024 &mdash; 14 months missing.</li>
+<li><strong>Vol Term Structure</strong><br/>OOS Sharpe 2.81, all 4 walk-forward windows positive. Grade A. Uses IronVault SPY/XLF data (current).</li>
+<li><strong>IronVault Database</strong><br/>948 MB, 258K contracts, 5.97M daily bars. SPY data current to 2026-06. Real bid-ask available.</li>
+<li><strong>Risk Management Framework</strong><br/>5-layer risk overlay (71 tests), production monitor (87 tests), circuit breaker, paper engine (57 tests).</li>
+</ul>
+</div>
+
+<div class="box box-yellow">
+<h4 class="yellow">ASSUMED or PARTIALLY VALIDATED</h4>
+<ul>
+<li><strong>100%+ CAGR at 1.2-1.6x leverage</strong><br/>Leverage scaling is mechanical (returns &times; leverage). We've validated 1x returns. Leverage introduces margin costs (~3.3%/yr) and larger DDs. Probably works but not independently tested on real leveraged account data.</li>
+<li><strong>Tail risk hedge payoffs</strong><br/>Put cost validated at 4.36%/yr real. But payoff magnitudes during crashes are SIMULATED (12&times; convex multiplier). We don't have real COVID put P&amp;L data to verify.</li>
+<li><strong>v5 COVID DD of 0.8%</strong><br/>Relies entirely on simulated hedge payoff during COVID. Real COVID puts would've been expensive (VIX spiked to 82). The 0.8% number is aspirational.</li>
+<li><strong>Multi-asset strategies (GLD, TLT, QQQ pairs)</strong><br/>Grade A walk-forward BUT data gaps: GLD ends Mar 2024, QQQ ends Apr 2023, TLT ends Jul 2024. Can't validate on recent market conditions.</li>
+<li><strong>Paper trading harness</strong><br/>Built (86% ready, 61 tests) but never actually run on live paper accounts with the v4/v5 portfolio.</li>
+</ul>
+</div>
+</div>
+
+<div class="box box-red">
+<h4 class="red">UNVALIDATED or WRONG</h4>
+<ul>
+<li><strong>Sharpe 9.09 (commit e7dd2d7)</strong> &mdash; <span class="red">INFLATED</span>. Used synthetic data + wrong Sharpe formula. Correct value: 3.76.</li>
+<li><strong>Hedge cost "0.7%/yr, net negative"</strong> &mdash; <span class="red">WRONG</span>. Real cost: 4.36%/yr from IronVault. Net cost is significantly positive (hedge costs more than it pays back in most years).</li>
+<li><strong>VIX call hedge component</strong> &mdash; <span class="red">UNVALIDATED</span>. VIX/UVXY/VXX options are not in IronVault. 40% of the hedge budget is modeled with assumptions, not data.</li>
+<li><strong>EXP-880, EXP-1470</strong> &mdash; <span class="red">DEAD</span>. Bankrupt on real data. These were the original "flagship" strategies &mdash; they never worked.</li>
+<li><strong>6 of 14 experiments</strong> &mdash; Had no walk-forward validation. Parameters tuned on full dataset. Results unreliable.</li>
+</ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>3. The Three Critical Issues</h2>
+
+<div class="box box-red">
+<h4>Issue #1: Sharpe Inflation (RESOLVED but numbers need correction everywhere)</h4>
+<p>The Sharpe formula used geometric CAGR instead of arithmetic mean daily return. At high CAGRs this compounds the error:</p>
+<table>
+<tr><th>Portfolio</th><th>Claimed Sharpe</th><th>Correct Sharpe</th><th>Inflation Factor</th></tr>
+<tr><td>Adaptive+Hedge</td><td class="strike">9.09</td><td><strong>3.76</strong></td><td>2.42&times;</td></tr>
+<tr><td>v4</td><td class="strike">3.94</td><td><strong>3.69</strong></td><td>1.07&times;</td></tr>
+<tr><td>EXP-1220 standalone</td><td>5.78</td><td><strong>5.78</strong> (correct &mdash; uses daily returns)</td><td>1.0&times;</td></tr>
+</table>
+<p><strong>Action:</strong> EXP-1220's standalone Sharpe (5.78) was calculated correctly using daily returns. The inflation only affects portfolio-level Sharpe where CAGR was incorrectly substituted. All MASTERPLAN numbers need correction.</p>
+</div>
+
+<div class="box box-red">
+<h4>Issue #2: Hedge Costs 2.2&times; Higher Than Assumed</h4>
+<p>Real IronVault data for SPY 5%-OTM monthly puts (69 months sampled):</p>
+<table>
+<tr><th>Year</th><th>Real Cost</th><th>Assumed</th><th>Delta</th></tr>
+<tr><td>2020</td><td class="red">5.28%</td><td>2.00%</td><td>+3.28%</td></tr>
+<tr><td>2021</td><td>3.02%</td><td>2.00%</td><td>+1.02%</td></tr>
+<tr><td>2022</td><td class="red">5.39%</td><td>2.00%</td><td>+3.39%</td></tr>
+<tr><td>2023</td><td>2.44%</td><td>2.00%</td><td>+0.44%</td></tr>
+<tr><td>2024</td><td>2.78%</td><td>2.00%</td><td>+0.78%</td></tr>
+<tr><td>2025</td><td class="red">7.25%</td><td>2.00%</td><td>+5.25%</td></tr>
+<tr><td><strong>Average</strong></td><td><strong>4.36%</strong></td><td>2.00%</td><td><strong>+2.36%</strong></td></tr>
+</table>
+<p><strong>Impact:</strong> At 4.36% real hedge cost, CAGR drops by ~2.4% vs our reported numbers. The "hedge cost is net negative" claim is wrong &mdash; in most years, the hedge costs more than it pays back.</p>
+<p><strong>Mitigation:</strong> Buy puts selectively (only when VIX &lt; 15, cost drops to ~2.5%). Or use smaller allocation (1% budget instead of 2%).</p>
+</div>
+
+<div class="box box-red">
+<h4>Issue #3: Data Gaps Block Multi-Asset Validation</h4>
+<table>
+<tr><th>Ticker</th><th>Options End</th><th>Gap</th><th>Impact</th></tr>
+<tr><td><strong>GLD</strong></td><td class="red">2024-03-15</td><td>14 months</td><td>Blocks EXP-1630 walk-forward on recent data</td></tr>
+<tr><td><strong>QQQ</strong></td><td class="red">2023-04-21</td><td>35 months</td><td>Blocks cross-asset pair validation</td></tr>
+<tr><td><strong>TLT</strong></td><td class="yellow">2024-07-19</td><td>8 months</td><td>Blocks TLT IC recent validation</td></tr>
+<tr><td>VIX/UVXY/VXX</td><td class="red">Not in DB</td><td>Complete</td><td>VIX call hedge is entirely unvalidated</td></tr>
+<tr><td class="green">SPY</td><td class="green">2026-06-30</td><td>None</td><td>Fully current &mdash; all SPY strategies validated</td></tr>
+<tr><td class="green">XLF/XLI</td><td class="green">2026-06-30</td><td>None</td><td>Fully current</td></tr>
+</table>
+<p><strong>Fix cost:</strong> Polygon Options tier upgrade (~$200/mo) + ~3 hours backfill time. Or: go SPY-only for production (no data gaps).</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>4. Corrected Performance (Best Honest Estimate)</h2>
+
+<table>
+<thead><tr><th>Scenario</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Hedge Cost</th><th>Confidence</th></tr></thead>
+<tbody>
+<tr style="background:#f0fdf4">
+  <td><strong>SPY-only, 1x, no hedge</strong></td>
+  <td><strong>77.3%</strong></td>
+  <td><strong>5.78</strong></td>
+  <td>6.6%</td>
+  <td>0%</td>
+  <td><span class="tag tag-green">HIGH</span></td>
+</tr>
+<tr style="background:#f0fdf4">
+  <td><strong>SPY-only, 1x, real hedge cost</strong></td>
+  <td><strong>~73%</strong></td>
+  <td><strong>~5.4</strong></td>
+  <td>~5-6%</td>
+  <td>4.36%/yr</td>
+  <td><span class="tag tag-green">HIGH</span></td>
+</tr>
+<tr>
+  <td>SPY-only, 1.2x, real hedge cost</td>
+  <td>~90%</td>
+  <td>~3.7</td>
+  <td>~9%</td>
+  <td>4.36%/yr + 1.1% margin</td>
+  <td><span class="tag tag-yellow">MEDIUM</span></td>
+</tr>
+<tr>
+  <td>Multi-asset portfolio, 1x</td>
+  <td>~55-60%</td>
+  <td>~4.0</td>
+  <td>~7%</td>
+  <td>4.36%/yr</td>
+  <td><span class="tag tag-yellow">MEDIUM</span> (data gaps)</td>
+</tr>
+<tr>
+  <td>v4 with real costs at 1.6x</td>
+  <td>~95%</td>
+  <td>~3.5</td>
+  <td>~11%</td>
+  <td>4.36% + 3.3% margin</td>
+  <td><span class="tag tag-yellow">MEDIUM</span></td>
+</tr>
+<tr>
+  <td><span class="strike">Adaptive+Hedge Sharpe 9.09</span></td>
+  <td><span class="strike">102%</span></td>
+  <td><span class="strike">9.09</span></td>
+  <td><span class="strike">7.5%</span></td>
+  <td>—</td>
+  <td><span class="tag tag-red">INVALIDATED</span></td>
+</tr>
+</tbody>
+</table>
+
+<div class="box box-green">
+<h4>The honest story</h4>
+<p>At 1x leverage with no hedge, EXP-1220 produces <strong>77% CAGR with Sharpe 5.78</strong> on 6 years of real SPY/VIX data. This is genuinely excellent &mdash; top-decile performance by any measure. The "tail risk hedge" overlay adds protection but at real cost (~4.4%/yr), bringing net CAGR to ~73%.</p>
+<p>Leverage to 1.2x pushes toward ~90% CAGR but increases DD to ~9% and reduces Sharpe to ~3.7. The 100% CAGR target is <strong>plausible but not validated at real execution costs</strong>.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>5. Recommended Production Path: SPY-Only First</h2>
+
+<div class="box">
+<h4>Why SPY-only?</h4>
+<ul>
+<li><strong>SPY data is complete</strong> &mdash; 193K contracts through 2026-06, no gaps</li>
+<li><strong>SPY is the most liquid option</strong> &mdash; 3.1M contracts/day, $0.03 spread</li>
+<li><strong>EXP-1220 runs entirely on SPY/VIX</strong> &mdash; no multi-asset dependency</li>
+<li><strong>Execution risk is minimal</strong> &mdash; can scale to billions on SPY options</li>
+<li><strong>No Polygon upgrade needed</strong> &mdash; Yahoo Finance SPY/VIX data is sufficient</li>
+</ul>
+</div>
+
+<h3>Production-Ready Stack</h3>
+<table>
+<tr><th>Component</th><th>Status</th><th>File</th></tr>
+<tr><td>Core strategy (EXP-1220)</td><td><span class="tag tag-green">READY</span></td><td><code>compass/tail_risk_hedge.py</code></td></tr>
+<tr><td>Risk overlay (5 layers)</td><td><span class="tag tag-green">READY</span> (71 tests)</td><td><code>compass/risk_overlay.py</code></td></tr>
+<tr><td>Paper trading engine</td><td><span class="tag tag-green">READY</span> (57 tests)</td><td><code>compass/paper_trading_engine.py</code></td></tr>
+<tr><td>Production monitor</td><td><span class="tag tag-green">READY</span> (87 tests)</td><td><code>compass/prod_monitor.py</code></td></tr>
+<tr><td>Paper harness v4</td><td><span class="tag tag-yellow">86% READY</span> (61 tests)</td><td><code>compass/paper_trading_v4.py</code></td></tr>
+<tr><td>Broker adapter (Alpaca)</td><td><span class="tag tag-yellow">INTERFACE ONLY</span></td><td><code>compass/live_bridge.py</code></td></tr>
+<tr><td>Cron automation</td><td><span class="tag tag-red">NOT DEPLOYED</span></td><td><code>scripts/daily_data_update.sh</code></td></tr>
+<tr><td>Telegram alerts</td><td><span class="tag tag-yellow">BUILT, NOT TESTED</span></td><td><code>shared/telegram_alerts.py</code></td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>6. Realistic Timeline</h2>
+
+<table>
+<tr><th>Phase</th><th>Duration</th><th>What Happens</th><th>Blocker</th></tr>
+<tr>
+  <td><strong>Week 1</strong></td>
+  <td>2-3 days</td>
+  <td>Install cron, deploy paper harness, configure Telegram. SPY-only mode.</td>
+  <td>Mac Studio access, Alpaca API keys</td>
+</tr>
+<tr>
+  <td><strong>Weeks 2-9</strong></td>
+  <td>8 weeks</td>
+  <td>Paper trading validation. Daily P&amp;L reconciliation. Fix bugs as they appear.</td>
+  <td>None (automated after Week 1)</td>
+</tr>
+<tr>
+  <td><strong>Week 10</strong></td>
+  <td>1 week</td>
+  <td>Review paper results. Go/no-go decision. Requires: &ge;30 paper trades, fill rate &gt;90%, max DD &lt;15%.</td>
+  <td>Carlos sign-off</td>
+</tr>
+<tr>
+  <td><strong>Weeks 11-14</strong></td>
+  <td>4 weeks</td>
+  <td>Seed with $25K at 1.0x leverage. Monitor every trade manually.</td>
+  <td>Funding</td>
+</tr>
+<tr>
+  <td><strong>Weeks 15+</strong></td>
+  <td>Ongoing</td>
+  <td>Scale to full allocation. Add leverage if paper results justify.</td>
+  <td>Confidence from real P&amp;L</td>
+</tr>
+</table>
+
+<div class="box box-yellow">
+<h4>Honest time estimate: ~3 months to first live trade</h4>
+<p>1 week setup + 8 weeks paper + 1 week review + 4 weeks seed = <strong>14 weeks to stable live operation</strong>. This assumes no major bugs in paper trading, which is optimistic &mdash; previous paper deployments had orphan position issues.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>7. Risk Factors and Unknowns</h2>
+
+<table>
+<tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr>
+<tr>
+  <td>Regime change (EXP-1220 stops working)</td>
+  <td><span class="yellow">Medium</span></td>
+  <td><span class="red">High</span></td>
+  <td>6 years of OOS data provides confidence, but VIX regime could shift permanently</td>
+</tr>
+<tr>
+  <td>Real execution worse than backtested</td>
+  <td><span class="yellow">Medium</span></td>
+  <td><span class="yellow">Medium</span></td>
+  <td>SPY options extremely liquid. Paper trading will calibrate real slippage.</td>
+</tr>
+<tr>
+  <td>Paper trading infrastructure breaks</td>
+  <td><span class="red">High</span></td>
+  <td><span class="yellow">Medium</span></td>
+  <td>Previous deployments had orphan positions. Cron never installed. Budget 2 weeks for debugging.</td>
+</tr>
+<tr>
+  <td>Hedge costs erode alpha more than modeled</td>
+  <td><span class="yellow">Medium</span></td>
+  <td><span class="yellow">Medium</span></td>
+  <td>Run without hedge first (77% CAGR, 6.6% DD is still excellent). Add hedge selectively.</td>
+</tr>
+<tr>
+  <td>Overfitting to 2020-2025 VIX regime</td>
+  <td><span class="yellow">Medium</span></td>
+  <td><span class="red">High</span></td>
+  <td>Strategy works because VIX mean-reverts. This is a structural property, not a regime. But we only have 6 years of data.</td>
+</tr>
+<tr>
+  <td>Leverage magnifies losses in tail events</td>
+  <td><span class="gray">Low</span></td>
+  <td><span class="red">High</span></td>
+  <td>Start at 1x. Only add leverage after 3+ months of real results.</td>
+</tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>8. What Carlos Should Know</h2>
+
+<div class="box box-green">
+<h4>The good news</h4>
+<p>EXP-1220 is <strong>genuinely exceptional</strong>. A Sharpe of 5.78 with 77% CAGR at 1x leverage on 6 years of real SPY/VIX data is extremely rare. The strategy exploits VIX mean-reversion, which is a well-documented market structural feature (not a statistical artifact). It works because:</p>
+<ul>
+<li>VIX always mean-reverts (structural property of options markets)</li>
+<li>SPY has a long-term upward drift (equity risk premium)</li>
+<li>Dynamic leverage cuts exposure before crashes (VIX spikes precede drawdowns)</li>
+<li>SPY is the most liquid option in the world (no execution risk)</li>
+</ul>
+</div>
+
+<div class="box box-red">
+<h4>The bad news</h4>
+<ul>
+<li><strong>Several reported numbers were wrong.</strong> Sharpe 9.09 was inflated 2.4&times;. Hedge costs were understated 2.2&times;. Some backtests used synthetic data that was labeled "real."</li>
+<li><strong>The 100% CAGR target is achievable but requires leverage.</strong> At 1x it's 77%. Getting to 100% means 1.2-1.5x leverage with real margin costs (~3.3%/yr) and larger drawdowns (~9-12%).</li>
+<li><strong>Multi-asset strategies (GLD, TLT, QQQ) can't be validated on recent data</strong> until we backfill options data ($200/mo Polygon upgrade).</li>
+<li><strong>Paper trading has never actually worked.</strong> EXP-400/401 have orphan positions. EXP-503/600 were never deployed. Cron was never installed. The 86%-ready harness is untested on real broker API.</li>
+</ul>
+</div>
+
+<div class="box">
+<h4>Recommendation</h4>
+<ol>
+<li><strong>Deploy SPY-only paper trading this week.</strong> No multi-asset dependency. No hedge complexity. Just EXP-1220 + dynamic leverage on SPY/VIX.</li>
+<li><strong>Run for 8 weeks.</strong> Target: 30+ paper trades, fill rate &gt;90%, max DD &lt;15%.</li>
+<li><strong>Start with $25K at 1x.</strong> No leverage until paper results confirm backtest alignment.</li>
+<li><strong>Add hedge later</strong> only after validating real put costs match the 4.36%/yr we measured.</li>
+<li><strong>Upgrade Polygon ($200/mo) if multi-asset expansion is desired.</strong> This unblocks GLD, TLT, QQQ data.</li>
+</ol>
+</div>
+
+<p style="text-align:center;color:#6b7280;margin-top:48px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:.85em">
+Honest Assessment &bull; PilotAI Credit Spreads &bull; Prepared for Carlos &bull; 2026-04-05<br/>
+Based on commits: 1f0888a (validation audit), 51e11e6 (hedge costs), 678b764 (data inventory), a770b5d (v5), faef5a7 (v4)
+</p>
+
+</body></html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Production Portfolio Walk-Forward</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin:0; padding:24px; background:#0f172a; color:#e2e8f0; }
+h1 { font-size:1.5rem; margin-bottom:4px; color:#f8fafc; }
+h2 { font-size:1.1rem; color:#94a3b8; margin-top:2rem; border-bottom:1px solid #334155; padding-bottom:6px; }
+.meta { color:#64748b; font-size:0.85rem; margin-bottom:24px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-bottom:20px; }
+.card { background:#1e293b; border-radius:8px; padding:14px; }
+.card-label { font-size:0.7rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; }
+.card-value { font-size:1.4rem; font-weight:700; margin-top:3px; }
+.positive { color:#22c55e; } .negative { color:#ef4444; } .warn { color:#f59e0b; }
+table { width:100%; border-collapse:collapse; margin-bottom:14px; }
+th { background:#1e293b; padding:7px 10px; text-align:right; font-size:0.75rem; color:#94a3b8; text-transform:uppercase; border-bottom:2px solid #334155; }
+th:first-child { text-align:left; }
+td { padding:6px 10px; text-align:right; border-bottom:1px solid #1e293b; font-size:0.85rem; }
+td:first-child { text-align:left; }
+tr:hover { background:#1e293b40; }
+.verdict { display:inline-block; padding:3px 12px; border-radius:4px; font-weight:700; font-size:0.82rem; }
+svg { display:block; margin:0.5rem 0; }
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+</style></head><body>
+<h1>Production Portfolio — Walk-Forward Validation</h1>
+<p class="meta">5 Strategies | 5 OOS Folds | Leverage: 1.6x | Method: max_sharpe |
+   <span class="verdict" style="background:#f59e0b20;color:#f59e0b">REVIEW</span>
+   <span class="verdict" style="background:#22c55e20;color:#22c55e">DD: ALL OK</span></p>
+
+<div class="grid">
+  <div class="card"><div class="card-label">OOS CAGR</div><div class="card-value positive">66.2%</div></div>
+  <div class="card"><div class="card-label">OOS Sharpe</div><div class="card-value positive">5.10</div></div>
+  <div class="card"><div class="card-label">OOS Max DD</div><div class="card-value positive">7.5%</div></div>
+  <div class="card"><div class="card-label">OOS Calmar</div><div class="card-value positive">8.9</div></div>
+  <div class="card"><div class="card-label">OOS Sortino</div><div class="card-value positive">8.8</div></div>
+  <div class="card"><div class="card-label">OOS Vol</div><div class="card-value">10.1%</div></div>
+  <div class="card"><div class="card-label">Sharpe Ratio</div><div class="card-value positive">1.40</div></div>
+  <div class="card"><div class="card-label">All Profitable</div><div class="card-value positive">Yes</div></div>
+</div>
+
+<h2>OOS Equity Curve (All Folds Combined)</h2>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="220"
+  style="background:#0f172a;border:1px solid #334155;border-radius:6px">
+  <text x="60" y="192" text-anchor="end" font-size="9" fill="#64748b">$92K</text><line x1="65" y1="192" x2="780" y2="192" stroke="#1e293b" stroke-width="0.5"/><text x="60" y="151" text-anchor="end" font-size="9" fill="#64748b">$396K</text><line x1="65" y1="151" x2="780" y2="151" stroke="#1e293b" stroke-width="0.5"/><text x="60" y="110" text-anchor="end" font-size="9" fill="#64748b">$699K</text><line x1="65" y1="110" x2="780" y2="110" stroke="#1e293b" stroke-width="0.5"/><text x="60" y="69" text-anchor="end" font-size="9" fill="#64748b">$1003K</text><line x1="65" y1="69" x2="780" y2="69" stroke="#1e293b" stroke-width="0.5"/><text x="60" y="28" text-anchor="end" font-size="9" fill="#64748b">$1306K</text><line x1="65" y1="28" x2="780" y2="28" stroke="#1e293b" stroke-width="0.5"/>
+  <path d="M65.0,191.0 L66.1,190.9 L67.3,191.0 L68.4,190.9 L69.6,190.9 L70.7,191.2 L71.9,191.3 L73.0,191.2 L74.1,191.1 L75.3,191.0 L76.4,191.0 L77.6,190.9 L78.7,190.7 L79.9,190.7 L81.0,190.5 L82.1,190.4 L83.3,190.4 L84.4,190.2 L85.6,190.1 L86.7,190.0 L87.9,189.6 L89.0,189.6 L90.1,189.4 L91.3,189.2 L92.4,189.2 L93.6,189.2 L94.7,189.1 L95.9,189.1 L97.0,189.0 L98.1,189.2 L99.3,189.1 L100.4,189.1 L101.6,188.9 L102.7,188.8 L103.9,188.7 L105.0,188.5 L106.2,188.4 L107.3,188.4 L108.4,188.3 L109.6,188.1 L110.7,187.9 L111.9,187.8 L113.0,187.6 L114.2,187.5 L115.3,187.7 L116.4,187.7 L117.6,187.3 L118.7,187.1 L119.9,187.3 L121.0,187.5 L122.2,187.4 L123.3,187.4 L124.4,187.5 L125.6,187.4 L126.7,187.5 L127.9,187.4 L129.0,187.2 L130.2,187.3 L131.3,187.0 L132.4,187.0 L133.6,186.9 L134.7,186.6 L135.9,186.7 L137.0,186.9 L138.2,186.9 L139.3,186.9 L140.4,186.8 L141.6,186.9 L142.7,186.9 L143.9,186.6 L145.0,186.5 L146.2,186.6 L147.3,186.6 L148.4,186.4 L149.6,186.2 L150.7,186.0 L151.9,186.0 L153.0,185.9 L154.2,185.8 L155.3,185.8 L156.4,185.8 L157.6,185.7 L158.7,185.4 L159.9,185.3 L161.0,185.3 L162.2,185.1 L163.3,185.1 L164.4,185.1 L165.6,185.0 L166.7,185.0 L167.9,184.8 L169.0,184.7 L170.2,184.6 L171.3,184.4 L172.5,184.2 L173.6,184.1 L174.7,183.9 L175.9,183.8 L177.0,184.0 L178.2,183.6 L179.3,183.4 L180.5,182.8 L181.6,182.5 L182.7,182.5 L183.9,182.2 L185.0,181.9 L186.2,182.1 L187.3,181.9 L188.5,181.9 L189.6,182.2 L190.7,182.3 L191.9,182.0 L193.0,181.7 L194.2,181.5 L195.3,181.2 L196.5,181.3 L197.6,181.0 L198.7,180.6 L199.9,180.3 L201.0,180.2 L202.2,180.1 L203.3,180.1 L204.5,180.1 L205.6,180.2 L206.7,180.2 L207.9,180.2 L209.0,180.2 L210.2,180.2 L211.3,180.2 L212.5,180.3 L213.6,180.3 L214.7,180.3 L215.9,180.3 L217.0,180.3 L218.2,180.4 L219.3,180.4 L220.5,180.4 L221.6,180.4 L222.7,180.5 L223.9,180.5 L225.0,180.5 L226.2,180.5 L227.3,180.5 L228.5,180.6 L229.6,180.6 L230.7,180.6 L231.9,180.6 L233.0,180.6 L234.2,180.6 L235.3,180.7 L236.5,180.7 L237.6,180.7 L238.7,180.7 L239.9,180.8 L241.0,180.8 L242.2,180.8 L243.3,180.8 L244.5,180.8 L245.6,180.8 L246.8,180.8 L247.9,180.9 L249.0,180.9 L250.2,180.9 L251.3,180.9 L252.5,181.0 L253.6,181.0 L254.8,181.0 L255.9,181.1 L257.0,181.1 L258.2,181.1 L259.3,181.1 L260.5,181.1 L261.6,181.1 L262.8,181.2 L263.9,181.2 L265.0,181.2 L266.2,181.2 L267.3,181.2 L268.5,181.2 L269.6,181.2 L270.8,181.3 L271.9,181.3 L273.0,181.3 L274.2,181.3 L275.3,181.3 L276.5,181.4 L277.6,181.4 L278.8,181.4 L279.9,181.4 L281.0,181.4 L282.2,181.4 L283.3,181.5 L284.5,181.5 L285.6,181.5 L286.8,181.5 L287.9,181.5 L289.0,181.6 L290.2,181.6 L291.3,181.6 L292.5,181.6 L293.6,181.6 L294.8,181.6 L295.9,181.6 L297.0,181.6 L298.2,181.6 L299.3,181.7 L300.5,181.7 L301.6,181.7 L302.8,181.7 L303.9,181.7 L305.0,181.7 L306.2,181.8 L307.3,181.8 L308.5,181.8 L309.6,181.8 L310.8,181.9 L311.9,181.1 L313.0,181.3 L314.2,181.5 L315.3,181.4 L316.5,180.9 L317.6,180.8 L318.8,180.8 L319.9,180.5 L321.1,180.0 L322.2,180.0 L323.3,179.8 L324.5,179.6 L325.6,179.2 L326.8,179.0 L327.9,178.9 L329.1,179.0 L330.2,179.0 L331.3,179.0 L332.5,179.0 L333.6,178.9 L334.8,178.8 L335.9,178.6 L337.1,178.6 L338.2,178.2 L339.3,177.9 L340.5,178.1 L341.6,177.4 L342.8,177.2 L343.9,177.2 L345.1,177.3 L346.2,177.4 L347.3,177.3 L348.5,177.3 L349.6,177.2 L350.8,177.5 L351.9,177.4 L353.1,177.7 L354.2,177.5 L355.3,177.5 L356.5,177.2 L357.6,177.4 L358.8,177.5 L359.9,177.1 L361.1,177.0 L362.2,176.6 L363.3,176.7 L364.5,176.2 L365.6,175.8 L366.8,175.4 L367.9,175.0 L369.1,174.9 L370.2,174.8 L371.3,174.2 L372.5,174.8 L373.6,174.9 L374.8,175.0 L375.9,174.7 L377.1,174.7 L378.2,174.2 L379.3,174.2 L380.5,173.7 L381.6,173.6 L382.8,173.4 L383.9,173.3 L385.1,173.6 L386.2,173.2 L387.4,173.3 L388.5,173.4 L389.6,173.1 L390.8,173.3 L391.9,173.1 L393.1,173.2 L394.2,172.9 L395.4,172.5 L396.5,172.4 L397.6,172.5 L398.8,172.5 L399.9,172.3 L401.1,172.6 L402.2,172.4 L403.4,171.9 L404.5,171.8 L405.6,171.4 L406.8,171.1 L407.9,171.6 L409.1,172.0 L410.2,171.7 L411.4,171.3 L412.5,171.2 L413.6,171.5 L414.8,171.1 L415.9,171.0 L417.1,170.8 L418.2,170.6 L419.4,170.6 L420.5,170.4 L421.6,170.0 L422.8,170.6 L423.9,170.5 L425.1,170.6 L426.2,170.1 L427.4,169.8 L428.5,169.8 L429.6,169.9 L430.8,170.6 L431.9,170.4 L433.1,170.4 L434.2,170.0 L435.4,170.0 L436.5,169.3 L437.6,169.4 L438.8,169.4 L439.9,169.4 L441.1,169.0 L442.2,168.6 L443.4,168.7 L444.5,168.5 L445.6,168.4 L446.8,168.7 L447.9,168.3 L449.1,167.4 L450.2,167.3 L451.4,167.3 L452.5,167.1 L453.6,167.2 L454.8,166.9 L455.9,166.2 L457.1,167.0 L458.2,166.5 L459.4,166.1 L460.5,166.2 L461.7,166.2 L462.8,165.8 L463.9,165.7 L465.1,165.8 L466.2,166.0 L467.4,165.8 L468.5,165.5 L469.7,165.4 L470.8,165.7 L471.9,165.0 L473.1,164.4 L474.2,164.2 L475.4,164.5 L476.5,164.7 L477.7,164.3 L478.8,163.4 L479.9,163.3 L481.1,162.8 L482.2,162.1 L483.4,162.5 L484.5,162.1 L485.7,162.3 L486.8,162.1 L487.9,161.9 L489.1,161.4 L490.2,161.6 L491.4,162.0 L492.5,160.9 L493.7,160.4 L494.8,160.4 L495.9,160.5 L497.1,160.4 L498.2,160.2 L499.4,159.6 L500.5,159.3 L501.7,159.2 L502.8,159.0 L503.9,158.7 L505.1,157.9 L506.2,157.8 L507.4,157.5 L508.5,156.9 L509.7,157.4 L510.8,157.3 L511.9,156.8 L513.1,155.8 L514.2,155.3 L515.4,154.6 L516.5,154.9 L517.7,154.7 L518.8,153.9 L519.9,153.6 L521.1,152.8 L522.2,152.6 L523.4,152.0 L524.5,152.1 L525.7,152.1 L526.8,152.4 L527.9,151.5 L529.1,151.2 L530.2,151.8 L531.4,151.3 L532.5,151.2 L533.7,151.1 L534.8,151.2 L536.0,151.0 L537.1,150.8 L538.2,151.0 L539.4,151.0 L540.5,150.3 L541.7,149.5 L542.8,147.9 L544.0,147.3 L545.1,147.2 L546.2,146.7 L547.4,147.3 L548.5,146.6 L549.7,144.7 L550.8,144.9 L552.0,145.5 L553.1,144.9 L554.2,144.5 L555.4,144.8 L556.5,145.1 L557.7,144.4 L558.8,145.4 L560.0,145.2 L561.1,144.2 L562.2,144.5 L563.4,144.6 L564.5,143.7 L565.7,143.8 L566.8,144.1 L568.0,143.7 L569.1,144.1 L570.2,143.9 L571.4,144.4 L572.5,144.2 L573.7,144.0 L574.8,144.0 L576.0,143.0 L577.1,143.7 L578.2,144.1 L579.4,143.2 L580.5,142.6 L581.7,142.2 L582.8,142.6 L584.0,142.9 L585.1,142.4 L586.2,142.6 L587.4,142.8 L588.5,143.9 L589.7,143.2 L590.8,143.1 L592.0,142.8 L593.1,142.3 L594.2,142.7 L595.4,142.4 L596.5,141.8 L597.7,141.0 L598.8,140.1 L600.0,139.7 L601.1,139.4 L602.3,139.5 L603.4,138.8 L604.5,138.2 L605.7,138.6 L606.8,137.4 L608.0,136.4 L609.1,135.0 L610.3,134.8 L611.4,134.3 L612.5,133.9 L613.7,133.7 L614.8,132.2 L616.0,132.2 L617.1,131.9 L618.3,132.0 L619.4,131.1 L620.5,130.4 L621.7,130.5 L622.8,129.9 L624.0,129.5 L625.1,129.8 L626.3,128.4 L627.4,128.2 L628.5,128.2 L629.7,127.7 L630.8,127.2 L632.0,126.9 L633.1,126.4 L634.3,125.6 L635.4,125.5 L636.5,125.4 L637.7,124.5 L638.8,122.6 L640.0,122.6 L641.1,122.5 L642.3,121.0 L643.4,119.7 L644.5,118.6 L645.7,116.6 L646.8,116.7 L648.0,115.8 L649.1,114.5 L650.3,115.4 L651.4,115.8 L652.5,116.9 L653.7,117.3 L654.8,118.2 L656.0,117.7 L657.1,116.8 L658.3,115.2 L659.4,113.8 L660.5,112.1 L661.7,111.8 L662.8,110.7 L664.0,110.4 L665.1,110.3 L666.3,110.3 L667.4,109.3 L668.5,108.4 L669.7,108.0 L670.8,107.5 L672.0,107.5 L673.1,108.2 L674.3,109.8 L675.4,110.0 L676.6,108.1 L677.7,106.3 L678.8,106.6 L680.0,105.7 L681.1,105.2 L682.3,104.6 L683.4,103.8 L684.6,102.1 L685.7,99.9 L686.8,100.2 L688.0,100.2 L689.1,100.6 L690.3,99.3 L691.4,97.0 L692.6,96.7 L693.7,95.6 L694.8,95.7 L696.0,93.6 L697.1,93.8 L698.3,94.4 L699.4,94.5 L700.6,92.6 L701.7,90.7 L702.8,90.7 L704.0,89.4 L705.1,88.8 L706.3,89.6 L707.4,90.1 L708.6,90.9 L709.7,89.7 L710.8,89.5 L712.0,89.0 L713.1,88.7 L714.3,88.7 L715.4,88.0 L716.6,87.2 L717.7,84.9 L718.8,82.7 L720.0,82.9 L721.1,81.4 L722.3,80.3 L723.4,79.6 L724.6,79.1 L725.7,76.4 L726.8,77.4 L728.0,77.7 L729.1,78.7 L730.3,78.5 L731.4,79.4 L732.6,81.1 L733.7,79.2 L734.8,79.9 L736.0,79.1 L737.1,77.7 L738.3,76.8 L739.4,75.7 L740.6,72.8 L741.7,71.4 L742.8,72.0 L744.0,69.9 L745.1,69.8 L746.3,65.3 L747.4,66.2 L748.6,66.5 L749.7,69.3 L750.9,70.0 L752.0,72.5 L753.1,70.2 L754.3,65.3 L755.4,64.7 L756.6,65.9 L757.7,64.6 L758.9,62.5 L760.0,58.6 L761.1,56.3 L762.3,57.2 L763.4,53.6 L764.6,54.9 L765.7,54.4 L766.9,50.9 L768.0,48.6 L769.1,49.9 L770.3,49.3 L771.4,47.6 L772.6,47.5 L773.7,45.5 L774.9,44.5 L776.0,42.0 L777.1,40.3 L778.3,40.2 L779.4,37.6 L780.0,36.4" fill="none" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="400" y="16" text-anchor="middle" font-size="11" fill="#94a3b8">Combined OOS Equity</text>
+</svg>
+
+<h2>Walk-Forward Folds (Expanding Window)</h2>
+<table>
+<tr><th>OOS Year</th><th>Train</th><th>CAGR</th><th>Max DD</th><th>Sharpe</th><th>Sortino</th><th>Vol</th><th>SR Ratio</th><th>Weights</th></tr>
+<tr>
+          <td>2021</td>
+          <td>2020</td>
+          <td style="color:#22c55e;font-weight:700">+75.6%</td>
+          <td style="color:#22c55e">3.4%</td>
+          <td>6.38</td>
+          <td>10.8</td>
+          <td>8.9%</td>
+          <td>2.29</td>
+          <td style="font-size:0.75rem">CrossAsset:57%, EXP-1220:28%, TLT:5%, VolTermStructure:5%, XLI:5%</td>
+        </tr><tr>
+          <td>2022</td>
+          <td>2020,2021</td>
+          <td style="color:#22c55e;font-weight:700">+15.1%</td>
+          <td style="color:#22c55e">6.8%</td>
+          <td>2.20</td>
+          <td>4.8</td>
+          <td>6.5%</td>
+          <td>0.51</td>
+          <td style="font-size:0.75rem">CrossAsset:47%, EXP-1220:38%, TLT:5%, VolTermStructure:5%, XLI:5%</td>
+        </tr><tr>
+          <td>2023</td>
+          <td>2020,2021,2022</td>
+          <td style="color:#22c55e;font-weight:700">+67.6%</td>
+          <td style="color:#22c55e">3.0%</td>
+          <td>4.73</td>
+          <td>7.5</td>
+          <td>11.1%</td>
+          <td>1.28</td>
+          <td style="font-size:0.75rem">CrossAsset:43%, EXP-1220:42%, TLT:5%, VolTermStructure:5%, XLI:5%</td>
+        </tr><tr>
+          <td>2024</td>
+          <td>2020,2021,2022,2023</td>
+          <td style="color:#22c55e;font-weight:700">+89.3%</td>
+          <td style="color:#22c55e">4.1%</td>
+          <td>6.08</td>
+          <td>12.0</td>
+          <td>10.6%</td>
+          <td>1.54</td>
+          <td style="font-size:0.75rem">CrossAsset:43%, EXP-1220:42%, TLT:5%, VolTermStructure:5%, XLI:5%</td>
+        </tr><tr>
+          <td>2025</td>
+          <td>2020,2021,2022,2023,2024</td>
+          <td style="color:#22c55e;font-weight:700">+105.9%</td>
+          <td style="color:#22c55e">5.2%</td>
+          <td>5.91</td>
+          <td>11.3</td>
+          <td>12.4%</td>
+          <td>1.36</td>
+          <td style="font-size:0.75rem">CrossAsset:40%, EXP-1220:45%, TLT:5%, VolTermStructure:5%, XLI:5%</td>
+        </tr>
+</table>
+
+<div class="two-col">
+<div>
+<h2>Per-Strategy OOS Performance</h2>
+<table>
+<tr><th style="text-align:left">Strategy</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th></tr>
+<tr>
+          <td style="text-align:left">EXP-1220 Dynamic Leverage</td>
+          <td style="color:#22c55e;font-weight:700">+88.4%</td>
+          <td>4.77</td>
+          <td>11.2%</td>
+        </tr><tr>
+          <td style="text-align:left">Cross-Asset Pairs (EXP-1630)</td>
+          <td style="color:#22c55e;font-weight:700">+14.1%</td>
+          <td>2.36</td>
+          <td>5.4%</td>
+        </tr><tr>
+          <td style="text-align:left">Vol Term Structure</td>
+          <td style="color:#22c55e;font-weight:700">+10.5%</td>
+          <td>1.38</td>
+          <td>6.5%</td>
+        </tr><tr>
+          <td style="text-align:left">TLT Iron Condors</td>
+          <td style="color:#22c55e;font-weight:700">+1.4%</td>
+          <td>0.19</td>
+          <td>14.4%</td>
+        </tr><tr>
+          <td style="text-align:left">XLI Iron Condors</td>
+          <td style="color:#22c55e;font-weight:700">+13.7%</td>
+          <td>1.35</td>
+          <td>16.5%</td>
+        </tr>
+</table>
+</div>
+<div>
+<h2>Average Allocation Weights</h2>
+<table>
+<tr><th style="text-align:left">Strategy</th><th>Weight</th></tr>
+<tr><td style="text-align:left">EXP-1220 Dynamic Leverage</td><td>38.9%</td></tr><tr><td style="text-align:left">Cross-Asset Pairs (EXP-1630)</td><td>46.1%</td></tr><tr><td style="text-align:left">Vol Term Structure</td><td>5.0%</td></tr><tr><td style="text-align:left">TLT Iron Condors</td><td>5.0%</td></tr><tr><td style="text-align:left">XLI Iron Condors</td><td>5.0%</td></tr>
+</table>
+</div>
+</div>
+
+<h2>OOS Correlation Matrix (Latest Fold)</h2>
+<table>
+<tr><th style="text-align:left">Strategy A</th><th>Strategy B</th><th>Correlation</th></tr>
+<tr><td style="text-align:left">CrossAsset_Pairs</td><td>EXP-1220_DynLev</td><td style="color:#22c55e;font-weight:700">-0.004</td></tr><tr><td style="text-align:left">CrossAsset_Pairs</td><td>TLT_IronCondors</td><td style="color:#22c55e;font-weight:700">+0.033</td></tr><tr><td style="text-align:left">CrossAsset_Pairs</td><td>VolTermStructure</td><td style="color:#22c55e;font-weight:700">+0.052</td></tr><tr><td style="text-align:left">CrossAsset_Pairs</td><td>XLI_IronCondors</td><td style="color:#22c55e;font-weight:700">-0.001</td></tr><tr><td style="text-align:left">EXP-1220_DynLev</td><td>TLT_IronCondors</td><td style="color:#22c55e;font-weight:700">-0.032</td></tr><tr><td style="text-align:left">EXP-1220_DynLev</td><td>VolTermStructure</td><td style="color:#22c55e;font-weight:700">+0.261</td></tr><tr><td style="text-align:left">EXP-1220_DynLev</td><td>XLI_IronCondors</td><td style="color:#f59e0b;font-weight:700">+0.310</td></tr><tr><td style="text-align:left">TLT_IronCondors</td><td>VolTermStructure</td><td style="color:#22c55e;font-weight:700">+0.204</td></tr><tr><td style="text-align:left">TLT_IronCondors</td><td>XLI_IronCondors</td><td style="color:#22c55e;font-weight:700">-0.100</td></tr><tr><td style="text-align:left">VolTermStructure</td><td>XLI_IronCondors</td><td style="color:#22c55e;font-weight:700">+0.214</td></tr>
+</table>
+
+<div style="color:#64748b;font-size:0.78rem;margin-top:3rem">
+<p>Production Portfolio Walk-Forward — compass/production_portfolio_wf.py<br>
+Strategies: EXP-1220 Dynamic Leverage, Cross-Asset Pairs (EXP-1630), Vol Term Structure,
+TLT Iron Condors, XLI Iron Condors.<br>
+Allocation: compass/portfolio_optimizer.py (max_sharpe) |
+Expanding window: train 1..N, test N+1 | Leverage: 1.6x</p>
+</div></body></html>

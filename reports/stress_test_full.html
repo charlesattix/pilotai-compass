@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>Phase 6 Stress Test — EXP-400/401 Blend</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e2e8f0;--text:#1a1a2e;--muted:#64748b;--green:#059669;--red:#dc2626;--blue:#2563eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;max-width:1200px;margin:0 auto;padding:28px}
+h1{font-size:1.55rem;font-weight:800;margin-bottom:4px}
+h2{font-size:1.15rem;font-weight:700;margin:32px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--border)}
+h3{font-size:.98rem;font-weight:600;margin:22px 0 8px;color:#374151}
+.sub{color:var(--muted);font-size:.86rem;margin-bottom:18px}
+.note{color:var(--muted);font-size:.82rem;font-style:italic;margin:6px 0}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.84rem}
+th{background:#f1f5f9;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:2px solid var(--border);font-size:.74rem;font-weight:600;text-transform:uppercase}
+td{padding:6px 10px;border-bottom:1px solid #f1f5f9;text-align:left}
+.r{text-align:right}
+tr:hover td{background:#fafafa}
+.hero{background:linear-gradient(135deg,#f1f5f9,#e2e8f0);border:2px solid #dc2626;border-radius:12px;padding:24px;text-align:center;margin:18px 0}
+.hero .big{font-size:1.8rem;font-weight:800;color:#dc2626}
+.hero p{color:var(--muted);font-size:.9rem;margin-top:6px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:16px 0}
+.c{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:13px;text-align:center}
+.c .l{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.3px}
+.c .v{font-weight:700;font-size:1.18rem;margin-top:3px}
+.box{border:1px solid var(--border);border-radius:8px;padding:16px;margin:12px 0;background:var(--card)}
+.box-green{border-left:5px solid var(--green)} .box-red{border-left:5px solid var(--red)}
+.box-blue{border-left:5px solid var(--blue)}
+.box h4{margin:0 0 6px;font-size:.95rem}
+</style></head><body>
+
+<h1>Phase 6 Stress Test — EXP-400/401 Blend</h1>
+<p class="sub">Full stress suite on best portfolio configuration from Phase 5 optimization
+&bull; 1565 daily returns &bull; 10,000 MC paths &bull;
+2026-04-06 08:32</p>
+
+<div class="hero">
+<div class="big">FAIL</div>
+<p>Monte Carlo P5 DD: <strong>16.58%</strong> (threshold: ≤30.0%)
+&bull; Crisis scenarios: <strong>FAILING</strong>
+(threshold: ≤40.0%)</p>
+</div>
+
+<div class="cards">
+<div class="c"><div class="l">Portfolio</div><div class="v" style="font-size:.85rem">EXP-400 81%<br/>EXP-401 19%</div></div>
+<div class="c"><div class="l">Starting Capital</div><div class="v">$100,000</div></div>
+<div class="c"><div class="l">Daily Returns</div><div class="v">1,565</div></div>
+<div class="c"><div class="l">MC Simulations</div><div class="v">10,000</div></div>
+<div class="c"><div class="l">Block Size</div><div class="v">5 days</div></div>
+<div class="c"><div class="l">Prob. Profit</div><div class="v" style="color:var(--green)">100%</div></div>
+<div class="c"><div class="l">Prob. Ruin (50%)</div><div class="v" style="color:var(--red)">0.0%</div></div>
+</div>
+
+<!-- ══ Monte Carlo ══ -->
+<h2>1. Monte Carlo Simulation (10,000 paths, block-bootstrap)</h2>
+<p class="note">Block bootstrap preserves volatility clustering and mean reversion.
+Block size: 5 trading days. Horizon: 1565 days.</p>
+
+<table>
+<thead><tr><th>Percentile</th><th class="r">Terminal Wealth</th><th class="r">Total Return</th><th class="r">Max Drawdown</th></tr></thead>
+<tbody><tr><td><strong>P1</strong></td><td class="r">$187,077</td><td class="r">+87.1%</td><td class="r" style="color:#dc2626">-20.82%</td></tr>
+<tr style="background:#fef3c7"><td><strong>P5</strong></td><td class="r">$221,579</td><td class="r">+121.6%</td><td class="r" style="color:#dc2626">-16.58%</td></tr>
+<tr><td><strong>P10</strong></td><td class="r">$241,687</td><td class="r">+141.7%</td><td class="r" style="color:#dc2626">-14.87%</td></tr>
+<tr><td><strong>P25</strong></td><td class="r">$280,384</td><td class="r">+180.4%</td><td class="r" style="color:#dc2626">-12.34%</td></tr>
+<tr><td><strong>P50</strong></td><td class="r">$332,169</td><td class="r">+232.2%</td><td class="r" style="color:#dc2626">-10.19%</td></tr>
+<tr><td><strong>P75</strong></td><td class="r">$390,743</td><td class="r">+290.7%</td><td class="r" style="color:#dc2626">-8.60%</td></tr>
+<tr><td><strong>P90</strong></td><td class="r">$452,087</td><td class="r">+352.1%</td><td class="r" style="color:#dc2626">-7.66%</td></tr>
+<tr><td><strong>P95</strong></td><td class="r">$494,387</td><td class="r">+394.4%</td><td class="r" style="color:#dc2626">-7.03%</td></tr>
+<tr><td><strong>P99</strong></td><td class="r">$594,790</td><td class="r">+494.8%</td><td class="r" style="color:#dc2626">-5.57%</td></tr>
+</tbody>
+</table>
+
+<div class="box box-green">
+<h4>Monte Carlo Verdict</h4>
+<p>P5 max drawdown: <strong>16.58%</strong>
+(only 5% of simulated paths exceed this drawdown).
+Threshold: ≤30.0%. <strong>PASS</strong>.</p>
+<p style="margin-top:6px;font-size:.85rem">
+Median terminal: $332,169
+&bull; Mean: $341,636
+&bull; Worst: $133,674
+&bull; Best: $854,350
+</p>
+</div>
+
+<!-- ══ Crisis Scenarios ══ -->
+<h2>2. Crisis Scenario Analysis (4 historical stress events)</h2>
+<p class="note">Each scenario overlays historical crisis daily shocks onto the portfolio,
+with a 1.5x beta adjustment for credit spreads (short gamma amplification).</p>
+
+<table>
+<thead><tr><th>Scenario</th><th class="r">Days</th><th class="r">VIX Mult</th><th class="r">Underlying DD</th><th class="r">Portfolio DD (1.5x β)</th><th class="r">Trough $</th><th class="r">Recovery</th><th class="r">Status</th></tr></thead>
+<tbody><tr><td style="text-align:left"><strong>COVID Crash (Feb-Mar 2020)</strong><br/><span style="color:#64748b;font-size:.76rem">S&P 500 fell ~34% in 23 trading days</span></td><td class="r">23</td><td class="r">5.5x</td><td class="r" style="color:#dc2626">34.52%</td><td class="r" style="color:#dc2626;font-weight:700">51.78%</td><td class="r">$48,216</td><td class="r">927 days</td><td class="r" style="color:#dc2626;font-weight:700">&#10007; FAIL</td></tr>
+<tr><td style="text-align:left"><strong>2022 Bear Market</strong><br/><span style="color:#64748b;font-size:.76rem">S&P 500 fell ~25% over ~9 months (~190 trading days)</span></td><td class="r">190</td><td class="r">2.1x</td><td class="r" style="color:#dc2626">29.12%</td><td class="r" style="color:#dc2626;font-weight:700">43.68%</td><td class="r">$56,319</td><td class="r">730 days</td><td class="r" style="color:#dc2626;font-weight:700">&#10007; FAIL</td></tr>
+<tr><td style="text-align:left"><strong>Flash Crash (Single Day)</strong><br/><span style="color:#64748b;font-size:.76rem">Sudden 10% drawdown in a single trading session</span></td><td class="r">1</td><td class="r">4.3x</td><td class="r" style="color:#dc2626">10.00%</td><td class="r" style="color:#dc2626;font-weight:700">15.00%</td><td class="r">$85,000</td><td class="r">207 days</td><td class="r" style="color:#059669;font-weight:700">&#10003; PASS</td></tr>
+<tr><td style="text-align:left"><strong>VIX Spike (15 → 65)</strong><br/><span style="color:#64748b;font-size:.76rem">VIX quadruples over 5 days; credit spreads widen sharply</span></td><td class="r">5</td><td class="r">4.3x</td><td class="r" style="color:#dc2626">15.00%</td><td class="r" style="color:#dc2626;font-weight:700">22.50%</td><td class="r">$77,500</td><td class="r">324 days</td><td class="r" style="color:#059669;font-weight:700">&#10003; PASS</td></tr>
+</tbody>
+</table>
+
+<div class="box box-red">
+<h4>Crisis Verdict</h4>
+<p>All crisis DDs must be ≤40.0% (with 1.5x credit spread beta).
+<strong>One or more scenarios fail.</strong></p>
+</div>
+
+<!-- ══ Sensitivity Analysis ══ -->
+<h2>3. Sensitivity Analysis</h2>
+<p class="note">Parameter sweeps measuring Sharpe/drawdown impact. Uses built-in heuristic
+scaling model. Baseline row highlighted in green.</p>
+
+<h3>Position Size (% of account)</h3><p class="note">Risk per trade as pct of account (risk.max_risk_per_trade) &bull; Baseline: 5.0</p><table><thead><tr><th>Value</th><th class="r">Sharpe</th><th class="r">CAGR</th><th class="r">Max DD</th><th class="r">Calmar</th><th class="r">Terminal</th></tr></thead><tbody><tr><td><strong>1.00</strong></td><td class="r" style="color:#059669">1.89</td><td class="r" style="color:#059669">+4.0%</td><td class="r" style="color:#dc2626">-2.22%</td><td class="r">1.81</td><td class="r">$127,789</td></tr>
+<tr><td><strong>2.00</strong></td><td class="r" style="color:#059669">1.89</td><td class="r" style="color:#059669">+8.2%</td><td class="r" style="color:#dc2626">-4.42%</td><td class="r">1.85</td><td class="r">$162,845</td></tr>
+<tr><td><strong>3.00</strong></td><td class="r" style="color:#059669">1.89</td><td class="r" style="color:#059669">+12.4%</td><td class="r" style="color:#dc2626">-6.59%</td><td class="r">1.88</td><td class="r">$206,940</td></tr>
+<tr style="background:#f0fdf4"><td><strong>5.00</strong> ★</td><td class="r" style="color:#059669">1.89</td><td class="r" style="color:#059669">+21.3%</td><td class="r" style="color:#dc2626">-10.89%</td><td class="r">1.95</td><td class="r">$331,383</td></tr>
+<tr><td><strong>7.00</strong></td><td class="r" style="color:#059669">1.89</td><td class="r" style="color:#059669">+30.6%</td><td class="r" style="color:#dc2626">-15.11%</td><td class="r">2.02</td><td class="r">$524,711</td></tr>
+<tr><td><strong>10.00</strong></td><td class="r" style="color:#059669">1.89</td><td class="r" style="color:#059669">+45.4%</td><td class="r" style="color:#dc2626">-21.28%</td><td class="r">2.13</td><td class="r">$1,023,379</td></tr>
+<tr><td><strong>15.00</strong></td><td class="r" style="color:#059669">1.89</td><td class="r" style="color:#059669">+72.3%</td><td class="r" style="color:#dc2626">-31.17%</td><td class="r">2.32</td><td class="r">$2,940,434</td></tr>
+</tbody></table><h3>Stop Loss Multiplier</h3><p class="note">Stop loss as multiple of credit received &bull; Baseline: 3.5</p><table><thead><tr><th>Value</th><th class="r">Sharpe</th><th class="r">CAGR</th><th class="r">Max DD</th><th class="r">Calmar</th><th class="r">Terminal</th></tr></thead><tbody><tr><td><strong>1.50</strong></td><td class="r" style="color:#059669">5.90</td><td class="r" style="color:#059669">+54.0%</td><td class="r" style="color:#dc2626">-0.93%</td><td class="r">57.89</td><td class="r">$1,461,996</td></tr>
+<tr><td><strong>2.00</strong></td><td class="r" style="color:#059669">5.53</td><td class="r" style="color:#059669">+50.6%</td><td class="r" style="color:#dc2626">-1.20%</td><td class="r">42.28</td><td class="r">$1,272,270</td></tr>
+<tr><td><strong>2.50</strong></td><td class="r" style="color:#059669">5.10</td><td class="r" style="color:#059669">+46.7%</td><td class="r" style="color:#dc2626">-1.89%</td><td class="r">24.73</td><td class="r">$1,080,047</td></tr>
+<tr><td><strong>3.00</strong></td><td class="r" style="color:#059669">4.11</td><td class="r" style="color:#059669">+38.1%</td><td class="r" style="color:#dc2626">-3.48%</td><td class="r">10.95</td><td class="r">$744,067</td></tr>
+<tr style="background:#f0fdf4"><td><strong>3.50</strong> ★</td><td class="r" style="color:#059669">1.89</td><td class="r" style="color:#059669">+21.3%</td><td class="r" style="color:#dc2626">-10.89%</td><td class="r">1.95</td><td class="r">$331,383</td></tr>
+<tr><td><strong>4.00</strong></td><td class="r" style="color:#059669">1.73</td><td class="r" style="color:#059669">+19.6%</td><td class="r" style="color:#dc2626">-11.49%</td><td class="r">1.71</td><td class="r">$304,824</td></tr>
+<tr><td><strong>5.00</strong></td><td class="r" style="color:#059669">1.42</td><td class="r" style="color:#059669">+16.5%</td><td class="r" style="color:#dc2626">-12.66%</td><td class="r">1.30</td><td class="r">$257,873</td></tr>
+</tbody></table><h3>Spread Width ($)</h3><p class="note">Width between short and long strikes &bull; Baseline: 5.0</p><table><thead><tr><th>Value</th><th class="r">Sharpe</th><th class="r">CAGR</th><th class="r">Max DD</th><th class="r">Calmar</th><th class="r">Terminal</th></tr></thead><tbody><tr><td><strong>2.50</strong></td><td class="r" style="color:#059669">1.89</td><td class="r" style="color:#059669">+12.8%</td><td class="r" style="color:#dc2626">-6.76%</td><td class="r">1.89</td><td class="r">$210,813</td></tr>
+<tr style="background:#f0fdf4"><td><strong>5.00</strong> ★</td><td class="r" style="color:#059669">1.89</td><td class="r" style="color:#059669">+21.3%</td><td class="r" style="color:#dc2626">-10.89%</td><td class="r">1.95</td><td class="r">$331,383</td></tr>
+<tr><td><strong>7.50</strong></td><td class="r" style="color:#059669">1.89</td><td class="r" style="color:#059669">+28.9%</td><td class="r" style="color:#dc2626">-14.36%</td><td class="r">2.01</td><td class="r">$483,567</td></tr>
+<tr><td><strong>10.00</strong></td><td class="r" style="color:#059669">1.89</td><td class="r" style="color:#059669">+36.0%</td><td class="r" style="color:#dc2626">-17.44%</td><td class="r">2.06</td><td class="r">$675,745</td></tr>
+<tr><td><strong>15.00</strong></td><td class="r" style="color:#059669">1.89</td><td class="r" style="color:#059669">+49.5%</td><td class="r" style="color:#dc2626">-22.87%</td><td class="r">2.16</td><td class="r">$1,214,538</td></tr>
+<tr><td><strong>20.00</strong></td><td class="r" style="color:#059669">1.89</td><td class="r" style="color:#059669">+62.3%</td><td class="r" style="color:#dc2626">-27.66%</td><td class="r">2.25</td><td class="r">$2,025,898</td></tr>
+</tbody></table>
+
+<!-- ══ Summary ══ -->
+<h2>4. Summary</h2>
+<div class="box box-blue">
+<h4>Phase 6 Verdict: FAIL</h4>
+<ul style="padding-left:18px;font-size:.88rem;line-height:1.85;margin-top:6px">
+<li><strong>Monte Carlo:</strong> P5 drawdown 16.58%
+(within 30% threshold).
+Median Sharpe 1.91. Probability of profit 100%.
+Probability of 50% ruin: 0.0%.</li>
+<li><strong>Crisis scenarios:</strong>
+2/4
+passing. Worst case: COVID Crash (Feb-Mar 2020)
+at 51.78% DD.</li>
+<li><strong>Sensitivity:</strong> Swept position size (1-15%), stop-loss multiplier (1.5-5.0),
+and spread width ($2.5-$20). Results show how parameter changes affect risk/return profile.</li>
+</ul>
+</div>
+
+<p style="text-align:center;color:var(--muted);margin-top:36px;padding-top:14px;border-top:1px solid var(--border);font-size:.78rem">
+Phase 6 Stress Test &bull; compass/stress_test.py &bull;
+Portfolio: EXP-400 81% + EXP-401 19%
+&bull; 2026-04-06
+</p>
+</body></html>

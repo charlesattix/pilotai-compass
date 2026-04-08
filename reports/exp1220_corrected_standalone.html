@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>EXP-1220 Corrected Standalone</title>
+<style>
+body{font-family:-apple-system,sans-serif;margin:0;padding:24px;background:#fff;color:#1e293b}
+h1{font-size:1.4rem;color:#0f172a}h2{font-size:1rem;color:#334155;margin-top:1.5rem;border-bottom:1px solid #e2e8f0;padding-bottom:4px}
+.meta{color:#64748b;font-size:0.82rem;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:16px 0}
+.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;text-align:center}
+.card .l{font-size:0.65rem;color:#64748b;text-transform:uppercase}.card .v{font-size:1.1rem;font-weight:700;margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:0.82rem;margin:10px 0}
+th{background:#f1f5f9;padding:6px 8px;text-align:right;font-size:0.7rem;color:#64748b;text-transform:uppercase;border-bottom:2px solid #e2e8f0}
+th:first-child{text-align:left}td{padding:5px 8px;text-align:right;border-bottom:1px solid #f1f5f9}td:first-child{text-align:left}
+.bug{background:#fef2f2;border-left:4px solid #dc2626;padding:12px;margin:12px 0;border-radius:4px;font-size:0.85rem}
+.fix{background:#f0fdf4;border-left:4px solid #16a34a;padding:12px;margin:12px 0;border-radius:4px;font-size:0.85rem}
+code{background:#f1f5f9;padding:2px 6px;border-radius:3px;font-size:0.82rem}
+</style></head><body>
+<h1>EXP-1220 Corrected Standalone Analysis</h1>
+<p class="meta">Real IronVault trades | 3-way comparison: buggy vs corrected vs with-hedge</p>
+
+<div class="bug">
+<strong>BUG DIAGNOSIS — Why SPY-only portfolio showed -0.7% CAGR:</strong><br><br>
+<strong>Bug 1 (dilution):</strong> Daily returns = trade P&L / $100K on exit dates, 0.0 on other days.
+With ~171 trade exits over ~1475 trading days, that's 65% exposure.
+The other ~35% of days contribute zero to mean but inflate denominator → Sharpe crushed.<br><br>
+<strong>Bug 2 (over-hedging):</strong> Hedge cost $17.30/day charged on ALL 1475 trading days,
+but trades only have capital at risk for ~957 hold-days total.
+Overpaying by 1475/957 = 1.5x.<br><br>
+<strong>Bug 3 (leverage on zeros):</strong> 1.6x leverage applied to the diluted series amplifies the
+negative hedge drag on zero-return days.
+</div>
+
+<div class="fix">
+<strong>FIX:</strong> Compute metrics at the <em>trade level</em> (cumulative P&L, not daily returns).
+Hedge cost charged per <em>hold-day</em> (days with open position), not all calendar days.
+This matches how the EXP-1220 backtest originally computed its 77% CAGR.
+</div>
+
+<h2>3-Way Comparison</h2>
+<table>
+<tr><th>Method</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th><th>Sortino</th><th>Total PnL</th><th>Win%</th><th>Avg PnL</th></tr>
+<tr><td style="text-align:left"><strong>buggy</strong></td>
+          <td style="color:#dc2626;font-weight:700">-2.6%</td>
+          <td>-1.72</td><td>16.9%</td>
+          <td>-0.1</td><td>-2.1</td>
+          <td>$7,372</td><td>88%</td><td>$43</td></tr><tr><td style="text-align:left"><strong>trade_level</strong></td>
+          <td style="color:#16a34a;font-weight:700">+1.2%</td>
+          <td>1.26</td><td>1.6%</td>
+          <td>0.8</td><td>0.7</td>
+          <td>$7,372</td><td>88%</td><td>$43</td></tr><tr><td style="text-align:left"><strong>with_hedge</strong></td>
+          <td style="color:#dc2626;font-weight:700">-1.6%</td>
+          <td>-1.48</td><td>10.2%</td>
+          <td>-0.2</td><td>-1.5</td>
+          <td>$-9,186</td><td>41%</td><td>$-54</td></tr>
+</table>
+
+<div class="grid">
+  <div class="card"><div class="l">Trades</div><div class="v">171</div></div>
+  <div class="card"><div class="l">Corrected CAGR</div><div class="v" style="color:#16a34a">+1.2%</div></div>
+  <div class="card"><div class="l">With Hedge CAGR</div><div class="v" style="color:#dc2626">-1.6%</div></div>
+  <div class="card"><div class="l">Corrected Sharpe</div><div class="v">1.26</div></div>
+  <div class="card"><div class="l">Total Hold Days</div><div class="v">957</div></div>
+  <div class="card"><div class="l">Hedge $/day</div><div class="v">$17.30</div></div>
+</div>
+
+<h2>Per-Year Comparison</h2>
+<table><tr><th>Year</th><th>buggy</th><th>trade_level</th><th>with_hedge</th></tr><tr><td>2020</td><td style="color:#16a34a">$240 (27t)</td><td style="color:#16a34a">$240 (27t)</td><td style="color:#dc2626">$-2,580 (hedge: -$2,820) (27t)</td></tr><tr><td>2021</td><td style="color:#16a34a">$616 (34t)</td><td style="color:#16a34a">$616 (34t)</td><td style="color:#dc2626">$-1,910 (hedge: -$2,526) (34t)</td></tr><tr><td>2022</td><td style="color:#16a34a">$2,520 (31t)</td><td style="color:#16a34a">$2,520 (31t)</td><td style="color:#dc2626">$-1,113 (hedge: -$3,633) (31t)</td></tr><tr><td>2023</td><td style="color:#16a34a">$1,084 (26t)</td><td style="color:#16a34a">$1,084 (26t)</td><td style="color:#dc2626">$-1,632 (hedge: -$2,716) (26t)</td></tr><tr><td>2024</td><td style="color:#16a34a">$200 (26t)</td><td style="color:#16a34a">$200 (26t)</td><td style="color:#dc2626">$-1,807 (hedge: -$2,007) (26t)</td></tr><tr><td>2025</td><td style="color:#16a34a">$2,712 (27t)</td><td style="color:#16a34a">$2,712 (27t)</td><td style="color:#dc2626">$-143 (hedge: -$2,855) (27t)</td></tr></table>
+
+<h2>Method Details</h2>
+<p><strong>buggy:</strong> Diluted daily returns + hedge on all days (spy_only bug)</p><p><strong>trade_level:</strong> Trade-level metrics, no daily dilution, no hedge cost</p><p><strong>with_hedge:</strong> Trade-level + real hedge cost ($17.30/day exposed, total $16,558)</p>
+
+<div style="color:#94a3b8;font-size:0.75rem;margin-top:2rem;border-top:1px solid #e2e8f0;padding-top:8px">
+compass/exp1220_standalone.py | All prices from IronVault | Sharpe: mean(daily) × sqrt(252) / std(daily, ddof=1)</div>
+</body></html>

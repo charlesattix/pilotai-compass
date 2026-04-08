@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>EXP-1800 Earnings/Event IV Crush</title>
+<style>
+body{font-family:-apple-system,sans-serif;margin:0;padding:24px;background:#fff;color:#1e293b}
+h1{font-size:1.4rem;color:#0f172a}h2{font-size:1rem;color:#334155;margin-top:1.5rem;border-bottom:1px solid #e2e8f0;padding-bottom:4px}
+.meta{color:#64748b;font-size:0.82rem;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:16px 0}
+.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;text-align:center}
+.card .l{font-size:0.65rem;color:#64748b;text-transform:uppercase}
+.card .v{font-size:1.1rem;font-weight:700;margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:0.82rem;margin:10px 0}
+th{background:#f1f5f9;padding:6px 8px;text-align:right;font-size:0.7rem;color:#64748b;text-transform:uppercase;border-bottom:2px solid #e2e8f0}
+th:first-child{text-align:left}
+td{padding:5px 8px;text-align:right;border-bottom:1px solid #f1f5f9}
+td:first-child{text-align:left}
+svg{display:block;margin:0.5rem 0}
+.callout{background:#eff6ff;border-left:4px solid #3b82f6;padding:12px;margin:12px 0;border-radius:4px;font-size:0.85rem}
+.data-gap{background:#fef2f2;border-left:4px solid #dc2626;padding:12px;margin:12px 0;border-radius:4px;font-size:0.85rem}
+</style></head><body>
+<h1>EXP-1800 — Earnings / Event IV Crush</h1>
+<p class="meta">Real IronVault SPY options + FOMC/CPI/NFP calendar | 2020-2025 | Rule Zero compliant</p>
+
+<div class="data-gap">
+<strong>DATA REALITY (HONEST):</strong> IronVault contains ZERO single-stock options
+(no AAPL, MSFT, NVDA, etc.). The classic earnings IV crush on single names CANNOT be
+tested with our data. This module tests the ANALOGOUS pattern on SPY: macro event
+IV crush around FOMC/CPI/NFP announcements. Rule Zero: no fabrication.
+</div>
+
+<div class="callout">
+<strong>Strategy:</strong> Enter SPY iron condor 1 trading day before each FOMC/CPI/NFP
+event at the close. Exit 1 trading day after the event. Strangle legs 2% OTM, hedge wings
+5% OTM. Risk 2% of capital per trade, max 5 contracts. All option prices from IronVault.
+</div>
+
+<div class="grid">
+  <div class="card"><div class="l">Events Calendar</div><div class="v">194</div></div>
+  <div class="card"><div class="l">Trades Executed</div><div class="v">152</div></div>
+  <div class="card"><div class="l">Win Rate</div><div class="v">65%</div></div>
+  <div class="card"><div class="l">CAGR</div><div class="v" style="color:#16a34a">+0.6%</div></div>
+  <div class="card"><div class="l">Sharpe</div><div class="v">0.43</div></div>
+  <div class="card"><div class="l">Max DD</div><div class="v">2.1%</div></div>
+  <div class="card"><div class="l">Corr SPY</div><div class="v" style="color:#d97706">+0.223</div></div>
+  <div class="card"><div class="l">Corr 1220</div><div class="v" style="color:#16a34a">+0.135</div></div>
+</div>
+
+<h2>Equity Curve</h2>
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="220" style="border:1px solid #e2e8f0;border-radius:6px"><text x="390" y="16" text-anchor="middle" font-size="11" fill="#64748b">Event IV Crush Equity (Real IronVault Data)</text><path d="M65.0,142.8 L66.2,142.8 L67.4,142.8 L68.6,142.8 L69.9,142.8 L71.1,142.8 L72.3,142.8 L73.5,142.8 L74.7,142.8 L75.9,142.8 L77.1,142.8 L78.3,142.8 L79.6,142.8 L80.8,142.8 L82.0,142.8 L83.2,142.8 L84.4,142.8 L85.6,142.8 L86.8,142.8 L88.0,142.8 L89.3,142.8 L90.5,142.8 L91.7,142.8 L92.9,142.8 L94.1,142.8 L95.3,142.8 L96.5,142.8 L97.7,142.8 L99.0,142.8 L100.2,142.8 L101.4,142.8 L102.6,142.8 L103.8,142.8 L105.0,142.8 L106.2,142.8 L107.5,142.8 L108.7,142.8 L109.9,142.8 L111.1,142.8 L112.3,142.8 L113.5,142.8 L114.7,142.8 L115.9,142.8 L117.2,142.8 L118.4,142.8 L119.6,142.8 L120.8,142.8 L122.0,142.8 L123.2,142.8 L124.4,142.8 L125.6,142.8 L126.9,142.8 L128.1,142.8 L129.3,142.8 L130.5,142.8 L131.7,142.8 L132.9,142.8 L134.1,142.8 L135.3,142.8 L136.6,142.8 L137.8,142.8 L139.0,142.8 L140.2,142.8 L141.4,142.8 L142.6,143.4 L143.8,163.5 L145.1,160.5 L146.3,160.5 L147.5,160.5 L148.7,126.4 L149.9,126.4 L151.1,126.4 L152.3,95.4 L153.5,95.4 L154.8,94.1 L156.0,94.1 L157.2,94.1 L158.4,93.9 L159.6,93.9 L160.8,93.9 L162.0,92.5 L163.2,92.5 L164.5,92.5 L165.7,92.5 L166.9,92.5 L168.1,92.5 L169.3,97.3 L170.5,97.3 L171.7,97.3 L172.9,97.3 L174.2,97.3 L175.4,97.3 L176.6,97.2 L177.8,97.2 L179.0,97.2 L180.2,99.0 L181.4,99.0 L182.7,99.0 L183.9,97.2 L185.1,97.2 L186.3,97.2 L187.5,95.2 L188.7,95.2 L189.9,95.2 L191.1,95.2 L192.4,95.2 L193.6,95.2 L194.8,98.7 L196.0,98.7 L197.2,98.7 L198.4,98.2 L199.6,98.2 L200.8,98.2 L202.1,98.2 L203.3,96.5 L204.5,96.5 L205.7,96.5 L206.9,96.5 L208.1,96.5 L209.3,96.5 L210.5,96.5 L211.8,96.5 L213.0,95.2 L214.2,93.1 L215.4,93.1 L216.6,93.1 L217.8,93.1 L219.0,93.1 L220.3,91.9 L221.5,91.8 L222.7,91.8 L223.9,90.8 L225.1,90.8 L226.3,90.8 L227.5,91.9 L228.7,91.9 L230.0,91.9 L231.2,90.7 L232.4,90.7 L233.6,90.7 L234.8,90.7 L236.0,90.7 L237.2,89.8 L238.4,89.5 L239.7,89.5 L240.9,89.5 L242.1,89.5 L243.3,89.5 L244.5,89.5 L245.7,90.3 L246.9,90.3 L248.2,91.5 L249.4,91.5 L250.6,91.5 L251.8,91.5 L253.0,91.5 L254.2,91.5 L255.4,91.0 L256.6,91.0 L257.9,91.0 L259.1,91.0 L260.3,90.3 L261.5,90.3 L262.7,90.3 L263.9,96.3 L265.1,96.3 L266.3,96.3 L267.6,96.3 L268.8,96.3 L270.0,96.3 L271.2,95.1 L272.4,95.1 L273.6,95.1 L274.8,95.1 L276.0,95.1 L277.3,95.1 L278.5,95.0 L279.7,95.0 L280.9,95.0 L282.1,95.0 L283.3,95.0 L284.5,95.0 L285.8,94.1 L287.0,94.1 L288.2,93.6 L289.4,93.6 L290.6,93.6 L291.8,93.6 L293.0,93.6 L294.2,93.6 L295.5,93.6 L296.7,93.4 L297.9,93.4 L299.1,92.5 L300.3,92.5 L301.5,89.2 L302.7,89.2 L303.9,87.1 L305.2,87.1 L306.4,87.1 L307.6,86.1 L308.8,86.1 L310.0,86.1 L311.2,86.1 L312.4,86.1 L313.6,86.0 L314.9,86.0 L316.1,86.0 L317.3,86.0 L318.5,86.0 L319.7,86.0 L320.9,86.0 L322.1,83.2 L323.4,83.2 L324.6,82.1 L325.8,82.1 L327.0,82.1 L328.2,82.1 L329.4,82.1 L330.6,82.1 L331.8,81.2 L333.1,81.2 L334.3,81.2 L335.5,81.2 L336.7,76.8 L337.9,76.8 L339.1,76.8 L340.3,76.0 L341.5,76.0 L342.8,76.0 L344.0,76.0 L345.2,76.0 L346.4,76.0 L347.6,76.5 L348.8,76.5 L350.0,71.3 L351.2,71.3 L352.5,71.3 L353.7,71.3 L354.9,69.5 L356.1,69.5 L357.3,69.5 L358.5,66.3 L359.7,66.3 L361.0,66.3 L362.2,66.3 L363.4,66.3 L364.6,68.9 L365.8,64.5 L367.0,64.5 L368.2,64.5 L369.4,64.5 L370.7,64.5 L371.9,64.5 L373.1,64.6 L374.3,64.6 L375.5,62.4 L376.7,62.4 L377.9,62.4 L379.1,62.4 L380.4,61.4 L381.6,61.4 L382.8,60.0 L384.0,60.0 L385.2,60.0 L386.4,60.0 L387.6,64.3 L388.8,64.3 L390.1,62.4 L391.3,62.8 L392.5,62.8 L393.7,62.8 L394.9,62.8 L396.1,62.8 L397.3,62.8 L398.6,59.5 L399.8,59.5 L401.0,58.6 L402.2,58.6 L403.4,61.1 L404.6,61.1 L405.8,61.1 L407.0,61.1 L408.3,75.6 L409.5,75.6 L410.7,75.6 L411.9,75.6 L413.1,75.6 L414.3,75.6 L415.5,78.0 L416.7,78.1 L418.0,78.1 L419.2,78.1 L420.4,78.1 L421.6,78.1 L422.8,78.1 L424.0,78.1 L425.2,78.1 L426.4,70.7 L427.7,70.7 L428.9,70.7 L430.1,70.7 L431.3,70.7 L432.5,71.5 L433.7,73.3 L434.9,73.3 L436.2,73.3 L437.4,73.3 L438.6,73.3 L439.8,73.4 L441.0,73.4 L442.2,73.4 L443.4,70.7 L444.6,70.7 L445.9,70.7 L447.1,70.7 L448.3,71.8 L449.5,71.8 L450.7,71.9 L451.9,71.9 L453.1,71.2 L454.3,71.2 L455.6,71.2 L456.8,71.2 L458.0,70.2 L459.2,69.2 L460.4,69.2 L461.6,69.2 L462.8,69.2 L464.0,69.2 L465.3,69.6 L466.5,68.9 L467.7,68.9 L468.9,68.9 L470.1,68.9 L471.3,68.9 L472.5,68.9 L473.8,69.3 L475.0,69.3 L476.2,68.6 L477.4,68.6 L478.6,68.6 L479.8,68.6 L481.0,68.6 L482.2,68.6 L483.5,69.0 L484.7,69.0 L485.9,69.0 L487.1,69.0 L488.3,68.5 L489.5,68.5 L490.7,67.3 L491.9,67.9 L493.2,67.9 L494.4,67.9 L495.6,67.9 L496.8,67.9 L498.0,67.9 L499.2,67.4 L500.4,67.4 L501.6,67.4 L502.9,67.4 L504.1,71.3 L505.3,71.3 L506.5,71.3 L507.7,71.3 L508.9,72.6 L510.1,72.0 L511.4,72.0 L512.6,72.0 L513.8,72.0 L515.0,72.0 L516.2,76.1 L517.4,76.1 L518.6,76.1 L519.8,78.7 L521.1,78.7 L522.3,78.7 L523.5,78.7 L524.7,78.2 L525.9,78.2 L527.1,79.7 L528.3,79.7 L529.5,79.7 L530.8,79.7 L532.0,79.7 L533.2,79.7 L534.4,80.3 L535.6,80.3 L536.8,80.3 L538.0,80.3 L539.2,80.3 L540.5,79.5 L541.7,79.5 L542.9,79.5 L544.1,79.0 L545.3,79.0 L546.5,79.0 L547.7,79.0 L549.0,78.8 L550.2,78.8 L551.4,78.8 L552.6,77.9 L553.8,77.9 L555.0,78.3 L556.2,78.3 L557.4,78.3 L558.7,77.4 L559.9,77.7 L561.1,77.7 L562.3,77.7 L563.5,77.7 L564.7,77.7 L565.9,77.7 L567.1,80.4 L568.4,80.4 L569.6,82.0 L570.8,82.0 L572.0,82.0 L573.2,82.0 L574.4,82.0 L575.6,82.0 L576.8,80.9 L578.1,80.4 L579.3,80.4 L580.5,80.4 L581.7,80.4 L582.9,80.4 L584.1,80.2 L585.3,81.6 L586.6,81.6 L587.8,81.6 L589.0,81.6 L590.2,81.6 L591.4,82.1 L592.6,82.1 L593.8,82.1 L595.0,84.2 L596.3,84.2 L597.5,84.2 L598.7,84.2 L599.9,84.2 L601.1,84.2 L602.3,84.2 L603.5,84.2 L604.7,83.6 L606.0,83.6 L607.2,83.6 L608.4,83.6 L609.6,81.8 L610.8,83.0 L612.0,83.0 L613.2,83.0 L614.5,83.0 L615.7,83.0 L616.9,83.0 L618.1,81.8 L619.3,81.7 L620.5,80.6 L621.7,80.6 L622.9,80.6 L624.2,80.6 L625.4,80.6 L626.6,80.6 L627.8,80.3 L629.0,79.5 L630.2,79.5 L631.4,87.8 L632.6,87.8 L633.9,87.8 L635.1,89.3 L636.3,89.3 L637.5,90.4 L638.7,90.4 L639.9,90.4 L641.1,89.3 L642.3,89.3 L643.6,89.3 L644.8,87.9 L646.0,87.9 L647.2,87.9 L648.4,87.9 L649.6,87.9 L650.8,87.9 L652.1,86.2 L653.3,84.1 L654.5,84.1 L655.7,82.0 L656.9,82.0 L658.1,82.0 L659.3,82.0 L660.5,90.7 L661.8,90.7 L663.0,90.7 L664.2,90.7 L665.4,90.7 L666.6,90.7 L667.8,88.6 L669.0,88.6 L670.2,88.9 L671.5,88.9 L672.7,88.9 L673.9,88.9 L675.1,88.9 L676.3,88.9 L677.5,87.7 L678.7,86.9 L679.9,86.9 L681.2,84.3 L682.4,84.3 L683.6,84.3 L684.8,85.0 L686.0,83.4 L687.2,83.4 L688.4,83.4 L689.7,83.4 L690.9,83.4 L692.1,83.0 L693.3,83.0 L694.5,83.0 L695.7,83.6 L696.9,83.6 L698.1,83.6 L699.4,83.6 L700.6,83.6 L701.8,83.6 L703.0,82.7 L704.2,82.7 L705.4,81.3 L706.6,81.3 L707.8,81.3 L709.1,81.3 L710.3,81.3 L711.5,81.3 L712.7,81.3 L713.9,81.9 L715.1,81.9 L716.3,81.9 L717.5,81.9 L718.8,81.9 L720.0,81.2 L721.2,80.4 L722.4,80.4 L723.6,80.4 L724.8,80.4 L726.0,80.4 L727.3,80.4 L728.5,79.6 L729.7,78.3 L730.9,78.3 L732.1,78.3 L733.3,78.3 L734.5,78.3 L735.7,78.3 L737.0,78.3 L738.2,78.3 L739.4,78.3 L740.6,78.3 L741.8,78.3 L743.0,78.3 L744.2,78.3 L745.4,78.3 L746.7,78.3 L747.9,78.3 L749.1,78.3 L750.3,78.3 L751.5,78.3 L752.7,78.3 L753.9,78.3 L755.1,78.3 L756.4,78.3 L757.6,78.3 L758.8,78.3 L760.0,78.3" fill="none" stroke="#16a34a" stroke-width="1.5"/></svg>
+
+<h2>P&L Summary</h2>
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Gross PnL</td><td>$5,470</td></tr>
+<tr><td>Commission</td><td>-$1,019</td></tr>
+<tr><td>Net PnL</td><td style="color:#16a34a;font-weight:700">$4,451</td></tr>
+<tr><td>Sortino</td><td>0.18</td></tr>
+<tr><td>Calmar</td><td>0.3</td></tr>
+</table>
+
+<h2>Event Type Breakdown</h2>
+<table>
+<tr><th>Event</th><th>Trades</th><th>Wins</th><th>Win%</th><th>Net PnL</th><th>Avg PnL</th></tr>
+<tr>
+          <td>CPI</td>
+          <td>61</td>
+          <td>36</td>
+          <td>59%</td>
+          <td style="color:#16a34a">$1,098</td>
+          <td>$18</td>
+        </tr><tr>
+          <td>FOMC</td>
+          <td>38</td>
+          <td>25</td>
+          <td>66%</td>
+          <td style="color:#16a34a">$2,493</td>
+          <td>$66</td>
+        </tr><tr>
+          <td>NFP</td>
+          <td>53</td>
+          <td>38</td>
+          <td>72%</td>
+          <td style="color:#16a34a">$860</td>
+          <td>$16</td>
+        </tr>
+</table>
+
+<h2>Yearly Performance</h2>
+<table>
+<tr><th>Year</th><th>Trades</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th></tr>
+<tr><td>2019</td><td>0</td><td style="color:#dc2626;font-weight:700">+0.0%</td><td>0.00</td><td>0.0%</td></tr><tr><td>2020</td><td>24</td><td style="color:#16a34a;font-weight:700">+3.6%</td><td>1.02</td><td>1.4%</td></tr><tr><td>2021</td><td>21</td><td style="color:#16a34a;font-weight:700">+0.6%</td><td>1.04</td><td>0.5%</td></tr><tr><td>2022</td><td>26</td><td style="color:#16a34a;font-weight:700">+0.8%</td><td>0.62</td><td>1.3%</td></tr><tr><td>2023</td><td>26</td><td style="color:#dc2626;font-weight:700">-0.6%</td><td>-1.12</td><td>0.8%</td></tr><tr><td>2024</td><td>28</td><td style="color:#dc2626;font-weight:700">-0.5%</td><td>-0.80</td><td>0.7%</td></tr><tr><td>2025</td><td>27</td><td style="color:#16a34a;font-weight:700">+0.6%</td><td>0.88</td><td>0.6%</td></tr><tr><td>2026</td><td>0</td><td style="color:#dc2626;font-weight:700">+0.0%</td><td>0.00</td><td>0.0%</td></tr>
+</table>
+
+<h2>Walk-Forward (Expanding Window)</h2>
+<table>
+<tr><th>Test Year</th><th>Train</th><th>Test Trades</th><th>IS SR</th><th>OOS SR</th><th>OOS CAGR</th><th>OOS WR</th></tr>
+<tr><td>2021</td><td>1y (24 trades)</td><td>21</td><td>1.02</td><td style="color:#16a34a;font-weight:700">1.04</td><td>+0.6%</td><td>86%</td></tr><tr><td>2022</td><td>2y (45 trades)</td><td>26</td><td>0.83</td><td style="color:#16a34a;font-weight:700">0.62</td><td>+0.8%</td><td>58%</td></tr><tr><td>2023</td><td>3y (71 trades)</td><td>26</td><td>0.76</td><td style="color:#dc2626;font-weight:700">-1.12</td><td>-0.6%</td><td>46%</td></tr><tr><td>2024</td><td>4y (97 trades)</td><td>28</td><td>0.57</td><td style="color:#dc2626;font-weight:700">-0.80</td><td>-0.5%</td><td>61%</td></tr><tr><td>2025</td><td>5y (125 trades)</td><td>27</td><td>0.44</td><td style="color:#16a34a;font-weight:700">0.88</td><td>+0.6%</td><td>74%</td></tr>
+</table>
+
+<h2>Skip Reasons (Diagnostic)</h2>
+<table><tr><th>Reason</th><th>Count</th></tr><tr><td>spacing</td><td>19</td></tr><tr><td>exit_unpriced</td><td>15</td></tr><tr><td>no_condor</td><td>6</td></tr><tr><td>no_exp</td><td>2</td></tr><tr><td>no_entry_td</td><td>0</td></tr><tr><td>no_exit_td</td><td>0</td></tr><tr><td>no_spot</td><td>0</td></tr><tr><td>no_expiration_after</td><td>0</td></tr></table>
+
+<div style="color:#94a3b8;font-size:0.75rem;margin-top:2rem;border-top:1px solid #e2e8f0;padding-top:8px">
+compass/earnings_iv_crush.py | 100% real IronVault + public FOMC dates |
+Sharpe: arithmetic mean × √252 / std(daily, ddof=1) |
+NO single-stock options in data — SPY event proxy is the honest alternative
+</div>
+</body></html>

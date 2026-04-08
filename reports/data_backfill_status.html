@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Data Backfill Status Report</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--green:#059669;--yellow:#d97706;--red:#dc2626}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;max-width:1200px;margin:0 auto;padding:24px}
+h1{font-size:1.5rem;font-weight:800;margin-bottom:4px}
+h2{font-size:1.1rem;font-weight:700;margin:28px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--border)}
+h3{font-size:.95rem;font-weight:600;margin:16px 0 8px}
+.subtitle{color:var(--muted);font-size:.85rem;margin-bottom:20px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:16px 0}
+.c{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.c .l{color:var(--muted);font-size:.65rem;font-weight:600;text-transform:uppercase}.c .v{font-size:1.05rem;font-weight:700;margin-top:2px}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.82rem}
+th,td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--border)}
+th{background:#f1f5f9;color:var(--muted);font-size:.7rem;font-weight:600;text-transform:uppercase}
+td:first-child,th:first-child{text-align:left}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600}
+.tag-green{background:#d1fae5;color:#065f46}.tag-yellow{background:#fef3c7;color:#92400e}.tag-red{background:#fee2e2;color:#991b1b}
+.callout{padding:14px;border-radius:8px;margin:12px 0;font-size:.85rem;line-height:1.6}
+.callout-green{background:#ecfdf5;border-left:4px solid var(--green)}
+.callout-yellow{background:#fffbeb;border-left:4px solid var(--yellow)}
+.callout-red{background:#fef2f2;border-left:4px solid var(--red)}
+.progress-bar{height:12px;background:#e5e7eb;border-radius:6px;overflow:hidden;margin:4px 0}
+.progress-fill{height:100%;border-radius:6px}
+.footer{margin-top:36px;text-align:center;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);padding-top:12px}
+</style></head><body>
+
+<h1>IronVault Data Backfill Status</h1>
+<div class="subtitle">Polygon.io options data &bull; options_cache.db (948 MB) &bull; 2026-04-05</div>
+
+<div class="cards">
+  <div class="c"><div class="l">Database</div><div class="v">948 MB</div></div>
+  <div class="c"><div class="l">Contracts</div><div class="v">259,806</div></div>
+  <div class="c"><div class="l">Daily Bars</div><div class="v">6.1M</div></div>
+  <div class="c"><div class="l">Tickers</div><div class="v">9</div></div>
+  <div class="c"><div class="l">GLD Gap</div><div class="v" style="color:var(--yellow)">15 mo</div></div>
+  <div class="c"><div class="l">QQQ Gap</div><div class="v" style="color:var(--red)">32 mo</div></div>
+  <div class="c"><div class="l">TLT Gap</div><div class="v" style="color:var(--yellow)">17 mo</div></div>
+  <div class="c"><div class="l">SPY</div><div class="v" style="color:var(--green)">Current</div></div>
+</div>
+
+<h2>1. Per-Ticker Coverage</h2>
+<table>
+<thead><tr><th>Ticker</th><th>Contracts</th><th>Expirations</th><th>First Exp</th><th>Last Exp</th><th>Daily Bars</th><th>Status</th><th>Gap</th></tr></thead>
+<tbody>
+<tr><td><strong>SPY</strong></td><td>193,272</td><td>646</td><td>2020-01-29</td><td>2026-06-30</td><td>4,423,353</td><td><span class="tag tag-green">FULL</span></td><td>None</td></tr>
+<tr><td><strong>XLF</strong></td><td>9,256</td><td>320</td><td>2020-01-03</td><td>2026-06-30</td><td>243,583</td><td><span class="tag tag-green">FULL</span></td><td>None</td></tr>
+<tr><td><strong>XLI</strong></td><td>17,287</td><td>320</td><td>2020-01-03</td><td>2026-06-18</td><td>200,761</td><td><span class="tag tag-green">FULL</span></td><td>None</td></tr>
+<tr><td><strong>GLD</strong></td><td>14,115</td><td>~210</td><td>2020-01-17</td><td style="color:var(--yellow)"><strong>2024-10-18</strong></td><td>168,694</td><td><span class="tag tag-yellow">PARTIAL</span></td><td style="color:var(--yellow)">Oct 2024 &rarr; Dec 2025</td></tr>
+<tr><td><strong>TLT</strong></td><td>9,185</td><td>181</td><td>2020-01-17</td><td style="color:var(--yellow)"><strong>2024-07-19</strong></td><td>185,357</td><td><span class="tag tag-yellow">PARTIAL</span></td><td style="color:var(--yellow)">Aug 2024 &rarr; Dec 2025</td></tr>
+<tr><td><strong>QQQ</strong></td><td>9,194</td><td>98</td><td>2020-01-03</td><td style="color:var(--red)"><strong>2023-04-21</strong></td><td>386,814</td><td><span class="tag tag-red">STALE</span></td><td style="color:var(--red)">May 2023 &rarr; Dec 2025</td></tr>
+<tr><td>XLK</td><td>2,680</td><td>242</td><td>2020-01-17</td><td>2026-06-18</td><td>18,702</td><td><span class="tag tag-green">FULL</span></td><td>Sparse strikes</td></tr>
+<tr><td>XLE</td><td>1,757</td><td>181</td><td>2020-04-17</td><td>2026-06-30</td><td>20,542</td><td><span class="tag tag-green">FULL</span></td><td>Sparse strikes</td></tr>
+<tr><td>SOXX</td><td>3,460</td><td>70</td><td>2020-07-17</td><td>2026-06-18</td><td>37,229</td><td><span class="tag tag-green">FULL</span></td><td>Sparse strikes</td></tr>
+</tbody></table>
+
+<h2>2. GLD Backfill Session Results</h2>
+<table>
+<thead><tr><th>Metric</th><th>Before</th><th>After</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td>Contracts</td><td>12,515</td><td style="color:var(--green)"><strong>14,115</strong></td><td style="color:var(--green)">+1,600</td></tr>
+<tr><td>Expirations</td><td>188</td><td style="color:var(--green)"><strong>~210</strong></td><td style="color:var(--green)">+22</td></tr>
+<tr><td>Latest Expiration</td><td>2024-03-15</td><td style="color:var(--green)"><strong>2024-10-18</strong></td><td style="color:var(--green)">+7 months</td></tr>
+<tr><td>New Daily Bars</td><td>&mdash;</td><td style="color:var(--green)">+24,605</td><td>&mdash;</td></tr>
+<tr><td>Fetch Rate</td><td>&mdash;</td><td>~3,200 contracts/hr</td><td>&mdash;</td></tr>
+</tbody></table>
+
+<h3>GLD Coverage Progress</h3>
+<div style="display:flex;align-items:center;gap:8px;margin:8px 0">
+  <span style="font-size:.75rem;color:var(--muted);min-width:70px">2020-01</span>
+  <div class="progress-bar" style="flex:1"><div class="progress-fill" style="width:78%;background:var(--green)"></div></div>
+  <span style="font-size:.75rem;min-width:70px">2024-10</span>
+  <div class="progress-bar" style="flex:0.4"><div class="progress-fill" style="width:0%;background:#e5e7eb"></div></div>
+  <span style="font-size:.75rem;color:var(--red);min-width:70px">2025-12</span>
+</div>
+<p style="font-size:.78rem;color:var(--muted)">Green = data available (~78%). Gray = remaining gap.</p>
+
+<div class="callout callout-yellow">
+<strong>GLD: PARTIALLY COMPLETE.</strong> Extended from 2024-03-15 to 2024-10-18 (+7 months, +1,600 contracts, +24,605 daily bars). ~6,000 contracts remain (Oct 2024 &rarr; Dec 2025). Need ~2 more hours of fetching.
+</div>
+
+<h2>3. Polygon API Assessment</h2>
+<table>
+<thead><tr><th>Capability</th><th>Status</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>API Key</td><td><span class="tag tag-green">ACTIVE</span></td><td>Set in .env, verified working</td></tr>
+<tr><td>Equity Daily Bars</td><td><span class="tag tag-green">WORKS</span></td><td>/v2/aggs/ &rarr; 200 OK with data</td></tr>
+<tr><td>Options Daily Bars</td><td><span class="tag tag-green">WORKS</span></td><td>Can fetch individual contract OHLCV</td></tr>
+<tr><td>Options Contract Listing</td><td><span class="tag tag-red">EMPTY</span></td><td>/v3/reference/options/contracts returns 0 results</td></tr>
+<tr><td>Rate Limit</td><td><span class="tag tag-yellow">~5 calls/sec</span></td><td>No X-RateLimit headers (Starter behavior)</td></tr>
+</tbody></table>
+
+<div class="callout callout-yellow">
+<strong>Tier: Starter.</strong> Contract enumeration endpoint returns empty. The fetch script works around this by constructing OCC symbols from Yahoo Finance price data + known strike grids, then fetching bars directly. Slower but functional. Upgrading to Options tier ($200/mo) would enable direct enumeration and faster backfill.
+</div>
+
+<h2>4. Errors During Backfill</h2>
+<table>
+<thead><tr><th>Error</th><th>Count</th><th>Impact</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td><code>database is locked</code></td><td>3</td><td>Process crashed on concurrent DB writes</td><td>Kill competing processes; use --resume</td></tr>
+<tr><td>Background task timeout</td><td>2</td><td>Fetch killed before completion</td><td>Use nohup/screen for long fetches</td></tr>
+<tr><td>API rate limiting</td><td>0</td><td>None observed</td><td>1s delay built into script</td></tr>
+</tbody></table>
+
+<h2>5. Remaining Backfill Plan</h2>
+<table>
+<thead><tr><th>Ticker</th><th>Gap</th><th>Est. Contracts</th><th>Est. Time</th><th>Priority</th></tr></thead>
+<tbody>
+<tr><td><strong>GLD</strong></td><td>Oct 2024 &rarr; Dec 2025</td><td>~6,000</td><td>~2 hr</td><td><span class="tag tag-red">HIGH</span></td></tr>
+<tr><td><strong>TLT</strong></td><td>Aug 2024 &rarr; Dec 2025</td><td>~4,000</td><td>~1.5 hr</td><td><span class="tag tag-red">HIGH</span></td></tr>
+<tr><td><strong>QQQ</strong></td><td>May 2023 &rarr; Dec 2025</td><td>~12,000</td><td>~4 hr</td><td><span class="tag tag-yellow">MEDIUM</span></td></tr>
+</tbody></table>
+
+<div class="callout callout-green">
+<strong>Overnight backfill command:</strong>
+<pre style="background:#f1f5f9;padding:12px;border-radius:6px;margin:8px 0;font-size:.82rem">export $(grep -v '^#' .env | grep -v '^$' | xargs)
+python3 scripts/fetch_sector_options.py --ticker GLD --start 2024-10-19 --end 2025-12-31 --resume &amp;&amp; \
+python3 scripts/fetch_sector_options.py --ticker TLT --start 2024-07-20 --end 2025-12-31 &amp;&amp; \
+python3 scripts/fetch_sector_options.py --ticker QQQ --start 2023-05-01 --end 2025-12-31</pre>
+Total: ~7.5 hours. Run in screen/tmux overnight.
+</div>
+
+<h2>6. Strategy Impact</h2>
+<table>
+<thead><tr><th>Strategy</th><th>Blocked By</th><th>Current</th><th>After Backfill</th></tr></thead>
+<tbody>
+<tr><td>EXP-1630 GLD/TLT RelVal</td><td>GLD + TLT</td><td style="color:var(--yellow)">Oct 2024</td><td style="color:var(--green)">Dec 2025</td></tr>
+<tr><td>Cross-Asset QQQ Pairs</td><td>QQQ</td><td style="color:var(--red)">Apr 2023</td><td style="color:var(--green)">Dec 2025</td></tr>
+<tr><td>TLT Iron Condors</td><td>TLT</td><td style="color:var(--yellow)">Jul 2024</td><td style="color:var(--green)">Dec 2025</td></tr>
+<tr><td>EXP-1220 / SPY strategies</td><td>None</td><td style="color:var(--green)">Jun 2026</td><td style="color:var(--green)">No change</td></tr>
+</tbody></table>
+
+<div class="footer">Data Backfill Status &bull; 2026-04-05 &bull; PilotAI Compass</div>
+</body></html>

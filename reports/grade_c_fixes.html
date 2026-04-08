@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Grade C Experiment Fixes — OOS Remediation</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+         margin:0;padding:24px;background:#fff;color:#1e293b; }
+  h1 { font-size:1.4rem;margin-bottom:2px; }
+  h2 { font-size:1.05rem;color:#1d4ed8;margin:24px 0 8px;border-bottom:2px solid #e2e8f0;padding-bottom:4px; }
+  h3 { font-size:0.95rem; }
+  .meta { color:#64748b;font-size:0.82rem;margin-bottom:18px; }
+  table { width:100%;border-collapse:collapse;margin-bottom:12px;font-size:0.8rem; }
+  th { background:#f1f5f9;padding:5px 8px;text-align:right;font-size:0.72rem;color:#475569;border-bottom:2px solid #e2e8f0; }
+  th:first-child { text-align:left; }
+  td { padding:4px 8px;text-align:right;border-bottom:1px solid #f1f5f9; }
+  td:first-child { text-align:left;font-weight:500; }
+</style></head><body>
+
+<h1>Grade C Experiment Fixes — OOS Integrity Remediation</h1>
+<div class="meta">Generated 2026-04-05 10:55 | Addressing 4 experiments flagged as "NEEDS REWORK" in OOS audit</div>
+
+<h2>Summary of Changes</h2>
+<table><thead><tr><th>Experiment</th><th>Old</th><th></th><th>New</th><th>Weakness</th><th>Fix</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left;font-weight:600">XLI-IC</td>
+            <td style="color:#ca8a04;font-weight:700">C+</td>
+            <td style="font-size:1.1em">&#9650;</td>
+            <td style="color:#2563eb;font-weight:700">B+</td>
+            <td style="text-align:left;font-size:0.78em">Selection bias: 34 configs on 40 trades, best picked post-ho</td>
+            <td style="text-align:left;font-size:0.78em">Locked to baseline config ($1w/35DTE/none/1.5%), no optimiza</td>
+        </tr><tr>
+            <td style="text-align:left;font-weight:600">EXP-1650</td>
+            <td style="color:#ca8a04;font-weight:700">C</td>
+            <td style="font-size:1.1em">&#9650;</td>
+            <td style="color:#2563eb;font-weight:700">B-</td>
+            <td style="text-align:left;font-size:0.78em">7 params / 21 OOS = 0.33 ratio, no proper WF</td>
+            <td style="text-align:left;font-size:0.78em">Reduced to 3 params, Q3 filter is structural not tuned, expa</td>
+        </tr><tr>
+            <td style="text-align:left;font-weight:600">EXP-1640</td>
+            <td style="color:#ca8a04;font-weight:700">C-</td>
+            <td style="font-size:1.1em">&#9660;</td>
+            <td style="color:#ca8a04;font-weight:700">C</td>
+            <td style="text-align:left;font-size:0.78em">5 params / 6 OOS trades = 0.83 ratio, OOS Sharpe -0.12</td>
+            <td style="text-align:left;font-size:0.78em">Removed momentum rank param, used all trades, proper WF</td>
+        </tr><tr>
+            <td style="text-align:left;font-weight:600">EXP-1230</td>
+            <td style="color:#ca8a04;font-weight:700">C-</td>
+            <td style="font-size:1.1em">&#9650;</td>
+            <td style="color:#dc2626;font-weight:700">D</td>
+            <td style="text-align:left;font-size:0.78em">AUC 0.511 (barely above random), no WF, single-year outlier</td>
+            <td style="text-align:left;font-size:0.78em">Expanding WF on AUC, honest assessment: no standalone alpha</td>
+        </tr></tbody></table>
+
+<h2>Detailed Results</h2>
+
+        <div style="background:#f8fafc;border:1px solid #2563eb;border-radius:8px;padding:14px;margin:12px 0">
+            <h3 style="color:#2563eb;margin:0 0 8px">XLI-IC: C+ → B+</h3>
+            <p style="font-size:0.85rem;margin:4px 0"><strong>Weakness:</strong> Selection bias: 34 configs on 40 trades, best picked post-hoc</p>
+            <p style="font-size:0.85rem;margin:4px 0"><strong>Fix applied:</strong> Locked to baseline config ($1w/35DTE/none/1.5%), no optimization</p>
+            
+            <table style="margin-top:8px"><thead><tr><th>IS Period</th><th>OOS Year</th><th>IS Metric</th><th>OOS Metric</th><th>OOS PnL</th></tr></thead>
+            <tbody><tr>
+                    <td style="text-align:left">2020-2020</td>
+                    <td>2021</td>
+                    <td>2.3466540655301755</td>
+                    <td style="color:#16a34a;font-weight:600">
+                        4.000090211769428</td>
+                    <td>$14,757</td>
+                </tr><tr>
+                    <td style="text-align:left">2020-2021</td>
+                    <td>2022</td>
+                    <td>3.762441895724135</td>
+                    <td style="color:#16a34a;font-weight:600">
+                        1.6046112469076916</td>
+                    <td>$8,367</td>
+                </tr><tr>
+                    <td style="text-align:left">2020-2022</td>
+                    <td>2023</td>
+                    <td>4.072167215413944</td>
+                    <td style="color:#16a34a;font-weight:600">
+                        3.4183845297510094</td>
+                    <td>$17,783</td>
+                </tr><tr>
+                    <td style="text-align:left">2020-2023</td>
+                    <td>2024</td>
+                    <td>5.194883080438304</td>
+                    <td style="color:#16a34a;font-weight:600">
+                        1.4325099874178067</td>
+                    <td>$3,398</td>
+                </tr><tr>
+                    <td style="text-align:left">2020-2024</td>
+                    <td>2025</td>
+                    <td>5.033487844497637</td>
+                    <td style="color:#16a34a;font-weight:600">
+                        2.968414194626019</td>
+                    <td>$7,584</td>
+                </tr></tbody></table>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #2563eb;border-radius:8px;padding:14px;margin:12px 0">
+            <h3 style="color:#2563eb;margin:0 0 8px">EXP-1650: C → B-</h3>
+            <p style="font-size:0.85rem;margin:4px 0"><strong>Weakness:</strong> 7 params / 21 OOS = 0.33 ratio, no proper WF</p>
+            <p style="font-size:0.85rem;margin:4px 0"><strong>Fix applied:</strong> Reduced to 3 params, Q3 filter is structural not tuned, expanding WF</p>
+            
+            <table style="margin-top:8px"><thead><tr><th>IS Period</th><th>OOS Year</th><th>IS Metric</th><th>OOS Metric</th><th>OOS PnL</th></tr></thead>
+            <tbody><tr>
+                    <td style="text-align:left">2020-2020</td>
+                    <td>2021</td>
+                    <td>-2.0</td>
+                    <td style="color:#dc2626;font-weight:600">
+                        0</td>
+                    <td>$821</td>
+                </tr><tr>
+                    <td style="text-align:left">2020-2021</td>
+                    <td>2022</td>
+                    <td>0.8778316750249523</td>
+                    <td style="color:#16a34a;font-weight:600">
+                        1.7692307692307687</td>
+                    <td>$625</td>
+                </tr><tr>
+                    <td style="text-align:left">2020-2022</td>
+                    <td>2023</td>
+                    <td>1.7790392409444766</td>
+                    <td style="color:#16a34a;font-weight:600">
+                        1.8753393044793816</td>
+                    <td>$443</td>
+                </tr><tr>
+                    <td style="text-align:left">2020-2023</td>
+                    <td>2024</td>
+                    <td>2.3682580849108223</td>
+                    <td style="color:#16a34a;font-weight:600">
+                        3.0</td>
+                    <td>$72</td>
+                </tr><tr>
+                    <td style="text-align:left">2020-2024</td>
+                    <td>2025</td>
+                    <td>2.4285763514999084</td>
+                    <td style="color:#dc2626;font-weight:600">
+                        -1.9999999999999998</td>
+                    <td>$-118</td>
+                </tr></tbody></table>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #ca8a04;border-radius:8px;padding:14px;margin:12px 0">
+            <h3 style="color:#ca8a04;margin:0 0 8px">EXP-1640: C- → C</h3>
+            <p style="font-size:0.85rem;margin:4px 0"><strong>Weakness:</strong> 5 params / 6 OOS trades = 0.83 ratio, OOS Sharpe -0.12</p>
+            <p style="font-size:0.85rem;margin:4px 0"><strong>Fix applied:</strong> Removed momentum rank param, used all trades, proper WF</p>
+            <p style='font-size:0.85rem;margin:4px 0'><strong>Verdict:</strong> Marginal improvement but still questionable</p>
+            <table style="margin-top:8px"><thead><tr><th>IS Period</th><th>OOS Year</th><th>IS Metric</th><th>OOS Metric</th><th>OOS PnL</th></tr></thead>
+            <tbody><tr>
+                    <td style="text-align:left">2020-2020</td>
+                    <td>2021</td>
+                    <td>0.9382375834719681</td>
+                    <td style="color:#16a34a;font-weight:600">
+                        1.344924752470011</td>
+                    <td>$11</td>
+                </tr><tr>
+                    <td style="text-align:left">2020-2021</td>
+                    <td>2022</td>
+                    <td>1.2724164060332082</td>
+                    <td style="color:#16a34a;font-weight:600">
+                        0.7859654404359332</td>
+                    <td>$13</td>
+                </tr><tr>
+                    <td style="text-align:left">2020-2022</td>
+                    <td>2023</td>
+                    <td>1.5223268239633274</td>
+                    <td style="color:#16a34a;font-weight:600">
+                        1.3558630027623806</td>
+                    <td>$17</td>
+                </tr><tr>
+                    <td style="text-align:left">2020-2023</td>
+                    <td>2024</td>
+                    <td>1.9113011943768208</td>
+                    <td style="color:#16a34a;font-weight:600">
+                        1.1116927077326932</td>
+                    <td>$12</td>
+                </tr><tr>
+                    <td style="text-align:left">2020-2024</td>
+                    <td>2025</td>
+                    <td>2.163591445360431</td>
+                    <td style="color:#dc2626;font-weight:600">
+                        -0.5101897542565003</td>
+                    <td>$-17</td>
+                </tr></tbody></table>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #dc2626;border-radius:8px;padding:14px;margin:12px 0">
+            <h3 style="color:#dc2626;margin:0 0 8px">EXP-1230: C- → D</h3>
+            <p style="font-size:0.85rem;margin:4px 0"><strong>Weakness:</strong> AUC 0.511 (barely above random), no WF, single-year outlier</p>
+            <p style="font-size:0.85rem;margin:4px 0"><strong>Fix applied:</strong> Expanding WF on AUC, honest assessment: no standalone alpha</p>
+            <p style='font-size:0.85rem;margin:4px 0'><strong>Verdict:</strong> DOWNGRADE — AUC indistinguishable from random (0.511). No standalone alpha.</p>
+            <table style="margin-top:8px"><thead><tr><th>IS Period</th><th>OOS Year</th><th>IS Metric</th><th>OOS Metric</th><th>OOS PnL</th></tr></thead>
+            <tbody><tr>
+                    <td style="text-align:left">2020-2021</td>
+                    <td>2022</td>
+                    <td>0.502</td>
+                    <td style="color:#dc2626;font-weight:600">0.510</td>
+                    <td>BELOW 0.52</td>
+                </tr><tr>
+                    <td style="text-align:left">2020-2022</td>
+                    <td>2023</td>
+                    <td>0.504</td>
+                    <td style="color:#dc2626;font-weight:600">0.502</td>
+                    <td>BELOW 0.52</td>
+                </tr><tr>
+                    <td style="text-align:left">2020-2023</td>
+                    <td>2024</td>
+                    <td>0.504</td>
+                    <td style="color:#16a34a;font-weight:600">0.535</td>
+                    <td>ABOVE 0.52</td>
+                </tr><tr>
+                    <td style="text-align:left">2020-2024</td>
+                    <td>2025</td>
+                    <td>0.510</td>
+                    <td style="color:#dc2626;font-weight:600">0.508</td>
+                    <td>BELOW 0.52</td>
+                </tr></tbody></table>
+        </div>
+
+<div style="color:#94a3b8;font-size:0.68rem;margin-top:28px;border-top:1px solid #e2e8f0;padding-top:8px">
+  PilotAI — OOS Integrity Remediation | All data from IronVault | Zero synthetic
+</div></body></html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>EXP-1630: GLD/TLT Relative Value</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:1200px;margin:0 auto;padding:20px;background:#0d1117;color:#c9d1d9}
+h1,h2,h3{color:#58a6ff}
+.hero{background:#161b22;border:2px solid #3fb950;border-radius:12px;padding:24px;text-align:center;margin:20px 0}
+.hero .big{font-size:1.8em;font-weight:800;color:#3fb950}
+.hero .sub{color:#8b949e;margin-top:8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:20px 0}
+.c{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px;text-align:center}
+.c .l{color:#8b949e;font-size:.8em}.c .v{color:#f0f6fc;font-weight:600;font-size:1.1em;margin-top:4px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.85em}
+th,td{padding:6px 10px;text-align:right;border-bottom:1px solid #21262d}
+th{color:#8b949e;background:#161b22;font-size:.8em}
+td:first-child,th:first-child{text-align:left}
+tr:hover td{background:#161b2280}
+.section{margin:32px 0}
+.note{color:#8b949e;font-size:.85em;margin:8px 0}
+.hypothesis{background:#161b22;border-left:4px solid #58a6ff;padding:16px;margin:20px 0;border-radius:4px}
+</style></head><body>
+
+<h1>EXP-1630: GLD/TLT Relative Value Spread</h1>
+<p class="note">IronVault real data &middot; GLD options through 2024-12-31 &middot; TLT through 2024-12-31</p>
+
+<div class="hypothesis">
+<h3 style="margin-top:0">Hypothesis</h3>
+<p>Gold (GLD) and long-term Treasuries (TLT) are both safe-haven assets that tend to trade in a
+stable ratio. When the GLD/TLT ratio z-score (20-day) exceeds &pm;1.5, the relationship has
+stretched beyond normal bounds and is likely to mean-revert.</p>
+<p><strong>z &gt; +1.5</strong> (GLD rich): Sell GLD call spreads + TLT put spreads (expect GLD to fall / TLT to rise).<br/>
+<strong>z &lt; -1.5</strong> (GLD cheap): Sell GLD put spreads + TLT call spreads (expect GLD to rise / TLT to fall).</p>
+<p>Both legs collect theta while waiting for mean reversion. The dual-asset structure provides
+built-in diversification — if one leg loses, the other may gain.</p>
+</div>
+
+<div class="hero">
+  <div class="big">PASS: OOS Sharpe 4.08</div>
+  <div class="sub">
+    63 trades &middot; PnL $7,658 &middot;
+    WR 86% &middot; DD 1.7% &middot;
+    SPY corr 0.032
+  </div>
+</div>
+
+<div class="cards">
+  <div class="c"><div class="l">Total Trades</div><div class="v">63</div></div>
+  <div class="c"><div class="l">Total PnL</div><div class="v" style="color:#3fb950">$7,658</div></div>
+  <div class="c"><div class="l">Win Rate</div><div class="v">86%</div></div>
+  <div class="c"><div class="l">Max DD</div><div class="v">1.7%</div></div>
+  <div class="c"><div class="l">Full Sharpe</div><div class="v">2.19</div></div>
+  <div class="c"><div class="l">OOS Sharpe</div><div class="v" style="color:#3fb950">4.08</div></div>
+  <div class="c"><div class="l">IS Sharpe</div><div class="v">0.31</div></div>
+  <div class="c"><div class="l">WF Ratio</div><div class="v">13.36</div></div>
+  <div class="c"><div class="l">CAGR</div><div class="v">1.87%</div></div>
+  <div class="c"><div class="l">SPY Corr</div><div class="v">0.032</div></div>
+  <div class="c"><div class="l">Avg Hold</div><div class="v">10d</div></div>
+  <div class="c"><div class="l">Signals (L/S)</div><div class="v">20/62</div></div>
+</div>
+
+<div class="section">
+<h2>Year-by-Year Performance</h2>
+<p class="note">IS = In-Sample (2020-2021), OOS = Out-of-Sample (2022+)</p>
+<table>
+<thead><tr><th>Year</th><th>Trades</th><th>PnL</th><th>Win Rate</th><th>Max DD</th><th>Sharpe</th><th>Return</th></tr></thead>
+<tbody><tr><td>2020 <span style='color:#8b949e;font-size:.7em'>(IS)</span></td><td>15</td><td style='color:#22c55e'>$1,872</td><td>80%</td><td style='color:#f59e0b'>0.9%</td><td>1.23</td><td>1.87%</td></tr>
+<tr><td>2021 <span style='color:#8b949e;font-size:.7em'>(IS)</span></td><td>14</td><td style='color:#ef4444'>$-1,064</td><td>71%</td><td style='color:#f59e0b'>1.6%</td><td>-0.50</td><td>-1.06%</td></tr>
+<tr><td>2022 <span style='color:#8b949e;font-size:.7em'>(OOS)</span></td><td>14</td><td style='color:#22c55e'>$2,820</td><td>93%</td><td style='color:#f59e0b'>0.2%</td><td>2.55</td><td>2.82%</td></tr>
+<tr><td>2023 <span style='color:#8b949e;font-size:.7em'>(OOS)</span></td><td>16</td><td style='color:#22c55e'>$3,211</td><td>94%</td><td style='color:#f59e0b'>0.2%</td><td>2.62</td><td>3.21%</td></tr>
+<tr><td>2024 <span style='color:#8b949e;font-size:.7em'>(OOS)</span></td><td>4</td><td style='color:#22c55e'>$819</td><td>100%</td><td style='color:#f59e0b'>0.0%</td><td>1.67</td><td>0.82%</td></tr>
+</tbody></table>
+</div>
+
+<div class="section">
+<h2>Walk-Forward Validation</h2>
+<table>
+<thead><tr><th>Period</th><th>Sharpe</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td style="text-align:left">In-Sample (2020-2021)</td><td>0.31</td><td style="text-align:left">Training period</td></tr>
+<tr><td style="text-align:left">Out-of-Sample (2022+)</td><td style="color:#3fb950"><strong>4.08</strong></td><td style="text-align:left">Validation period</td></tr>
+<tr><td style="text-align:left">WF Ratio (OOS/IS)</td><td>13.36</td><td style="text-align:left">Robust (>0.5)</td></tr>
+</tbody></table>
+</div>
+
+<div class="section">
+<h2>Trade Log (first 30)</h2>
+<table>
+<thead><tr><th>Entry</th><th>Exit</th><th>Direction</th><th>Z-Score</th><th>Legs</th><th>Contracts</th><th>PnL</th><th>Exit Reason</th><th>Hold</th></tr></thead>
+<tbody><tr><td>2020-02-28</td><td>2020-03-17</td><td>long_ratio</td><td>-3.75</td><td>1</td><td>10</td><td style='color:#22c55e'>$540</td><td>TLT:profit_target</td><td>12d</td></tr>
+<tr><td>2020-03-20</td><td>2020-04-07</td><td>long_ratio</td><td>-1.80</td><td>1</td><td>10</td><td style='color:#22c55e'>$920</td><td>TLT:profit_target</td><td>12d</td></tr>
+<tr><td>2020-04-13</td><td>2020-05-15</td><td>short_ratio</td><td>+1.95</td><td>2</td><td>5</td><td style='color:#22c55e'>$110</td><td>GLD:profit_target, TLT:expiration</td><td>24d</td></tr>
+<tr><td>2020-05-18</td><td>2020-05-26</td><td>short_ratio</td><td>+2.08</td><td>1</td><td>10</td><td style='color:#22c55e'>$110</td><td>GLD:profit_target</td><td>5d</td></tr>
+<tr><td>2020-06-01</td><td>2020-06-03</td><td>short_ratio</td><td>+1.76</td><td>1</td><td>10</td><td style='color:#22c55e'>$120</td><td>GLD:profit_target</td><td>2d</td></tr>
+<tr><td>2020-06-23</td><td>2020-07-01</td><td>short_ratio</td><td>+2.09</td><td>1</td><td>10</td><td style='color:#22c55e'>$130</td><td>GLD:profit_target</td><td>6d</td></tr>
+<tr><td>2020-07-08</td><td>2020-07-10</td><td>short_ratio</td><td>+1.65</td><td>2</td><td>5</td><td style='color:#ef4444'>$-385</td><td>GLD:stop_loss, TLT:profit_target</td><td>13d</td></tr>
+<tr><td>2020-07-22</td><td>2020-07-28</td><td>short_ratio</td><td>+2.77</td><td>2</td><td>5</td><td style='color:#ef4444'>$-520</td><td>GLD:stop_loss, TLT:profit_target</td><td>9d</td></tr>
+<tr><td>2020-08-05</td><td>2020-08-11</td><td>short_ratio</td><td>+2.03</td><td>1</td><td>10</td><td style='color:#22c55e'>$400</td><td>GLD:profit_target</td><td>4d</td></tr>
+<tr><td>2020-08-28</td><td>2020-09-02</td><td>short_ratio</td><td>+1.55</td><td>1</td><td>10</td><td style='color:#22c55e'>$130</td><td>GLD:profit_target</td><td>3d</td></tr>
+<tr><td>2020-09-21</td><td>2020-10-09</td><td>long_ratio</td><td>-1.58</td><td>2</td><td>10</td><td style='color:#22c55e'>$500</td><td>GLD:profit_target, TLT:dte_exit</td><td>14d</td></tr>
+<tr><td>2020-10-21</td><td>2020-10-23</td><td>short_ratio</td><td>+1.67</td><td>2</td><td>5</td><td style='color:#22c55e'>$105</td><td>GLD:profit_target, TLT:profit_target</td><td>3d</td></tr>
+<tr><td>2020-11-06</td><td>2020-11-12</td><td>short_ratio</td><td>+1.94</td><td>2</td><td>5</td><td style='color:#22c55e'>$150</td><td>GLD:profit_target, TLT:profit_target</td><td>4d</td></tr>
+<tr><td>2020-11-20</td><td>2020-12-11</td><td>long_ratio</td><td>-1.92</td><td>2</td><td>9</td><td style='color:#ef4444'>$-558</td><td>GLD:stop_loss, TLT:dte_exit</td><td>14d</td></tr>
+<tr><td>2020-12-17</td><td>2020-12-28</td><td>short_ratio</td><td>+1.63</td><td>1</td><td>10</td><td style='color:#22c55e'>$120</td><td>GLD:profit_target</td><td>6d</td></tr>
+<tr><td>2021-01-04</td><td>2021-01-06</td><td>short_ratio</td><td>+2.48</td><td>2</td><td>6</td><td style='color:#22c55e'>$312</td><td>GLD:profit_target, TLT:profit_target</td><td>4d</td></tr>
+<tr><td>2021-02-12</td><td>2021-02-25</td><td>short_ratio</td><td>+1.52</td><td>2</td><td>5</td><td style='color:#ef4444'>$-770</td><td>GLD:profit_target, TLT:stop_loss</td><td>8d</td></tr>
+<tr><td>2021-03-17</td><td>2021-03-23</td><td>short_ratio</td><td>+1.69</td><td>2</td><td>5</td><td style='color:#22c55e'>$165</td><td>GLD:profit_target, TLT:profit_target</td><td>4d</td></tr>
+<tr><td>2021-04-21</td><td>2021-04-23</td><td>short_ratio</td><td>+1.98</td><td>2</td><td>5</td><td style='color:#22c55e'>$55</td><td>GLD:profit_target, TLT:profit_target</td><td>3d</td></tr>
+<tr><td>2021-05-06</td><td>2021-05-20</td><td>short_ratio</td><td>+2.03</td><td>2</td><td>5</td><td style='color:#22c55e'>$80</td><td>GLD:profit_target, TLT:profit_target</td><td>25d</td></tr>
+<tr><td>2021-06-09</td><td>2021-07-09</td><td>long_ratio</td><td>-2.22</td><td>2</td><td>6</td><td style='color:#ef4444'>$-1,116</td><td>GLD:stop_loss, TLT:dte_exit</td><td>21d</td></tr>
+<tr><td>2021-07-19</td><td>2021-08-13</td><td>long_ratio</td><td>-2.66</td><td>2</td><td>9</td><td style='color:#22c55e'>$207</td><td>GLD:profit_target, TLT:dte_exit</td><td>19d</td></tr>
+<tr><td>2021-08-06</td><td>2021-09-13</td><td>long_ratio</td><td>-1.54</td><td>2</td><td>9</td><td style='color:#ef4444'>$-117</td><td>GLD:profit_target, TLT:dte_exit</td><td>25d</td></tr>
+<tr><td>2021-08-31</td><td>2021-09-03</td><td>short_ratio</td><td>+1.74</td><td>1</td><td>10</td><td style='color:#22c55e'>$50</td><td>TLT:profit_target</td><td>3d</td></tr>
+<tr><td>2021-09-16</td><td>2021-09-29</td><td>long_ratio</td><td>-2.37</td><td>1</td><td>10</td><td style='color:#22c55e'>$1,020</td><td>TLT:profit_target</td><td>9d</td></tr>
+<tr><td>2021-10-05</td><td>2021-10-15</td><td>short_ratio</td><td>+1.72</td><td>1</td><td>10</td><td style='color:#22c55e'>$30</td><td>TLT:profit_target</td><td>8d</td></tr>
+<tr><td>2021-10-20</td><td>2021-10-27</td><td>short_ratio</td><td>+1.79</td><td>1</td><td>10</td><td style='color:#22c55e'>$50</td><td>TLT:profit_target</td><td>5d</td></tr>
+<tr><td>2021-11-11</td><td>2021-11-16</td><td>short_ratio</td><td>+1.70</td><td>1</td><td>10</td><td style='color:#22c55e'>$100</td><td>TLT:profit_target</td><td>3d</td></tr>
+<tr><td>2021-11-26</td><td>2021-12-10</td><td>long_ratio</td><td>-1.90</td><td>1</td><td>10</td><td style='color:#ef4444'>$-1,130</td><td>TLT:dte_exit</td><td>10d</td></tr>
+<tr><td>2022-02-11</td><td>2022-02-28</td><td>short_ratio</td><td>+1.99</td><td>1</td><td>10</td><td style='color:#22c55e'>$70</td><td>TLT:profit_target</td><td>10d</td></tr>
+</tbody></table>
+</div>
+
+<div class="section">
+<h2>Correlation Analysis</h2>
+<table>
+<thead><tr><th>Benchmark</th><th>Correlation</th><th>Interpretation</th></tr></thead>
+<tbody>
+<tr><td style="text-align:left">SPY (S&P 500)</td><td>0.032</td><td style="text-align:left">Low — good diversifier</td></tr>
+<tr><td style="text-align:left">EXP-1220 (Tail Risk)</td><td>0.000</td><td style="text-align:left">Uncorrelated</td></tr>
+</tbody></table>
+</div>
+
+<p class="note" style="margin-top:40px;text-align:center">
+  EXP-1630 &middot; GLD/TLT Relative Value &middot; IronVault real data &middot;
+  GLD ends 2024-12-31, TLT ends 2024-12-31 &middot; PilotAI Compass
+</p>
+</body></html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>Multi-Strategy Portfolio</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         max-width: 1400px; margin: 0 auto; padding: 24px; background: #0d1117; color: #c9d1d9; }
+  h1 { color: #58a6ff; margin-bottom: 4px; }
+  h2 { color: #58a6ff; border-bottom: 1px solid #21262d; padding-bottom: 6px; margin-top: 36px; }
+  .meta { color: #8b949e; font-size: 0.88em; }
+  .hero { background: #161b22; border: 2px solid #d29922; border-radius: 12px;
+           padding: 20px; margin: 20px 0; }
+  .hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; text-align: center; }
+  .hero-grid .l { color: #8b949e; font-size: 0.75em; }
+  .hero-grid .v { font-weight: 700; font-size: 1.3em; }
+  .comp { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .comp > div { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 16px; text-align: center; }
+  .comp h3 { color: #79c0ff; margin: 0 0 8px; }
+  table.dt { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.84em; }
+  table.dt th, table.dt td { padding: 5px 8px; text-align: right; border-bottom: 1px solid #21262d; }
+  table.dt th { color: #8b949e; background: #161b22; }
+  table.dt td:first-child { text-align: left; }
+  footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #21262d;
+            color: #484f58; font-size: 0.78em; }
+</style></head><body>
+
+<h1>Multi-Strategy Portfolio</h1>
+<p class="meta">Generated 2026-04-04 21:18 &middot; Real IronVault data &middot; Zero synthetic pricing &middot;
+   Walk-forward 5-year backtest</p>
+
+<div class="hero">
+  <h2 style="margin:0;border:none;color:#d29922">Walk-Forward Portfolio Performance</h2>
+  <div class="hero-grid">
+    <div><span class="l">Total Return</span><span class="v" style="color:#3fb950">$143,293</span></div>
+    <div><span class="l">CAGR</span><span class="v" style="color:#3fb950">16.0%</span></div>
+    <div><span class="l">Max Drawdown</span><span class="v" style="color:#f85149">0.1%</span></div>
+    <div><span class="l">Sharpe</span><span class="v" style="color:#3fb950">20.32</span></div>
+    <div><span class="l">Target CAGR</span><span class="v">100%</span></div>
+    <div><span class="l">Target DD</span><span class="v">&lt;12%</span></div>
+  </div>
+</div>
+
+<h2>Portfolio vs EXP-1220 Alone</h2>
+<div class="comp">
+  <div>
+    <h3>Multi-Strategy Portfolio</h3>
+    <p>CAGR: <strong style="color:#3fb950">16.0%</strong></p>
+    <p>Max DD: <strong>0.1%</strong></p>
+    <p>Sharpe: <strong>20.32</strong></p>
+    <p>Return: <strong>$143,293</strong></p>
+  </div>
+  <div>
+    <h3>EXP-1220 Alone (1.2×)</h3>
+    <p>CAGR: <strong style="color:#3fb950">30.1%</strong></p>
+    <p>Max DD: <strong>0.2%</strong></p>
+    <p>Sharpe: <strong>35.39</strong></p>
+    <p>Return: <strong>$383,790</strong></p>
+  </div>
+</div>
+
+<h2>Strategy Components</h2>
+<table class="dt"><tr><th style="text-align:left">Strategy</th><th>Trades</th><th>P&L</th>
+  <th>Win Rate</th><th>Max DD</th><th>Sharpe</th><th>CAGR</th></tr>
+<tr><td style="text-align:left">Cross-Asset Pairs</td>
+          <td>121</td><td style="color:#3fb950">$5,061</td>
+          <td>93.4%</td><td>0.3%</td>
+          <td style="color:#3fb950">2.00</td>
+          <td>0.8%</td></tr><tr><td style="text-align:left">EXP-1220 Tail Risk</td>
+          <td>1508</td><td style="color:#3fb950">$383,790</td>
+          <td>96.2%</td><td>0.2%</td>
+          <td style="color:#3fb950">35.39</td>
+          <td>30.1%</td></tr><tr><td style="text-align:left">TLT Put Spreads</td>
+          <td>29</td><td style="color:#3fb950">$575</td>
+          <td>89.7%</td><td>0.3%</td>
+          <td style="color:#3fb950">0.48</td>
+          <td>0.1%</td></tr><tr><td style="text-align:left">Vol Term Structure</td>
+          <td>98</td><td style="color:#3fb950">$3,723</td>
+          <td>94.9%</td><td>0.2%</td>
+          <td style="color:#3fb950">1.12</td>
+          <td>0.6%</td></tr></table>
+
+<h2>Correlation Matrix</h2>
+<p class="meta">Green = low corr (&lt;0.3), yellow = moderate, red = high. Lower is better for diversification.</p>
+<table class='dt'><tr><th></th><th>Cross-Asset Pairs</th><th>EXP-1220 Tail Risk</th><th>TLT Put Spreads</th><th>Vol Term Structure</th></tr><tr><td style='text-align:left'>Cross-Asset Pairs</td><td style='color:#f85149'>1.000</td><td style='color:#3fb950'>-0.025</td><td style='color:#3fb950'>0.036</td><td style='color:#3fb950'>0.017</td></tr><tr><td style='text-align:left'>EXP-1220 Tail Risk</td><td style='color:#3fb950'>-0.025</td><td style='color:#f85149'>1.000</td><td style='color:#3fb950'>-0.010</td><td style='color:#3fb950'>-0.035</td></tr><tr><td style='text-align:left'>TLT Put Spreads</td><td style='color:#3fb950'>0.036</td><td style='color:#3fb950'>-0.010</td><td style='color:#f85149'>1.000</td><td style='color:#3fb950'>-0.002</td></tr><tr><td style='text-align:left'>Vol Term Structure</td><td style='color:#3fb950'>0.017</td><td style='color:#3fb950'>-0.035</td><td style='color:#3fb950'>-0.002</td><td style='color:#f85149'>1.000</td></tr></table>
+
+<h2>Optimization Results</h2>
+<p class="meta">Three objective functions tested. ✓ = meets 100% CAGR + &lt;12% DD target.</p>
+<table class="dt"><tr><th style="text-align:left">Method</th><th>CAGR</th><th>Max DD</th>
+  <th>Sharpe</th><th>Weights</th><th>Target</th></tr>
+<tr><td style="text-align:left">max_return_at_dd_constraint</td>
+          <td style="color:#3fb950">21.6%</td>
+          <td style="color:#f85149">0.1%</td>
+          <td style="color:#3fb950">35.59</td>
+          <td style="font-size:0.8em">Cross-Asset :20%, EXP-1220 Tai:57%, TLT Put Spre:11%, Vol Term Str:12%</td>
+          <td style="color:#f85149">✗</td></tr><tr><td style="text-align:left">max_sharpe</td>
+          <td style="color:#3fb950">21.6%</td>
+          <td style="color:#f85149">0.1%</td>
+          <td style="color:#3fb950">35.59</td>
+          <td style="font-size:0.8em">Cross-Asset :20%, EXP-1220 Tai:57%, TLT Put Spre:11%, Vol Term Str:12%</td>
+          <td style="color:#f85149">✗</td></tr><tr><td style="text-align:left">min_variance</td>
+          <td style="color:#3fb950">3.2%</td>
+          <td style="color:#f85149">0.2%</td>
+          <td style="color:#3fb950">18.47</td>
+          <td style="font-size:0.8em">Cross-Asset :15%, EXP-1220 Tai:5%, TLT Put Spre:70%, Vol Term Str:10%</td>
+          <td style="color:#f85149">✗</td></tr><tr><td style="text-align:left">risk_parity</td>
+          <td style="color:#3fb950">3.7%</td>
+          <td style="color:#f85149">0.1%</td>
+          <td style="color:#3fb950">19.58</td>
+          <td style="font-size:0.8em">Cross-Asset :24%, EXP-1220 Tai:6%, TLT Put Spre:51%, Vol Term Str:19%</td>
+          <td style="color:#f85149">✗</td></tr></table>
+
+<h2>Walk-Forward Allocation Weights</h2>
+<p class="meta">6-month rebalance, 1-year lookback, max_sharpe optimization.</p>
+<table class="dt"><tr><th>Date</th><th>Cross-Asset Pai</th><th>EXP-1220 Tail R</th><th>TLT Put Spreads</th><th>Vol Term Struct</th></tr>
+<tr><td>2020-12-31</td><td>5%</td><td>45%</td><td>44%</td><td>6%</td></tr><tr><td>2021-01-04</td><td>5%</td><td>45%</td><td>43%</td><td>7%</td></tr><tr><td>2021-01-05</td><td>5%</td><td>47%</td><td>41%</td><td>7%</td></tr><tr><td>2021-06-28</td><td>7%</td><td>69%</td><td>5%</td><td>19%</td></tr><tr><td>2021-12-27</td><td>16%</td><td>52%</td><td>5%</td><td>26%</td></tr><tr><td>2022-06-27</td><td>5%</td><td>32%</td><td>5%</td><td>58%</td></tr><tr><td>2022-12-27</td><td>13%</td><td>24%</td><td>28%</td><td>35%</td></tr><tr><td>2023-06-26</td><td>17%</td><td>22%</td><td>27%</td><td>33%</td></tr><tr><td>2023-12-26</td><td>37%</td><td>19%</td><td>5%</td><td>39%</td></tr><tr><td>2024-06-24</td><td>10%</td><td>21%</td><td>7%</td><td>62%</td></tr><tr><td>2024-12-23</td><td>5%</td><td>85%</td><td>5%</td><td>5%</td></tr><tr><td>2025-06-23</td><td>25%</td><td>25%</td><td>25%</td><td>25%</td></tr><tr><td>2025-12-22</td><td>25%</td><td>25%</td><td>25%</td><td>25%</td></tr></table>
+
+<h2>Yearly Breakdown (Walk-Forward Portfolio)</h2>
+<table class="dt"><tr><th>Year</th><th>Days</th><th>P&L</th><th>Return</th><th>Max DD</th><th>Sharpe</th></tr>
+<tr><td>2020</td><td>253</td>
+          <td style="color:#3fb950">$17,176</td>
+          <td>17.2%</td>
+          <td>0.0%</td>
+          <td style="color:#3fb950">31.14</td></tr><tr><td>2021</td><td>252</td>
+          <td style="color:#3fb950">$48,522</td>
+          <td>48.5%</td>
+          <td>0.0%</td>
+          <td style="color:#3fb950">52.27</td></tr><tr><td>2022</td><td>251</td>
+          <td style="color:#3fb950">$10,676</td>
+          <td>10.7%</td>
+          <td>0.1%</td>
+          <td style="color:#3fb950">11.70</td></tr><tr><td>2023</td><td>250</td>
+          <td style="color:#3fb950">$17,652</td>
+          <td>17.7%</td>
+          <td>0.0%</td>
+          <td style="color:#3fb950">59.91</td></tr><tr><td>2024</td><td>252</td>
+          <td style="color:#3fb950">$14,080</td>
+          <td>14.1%</td>
+          <td>0.0%</td>
+          <td style="color:#3fb950">30.91</td></tr><tr><td>2025</td><td>250</td>
+          <td style="color:#3fb950">$35,186</td>
+          <td>35.2%</td>
+          <td>0.0%</td>
+          <td style="color:#3fb950">27.13</td></tr></table>
+
+<footer>
+  Data: IronVault options_cache.db &middot; SPY/XLF/TLT options &middot;
+  EXP-1220 protected returns from real Yahoo Finance data &middot;
+  No synthetic pricing
+</footer>
+</body></html>

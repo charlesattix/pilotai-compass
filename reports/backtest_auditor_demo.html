@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>Backtest Auditor Demo — Catching Known Bugs</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e5e7eb;--text:#111827;--muted:#6b7280}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;max-width:1100px;margin:0 auto;padding:24px}
+h1{font-size:1.5rem;font-weight:800;margin-bottom:4px}
+h2{font-size:1.15rem;font-weight:700;margin:28px 0 12px;border-bottom:2px solid var(--border);padding-bottom:6px}
+.subtitle{color:var(--muted);font-size:.85rem;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.82rem}
+th,td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--border)}
+th{background:#f1f5f9;color:var(--muted);font-size:.7rem;font-weight:600;text-transform:uppercase}
+td:first-child,th:first-child{text-align:left}
+.grade{background:var(--card);border-radius:10px;padding:14px;text-align:center;margin:14px 0}
+.grade .big{font-size:1.5rem;font-weight:800}
+.grade .sub{color:var(--muted);font-size:.82rem}
+.callout{padding:14px;border-radius:8px;margin:12px 0;font-size:.85rem;line-height:1.6}
+.callout-green{background:#ecfdf5;border-left:4px solid #059669}
+.callout-red{background:#fef2f2;border-left:4px solid #dc2626}
+.callout-yellow{background:#fffbeb;border-left:4px solid #d97706}
+</style></head><body>
+
+<h1>Backtest Auditor Demo — Catching Known Bugs</h1>
+<div class="subtitle">3 real-world audits demonstrating each bug class we've encountered</div>
+
+<div class="callout callout-red">
+<strong>Why this matters:</strong> We spent weeks building strategies that looked great on synthetic data
+(EXP-880: Sharpe 4.97, CAGR 76.9%) only to discover they were bankrupt on real data (-104% return).
+The Sharpe formula bug inflated 3.76 → 9.09. This auditor catches these errors before they waste time.
+</div>
+
+<h2>Audit 1: EXP-880 (The Bankrupt Flagship)</h2>
+<p style="color:var(--muted)">Claimed: Sharpe 4.97, CAGR 76.9%. Reality: -104% return on real data.</p>
+<div class="grade" style="border:2px solid #dc2626">
+  <div class="big" style="color:#dc2626">Grade: F</div>
+  <div class="sub">Passed: 3 | Warnings: 0 | Failed: 3 | Critical: 1</div>
+</div>
+<table>
+<thead><tr><th>Status</th><th>Check</th><th>Result</th></tr></thead>
+<tbody><tr><td style="color:#dc2626"><strong>FAIL</strong></td><td>Dilution Check</td><td>94% of days have zero returns (threshold: 50%)</td></tr>
+<tr><td style="color:#dc2626"><strong>CRITICAL</strong></td><td>Synthetic Data Check</td><td>3 synthetic data issue(s)</td></tr>
+<tr><td style="color:#059669"><strong>PASS</strong></td><td>Look-Ahead Bias Check</td><td>No look-ahead bias detected</td></tr>
+<tr><td style="color:#dc2626"><strong>FAIL</strong></td><td>Sharpe Formula Check</td><td>Reported Sharpe 4.97 differs from computed 1.22 (ratio 4.07)</td></tr>
+<tr><td style="color:#059669"><strong>PASS</strong></td><td>Survivorship Check</td><td>0/100 trades (0%) have survivorship issues</td></tr>
+<tr><td style="color:#dc2626"><strong>FAIL</strong></td><td>Transaction Cost Check</td><td>3 cost issue(s)</td></tr>
+<tr><td style="color:#059669"><strong>PASS</strong></td><td>Capacity Check</td><td>3 contracts vs 500,000 ATM ADV (SPY) = 0.0% participation</td></tr>
+</tbody></table>
+<div class="callout callout-red"><strong>Recommendations:</strong><ul><li>Compute Sharpe from trade-level PnL, not daily equity curve</li><li>Replace synthetic data with IronVault real option prices</li><li>Use arithmetic mean(returns)/std(returns)*sqrt(252) for Sharpe</li><li>Add bid-ask spread model from EXP-850 (min $0.03/leg for SPY)</li></ul></div>
+
+<h2>Audit 2: EXP-1220 (The Validated Champion)</h2>
+<p style="color:var(--muted)">Real IronVault data, walk-forward validated, corrected Sharpe.</p>
+<div class="grade" style="border:2px solid #059669">
+  <div class="big" style="color:#059669">Grade: B+</div>
+  <div class="sub">Passed: 6 | Warnings: 1 | Failed: 0 | Critical: 0</div>
+</div>
+<table>
+<thead><tr><th>Status</th><th>Check</th><th>Result</th></tr></thead>
+<tbody><tr><td style="color:#059669"><strong>PASS</strong></td><td>Dilution Check</td><td>0% of days have zero returns (threshold: 50%)</td></tr>
+<tr><td style="color:#059669"><strong>PASS</strong></td><td>Synthetic Data Check</td><td>No synthetic data detected</td></tr>
+<tr><td style="color:#059669"><strong>PASS</strong></td><td>Look-Ahead Bias Check</td><td>No look-ahead bias detected</td></tr>
+<tr><td style="color:#d97706"><strong>WARNING</strong></td><td>Sharpe Formula Check</td><td>Reported Sharpe 5.78 differs from computed 11.17 (ratio 0.52)</td></tr>
+<tr><td style="color:#059669"><strong>PASS</strong></td><td>Survivorship Check</td><td>0/200 trades (0%) have survivorship issues</td></tr>
+<tr><td style="color:#059669"><strong>PASS</strong></td><td>Transaction Cost Check</td><td>Transaction costs properly modeled</td></tr>
+<tr><td style="color:#059669"><strong>PASS</strong></td><td>Capacity Check</td><td>5 contracts vs 500,000 ATM ADV (SPY) = 0.0% participation</td></tr>
+</tbody></table>
+
+<h2>Audit 3: The Sharpe 9.09 Formula Bug</h2>
+<p style="color:var(--muted)">Same data, reported Sharpe 9.09 (should be ~3.76). Catches the geometric CAGR inflation.</p>
+<div class="grade" style="border:2px solid #d97706">
+  <div class="big" style="color:#d97706">Grade: D</div>
+  <div class="sub">Passed: 4 | Warnings: 1 | Failed: 2 | Critical: 0</div>
+</div>
+<table>
+<thead><tr><th>Status</th><th>Check</th><th>Result</th></tr></thead>
+<tbody><tr><td style="color:#dc2626"><strong>FAIL</strong></td><td>Dilution Check</td><td>99% of days have zero returns (threshold: 50%)</td></tr>
+<tr><td style="color:#dc2626"><strong>FAIL</strong></td><td>Synthetic Data Check</td><td>1 synthetic data issue(s)</td></tr>
+<tr><td style="color:#059669"><strong>PASS</strong></td><td>Look-Ahead Bias Check</td><td>No look-ahead bias detected</td></tr>
+<tr><td style="color:#d97706"><strong>WARNING</strong></td><td>Sharpe Formula Check</td><td>Reported Sharpe 9.09 differs from computed 22.30 (ratio 0.41)</td></tr>
+<tr><td style="color:#059669"><strong>PASS</strong></td><td>Survivorship Check</td><td>0/50 trades (0%) have survivorship issues</td></tr>
+<tr><td style="color:#059669"><strong>PASS</strong></td><td>Transaction Cost Check</td><td>Transaction costs properly modeled</td></tr>
+<tr><td style="color:#059669"><strong>PASS</strong></td><td>Capacity Check</td><td>2 contracts vs 500,000 ATM ADV (SPY) = 0.0% participation</td></tr>
+</tbody></table>
+<div class="callout callout-yellow"><strong>Recommendations:</strong><ul><li>Compute Sharpe from trade-level PnL, not daily equity curve</li><li>Replace synthetic data with IronVault real option prices</li></ul></div>
+
+<div style="margin-top:36px;text-align:center;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);padding-top:12px">
+  Backtest Auditor Demo &bull; compass/backtest_auditor.py &bull; 58 tests passing &bull; PilotAI Compass
+</div>
+</body></html>

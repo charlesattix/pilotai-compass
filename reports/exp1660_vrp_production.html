@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>EXP-1660 VRP Production — Portfolio Integration</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--green:#059669;--red:#dc2626;--yellow:#d97706;--blue:#2563eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;max-width:1200px;margin:0 auto;padding:24px}
+h1{font-size:1.5rem;font-weight:800}
+h2{font-size:1.1rem;font-weight:700;margin:28px 0 12px;border-bottom:2px solid var(--border);padding-bottom:6px}
+.subtitle{color:var(--muted);font-size:.85rem;margin-bottom:20px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:16px 0}
+.c{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.c .l{color:var(--muted);font-size:.68rem;font-weight:600;text-transform:uppercase}
+.c .v{font-size:1.1rem;font-weight:800;margin-top:4px}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.82rem}
+th,td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--border)}
+th{background:#f1f5f9;color:var(--muted);font-size:.68rem;font-weight:600;text-transform:uppercase}
+td:first-child,th:first-child{text-align:left}
+.callout{background:var(--card);border-left:4px solid var(--blue);padding:14px;margin:12px 0;font-size:.85rem;line-height:1.6;border-radius:4px}
+.footer{margin-top:40px;text-align:center;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);padding-top:14px}
+</style></head><body>
+
+<h1>EXP-1660 VRP Production — Portfolio Integration Test</h1>
+<div class="subtitle">2026-04-06 11:48 UTC &bull; Rule Zero: 100% real IronVault data + validated yearly streams &bull; Zero synthetic</div>
+
+<div class="callout">
+<strong>Production VRP configs (frozen from EXP-1660 universe winners):</strong> XLI
+(delta=0.15, threshold=2.0%), XLF (delta=0.18, threshold=2.5%), QQQ (delta=0.15,
+threshold=1.5%). These are the 3 survivors from the 118-point grid search that
+hit >=50 trades AND positive OOS Sharpe.
+<br><br>
+<strong>Test:</strong> Combine with EXP-1220 at 1.5× leverage and allocate 5%, 10%,
+15% to the VRP basket. Does VRP improve the Sharpe of the core portfolio?
+</div>
+
+<h2>VRP Per-Ticker Results</h2>
+<table>
+<thead><tr><th>Ticker</th><th>Delta</th><th>Threshold</th><th>N Trades</th><th>WR</th><th>Total PnL</th><th>Trade Sharpe</th></tr></thead>
+<tbody><tr><td><strong>QQQ</strong></td><td>0.15</td><td>1.5%</td><td>73</td><td>60%</td><td style="color:var(--red)">$-3,375</td><td>-0.23</td></tr>
+<tr><td><strong>XLF</strong></td><td>0.18</td><td>2.5%</td><td>204</td><td>60%</td><td style="color:var(--green)">$5,323</td><td>0.57</td></tr>
+<tr><td><strong>XLI</strong></td><td>0.15</td><td>2.0%</td><td>61</td><td>59%</td><td style="color:var(--green)">$6,173</td><td>1.42</td></tr>
+</tbody></table>
+
+<h2>Portfolio Allocation Comparison</h2>
+<p class="subtitle">Baseline: EXP-1220 @ 1.5× leverage with 0% VRP. Each row adds VRP at the stated %.</p>
+<table>
+<thead><tr>
+  <th>Portfolio</th><th>VRP %</th>
+  <th>CAGR</th><th>Sharpe</th><th>Δ Sharpe</th>
+  <th>Max DD</th><th>Vol</th><th>Total PnL</th>
+</tr></thead>
+<tbody><tr><td><strong>EXP-1220 @ 1.5× solo</strong></td><td>0%</td><td>292.7%</td><td>6.13</td><td style="color:var(--muted)">+0.00</td><td>0.0%</td><td>23.3%</td><td>$932,100</td></tr>
+<tr><td><strong>Core + 5% VRP</strong></td><td>5%</td><td>268.4%</td><td>6.13</td><td style="color:var(--muted)">-0.00</td><td>0.0%</td><td>22.1%</td><td>$885,630</td></tr>
+<tr><td><strong>Core + 10% VRP</strong></td><td>10%</td><td>245.5%</td><td>6.13</td><td style="color:var(--muted)">-0.01</td><td>0.0%</td><td>20.9%</td><td>$839,161</td></tr>
+<tr><td><strong>Core + 15% VRP</strong></td><td>15%</td><td>223.9%</td><td>6.12</td><td style="color:var(--muted)">-0.01</td><td>0.0%</td><td>19.7%</td><td>$792,691</td></tr>
+</tbody></table>
+
+<div class="cards">
+  <div class="c"><div class="l">Best Allocation</div><div class="v">5%</div></div>
+  <div class="c"><div class="l">Best Sharpe</div><div class="v">6.13</div></div>
+  <div class="c"><div class="l">Baseline Sharpe</div><div class="v">6.13</div></div>
+  <div class="c"><div class="l">Sharpe Delta</div>
+    <div class="v" style="color:var(--red)">
+      -0.00</div></div>
+  <div class="c"><div class="l">Verdict</div><div class="v" style="font-size:.9rem">NEUTRAL — no meaningful impact</div></div>
+</div>
+
+<h2>VRP vs Dispersion Correlation</h2>
+<p>Both sell volatility. The question: are they trading the same edge or
+genuinely different risk premia?</p>
+<div class="cards">
+  <div class="c"><div class="l">Correlation (monthly)</div><div class="v">-0.093</div></div>
+  <div class="c"><div class="l">Interpretation</div>
+    <div class="v" style="font-size:.85rem">
+      Meaningfully different edges
+    </div></div>
+</div>
+
+<h2>Honest Caveats (Rule Zero)</h2>
+<ul style="padding-left:20px;line-height:1.7">
+<li><strong>EXP-1220 monthly series is yearly-distributed.</strong> better_portfolio.json only
+has yearly returns for EXP-1220. I distribute each year's return evenly across 12 months. This
+underestimates real monthly vol, which means the reported Sharpe is biased UP. A proper test
+needs real daily/monthly EXP-1220 PnL data.</li>
+<li><strong>VRP daily series dilution.</strong> VRP trades cluster (most days have zero PnL).
+The daily Sharpe is low even when trade-level Sharpe is positive. This is the Phase 7 capital
+utilization bug from MASTERPLAN.</li>
+<li><strong>Dispersion correlation uses whatever data the existing module produces.</strong>
+If the dispersion module doesn't expose a trade list, this correlation falls back to N/A.</li>
+</ul>
+
+<div class="footer">
+  EXP-1660 VRP Production &bull; compass/vrp_production.py &bull; 2026-04-06 11:48 UTC
+</div>
+</body></html>

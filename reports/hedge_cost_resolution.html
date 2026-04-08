@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>Hedge Cost Resolution — Priority #4</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e2e8f0;--text:#1a1a2e;--muted:#64748b;--green:#059669;--red:#dc2626;--blue:#2563eb;--yellow:#d97706}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;max-width:1100px;margin:0 auto;padding:28px}
+h1{font-size:1.55rem;font-weight:800;margin-bottom:4px}
+h2{font-size:1.15rem;font-weight:700;margin:32px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--border)}
+h3{font-size:.98rem;font-weight:600;margin:22px 0 8px;color:#374151}
+.sub{color:var(--muted);font-size:.86rem;margin-bottom:18px}
+.note{color:var(--muted);font-size:.82rem;font-style:italic;margin:6px 0}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.84rem}
+th{background:#f1f5f9;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:2px solid var(--border);font-size:.74rem;font-weight:600;text-transform:uppercase}
+td{padding:6px 10px;border-bottom:1px solid #f1f5f9;text-align:left}
+.r{text-align:right}
+tr:hover td{background:#fafafa}
+.hero{background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #d97706;border-radius:12px;padding:24px;margin:18px 0}
+.hero .title{font-size:1.15rem;font-weight:700;color:#92400e;margin-bottom:4px}
+.hero .verdict{font-size:1.4rem;font-weight:800;color:#92400e;margin:6px 0}
+.hero p{color:#78350f;font-size:.9rem;margin-top:6px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:16px 0}
+.c{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:13px;text-align:center}
+.c .l{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.3px}
+.c .v{font-weight:700;font-size:1.18rem;margin-top:3px}
+.box{border:1px solid var(--border);border-radius:8px;padding:16px;margin:12px 0;background:var(--card)}
+.box-green{border-left:5px solid var(--green)} .box-red{border-left:5px solid var(--red)}
+.box-blue{border-left:5px solid var(--blue)} .box-yellow{border-left:5px solid var(--yellow)}
+.box h4{margin:0 0 6px;font-size:.95rem}
+ul{padding-left:20px;line-height:1.85;font-size:.88rem;margin-top:6px}
+</style></head><body>
+
+<h1>Hedge Cost Resolution — MASTERPLAN Priority #4</h1>
+<p class="sub">At current trade-level alpha (~1.5%/yr), which hedge strategy survives the math?
+&bull; Real IronVault put costs (2020-2025) &bull; 2026-04-06</p>
+
+<div class="hero">
+<div class="title">RECOMMENDATION</div>
+<div class="verdict">No Hedge</div>
+<p>At current trade-level alpha of 1.5%/yr, EVERY hedge option is net-negative because the cheapest hedge (collar at ~1.8%/yr total drag) still exceeds the alpha. Hedging only becomes viable when alpha > 1.8%/yr. Current credit spread strategy must either: (1) increase position size/frequency to boost alpha beyond hedge break-even, or (2) accept drawdown risk and forgo hedging until alpha scales up.</p>
+</div>
+
+<div class="cards">
+<div class="c"><div class="l">Baseline Alpha</div><div class="v">1.5%/yr</div></div>
+<div class="c"><div class="l">Avg Real Put Cost</div><div class="v" style="color:var(--red)">4.36%/yr</div></div>
+<div class="c"><div class="l">Selective Puts</div><div class="v">2.1%/yr</div></div>
+<div class="c"><div class="l">Collar Net</div><div class="v">1.81%/yr</div></div>
+<div class="c"><div class="l">Break-even Alpha</div><div class="v" style="color:var(--yellow)">1.81%</div></div>
+<div class="c"><div class="l">Current Gap</div><div class="v" style="color:var(--red)">−0.31%</div></div>
+</div>
+
+<!-- ══ Real IronVault Put Costs ══ -->
+<h2>1. Real IronVault Put Costs (Commit 51e11e6)</h2>
+<p class="note">5% OTM SPY put held continuously, annualized cost per year from actual IronVault bid/ask data.</p>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+<div>
+<table>
+<thead><tr><th>Year</th><th class="r">Annual Cost</th></tr></thead>
+<tbody><tr><td><strong>2020</strong></td><td class="r" style="color:#dc2626">5.28%</td></tr>
+<tr><td><strong>2021</strong></td><td class="r" style="color:#d97706">3.02%</td></tr>
+<tr><td><strong>2022</strong></td><td class="r" style="color:#dc2626">5.39%</td></tr>
+<tr><td><strong>2023</strong></td><td class="r" style="color:#059669">2.44%</td></tr>
+<tr><td><strong>2024</strong></td><td class="r" style="color:#059669">2.78%</td></tr>
+<tr><td><strong>2025</strong></td><td class="r" style="color:#dc2626">7.25%</td></tr>
+
+<tr style="background:#fef3c7"><td><strong>6-year Avg</strong></td><td class="r"><strong>4.36%</strong></td></tr>
+</tbody></table>
+</div>
+<div>
+<div class="box box-red">
+<h4>The 2.2x Gap</h4>
+<p style="font-size:.85rem">Original model assumed 2%/yr hedge cost. Real IronVault data
+shows 4.36%/yr — <strong>2.2x higher</strong>.</p>
+<p style="font-size:.85rem;margin-top:6px">Worst years: 2025 (7.25%) and 2022 (5.39%).
+Best year: 2023 (2.44%). Volatility-driven pricing means hedges are
+most expensive exactly when you need them most.</p>
+</div>
+</div>
+</div>
+
+<!-- ══ 3 Options Comparison ══ -->
+<h2>2. Three Hedge Options Compared</h2>
+<table>
+<thead><tr>
+<th>Option</th><th class="r">Annual Cost</th><th class="r">Gross Alpha</th>
+<th class="r">Net CAGR</th><th class="r">Avg DD Reduction</th><th class="r">Net Sharpe</th><th class="r">Break-even</th>
+</tr></thead>
+<tbody><tr style="background:#f0fdf4"><td style="text-align:left"><strong>No Hedge</strong><br/><span style="color:#64748b;font-size:.75rem">Accept full drawdown risk. No hedge cost.</span></td><td class="r">0.00%</td><td class="r">1.50%</td><td class="r" style="color:#059669;font-weight:700">+1.50%</td><td class="r">0%</td><td class="r" style="color:#059669">1.26</td><td class="r">0.00%</td></tr>
+<tr><td style="text-align:left"><strong>Selective VIX<15 Puts</strong><br/><span style="color:#64748b;font-size:.75rem">Buy 5% OTM SPY puts only when VIX < 15 (~18% of days). Cheapest market entry.</span></td><td class="r">2.10%</td><td class="r">1.50%</td><td class="r" style="color:#dc2626;font-weight:700">-0.60%</td><td class="r">32%</td><td class="r" style="color:#dc2626">-0.50</td><td class="r">2.10%</td></tr>
+<tr><td style="text-align:left"><strong>Collar Strategy</strong><br/><span style="color:#64748b;font-size:.75rem">Sell 3% OTM SPY calls to fund 5% OTM puts. ~70% cost offset.</span></td><td class="r">1.31%</td><td class="r">1.50%</td><td class="r" style="color:#059669;font-weight:700">+0.19%</td><td class="r">45%</td><td class="r" style="color:#dc2626">-0.26</td><td class="r">1.81%</td></tr>
+</tbody>
+</table>
+
+<!-- ══ Crisis DD Comparison ══ -->
+<h2>3. Crisis Drawdown Comparison</h2>
+<p class="note">Portfolio drawdown under each crisis scenario with 1.5x credit spread beta.
+Numbers from Phase 6 stress test baseline.</p>
+<table>
+<thead><tr><th>Scenario</th><th class="r">No Hedge</th><th class="r">Selective VIX<15 Puts</th><th class="r">Collar Strategy</th></tr></thead>
+<tbody><tr><td style="text-align:left"><strong>COVID Crash</strong></td><td class="r" style="color:#dc2626">51.8%</td><td class="r" style="color:#d97706">33.7%</td><td class="r" style="color:#d97706">25.9%</td></tr>
+<tr><td style="text-align:left"><strong>2022 Bear</strong></td><td class="r" style="color:#dc2626">43.7%</td><td class="r" style="color:#d97706">34.9%</td><td class="r" style="color:#d97706">30.6%</td></tr>
+<tr><td style="text-align:left"><strong>Flash Crash</strong></td><td class="r" style="color:#059669">15.0%</td><td class="r" style="color:#059669">10.5%</td><td class="r" style="color:#059669">8.2%</td></tr>
+<tr><td style="text-align:left"><strong>VIX Spike</strong></td><td class="r" style="color:#059669">22.5%</td><td class="r" style="color:#059669">12.4%</td><td class="r" style="color:#059669">10.1%</td></tr>
+</tbody>
+</table>
+
+<div class="box box-yellow">
+<h4>Crisis protection trade-off</h4>
+<p style="font-size:.88rem">Collar provides the best crisis protection (30-55% DD reduction)
+at the lowest cost (1.31% net), but STILL leaves COVID DD around 26% and 2022 bear at 31%.
+No hedge option fully solves the Phase 6 crisis failure — only combined with lower leverage
+or alpha scale-up can the portfolio meet the 40% crisis threshold.</p>
+</div>
+
+<!-- ══ Alpha Sensitivity ══ -->
+<h2>4. At What Alpha Level Does Each Hedge Become Viable?</h2>
+<p class="note">Net annual return (alpha minus hedge cost). Check = net positive.</p>
+<table>
+<thead><tr><th>Gross Alpha</th><th class="r">Continuous Puts (4.36%)</th><th class="r">Selective VIX&lt;15 (2.10%)</th><th class="r">Collar (1.81%)</th></tr></thead>
+<tbody><tr><td><strong>1.0%</strong></td><td class="r" style="color:#dc2626">&#10007; -3.36%</td><td class="r" style="color:#dc2626">&#10007; -1.10%</td><td class="r" style="color:#dc2626">&#10007; -0.81%</td></tr>
+<tr><td><strong>1.5%</strong></td><td class="r" style="color:#dc2626">&#10007; -2.86%</td><td class="r" style="color:#dc2626">&#10007; -0.60%</td><td class="r" style="color:#dc2626">&#10007; -0.31%</td></tr>
+<tr><td><strong>2.0%</strong></td><td class="r" style="color:#dc2626">&#10007; -2.36%</td><td class="r" style="color:#dc2626">&#10007; -0.10%</td><td class="r" style="color:#059669">&#10003; +0.19%</td></tr>
+<tr><td><strong>2.5%</strong></td><td class="r" style="color:#dc2626">&#10007; -1.86%</td><td class="r" style="color:#059669">&#10003; +0.40%</td><td class="r" style="color:#059669">&#10003; +0.69%</td></tr>
+<tr><td><strong>3.5%</strong></td><td class="r" style="color:#dc2626">&#10007; -0.86%</td><td class="r" style="color:#059669">&#10003; +1.40%</td><td class="r" style="color:#059669">&#10003; +1.69%</td></tr>
+<tr><td><strong>5.0%</strong></td><td class="r" style="color:#059669">&#10003; +0.64%</td><td class="r" style="color:#059669">&#10003; +2.90%</td><td class="r" style="color:#059669">&#10003; +3.19%</td></tr>
+<tr><td><strong>8.0%</strong></td><td class="r" style="color:#059669">&#10003; +3.64%</td><td class="r" style="color:#059669">&#10003; +5.90%</td><td class="r" style="color:#059669">&#10003; +6.19%</td></tr>
+<tr><td><strong>12.0%</strong></td><td class="r" style="color:#059669">&#10003; +7.64%</td><td class="r" style="color:#059669">&#10003; +9.90%</td><td class="r" style="color:#059669">&#10003; +10.19%</td></tr>
+</tbody>
+</table>
+
+<div class="box box-blue">
+<h4>Break-even thresholds</h4>
+<ul>
+<li><strong>Collar</strong> becomes viable at alpha &gt; <strong>1.81%/yr</strong> (current 1.5% &mdash; still 0.31% short)</li>
+<li><strong>Selective puts</strong> become viable at alpha &gt; <strong>2.10%/yr</strong> (need +0.60% alpha)</li>
+<li><strong>Continuous puts</strong> need alpha &gt; <strong>4.36%/yr</strong> (nearly 3x current)</li>
+<li>At 5%+ alpha, all three options are net positive and collar becomes clearly dominant</li>
+</ul>
+</div>
+
+<!-- ══ Recommendation ══ -->
+<h2>5. Recommendation & Action Items</h2>
+
+<div class="box box-green">
+<h4>Best net CAGR: No Hedge</h4>
+<p style="font-size:.88rem">At current alpha, No Hedge produces
+the highest net CAGR because any hedge subtracts more than it protects.</p>
+</div>
+
+<div class="box box-blue">
+<h4>Best crisis protection: Collar Strategy</h4>
+<p style="font-size:.88rem">If crisis protection is the primary goal, Collar Strategy
+offers the best drawdown reduction (50%+ on COVID, 30% on 2022 bear).</p>
+</div>
+
+<div class="box box-yellow">
+<h4>Action Items</h4>
+<ul><li>Deploy Phase 6 EXP-400/401 blend unhedged at current parameters</li><li>Monitor for regime shifts (VIX > 30) as early crisis warning</li><li>Defer hedge deployment until portfolio alpha reaches ≥2.5%/yr</li><li>If hedge becomes necessary, use COLLAR (cheapest at 1.81% total drag)</li><li>Re-evaluate after 8 weeks of paper trading validates real alpha</li></ul>
+</div>
+
+<!-- ══ Methodology ══ -->
+<h2>6. Methodology</h2>
+<div class="box">
+<h4>Data sources</h4>
+<ul>
+<li><strong>Real put costs:</strong> IronVault 5% OTM SPY puts, 2020-2025 (commit 51e11e6)</li>
+<li><strong>VIX-based pricing:</strong> VIX_TO_PUT_COST table in compass/smart_hedge.py</li>
+<li><strong>Baseline alpha:</strong> EXP-1220 trade-level (1.2-1.5%/yr, commit 1ef262a)</li>
+<li><strong>Crisis drawdowns:</strong> Phase 6 stress test with 1.5x credit spread beta</li>
+<li><strong>Collar offset:</strong> 70% of put cost offset by selling 3% OTM calls</li>
+</ul>
+<h4 style="margin-top:12px">Assumptions</h4>
+<ul>
+<li>Selective VIX&lt;15 strategy: hedge active ~18% of days (empirical), pays VIX-12 to VIX-15 rate (~2.1%)</li>
+<li>Collar caps upside at 3% OTM calls → ~0.5%/yr opportunity cost during strong rallies</li>
+<li>Crisis DD reductions are approximate (full backtest in smart_hedge.py tests)</li>
+<li>Sharpe impact computed as (cost drag / alpha) × baseline Sharpe</li>
+</ul>
+</div>
+
+<p style="text-align:center;color:var(--muted);margin-top:36px;padding-top:14px;border-top:1px solid var(--border);font-size:.78rem">
+Priority #4 Hedge Cost Resolution &bull; compass/smart_hedge.py + hedge_cost_reality.py &bull;
+2026-04-06
+</p>
+</body></html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EXP-1220 Leverage Deep Dive: 2x / 3x / 4x / 5x</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #ffffff; color: #1e293b; padding: 24px; max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; margin-bottom: 4px; color: #0f172a; }
+  .subtitle { color: #64748b; font-size: 0.9rem; margin-bottom: 24px; }
+  h2 { font-size: 1.3rem; margin: 28px 0 12px; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; }
+  h3 { font-size: 1.1rem; margin: 20px 0 8px; color: #334155; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 16px 0; }
+  .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; text-align: center; }
+  .card .label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .card .value { font-size: 1.4rem; font-weight: 700; }
+  .card .sub { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.88rem; }
+  th { background: #f1f5f9; padding: 10px 10px; text-align: left; font-weight: 600; color: #334155; border-bottom: 2px solid #e2e8f0; }
+  td { padding: 9px 10px; border-bottom: 1px solid #f1f5f9; }
+  tr:hover { background: #f8fafc; }
+  .green { color: #16a34a; font-weight: 600; }
+  .yellow { color: #d97706; font-weight: 600; }
+  .red { color: #dc2626; font-weight: 600; }
+  .blue { color: #2563eb; font-weight: 600; }
+
+  .warning { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 14px 16px; margin: 16px 0; }
+  .warning .title { color: #dc2626; font-weight: 700; margin-bottom: 4px; }
+  .info { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 16px; margin: 16px 0; }
+  .info .title { color: #2563eb; font-weight: 700; margin-bottom: 4px; }
+  .note { background: #fefce8; border: 1px solid #fde68a; border-radius: 8px; padding: 14px 16px; margin: 16px 0; }
+  .note .title { color: #a16207; font-weight: 700; margin-bottom: 4px; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .badge-safe { background: #dcfce7; color: #166534; }
+  .badge-caution { background: #fef9c3; color: #854d0e; }
+  .badge-danger { background: #fee2e2; color: #991b1b; }
+  .badge-extreme { background: #fce7f3; color: #9d174d; }
+
+  .bar-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+  .bar-label { width: 32px; font-size: 0.8rem; font-weight: 700; color: #64748b; text-align: right; }
+  .bar { height: 28px; border-radius: 5px; display: flex; align-items: center; padding-left: 10px; font-size: 0.8rem; font-weight: 700; color: white; min-width: 50px; transition: width 0.3s; }
+  .bar-2x { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+  .bar-3x { background: linear-gradient(90deg, #f97316, #fb923c); }
+  .bar-4x { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+  .bar-5x { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #94a3b8; }
+</style>
+</head>
+<body>
+
+<h1>⚡ EXP-1220 Leverage Deep Dive: 2x / 3x / 4x / 5x</h1>
+<p class="subtitle">Static leverage comparison on real IronVault data (2020–2025) · April 6, 2026</p>
+
+<!-- ─── HEADLINE CARDS ─── -->
+<div class="cards">
+  <div class="card" style="border-left: 4px solid #3b82f6;">
+    <div class="label">2x</div>
+    <div class="value" style="color:#2563eb">212%</div>
+    <div class="sub">CAGR · 12.8% DD</div>
+  </div>
+  <div class="card" style="border-left: 4px solid #f97316;">
+    <div class="label">3x</div>
+    <div class="value" style="color:#ea580c">442%</div>
+    <div class="sub">CAGR · 18.8% DD</div>
+  </div>
+  <div class="card" style="border-left: 4px solid #8b5cf6;">
+    <div class="label">4x</div>
+    <div class="value" style="color:#7c3aed">831%</div>
+    <div class="sub">CAGR · 24.5% DD</div>
+  </div>
+  <div class="card" style="border-left: 4px solid #ef4444;">
+    <div class="label">5x</div>
+    <div class="value" style="color:#dc2626">1,484%</div>
+    <div class="sub">CAGR · 29.9% DD</div>
+  </div>
+</div>
+
+<!-- ─── MASTER COMPARISON TABLE ─── -->
+<h2>📊 Full Comparison Table</h2>
+
+<table>
+<thead>
+  <tr><th>Metric</th><th style="color:#2563eb">2.0x</th><th style="color:#ea580c">3.0x</th><th style="color:#7c3aed">4.0x</th><th style="color:#dc2626">5.0x</th></tr>
+</thead>
+<tbody>
+  <tr><td><strong>CAGR</strong></td><td class="blue">+212.1%</td><td class="yellow">+442.0%</td><td style="color:#7c3aed;font-weight:600">+831.4%</td><td class="red">+1,483.6%</td></tr>
+  <tr><td><strong>Sharpe Ratio</strong></td><td>5.68</td><td>5.68</td><td>5.68</td><td>5.68</td></tr>
+  <tr><td><strong>Sortino Ratio</strong></td><td>11.97</td><td>11.97</td><td>11.97</td><td>11.97</td></tr>
+  <tr><td><strong>Max Drawdown</strong></td><td class="yellow">12.8%</td><td class="red">18.8%</td><td class="red">24.5%</td><td class="red">29.9%</td></tr>
+  <tr><td><strong>Calmar Ratio</strong></td><td>16.51</td><td>23.48</td><td>33.90</td><td>49.56</td></tr>
+  <tr><td><strong>Annualized Vol</strong></td><td>20.4%</td><td>30.6%</td><td>40.9%</td><td>51.1%</td></tr>
+  <tr>
+    <td><strong>North Star DD ≤12%</strong></td>
+    <td><span class="badge badge-caution">⚠️ 12.8%</span></td>
+    <td><span class="badge badge-danger">❌ 18.8%</span></td>
+    <td><span class="badge badge-danger">❌ 24.5%</span></td>
+    <td><span class="badge badge-extreme">🔥 29.9%</span></td>
+  </tr>
+  <tr>
+    <td><strong>Estimated Real DD</strong></td>
+    <td class="yellow">~15-18%</td>
+    <td class="red">~22-28%</td>
+    <td class="red">~30-35%</td>
+    <td class="red">~36-42%</td>
+  </tr>
+  <tr>
+    <td><strong>Risk Profile</strong></td>
+    <td><span class="badge badge-caution">Aggressive</span></td>
+    <td><span class="badge badge-danger">Very Aggressive</span></td>
+    <td><span class="badge badge-extreme">Extreme</span></td>
+    <td><span class="badge badge-extreme">YOLO</span></td>
+  </tr>
+</tbody>
+</table>
+
+<!-- ─── VISUAL: CAGR BARS ─── -->
+<h2>📈 CAGR Comparison</h2>
+
+<div class="bar-row">
+  <div class="bar-label">2x</div>
+  <div class="bar bar-2x" style="width: 14%">212%</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label">3x</div>
+  <div class="bar bar-3x" style="width: 30%">442%</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label">4x</div>
+  <div class="bar bar-4x" style="width: 56%">831%</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label">5x</div>
+  <div class="bar bar-5x" style="width: 85%">1,484%</div>
+</div>
+
+<h2>📉 Max Drawdown Comparison</h2>
+
+<div class="bar-row">
+  <div class="bar-label">2x</div>
+  <div class="bar bar-2x" style="width: 42%">12.8%</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label">3x</div>
+  <div class="bar bar-3x" style="width: 63%">18.8%</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label">4x</div>
+  <div class="bar bar-4x" style="width: 82%">24.5%</div>
+</div>
+<div class="bar-row">
+  <div class="bar-label">5x</div>
+  <div class="bar bar-5x" style="width: 100%">29.9%</div>
+</div>
+
+<!-- ─── YEAR BY YEAR: 2x ─── -->
+<h2>📅 Year-by-Year Breakdown</h2>
+
+<h3 style="color:#2563eb">🔵 2.0x Leverage</h3>
+<table>
+<thead><tr><th>Year</th><th>Return</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th><th>Verdict</th></tr></thead>
+<tbody>
+  <tr><td>2020</td><td class="green">+540.8%</td><td>6.94</td><td class="green">5.9%</td><td>91.04</td><td><span class="badge badge-safe">✅ Excellent</span></td></tr>
+  <tr><td>2021</td><td class="green">+185.4%</td><td>6.74</td><td class="green">2.8%</td><td>65.92</td><td><span class="badge badge-safe">✅ Excellent</span></td></tr>
+  <tr><td>2022</td><td class="green">+214.7%</td><td>4.67</td><td class="yellow">12.8%</td><td>16.71</td><td><span class="badge badge-caution">⚠️ Worst year</span></td></tr>
+  <tr><td>2023</td><td class="green">+130.0%</td><td>4.29</td><td class="green">5.3%</td><td>24.67</td><td><span class="badge badge-safe">✅ Solid</span></td></tr>
+  <tr><td>2024</td><td class="green">+124.2%</td><td>6.47</td><td class="green">1.8%</td><td>68.89</td><td><span class="badge badge-safe">✅ Excellent</span></td></tr>
+  <tr><td>2025</td><td class="green">+209.6%</td><td>6.87</td><td class="green">2.8%</td><td>75.38</td><td><span class="badge badge-safe">✅ Excellent</span></td></tr>
+</tbody>
+</table>
+
+<!-- ─── YEAR BY YEAR: 3x ─── -->
+<h3 style="color:#ea580c">🟠 3.0x Leverage</h3>
+<table>
+<thead><tr><th>Year</th><th>Return</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th><th>Verdict</th></tr></thead>
+<tbody>
+  <tr><td>2020</td><td class="green">+1,472.3%</td><td>6.94</td><td class="green">8.9%</td><td>165.82</td><td><span class="badge badge-safe">✅ Monster</span></td></tr>
+  <tr><td>2021</td><td class="green">+377.1%</td><td>6.74</td><td class="green">4.2%</td><td>89.27</td><td><span class="badge badge-safe">✅ Excellent</span></td></tr>
+  <tr><td>2022</td><td class="green">+444.6%</td><td>4.67</td><td class="red">18.8%</td><td>23.61</td><td><span class="badge badge-danger">❌ Pain zone</span></td></tr>
+  <tr><td>2023</td><td class="green">+243.3%</td><td>4.29</td><td class="green">7.9%</td><td>30.81</td><td><span class="badge badge-safe">✅ Solid</span></td></tr>
+  <tr><td>2024</td><td class="green">+233.3%</td><td>6.47</td><td class="green">2.7%</td><td>86.32</td><td><span class="badge badge-safe">✅ Excellent</span></td></tr>
+  <tr><td>2025</td><td class="green">+438.2%</td><td>6.87</td><td class="green">4.2%</td><td>105.53</td><td><span class="badge badge-safe">✅ Excellent</span></td></tr>
+</tbody>
+</table>
+
+<!-- ─── YEAR BY YEAR: 4x ─── -->
+<h3 style="color:#7c3aed">🟣 4.0x Leverage</h3>
+<table>
+<thead><tr><th>Year</th><th>Return (est.)</th><th>Sharpe</th><th>Max DD (est.)</th><th>Verdict</th></tr></thead>
+<tbody>
+  <tr><td>2020</td><td class="green">~3,800%</td><td>6.94</td><td class="yellow">~11.7%</td><td><span class="badge badge-safe">✅ Insane</span></td></tr>
+  <tr><td>2021</td><td class="green">~650%</td><td>6.74</td><td class="green">~5.6%</td><td><span class="badge badge-safe">✅ Excellent</span></td></tr>
+  <tr><td>2022</td><td class="green">~780%</td><td>4.67</td><td class="red">24.5%</td><td><span class="badge badge-extreme">🔥 Quarter account gone</span></td></tr>
+  <tr><td>2023</td><td class="green">~400%</td><td>4.29</td><td class="yellow">~10.5%</td><td><span class="badge badge-safe">✅ Solid</span></td></tr>
+  <tr><td>2024</td><td class="green">~380%</td><td>6.47</td><td class="green">~3.6%</td><td><span class="badge badge-safe">✅ Excellent</span></td></tr>
+  <tr><td>2025</td><td class="green">~780%</td><td>6.87</td><td class="green">~5.6%</td><td><span class="badge badge-safe">✅ Excellent</span></td></tr>
+</tbody>
+</table>
+
+<!-- ─── YEAR BY YEAR: 5x ─── -->
+<h3 style="color:#dc2626">🔴 5.0x Leverage</h3>
+<table>
+<thead><tr><th>Year</th><th>Return (est.)</th><th>Sharpe</th><th>Max DD (est.)</th><th>Verdict</th></tr></thead>
+<tbody>
+  <tr><td>2020</td><td class="green">~9,200%</td><td>6.94</td><td class="yellow">~14.6%</td><td><span class="badge badge-caution">⚠️ Wild ride</span></td></tr>
+  <tr><td>2021</td><td class="green">~1,100%</td><td>6.74</td><td class="green">~7.0%</td><td><span class="badge badge-safe">✅ Excellent</span></td></tr>
+  <tr><td>2022</td><td class="green">~1,300%</td><td>4.67</td><td class="red">29.9%</td><td><span class="badge badge-extreme">🔥🔥 Third of account gone</span></td></tr>
+  <tr><td>2023</td><td class="green">~620%</td><td>4.29</td><td class="yellow">~13.1%</td><td><span class="badge badge-caution">⚠️ Significant DD</span></td></tr>
+  <tr><td>2024</td><td class="green">~600%</td><td>6.47</td><td class="green">~4.5%</td><td><span class="badge badge-safe">✅ Excellent</span></td></tr>
+  <tr><td>2025</td><td class="green">~1,300%</td><td>6.87</td><td class="green">~7.0%</td><td><span class="badge badge-safe">✅ Excellent</span></td></tr>
+</tbody>
+</table>
+
+<div class="note">
+  <div class="title">📝 Note on 4x and 5x Year-by-Year</div>
+  <p>4x and 5x year-by-year returns are estimated by scaling from the known data points. Summary metrics (CAGR, Max DD, Sharpe, Vol) are exact from the backtest. The worst-case year (2022) max DD is exact from the full sweep.</p>
+</div>
+
+<!-- ─── GROWTH OF $100K ─── -->
+<h2>💰 Growth of $100K Over 6 Years</h2>
+
+<table>
+<thead><tr><th>Leverage</th><th>Starting</th><th>After 6 Years</th><th>Multiple</th></tr></thead>
+<tbody>
+  <tr><td style="color:#2563eb;font-weight:700">2.0x</td><td>$100,000</td><td class="green">~$76 Million</td><td>760x</td></tr>
+  <tr><td style="color:#ea580c;font-weight:700">3.0x</td><td>$100,000</td><td class="green">~$1.7 Billion</td><td>17,000x</td></tr>
+  <tr><td style="color:#7c3aed;font-weight:700">4.0x</td><td>$100,000</td><td class="green">~$52 Billion</td><td>520,000x</td></tr>
+  <tr><td style="color:#dc2626;font-weight:700">5.0x</td><td>$100,000</td><td class="green">~$2.3 Trillion</td><td>23,000,000x</td></tr>
+</tbody>
+</table>
+
+<div class="warning">
+  <div class="title">🚨 Reality Check on These Numbers</div>
+  <ul style="margin-top: 8px; padding-left: 20px; color: #7f1d1d;">
+    <li><strong>These are theoretical backtested returns.</strong> Real-world slippage, execution delays, and market impact will reduce them significantly — especially at higher leverage and larger account sizes.</li>
+    <li><strong>Market impact:</strong> At 4-5x, you're running many concurrent positions. Fill quality degrades. The bigger the account, the worse the fills.</li>
+    <li><strong>Capacity ceiling:</strong> SPY options liquidity caps realistic AUM at ~$50M for this strategy. At 4-5x with large accounts, you'll move the market.</li>
+    <li><strong>Compounding assumption:</strong> These assume perfect reinvestment every cycle. Real trading has cash drag.</li>
+    <li><strong>One bad week at 5x = 30% gone.</strong> Psychologically, very few people can hold through that without panic-closing.</li>
+  </ul>
+</div>
+
+<!-- ─── THE REAL QUESTION ─── -->
+<h2>🎯 Which Leverage Should You Pick?</h2>
+
+<table>
+<thead><tr><th>Level</th><th>CAGR</th><th>Max DD</th><th>Real DD Est.</th><th>Who This Is For</th></tr></thead>
+<tbody>
+  <tr style="background:#eff6ff">
+    <td><strong style="color:#2563eb">2.0x</strong></td>
+    <td class="green">212%</td>
+    <td class="yellow">12.8%</td>
+    <td>~15-18%</td>
+    <td>Aggressive but disciplined. Best risk/reward ratio. <strong>Recommended starting point.</strong></td>
+  </tr>
+  <tr style="background:#fff7ed">
+    <td><strong style="color:#ea580c">3.0x</strong></td>
+    <td class="green">442%</td>
+    <td class="red">18.8%</td>
+    <td>~22-28%</td>
+    <td>Very aggressive. High conviction in the strategy. Can handle seeing -25%.</td>
+  </tr>
+  <tr style="background:#f5f3ff">
+    <td><strong style="color:#7c3aed">4.0x</strong></td>
+    <td class="green">831%</td>
+    <td class="red">24.5%</td>
+    <td>~30-35%</td>
+    <td>Extreme. Only with a small account you can afford to lose. Capacity limited.</td>
+  </tr>
+  <tr style="background:#fef2f2">
+    <td><strong style="color:#dc2626">5.0x</strong></td>
+    <td class="green">1,484%</td>
+    <td class="red">29.9%</td>
+    <td>~36-42%</td>
+    <td>YOLO. The numbers are insane but so is the risk. One really bad period and you're down 40%.</td>
+  </tr>
+</tbody>
+</table>
+
+<div class="info">
+  <div class="title">💡 The Smart Play: Tiered Approach</div>
+  <ol style="margin-top: 8px; padding-left: 20px; color: #1e40af;">
+    <li><strong>Paper trade 2x and 3x</strong> side by side for 8 weeks</li>
+    <li><strong>Go live at 2x</strong> — prove it works with real money and real emotions</li>
+    <li><strong>After 3 months of live 2x,</strong> if DD never exceeded 10%, scale to 3x</li>
+    <li><strong>Keep a "degen account"</strong> with 5-10% of capital at 4x or 5x if you want the rush</li>
+    <li><strong>Add Crisis Alpha hedge (EXP-1780)</strong> to reduce DD ~30% at any leverage level</li>
+  </ol>
+</div>
+
+<div class="info">
+  <div class="title">🛡️ Why Credit Spreads Handle High Leverage</div>
+  <ul style="margin-top: 8px; padding-left: 20px; color: #1e40af;">
+    <li><strong>Defined risk per trade:</strong> Max loss = spread width. No margin call surprises.</li>
+    <li><strong>91% win rate:</strong> Losses are rare and capped.</li>
+    <li><strong>Leverage = concurrent positions,</strong> not margin borrowing. Fundamentally different from leveraged stocks.</li>
+    <li><strong>But:</strong> Multiple positions can all lose in the same week during crashes → that's where the DD comes from.</li>
+  </ul>
+</div>
+
+<!-- ─── FULL SWEEP REFERENCE ─── -->
+<h2>📋 Full Leverage Sweep (Reference)</h2>
+<table>
+<thead><tr><th>Leverage</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th><th>Vol</th></tr></thead>
+<tbody>
+  <tr><td>0.5x</td><td>+33.5%</td><td>5.68</td><td class="green">3.3%</td><td>10.08</td><td>5.1%</td></tr>
+  <tr><td>1.0x</td><td>+77.7%</td><td>5.68</td><td class="green">6.6%</td><td>11.82</td><td>10.2%</td></tr>
+  <tr><td>1.2x</td><td>+99.0%</td><td>5.68</td><td class="green">7.8%</td><td>12.61</td><td>12.3%</td></tr>
+  <tr><td>1.5x</td><td>+135.8%</td><td>5.68</td><td class="green">9.8%</td><td>13.93</td><td>15.3%</td></tr>
+  <tr><td>1.8x</td><td>+179.1%</td><td>5.68</td><td class="yellow">11.6%</td><td>15.42</td><td>18.4%</td></tr>
+  <tr style="background:#eff6ff"><td><strong>2.0x</strong></td><td><strong>+212.1%</strong></td><td>5.68</td><td class="yellow"><strong>12.8%</strong></td><td>16.51</td><td>20.4%</td></tr>
+  <tr><td>2.5x</td><td>+311.8%</td><td>5.68</td><td class="red">15.9%</td><td>19.64</td><td>25.5%</td></tr>
+  <tr style="background:#fff7ed"><td><strong>3.0x</strong></td><td><strong>+442.0%</strong></td><td>5.68</td><td class="red"><strong>18.8%</strong></td><td>23.48</td><td>30.6%</td></tr>
+  <tr><td>3.5x</td><td>+611.5%</td><td>5.68</td><td class="red">21.7%</td><td>28.16</td><td>35.8%</td></tr>
+  <tr style="background:#f5f3ff"><td><strong>4.0x</strong></td><td><strong>+831.4%</strong></td><td>5.68</td><td class="red"><strong>24.5%</strong></td><td>33.90</td><td>40.9%</td></tr>
+  <tr><td>4.5x</td><td>+1,116.0%</td><td>5.68</td><td class="red">27.3%</td><td>40.93</td><td>46.0%</td></tr>
+  <tr style="background:#fef2f2"><td><strong>5.0x</strong></td><td><strong>+1,483.6%</strong></td><td>5.68</td><td class="red"><strong>29.9%</strong></td><td>49.56</td><td>51.1%</td></tr>
+</tbody>
+</table>
+
+<div class="footer">
+  <strong>Data source:</strong> IronVault options_cache.db — 100% real market data, zero synthetic.<br>
+  <strong>Strategy:</strong> EXP-1220 credit spreads, 7-day cadence, static leverage multiplier.<br>
+  <strong>Sharpe note:</strong> Sharpe stays constant because it's computed on the base strategy returns. Leverage scales returns AND volatility equally → same ratio.<br>
+  <strong>Generated:</strong> April 6, 2026 by Maximus ⚡ · <strong>Rule Zero:</strong> No synthetic data. Ever.
+</div>
+
+</body>
+</html>

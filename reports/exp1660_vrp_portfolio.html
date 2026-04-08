@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>EXP-1660 VRP Portfolio</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--green:#059669;--red:#dc2626;--yellow:#d97706;--blue:#2563eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;max-width:1200px;margin:0 auto;padding:24px}
+h1{font-size:1.5rem;font-weight:800}
+h2{font-size:1.1rem;font-weight:700;margin:28px 0 12px;border-bottom:2px solid var(--border);padding-bottom:6px}
+.subtitle{color:var(--muted);font-size:.85rem;margin-bottom:20px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:14px 0}
+.c{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.c .l{color:var(--muted);font-size:.68rem;font-weight:600;text-transform:uppercase}
+.c .v{font-size:1rem;font-weight:700;margin-top:2px}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.82rem}
+th,td{padding:5px 7px;text-align:right;border-bottom:1px solid var(--border)}
+th{background:#f1f5f9;color:var(--muted);font-size:.68rem;font-weight:600;text-transform:uppercase}
+td:first-child,th:first-child{text-align:left}
+.callout{background:var(--card);border-left:4px solid var(--blue);padding:14px;margin:12px 0;font-size:.85rem;line-height:1.6;border-radius:4px}
+.note{color:var(--muted);font-size:.82rem;margin:6px 0}
+.footer{margin-top:40px;text-align:center;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);padding-top:14px}
+</style></head><body>
+
+<h1>EXP-1660 VRP Portfolio — Multi-Ticker Harvesting + Correlation Matrix</h1>
+<div class="subtitle">2026-04-06 09:14 UTC &bull; IV-RV gap threshold: 2% &bull; Adaptive delta per ticker &bull; Rule Zero: 100% IronVault real data</div>
+
+<div class="callout">
+<strong>What changed from EXP-1660 VRP Deepening:</strong> QQQ and GLD were re-tested with the
+freshly backfilled 2025 data (previous run was stale). Delta targets are now adaptive per ticker
+(10-18 delta depending on strike density). IV-RV gap threshold lowered to 2% to catch more
+signals. Portfolio section combines all live configs equal-weighted.
+</div>
+
+<h2>Per-Ticker Results (IV-RV gap &gt; 2%)</h2>
+<table>
+<thead><tr><th>Ticker</th><th>N</th><th>PnL</th><th>WR</th><th>Trade SR</th><th>Daily SR</th><th>CAGR</th><th>DD</th><th>Avg Gap</th><th>SPY ρ</th><th>OOS N</th><th>OOS SR</th><th>Status</th></tr></thead>
+<tbody><tr><td><strong>XLF</strong></td><td>22</td><td style="color:var(--red)">$-850</td><td>50%</td><td>-0.41</td><td>-6.32</td><td>-0.1%</td><td>2.8%</td><td>0.240</td><td style="color:var(--yellow)">-0.623</td><td>5</td><td>5.17</td><td style="color:var(--green);font-weight:700">LIVE</td></tr>
+<tr><td><strong>TLT</strong></td><td>2</td><td style="color:var(--green)">$890</td><td>100%</td><td>2.12</td><td>-17.54</td><td>0.1%</td><td>0.0%</td><td>0.162</td><td style="color:var(--green)">+0.000</td><td>2</td><td>2.12</td><td style="color:var(--red);font-weight:700">KILLED</td></tr>
+<tr><td><strong>QQQ</strong></td><td>27</td><td style="color:var(--green)">$5,343</td><td>59%</td><td>0.59</td><td>-1.15</td><td>0.8%</td><td>7.2%</td><td>0.155</td><td style="color:var(--yellow)">-0.525</td><td>11</td><td>0.95</td><td style="color:var(--green);font-weight:700">LIVE</td></tr>
+<tr><td><strong>XLI</strong></td><td>2</td><td style="color:var(--green)">$375</td><td>50%</td><td>0.34</td><td>-15.16</td><td>0.1%</td><td>0.4%</td><td>0.213</td><td style="color:var(--green)">+0.000</td><td>1</td><td>0.00</td><td style="color:var(--red);font-weight:700">KILLED</td></tr>
+<tr><td><strong>GLD</strong></td><td>5</td><td style="color:var(--red)">$-436</td><td>60%</td><td>-0.15</td><td>-4.89</td><td>-0.1%</td><td>2.8%</td><td>0.191</td><td style="color:var(--green)">+0.000</td><td>5</td><td>-0.15</td><td style="color:var(--red);font-weight:700">KILLED</td></tr>
+<tr><td><strong>SPY</strong></td><td>87</td><td style="color:var(--red)">$-24,168</td><td>51%</td><td>-1.46</td><td>-1.65</td><td>-3.9%</td><td>26.0%</td><td>0.220</td><td style="color:var(--yellow)">-0.793</td><td>62</td><td>-2.21</td><td style="color:var(--red);font-weight:700">KILLED</td></tr>
+</tbody></table>
+
+<div class="callout">
+<strong>Two Sharpe columns:</strong> "Trade SR" is per-trade arithmetic mean/std × √N (counts only actual
+trade days). "Daily SR" is the full daily-return series Sharpe via compass/metrics.py — this is
+diluted by idle days but is the honest portfolio-level number. The gap between these two columns
+is the capital utilization problem documented in MASTERPLAN Phase 7.
+</div>
+
+
+        <h2>Combined VRP Portfolio (3 tickers, equal weight)</h2>
+        <p class="note">Tickers combined: SPY, QQQ, XLF</p>
+        <div class="cards">
+          <div class="c"><div class="l">Total PnL</div><div class="v">$-19,675</div></div>
+          <div class="c"><div class="l">Sharpe (arith)</div><div class="v">-2.77</div></div>
+          <div class="c"><div class="l">CAGR</div><div class="v">-1.1%</div></div>
+          <div class="c"><div class="l">Max DD</div><div class="v">10.7%</div></div>
+          <div class="c"><div class="l">SPY Corr</div><div class="v">-0.193</div></div>
+          <div class="c"><div class="l">Active Days</div><div class="v">125</div></div>
+        </div>
+        
+
+<h2>Correlation Matrix (daily PnL series)</h2>
+<p class="note">Red = positive (redundant), blue = negative (diversifying), white = uncorrelated.
+  EXP-1220 row/col present if its daily series was available.</p>
+<table>
+<tr><th></th><th>SPY</th><th>QQQ</th><th>XLF</th><th>GLD</th></tr>
+<tr><td><strong>SPY</strong></td><td style="background:#1e293b;color:#fff;text-align:center;font-size:.75rem">+1.00</td><td style="background:rgb(255,254,254);color:#111;text-align:center;font-size:.75rem">+0.00</td><td style="background:rgb(255,246,246);color:#111;text-align:center;font-size:.75rem">+0.03</td><td style="background:rgb(255,245,245);color:#111;text-align:center;font-size:.75rem">+0.04</td></tr>
+<tr><td><strong>QQQ</strong></td><td style="background:rgb(255,254,254);color:#111;text-align:center;font-size:.75rem">+0.00</td><td style="background:#1e293b;color:#fff;text-align:center;font-size:.75rem">+1.00</td><td style="background:rgb(255,255,255);color:#111;text-align:center;font-size:.75rem">+0.00</td><td style="background:rgb(255,255,255);color:#111;text-align:center;font-size:.75rem">+0.00</td></tr>
+<tr><td><strong>XLF</strong></td><td style="background:rgb(255,246,246);color:#111;text-align:center;font-size:.75rem">+0.03</td><td style="background:rgb(255,255,255);color:#111;text-align:center;font-size:.75rem">+0.00</td><td style="background:#1e293b;color:#fff;text-align:center;font-size:.75rem">+1.00</td><td style="background:rgb(255,250,250);color:#111;text-align:center;font-size:.75rem">+0.02</td></tr>
+<tr><td><strong>GLD</strong></td><td style="background:rgb(255,245,245);color:#111;text-align:center;font-size:.75rem">+0.04</td><td style="background:rgb(255,255,255);color:#111;text-align:center;font-size:.75rem">+0.00</td><td style="background:rgb(255,250,250);color:#111;text-align:center;font-size:.75rem">+0.02</td><td style="background:#1e293b;color:#fff;text-align:center;font-size:.75rem">+1.00</td></tr>
+
+</table>
+
+<div class="footer">
+  EXP-1660 VRP Portfolio &bull; Real IronVault data &bull; 2026-04-06 09:14 UTC
+</div>
+</body></html>

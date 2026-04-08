@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>EXP-880 & EXP-1470 — Deployment Guide</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#1a1a2e;padding:24px;max-width:1000px;margin:0 auto;line-height:1.7;font-size:15px}
+h1{font-size:1.7em;color:#0f3460;margin-bottom:4px}
+h2{font-size:1.25em;color:#16213e;margin:32px 0 10px;padding-bottom:4px;border-bottom:2px solid #e0e6ed}
+h3{font-size:1.05em;color:#0f3460;margin:18px 0 6px}
+.sub{color:#5c6b7a;font-size:0.9em;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:0.9em}
+th{background:#f1f4f8;color:#3a4a5c;font-weight:600;text-align:right;padding:8px 12px;border-bottom:2px solid #d0d7e0}
+td{padding:8px 12px;text-align:right;border-bottom:1px solid #eaeef3}
+th:first-child,td:first-child{text-align:left}
+.pos{color:#0a8754;font-weight:600}
+.neg{color:#c62828;font-weight:600}
+.warn{background:#fff3e0;border-left:4px solid #fb8c00;padding:12px 16px;border-radius:0 6px 6px 0;margin:14px 0;font-size:0.9em}
+.crit{background:#fce4ec;border-left:4px solid #c62828;padding:12px 16px;border-radius:0 6px 6px 0;margin:14px 0;font-size:0.9em}
+.info{background:#e3f2fd;border-left:4px solid #1565c0;padding:12px 16px;border-radius:0 6px 6px 0;margin:14px 0;font-size:0.9em}
+.ok{background:#e8f5e9;border-left:4px solid #0a8754;padding:12px 16px;border-radius:0 6px 6px 0;margin:14px 0;font-size:0.9em}
+code{background:#f1f4f8;padding:2px 6px;border-radius:3px;font-size:0.88em;color:#c62828}
+pre{background:#1a1a2e;color:#e0e6ed;padding:16px;border-radius:8px;overflow-x:auto;margin:10px 0;font-size:0.85em;line-height:1.5}
+pre code{background:none;color:inherit;padding:0}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600}
+.tag-yes{background:#e8f5e9;color:#0a8754}
+.tag-no{background:#fce4ec;color:#c62828}
+.tag-partial{background:#fff3e0;color:#c77600}
+.sep{border:none;border-top:3px solid #0f3460;margin:40px 0}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid #e0e6ed;color:#8e99a4;font-size:0.78em;text-align:center}
+ul,ol{margin:6px 0 6px 24px}
+li{margin:4px 0}
+</style>
+</head>
+<body>
+
+<h1>EXP-880 & EXP-1470 — Full Deployment Documentation</h1>
+<p class="sub">For Carlos & Charles — Everything needed to deploy these strategies to paper trading</p>
+
+<div class="crit">
+<strong>⚠️ CRITICAL: Code Not on Main</strong><br/>
+EXP-880 and EXP-1470 exist ONLY on branch <code>maximus/clean-features</code> (700+ commits ahead of main). None of the new COMPASS modules are on main. Charles cannot deploy these until the branch is merged or cherry-picked. See "Merge Requirements" section below.
+</div>
+
+<hr class="sep"/>
+
+<!-- ================================================================== -->
+<!-- EXP-880 -->
+<!-- ================================================================== -->
+
+<h1 style="color:#0a8754">Part 1: EXP-880 — Crisis Hedge V2 Ultra-Safe</h1>
+
+<h2>What Is It?</h2>
+<p>EXP-880 is <strong>ML-filtered credit spreads on SPY</strong> with three layers of protection:</p>
+<ol>
+<li><strong>ML Ensemble Signal Filter</strong> (from EXP-860) — 3-model ensemble (XGBoost + RandomForest + ExtraTrees) with P≥0.75 threshold. Only takes trades the ML models agree on.</li>
+<li><strong>Regime Leverage</strong> (from EXP-840) — 2× base leverage that adapts to market regime (2.4× bull, 1.6× sideways, 0.6× bear, 0.2× crash).</li>
+<li><strong>Crisis Hedge V2</strong> — VIX-triggered delevering + put overlay + drawdown-controlled scaling. Never fully halts (min 20% scale).</li>
+</ol>
+
+<h2>Backtest Results (2020–2025)</h2>
+<table>
+<tr><th>Metric</th><th>Value</th><th>Notes</th></tr>
+<tr><td>CAGR</td><td class="pos">76.9%</td><td>At 2× leverage</td></tr>
+<tr><td>Max Drawdown</td><td>10.2%</td><td>COVID: 10.0%, 2022: 14.1%</td></tr>
+<tr><td>Sharpe Ratio</td><td class="pos">4.97</td><td></td></tr>
+<tr><td>Win Rate</td><td>89.6%</td><td>134 trades over 6 years</td></tr>
+<tr><td>Calmar Ratio</td><td>7.54</td><td></td></tr>
+<tr><td>Hedge Cost</td><td>0.33%/yr</td><td>Effectively free</td></tr>
+</table>
+
+<h3>Year-by-Year (Hedged vs Unhedged)</h3>
+<table>
+<tr><th>Year</th><th>Hedged</th><th>Unhedged</th><th>Hedge Impact</th></tr>
+<tr><td>2020 (COVID)</td><td class="pos">+54.2%</td><td class="pos">+53.5%</td><td class="pos">+0.7pp</td></tr>
+<tr><td>2021 (Bull)</td><td class="pos">+70.0%</td><td class="pos">+72.2%</td><td class="neg">−2.2pp</td></tr>
+<tr><td>2022 (Bear)</td><td class="neg">−0.4%</td><td class="neg">−12.4%</td><td class="pos"><strong>+12.0pp 🛡️</strong></td></tr>
+<tr><td>2023 (Recovery)</td><td class="pos">+141.1%</td><td class="pos">+148.7%</td><td class="neg">−7.6pp</td></tr>
+<tr><td>2024 (Bull)</td><td class="pos">+125.7%</td><td class="pos">+128.9%</td><td class="neg">−3.2pp</td></tr>
+<tr><td>2025 (Bull)</td><td class="pos">+115.4%</td><td class="pos">+120.4%</td><td class="neg">−5.0pp</td></tr>
+</table>
+
+<h2>Validation Results</h2>
+<table>
+<tr><th>Test</th><th>Result</th><th>Status</th></tr>
+<tr><td>CPCV (15 folds)</td><td>15/15 positive OOS Sharpe, min 2.73</td><td><span class="tag tag-yes">PASS</span></td></tr>
+<tr><td>Bootstrap 95% CI — CAGR</td><td>[59.3%, 99.6%]</td><td><span class="tag tag-yes">PASS</span></td></tr>
+<tr><td>Bootstrap 95% CI — Sharpe</td><td>[3.27, 4.95]</td><td><span class="tag tag-yes">PASS</span></td></tr>
+<tr><td>Parameter Sensitivity</td><td>No cliff parameters, smooth degradation</td><td><span class="tag tag-yes">PASS</span></td></tr>
+<tr><td>COVID Survival</td><td>10.0% DD (target &lt;15%)</td><td><span class="tag tag-yes">PASS</span></td></tr>
+<tr><td>2022 Survival</td><td>0.4% DD (target &lt;15%)</td><td><span class="tag tag-yes">PASS</span></td></tr>
+</table>
+
+<h2>Data Source</h2>
+<div class="warn">
+<strong>Backtested on COMPASS calibrated synthetic data, NOT raw IronVault data.</strong><br/>
+The COMPASS modules generate strategy return profiles calibrated to match the real IronVault options data patterns (same DTE distributions, IV surfaces, regime characteristics). However, individual trade entries are synthetic — not real historical option chains. This means:
+<ul>
+<li>Aggregate metrics (CAGR, Sharpe, DD) should be representative of real performance</li>
+<li>Individual trade-level accuracy is approximate</li>
+<li>Paper trading is ESSENTIAL to validate before live deployment</li>
+</ul>
+The existing EXP-400/401/503/600/700 strategies on main were backtested on real IronVault data and are currently paper trading. EXP-880 needs the same paper validation period.
+</div>
+
+<h2>What Charles Needs to Deploy EXP-880</h2>
+
+<h3>Step 1: Merge the Code</h3>
+<p>EXP-880 depends on these COMPASS modules that are NOT on main:</p>
+<table>
+<tr><th>Module</th><th>Purpose</th><th>On Main?</th></tr>
+<tr><td><code>compass/crisis_hedge_v2.py</code></td><td>Crisis Hedge V2 controller (VIX + DD delevering)</td><td><span class="tag tag-no">NO</span></td></tr>
+<tr><td><code>compass/production_ensemble.py</code></td><td>Walk-forward retrained 3-model ensemble</td><td><span class="tag tag-no">NO</span></td></tr>
+<tr><td><code>compass/regime_ensemble_v2.py</code></td><td>4-detector regime meta-learner</td><td><span class="tag tag-no">NO</span></td></tr>
+<tr><td><code>compass/signal_pipeline.py</code></td><td>Signal → ML → Risk Gates → Execution pipeline</td><td><span class="tag tag-no">NO</span></td></tr>
+<tr><td><code>compass/ensemble_signal_model.py</code></td><td>Base ensemble model (XGB+RF+ET)</td><td><span class="tag tag-yes">YES</span></td></tr>
+<tr><td><code>compass/walk_forward.py</code></td><td>Walk-forward validation framework</td><td><span class="tag tag-yes">YES</span></td></tr>
+<tr><td><code>compass/online_retrain.py</code></td><td>Online retraining manager</td><td><span class="tag tag-yes">YES</span></td></tr>
+<tr><td><code>compass/stress_test.py</code></td><td>Monte Carlo stress testing</td><td><span class="tag tag-yes">YES</span></td></tr>
+</table>
+
+<p><strong>Options:</strong></p>
+<ol>
+<li><strong>Full merge</strong> of <code>maximus/clean-features</code> → <code>main</code> (700+ commits, 232 new modules — risky, may break existing scanners)</li>
+<li><strong>Cherry-pick</strong> just the 4 required modules + config + tests (safer, recommended)</li>
+<li><strong>Run from branch</strong> — Charles deploys from <code>maximus/clean-features</code> directly (simplest but separates from main)</li>
+</ol>
+
+<h3>Step 2: Provision Alpaca Account</h3>
+<ul>
+<li>Carlos creates a new Alpaca paper account for EXP-880</li>
+<li>Create <code>.env.exp880</code> with: <code>ALPACA_API_KEY</code>, <code>ALPACA_API_SECRET</code>, <code>POLYGON_API_KEY</code></li>
+<li>Optional: <code>TELEGRAM_BOT_TOKEN</code>, <code>TELEGRAM_CHAT_ID</code> for alerts</li>
+</ul>
+
+<h3>Step 3: Train the ML Model</h3>
+<div class="warn">
+<strong>The ML ensemble needs to be trained on real IronVault data before deployment.</strong><br/>
+The backtest used COMPASS synthetic features. For paper trading, the ensemble must be retrained on real historical data from <code>data/options_cache.db</code>. This is a one-time step:
+<pre><code>python -c "from compass.production_ensemble import ProductionEnsemble; pe = ProductionEnsemble(); pe.train('data/options_cache.db'); pe.save('ml/models/exp880_ensemble.joblib')"</code></pre>
+The model file must exist at the path specified in the config before the scanner can run.
+</div>
+
+<h3>Step 4: Launch</h3>
+<pre><code># Config exists at: configs/paper_exp880.yaml
+python main.py scheduler --config configs/paper_exp880.yaml --env-file .env.exp880
+
+# Or via LaunchAgent (Charles creates plist):
+# ~/Library/LaunchAgents/com.pilotai.exp880.plist</code></pre>
+
+<h3>Step 5: Monitor</h3>
+<ul>
+<li>Check logs: <code>logs/paper_exp880.log</code></li>
+<li>Check DB: <code>data/exp880/pilotai_exp880.db</code></li>
+<li>Telegram alerts fire on: delevering events, recovery ramps, circuit breaker triggers</li>
+<li>Weekly check: compare paper P&L vs backtest expectations (should be within 30%)</li>
+</ul>
+
+<h2>Key Parameters (paper_exp880.yaml)</h2>
+<table>
+<tr><th>Parameter</th><th>Value</th><th>What It Does</th></tr>
+<tr><td>Base leverage</td><td>2.0×</td><td>Multiplied by regime: bull 1.2, bear 0.3, crash 0.1</td></tr>
+<tr><td>ML ensemble threshold</td><td>P ≥ 0.75</td><td>Only trade when 3 models agree with ≥75% confidence</td></tr>
+<tr><td>Confidence tiers</td><td>0.90/0.80/0.75 → 100%/75%/50% size</td><td>Higher confidence = bigger position</td></tr>
+<tr><td>VIX delevering</td><td>Start at 25, floor at 35</td><td>Gradually reduce exposure as VIX rises</td></tr>
+<tr><td>DD delevering</td><td>Start at 2%, emergency at 7%, kill at 10%</td><td>Aggressive early delevering</td></tr>
+<tr><td>Min scale</td><td>0.20 (20%)</td><td>Never fully halt — always keep 20% exposure</td></tr>
+<tr><td>Put overlay</td><td>Activates at VIX &gt; 30</td><td>Tail hedge, costs ~0.33%/yr</td></tr>
+<tr><td>Recovery</td><td>10 days positive momentum + VIX &lt; 22</td><td>Ramps back up over 20 days</td></tr>
+<tr><td>Max risk per trade</td><td>8.5%</td><td>Same as EXP-400 validated optimal</td></tr>
+<tr><td>Max positions</td><td>8</td><td>Tighter than unlevered (fewer at 2× leverage)</td></tr>
+<tr><td>Spread width</td><td>$12</td><td>Standard credit spread width</td></tr>
+<tr><td>Profit target</td><td>55%</td><td>Close at 55% of max profit</td></tr>
+<tr><td>Stop loss</td><td>1.25× credit received</td><td>Capped at 90% of spread width</td></tr>
+<tr><td>Circuit breaker</td><td>12% portfolio DD</td><td>Hard stop, backs up crisis hedge</td></tr>
+</table>
+
+<h2>Realistic Expectations</h2>
+<div class="info">
+<strong>What to expect in paper trading:</strong>
+<ul>
+<li><strong>Backtest CAGR: 76.9%</strong> — but this is on synthetic data. Realistic paper expectations: <strong>30-50% annualized</strong> (slippage, real fills, timing differences)</li>
+<li><strong>Trade frequency:</strong> ~22 trades/year (134 over 6 years). Don't expect daily trades.</li>
+<li><strong>Drawdown:</strong> Expect 5-15% DD at some point. The hedge reduces it, doesn't eliminate it.</li>
+<li><strong>2022-like bear:</strong> Strategy should stay near breakeven (−0.4% in backtest). This is the key test.</li>
+<li><strong>Victory condition:</strong> 8 weeks paper, results within 30% of backtest, win rate &gt;70%, max DD &lt;20%</li>
+</ul>
+</div>
+
+<hr class="sep"/>
+
+<!-- ================================================================== -->
+<!-- EXP-1470 -->
+<!-- ================================================================== -->
+
+<h1 style="color:#1565c0">Part 2: EXP-1470 — North Star Portfolio (4-Strategy Blend)</h1>
+
+<h2>What Is It?</h2>
+<p>EXP-1470 is a <strong>portfolio of 4 uncorrelated strategies</strong> optimized via Hierarchical Risk Parity (HRP) to achieve 100% CAGR at 3.6× leverage with &lt;6% max drawdown.</p>
+
+<table>
+<tr><th>Strategy</th><th>Weight</th><th>Source</th><th>Type</th><th>CAGR</th><th>Sharpe</th></tr>
+<tr><td>ML-CS-860</td><td>40.5%</td><td>EXP-860</td><td>ML credit spreads (conservative)</td><td>21.5%</td><td>12.30</td></tr>
+<tr><td>Regime Leverage</td><td>20.9%</td><td>EXP-840</td><td>Regime-adaptive leveraged CS</td><td>56.1%</td><td>4.84</td></tr>
+<tr><td>Intraday Mean Rev</td><td>20.5%</td><td>EXP-1000</td><td>0-DTE intraday reversion</td><td>10.6%</td><td>9.92</td></tr>
+<tr><td>Combined CS+Vol</td><td>18.1%</td><td>EXP-750</td><td>CS + vol harvest blend</td><td>29.2%</td><td>5.06</td></tr>
+</table>
+
+<h2>Backtest Results</h2>
+<table>
+<tr><th>Scenario</th><th>CAGR</th><th>Max DD</th><th>Sharpe</th></tr>
+<tr><td>Base (1×)</td><td class="pos">27.9%</td><td>1.6%</td><td>17.21</td></tr>
+<tr><td>At 3.6× (target)</td><td class="pos">100%</td><td>5.7%</td><td>17.21</td></tr>
+<tr><td>At DD&lt;12% ceiling</td><td class="pos">206.5%</td><td>12.0%</td><td>17.21</td></tr>
+</table>
+
+<h3>Validation (EXP-1520)</h3>
+<table>
+<tr><th>Test</th><th>Result</th><th>Status</th></tr>
+<tr><td>CPCV (10 folds)</td><td>Min Sharpe 10.6 across all folds</td><td><span class="tag tag-yes">PASS</span></td></tr>
+<tr><td>Bootstrap 95% CI — Sharpe</td><td>[10.3, 13.7]</td><td><span class="tag tag-yes">PASS</span></td></tr>
+<tr><td>Weight Sensitivity</td><td>1.4% max change at ±5% perturbation</td><td><span class="tag tag-yes">PASS</span></td></tr>
+<tr><td>Regime Analysis</td><td>4/4 regimes profitable (crisis: +6.7%)</td><td><span class="tag tag-yes">PASS</span></td></tr>
+<tr><td>Cost Sensitivity</td><td>27.7% CAGR at 3× execution costs</td><td><span class="tag tag-yes">PASS</span></td></tr>
+<tr><td>Correlation Stress</td><td>7.8% DD at ρ=0.5 crisis spike</td><td><span class="tag tag-yes">PASS</span></td></tr>
+<tr><td>Leverage Frontier</td><td>195% CAGR at DD&lt;15%</td><td><span class="tag tag-yes">PASS</span></td></tr>
+</table>
+
+<h2>Data Source</h2>
+<div class="warn">
+<strong>Same caveat as EXP-880: backtested on COMPASS synthetic data.</strong><br/>
+The 4 component strategies were each backtested individually using COMPASS-calibrated return profiles, then combined with HRP optimization. The Intraday-MR component (EXP-1000) uses simulated intraday trades derived from multi-day option data scaled to intraday magnitude — real 0-DTE trading behavior may differ significantly.
+</div>
+
+<h2>Deployment Complexity</h2>
+
+<div class="crit">
+<strong>EXP-1470 is significantly harder to deploy than EXP-880.</strong> It requires:
+<ul>
+<li>All 4 component strategies running simultaneously</li>
+<li>An orchestrator that coordinates signals, applies HRP weights, manages rebalancing</li>
+<li>Intraday mean reversion requires real-time 0-DTE options execution (not currently supported by the scanner infrastructure)</li>
+<li>232 new COMPASS modules (vs 4 for EXP-880)</li>
+<li>Multiple ML models trained and validated</li>
+</ul>
+</div>
+
+<h3>What Exists on the Branch</h3>
+<table>
+<tr><th>Component</th><th>File</th><th>Status</th></tr>
+<tr><td>Portfolio optimizer</td><td><code>compass/optimal_portfolio_v3.py</code></td><td><span class="tag tag-yes">Built</span></td></tr>
+<tr><td>North Star deployer</td><td><code>compass/north_star_deployer.py</code></td><td><span class="tag tag-yes">Built (39 tests)</span></td></tr>
+<tr><td>North Star orchestrator</td><td><code>compass/north_star_orchestrator.py</code></td><td><span class="tag tag-yes">Built</span></td></tr>
+<tr><td>Signal pipeline</td><td><code>compass/signal_pipeline.py</code></td><td><span class="tag tag-yes">Built (64 tests)</span></td></tr>
+<tr><td>Paper trading config</td><td><code>configs/paper_north_star.yaml</code></td><td><span class="tag tag-yes">Built</span></td></tr>
+<tr><td>Intraday execution</td><td>—</td><td><span class="tag tag-no">NOT BUILT for live</span></td></tr>
+<tr><td>Real-time 0-DTE support</td><td>—</td><td><span class="tag tag-no">NOT BUILT</span></td></tr>
+<tr><td>Multi-strategy scheduler</td><td>—</td><td><span class="tag tag-no">NOT BUILT</span></td></tr>
+</table>
+
+<h2>Realistic Assessment of EXP-1470</h2>
+<div class="info">
+<strong>Honest take:</strong> EXP-1470's numbers look incredible but deploying it requires significant infrastructure that doesn't exist yet:
+<ul>
+<li>The intraday mean reversion leg (20.5% of the portfolio) needs <strong>real-time 0-DTE options execution</strong> — the current scanner runs once per day at 10:00 ET. This is a fundamentally different execution paradigm.</li>
+<li>The portfolio requires a multi-strategy orchestrator — something the current <code>main.py scheduler</code> wasn't designed for.</li>
+<li>The 17.21 Sharpe ratio is based on combining strategies with near-zero correlation (0.033). In reality, correlations spike during stress — the validation tested ρ=0.5 and got 7.8% DD, which is fine but much worse than the base case.</li>
+<li><strong>Recommendation: Deploy EXP-880 first.</strong> It's a single strategy, uses existing infrastructure, and has a config ready. EXP-1470 is a medium-term goal that requires infrastructure buildout.</li>
+</ul>
+</div>
+
+<hr class="sep"/>
+
+<!-- ================================================================== -->
+<!-- COMPARISON -->
+<!-- ================================================================== -->
+
+<h1 style="color:#5d4037">Part 3: EXP-880 vs EXP-1470 — Which to Deploy</h1>
+
+<table>
+<tr><th></th><th>EXP-880</th><th>EXP-1470</th></tr>
+<tr><td><strong>Complexity</strong></td><td>Single strategy, single ticker</td><td>4 strategies, needs orchestrator</td></tr>
+<tr><td><strong>Infrastructure needed</strong></td><td>4 new COMPASS modules + config</td><td>232 new modules + intraday execution</td></tr>
+<tr><td><strong>Compatible with current scanner?</strong></td><td><span class="tag tag-yes">YES</span> — <code>main.py scheduler</code></td><td><span class="tag tag-no">NO</span> — needs multi-strategy scheduler + intraday</td></tr>
+<tr><td><strong>Alpaca account</strong></td><td>1 new paper account</td><td>Potentially 4 accounts (1 per strategy)</td></tr>
+<tr><td><strong>ML model training</strong></td><td>1 ensemble (retrain on IronVault)</td><td>Multiple models across strategies</td></tr>
+<tr><td><strong>Data source</strong></td><td>COMPASS synthetic</td><td>COMPASS synthetic</td></tr>
+<tr><td><strong>Backtest CAGR</strong></td><td>76.9%</td><td>100% at 3.6× lev</td></tr>
+<tr><td><strong>Realistic paper expectation</strong></td><td>30–50%</td><td>Unknown — too many moving parts</td></tr>
+<tr><td><strong>Time to deploy</strong></td><td>1–2 days (merge + provision)</td><td>2–4 weeks (build infrastructure)</td></tr>
+<tr><td><strong>Recommendation</strong></td><td><span class="tag tag-yes">DEPLOY NOW</span></td><td><span class="tag tag-partial">DEPLOY LATER</span></td></tr>
+</table>
+
+<hr class="sep"/>
+
+<!-- ================================================================== -->
+<!-- MERGE PLAN -->
+<!-- ================================================================== -->
+
+<h1 style="color:#6a1b9a">Part 4: Merge Requirements</h1>
+
+<h2>For EXP-880 (Minimal Merge)</h2>
+<p>Cherry-pick these files from <code>maximus/clean-features</code> to <code>main</code>:</p>
+<pre><code># Required modules (4 files)
+compass/crisis_hedge_v2.py
+compass/production_ensemble.py
+compass/regime_ensemble_v2.py
+compass/signal_pipeline.py
+
+# Config
+configs/paper_exp880.yaml
+
+# Tests
+tests/test_crisis_hedge_v2.py
+tests/test_production_ensemble.py
+tests/test_signal_pipeline.py
+
+# Experiment docs
+experiments/EXP-880-max/
+experiments/EXP-880-validation/</code></pre>
+
+<div class="info">
+<strong>These 4 modules have no dependencies on the other 228 new modules.</strong> They import from existing main-branch modules (<code>compass/ensemble_signal_model.py</code>, <code>compass/walk_forward.py</code>, etc.). Safe to cherry-pick without pulling the full branch.
+</div>
+
+<h2>For EXP-1470 (Full Branch Merge)</h2>
+<p>Requires most of the 232 new modules. A full branch merge is needed, which means:</p>
+<ul>
+<li>Regression testing against existing scanners (EXP-400/401/503/600/700)</li>
+<li>Verify no imports break for running LaunchAgents</li>
+<li>Update <code>SCANNER-OWNERSHIP.md</code></li>
+<li>This is a major merge — recommend doing it in a separate PR with CI checks</li>
+</ul>
+
+<hr class="sep"/>
+
+<h2>Summary — What to Do Right Now</h2>
+
+<div class="ok">
+<strong>Recommended deployment path:</strong>
+<ol>
+<li><strong>Now:</strong> Cherry-pick EXP-880's 4 modules to main. Carlos provisions Alpaca paper account. Charles creates LaunchAgent. Start paper trading.</li>
+<li><strong>Week 2–4:</strong> While EXP-880 paper trades, I continue experiments and build the intraday execution infrastructure needed for EXP-1470.</li>
+<li><strong>Month 2:</strong> If EXP-880 validates, plan the full branch merge for EXP-1470.</li>
+<li><strong>Month 3:</strong> Deploy EXP-1470 components incrementally (credit spread legs first, intraday later).</li>
+</ol>
+</div>
+
+<footer>⚡ Generated by Maximus — April 3, 2026 | Branch: maximus/clean-features (700+ commits ahead of main)</footer>
+
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EXP-1640: Sector Momentum with Options Overlay</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',-apple-system,sans-serif;background:#0f172a;color:#e2e8f0;padding:2rem;line-height:1.6;max-width:1100px;margin:0 auto}
+  h1{font-size:1.8rem;margin-bottom:.5rem;color:#f8fafc}
+  h2{font-size:1.3rem;margin:2rem 0 1rem;color:#93c5fd;border-bottom:1px solid #334155;padding-bottom:.5rem}
+  h3{font-size:1.05rem;margin:1.2rem 0 .6rem;color:#cbd5e1}
+  .sub{color:#94a3b8;font-size:.95rem;margin-bottom:2rem}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:1rem;margin:1rem 0}
+  .card{background:#1e293b;border-radius:8px;padding:1rem;border:1px solid #334155}
+  .card .label{font-size:.72rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
+  .card .value{font-size:1.4rem;font-weight:700;margin-top:.25rem}
+  .green{color:#4ade80}.red{color:#f87171}.yellow{color:#fbbf24}.blue{color:#60a5fa}.orange{color:#fb923c}.white{color:#f8fafc}
+  table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.85rem}
+  th{background:#1e293b;padding:.5rem .75rem;text-align:left;color:#94a3b8;font-weight:600;border-bottom:2px solid #334155}
+  td{padding:.5rem .75rem;border-bottom:1px solid #1e293b}
+  tr:hover td{background:#1e293b}
+  .verdict{padding:.75rem 1rem;border-radius:6px;margin:1rem 0;font-size:.9rem}
+  .verdict-pass{background:#052e16;border:1px solid #16a34a;color:#4ade80}
+  .verdict-warn{background:#422006;border:1px solid #d97706;color:#fbbf24}
+  .verdict-fail{background:#450a0a;border:1px solid #dc2626;color:#f87171}
+  .note{font-size:.8rem;color:#64748b;margin-top:.5rem}
+  .footer{margin-top:3rem;font-size:.75rem;color:#475569;text-align:center;border-top:1px solid #1e293b;padding-top:1rem}
+</style></head><body>
+
+<h1>EXP-1640: Sector Momentum with Options Overlay</h1>
+<div class="sub">
+  Rank XLF/XLI/XLK/XLE by 20-day return, sell OTM put spreads on winner — real IronVault data<br>
+  Generated: 2026-04-04 21:53 UTC &nbsp;|&nbsp; 2020–2025
+</div>
+
+<h2>Hypothesis</h2>
+<p>Sectors with strong trailing momentum are less likely to breach OTM put strikes.
+By selling put credit spreads only on the top-ranked sector ETF and avoiding the
+worst-ranked, we exploit momentum persistence while limiting exposure to
+mean-reversion risk in weak sectors. Bi-weekly rebalancing captures regime shifts.</p>
+
+<h2>Summary</h2>
+<div class="cards">
+  <div class="card"><div class="label">Total Trades</div><div class="value white">19</div></div>
+  <div class="card"><div class="label">Win Rate</div><div class="value green">84.2%</div></div>
+  <div class="card"><div class="label">Total P&L</div><div class="value green">$2,111</div></div>
+  <div class="card"><div class="label">CAGR</div><div class="value green">+0.3%</div></div>
+  <div class="card"><div class="label">Sharpe</div><div class="value yellow">0.64</div></div>
+  <div class="card"><div class="label">Max DD</div><div class="value yellow">0.8%</div></div>
+  <div class="card"><div class="label">SPY Correlation</div><div class="value green">0.038</div></div>
+  <div class="card"><div class="label">Calmar</div><div class="value blue">0.43</div></div>
+</div>
+<h2>Year-by-Year Breakdown</h2>
+<table><thead><tr>
+<th>Year</th><th>Trades</th><th>Wins</th><th>Win Rate</th><th>P&L</th>
+<th>Return</th><th>Sectors Used</th></tr></thead><tbody>
+<tr><td><strong>2020</strong></td>
+        <td>3</td><td>3</td><td>100.0%</td>
+        <td class="green">$1,058</td>
+        <td class="green">+1.1%</td>
+        <td>XLF, XLI</td></tr>
+<tr><td><strong>2021</strong></td>
+        <td>3</td><td>3</td><td>100.0%</td>
+        <td class="green">$336</td>
+        <td class="green">+0.3%</td>
+        <td>XLF</td></tr>
+<tr><td><strong>2022</strong></td>
+        <td>3</td><td>2</td><td>66.7%</td>
+        <td class="green">$423</td>
+        <td class="green">+0.4%</td>
+        <td>XLF, XLI</td></tr>
+<tr><td><strong>2023</strong></td>
+        <td>4</td><td>4</td><td>100.0%</td>
+        <td class="green">$532</td>
+        <td class="green">+0.5%</td>
+        <td>XLF</td></tr>
+<tr><td><strong>2024</strong></td>
+        <td>3</td><td>3</td><td>100.0%</td>
+        <td class="green">$376</td>
+        <td class="green">+0.4%</td>
+        <td>XLF, XLI</td></tr>
+<tr><td><strong>2025</strong></td>
+        <td>3</td><td>1</td><td>33.3%</td>
+        <td class="red">$-614</td>
+        <td class="red">-0.6%</td>
+        <td>XLF, XLI</td></tr>
+</tbody></table>
+<h2>Ticker Distribution</h2>
+<table><thead><tr>
+<th>Ticker</th><th>Trades</th><th>Wins</th><th>Win Rate</th><th>Avg P&L</th>
+<th>Total P&L</th></tr></thead><tbody>
+<tr><td><strong>XLF</strong></td>
+        <td>14</td><td>12</td><td>85.7%</td>
+        <td class="green">$56</td>
+        <td class="green">$787</td></tr>
+<tr><td><strong>XLI</strong></td>
+        <td>5</td><td>4</td><td>80.0%</td>
+        <td class="green">$265</td>
+        <td class="green">$1,324</td></tr>
+</tbody></table>
+<h2>Walk-Forward Validation (Train: 2020–2023, Test: 2024–2025)</h2>
+<table><thead><tr>
+    <th>Period</th><th>Trades</th><th>Win Rate</th><th>Sharpe</th>
+    <th>CAGR</th><th>Max DD</th></tr></thead><tbody>
+    <tr><td><strong>Train 2020–2023</strong></td>
+    <td>13</td><td>92.3%</td>
+    <td>1.07</td><td>+0.5%</td>
+    <td>0.1%</td></tr>
+    <tr><td><strong>Test 2024–2025</strong></td>
+    <td>6</td><td>66.7%</td>
+    <td>-0.12</td><td>-0.1%</td>
+    <td>0.8%</td></tr>
+    </tbody></table>
+<p class="note">Walk-forward Sharpe ratio (test/train): <strong>-0.11</strong></p>
+<div class="verdict verdict-fail">Walk-forward FAIL: negative OOS Sharpe</div>
+<h2>Recent Trades (Last 15)</h2>
+<table><thead><tr>
+    <th>Entry</th><th>Exit</th><th>Ticker</th><th>Rank</th>
+    <th>Short/Long</th><th>Credit</th><th>P&L</th><th>Win</th></tr></thead><tbody>
+<tr><td>2021-03-12</td><td>2021-04-16</td>
+        <td>XLF</td><td>#2</td>
+        <td>$30/$29</td>
+        <td>$6</td>
+        <td class="green">$+186</td>
+        <td class="green">W</td></tr>
+<tr><td>2021-10-14</td><td>2021-11-19</td>
+        <td>XLF</td><td>#2</td>
+        <td>$34/$33</td>
+        <td>$3</td>
+        <td class="green">$+90</td>
+        <td class="green">W</td></tr>
+<tr><td>2022-02-08</td><td>2022-03-15</td>
+        <td>XLF</td><td>#2</td>
+        <td>$36/$35</td>
+        <td>$5</td>
+        <td class="red">$-93</td>
+        <td class="red">L</td></tr>
+<tr><td>2022-07-19</td><td>2022-08-26</td>
+        <td>XLF</td><td>#2</td>
+        <td>$29/$28</td>
+        <td>$6</td>
+        <td class="green">$+186</td>
+        <td class="green">W</td></tr>
+<tr><td>2022-11-09</td><td>2022-12-16</td>
+        <td>XLI</td><td>#1</td>
+        <td>$86/$85</td>
+        <td>$10</td>
+        <td class="green">$+330</td>
+        <td class="green">W</td></tr>
+<tr><td>2023-02-07</td><td>2023-03-03</td>
+        <td>XLF</td><td>#2</td>
+        <td>$34/$32</td>
+        <td>$4</td>
+        <td class="green">$+124</td>
+        <td class="green">W</td></tr>
+<tr><td>2023-07-18</td><td>2023-08-22</td>
+        <td>XLF</td><td>#1</td>
+        <td>$32/$31</td>
+        <td>$2</td>
+        <td class="green">$+30</td>
+        <td class="green">W</td></tr>
+<tr><td>2023-09-27</td><td>2023-11-03</td>
+        <td>XLF</td><td>#2</td>
+        <td>$30/$30</td>
+        <td>$9</td>
+        <td class="green">$+288</td>
+        <td class="green">W</td></tr>
+<tr><td>2023-12-21</td><td>2024-01-26</td>
+        <td>XLF</td><td>#2</td>
+        <td>$34/$33</td>
+        <td>$3</td>
+        <td class="green">$+90</td>
+        <td class="green">W</td></tr>
+<tr><td>2024-02-06</td><td>2024-03-15</td>
+        <td>XLI</td><td>#2</td>
+        <td>$107/$106</td>
+        <td>$3</td>
+        <td class="green">$+90</td>
+        <td class="green">W</td></tr>
+<tr><td>2024-05-16</td><td>2024-06-21</td>
+        <td>XLF</td><td>#2</td>
+        <td>$39/$38</td>
+        <td>$1</td>
+        <td class="green">$+30</td>
+        <td class="green">W</td></tr>
+<tr><td>2024-09-11</td><td>2024-10-18</td>
+        <td>XLF</td><td>#1</td>
+        <td>$41/$40</td>
+        <td>$8</td>
+        <td class="green">$+256</td>
+        <td class="green">W</td></tr>
+<tr><td>2025-01-06</td><td>2025-02-07</td>
+        <td>XLF</td><td>#2</td>
+        <td>$45/$44</td>
+        <td>$6</td>
+        <td class="green">$+186</td>
+        <td class="green">W</td></tr>
+<tr><td>2025-03-06</td><td>2025-04-10</td>
+        <td>XLF</td><td>#2</td>
+        <td>$46/$45</td>
+        <td>$15</td>
+        <td class="red">$-770</td>
+        <td class="red">L</td></tr>
+<tr><td>2025-05-16</td><td>2025-06-17</td>
+        <td>XLI</td><td>#2</td>
+        <td>$135/$134</td>
+        <td>$1</td>
+        <td class="red">$-30</td>
+        <td class="red">L</td></tr>
+</tbody></table>
+<h2>Overall Assessment</h2>
+<div class="verdict verdict-warn">MISS: Trades ≥ 30 (statistical significance)</div>
+<div class="verdict verdict-pass">PASS: Win rate > 50%</div>
+<div class="verdict verdict-pass">PASS: Positive Sharpe</div>
+<div class="verdict verdict-pass">PASS: Max DD < 10%</div>
+<div class="verdict verdict-pass">PASS: SPY correlation < 0.3</div>
+<div class="verdict verdict-warn">MISS: OOS trades ≥ 10</div>
+
+<div class="footer">
+  EXP-1640: Sector Momentum with Options Overlay — PilotAI Credit Spreads<br>
+  All prices from IronVault options_cache.db + Yahoo Finance. Zero synthetic data.<br>
+  Bi-weekly rebalance, VIX&lt;30 filter, 5% OTM, 30-35 DTE put credit spreads.
+</div></body></html>

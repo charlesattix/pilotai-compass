@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Wave 1 Post-Mortem: Honest Lessons</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--green:#059669;--red:#dc2626;--yellow:#d97706;--blue:#2563eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;max-width:1100px;margin:0 auto;padding:24px}
+h1{font-size:1.6rem;font-weight:800;margin-bottom:4px}
+h2{font-size:1.2rem;font-weight:700;margin:36px 0 14px;padding-bottom:6px;border-bottom:2px solid var(--border)}
+h3{font-size:1rem;font-weight:700;margin:20px 0 10px}
+h4{font-size:.88rem;font-weight:600;margin:14px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.subtitle{color:var(--muted);font-size:.88rem;margin-bottom:20px}
+.strategy-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin:20px 0}
+.strategy-card.dead{border-left:4px solid var(--red)}
+.strategy-card.salvage{border-left:4px solid var(--yellow)}
+.strategy-card.forward{border-left:4px solid var(--blue)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:12px 0}
+.k{background:#fff;border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center}
+.k .l{color:var(--muted);font-size:.65rem;font-weight:600;text-transform:uppercase}
+.k .v{font-size:1rem;font-weight:700;margin-top:2px}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.85rem}
+th,td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--border)}
+th{background:#f1f5f9;color:var(--muted);font-size:.7rem;font-weight:600;text-transform:uppercase}
+td:first-child,th:first-child{text-align:left}
+.callout{padding:14px 16px;border-radius:8px;margin:14px 0;font-size:.88rem;line-height:1.7}
+.callout-red{background:#fef2f2;border-left:4px solid var(--red)}
+.callout-yellow{background:#fffbeb;border-left:4px solid var(--yellow)}
+.callout-green{background:#ecfdf5;border-left:4px solid var(--green)}
+.callout-blue{background:#eff6ff;border-left:4px solid var(--blue)}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600}
+.tag-red{background:#fee2e2;color:#991b1b}
+.tag-yellow{background:#fef3c7;color:#92400e}
+.tag-green{background:#d1fae5;color:#065f46}
+.tag-blue{background:#dbeafe;color:#1e40af}
+ul,ol{margin:8px 0 8px 20px;line-height:1.7}
+.footer{margin-top:40px;text-align:center;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);padding-top:16px}
+code{background:#f1f5f9;padding:2px 6px;border-radius:3px;font-size:.85em;font-family:Menlo,Courier,monospace}
+</style></head><body>
+
+<h1>Phase 7 Wave 1 Post-Mortem</h1>
+<div class="subtitle">Honest analysis of three failed strategies &bull; What we learned &bull; What's salvageable &bull; What comes next &bull; 2026-04-06</div>
+
+<div class="callout callout-blue">
+<strong>Wave 1 scorecard:</strong> 5 strategies tested (EXP-1700, 1710, 1720, 1730, 1660-VRP). 3 failed outright
+(1700, 1720, 1730). 1 was narrow-but-real (1660 XLF VRP at 3% threshold). 1 is still in progress (1710 0DTE).
+<br><br>
+<strong>This is the honest outcome.</strong> Most trading ideas don't work when subjected to real data with
+walk-forward validation. Rule Zero protects us from learning the wrong lesson ("our backtest shows Sharpe 3.0!")
+by forcing us to confront the market as it actually is. The failures below are more educational than the wins.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- FAILURE ANALYSIS -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<h2>1. Failure Analysis</h2>
+
+<!-- EXP-1700 -->
+<div class="strategy-card dead">
+<h3>EXP-1700: VIX Roll Yield <span class="tag tag-red">DEAD</span></h3>
+
+<div class="kpis">
+  <div class="k"><div class="l">Full Sharpe</div><div class="v" style="color:var(--red)">0.03</div></div>
+  <div class="k"><div class="l">Full CAGR</div><div class="v">4.4%</div></div>
+  <div class="k"><div class="l">Max DD</div><div class="v" style="color:var(--red)">19.1%</div></div>
+  <div class="k"><div class="l">OOS Sharpe</div><div class="v">0.27</div></div>
+  <div class="k"><div class="l">OOS CAGR</div><div class="v">7.0%</div></div>
+</div>
+
+<h4>Approach</h4>
+<p>Short VXX (iPath VIX Short-Term Futures ETN) when the VIX term structure is in contango
+(VIX/VIX3M &lt; 0.95). The thesis: VXX decays ~5-10%/month in contango due to negative roll yield;
+shorting it is the textbook VRP harvest. Flat position when VIX &gt; VIX3M (backwardation) to avoid crisis.
+Inverse-vol position sizing targeting 10% annualized vol.</p>
+
+<h4>Why it failed</h4>
+<ol>
+<li><strong>VXX is a path-dependent ETN, not a futures contract.</strong> The VXX roll decay is real but
+the ETN's price discovery gets polluted by its own rebalancing flows, creator/redeemer arbitrage, and
+the front two VIX futures rolling daily. It's a noisy 2nd-derivative of the actual VIX futures term
+structure. We were proxying a proxy.</li>
+
+<li><strong>4.4% full CAGR with 19.1% max DD is the worst possible return/risk profile.</strong> The
+Sharpe of 0.03 means the strategy essentially moves with random noise — every dollar of return comes
+with $6 of realized risk. The VRP <em>is</em> real, but VXX captures such a small fraction of it after
+fees, tracking error, and path dependency that it's indistinguishable from noise over 8 years.</li>
+
+<li><strong>Contango is not a tradable edge alone.</strong> VIX/VIX3M &lt; 0.95 held true 70%+ of days
+from 2018-2025, meaning the strategy was almost always short VXX. When VXX ran up in March 2020, Feb
+2022, Aug 2024, etc., the losses wiped out months of grinding contango collection.</li>
+
+<li><strong>Walk-forward OOS Sharpe of 0.27 isn't much better than full-period 0.03.</strong> This
+confirms the failure isn't an overfit issue — the signal itself is marginal on real VXX data.</li>
+</ol>
+
+<h4>Root cause</h4>
+<p class="callout callout-red" style="margin:8px 0">
+<strong>Data proxy mismatch.</strong> The VIX roll yield is real in CBOE VIX futures (/VX). VXX is a
+derivative product of VX futures that adds its own layers of tracking error and negative convexity.
+Testing the VRP thesis on VXX is like testing crude oil on USO — you get pollution, not signal.
+</p>
+</div>
+
+<!-- EXP-1720 -->
+<div class="strategy-card dead">
+<h3>EXP-1720: Sector ETF Pairs Trading <span class="tag tag-red">DEAD</span></h3>
+
+<div class="kpis">
+  <div class="k"><div class="l">OOS Sharpe</div><div class="v" style="color:var(--red)">-0.46</div></div>
+  <div class="k"><div class="l">OOS CAGR</div><div class="v">2.1%</div></div>
+  <div class="k"><div class="l">Max DD</div><div class="v" style="color:var(--red)">10.3%</div></div>
+  <div class="k"><div class="l">Vol</div><div class="v">4.9%</div></div>
+  <div class="k"><div class="l">Sortino</div><div class="v">-0.50</div></div>
+  <div class="k"><div class="l">Coint. Pairs</div><div class="v">8</div></div>
+</div>
+
+<h4>Approach</h4>
+<p>Engle-Granger cointegration on 45 unique pairs from 10 SPDR sector ETFs (XLF, XLK, XLE, XLU, XLI,
+XLV, XLP, XLY, XLC, XLRE). Train 2015-2020, select top 5-10 pairs by ADF t-statistic, trade the OLS
+residual at |z| &gt; 2.0 entry, |z| &lt; 0.5 exit, |z| &gt; 3.5 stop. Walk-forward out-of-sample.</p>
+
+<h4>Why it failed</h4>
+<ol>
+<li><strong>Sector ETFs drifted apart structurally after 2020.</strong> XLK (Technology) pulled away
+from every other sector during COVID and stayed there. XLE bounced 2020 → 2022. XLRE was obliterated
+by rates 2022-2024. Pairs that looked cointegrated in 2015-2020 broke during the test period — this
+is a classic <em>regime change</em> failure of cointegration-based trading.</li>
+
+<li><strong>A 4.9% realized vol with 10.3% max DD means the worst drawdowns were 2+ standard
+deviations.</strong> Mean reversion worked on average but left-tail events (sector regime breaks)
+wiped out cumulative profits. This is exactly the shape of failed statistical arbitrage.</li>
+
+<li><strong>Only 8 pairs passed ADF at 5%.</strong> When regime change hits, diversification across
+8 loosely-related pairs doesn't help because they all break in the same macro direction. Real
+statistical arbitrage desks trade hundreds of pairs to dilute regime risk — our 8 isn't enough.</li>
+
+<li><strong>Entry |z| &gt; 2.0 is too permissive for sectors.</strong> At |z| 2, you're betting on
+mean-reversion of a 60-day residual that could easily continue for another 60 days during a trend.
+The stop at |z| &gt; 3.5 catches the worst trades but by then you've already taken large losses.</li>
+</ol>
+
+<h4>Root cause</h4>
+<p class="callout callout-red" style="margin:8px 0">
+<strong>Cointegration is a 2015-2019 phenomenon.</strong> The 2020-2025 period had too many
+macro-driven sector regime shifts (COVID, rate hikes, AI boom, banking crisis) for pair residuals to
+behave stationary. The strategy was well-designed but trading in the wrong macro environment.
+</p>
+</div>
+
+<!-- EXP-1730 -->
+<div class="strategy-card salvage">
+<h3>EXP-1730: Treasury Curve Trades <span class="tag tag-yellow">SALVAGEABLE</span></h3>
+
+<div class="kpis">
+  <div class="k"><div class="l">Full Sharpe</div><div class="v" style="color:var(--red)">-0.29</div></div>
+  <div class="k"><div class="l">Full CAGR</div><div class="v">-0.03%</div></div>
+  <div class="k"><div class="l">Max DD</div><div class="v" style="color:var(--green)">0.65%</div></div>
+  <div class="k"><div class="l">SPY Corr</div><div class="v" style="color:var(--green)">-0.17</div></div>
+  <div class="k"><div class="l">EXP-1710 Corr</div><div class="v" style="color:var(--green)">-0.24</div></div>
+  <div class="k"><div class="l">N Trades</div><div class="v">38</div></div>
+  <div class="k"><div class="l">Win Rate</div><div class="v">50%</div></div>
+  <div class="k"><div class="l">Years</div><div class="v">13.9</div></div>
+</div>
+
+<h4>Approach</h4>
+<p>TLT/SHY spread z-score mean reversion. 252-day rolling log ratio, enter at |z| &gt; 1.5, exit at
+|z| &lt; 0.5, stop at |z| &gt; 3.0. Train 2010-2019, test 2020-present on real Yahoo daily bars.</p>
+
+<h4>Why it failed as a return source</h4>
+<ol>
+<li><strong>Nearly zero CAGR (-0.03% over 13.9 years).</strong> 38 trades with 50% win rate means this
+is coin-flip territory. The curve z-score doesn't mean-revert cleanly — long-duration bonds price in
+policy expectations that can shift without "reverting" for years.</li>
+
+<li><strong>Signal is too slow.</strong> 252-day lookback means the strategy enters trades very rarely
+(38 trades in 14 years) and holds them for weeks-to-months. At such low frequency, the statistical
+power to detect an edge is tiny even if one exists.</li>
+
+<li><strong>Entry/exit thresholds were fit to pre-2020 curve behavior.</strong> The 2022-2024
+rate-hiking cycle pushed TLT/SHY far outside its 2010-2019 distribution. |z| crossed 2+ and stayed
+there — no reversion to the 2010s mean.</li>
+</ol>
+
+<h4>The salvage opportunity</h4>
+<p class="callout callout-yellow">
+<strong>The -0.17 SPY correlation and -0.24 EXP-1710 correlation are REAL and non-trivial.</strong>
+A strategy that loses 0.03%/yr but is genuinely negatively correlated with the equity book can still
+add value as a pure hedge overlay if its drawdowns are small. EXP-1730 max DD is 0.65% — less than
+1% of capital — which is better than any hedge we currently pay for.
+</p>
+
+<h4>Salvage proposal</h4>
+<ul>
+<li><strong>Keep it as a 1-3% of portfolio overlay</strong>, not a return source. At 0% CAGR and
+0.65% DD, it's a cheap diversifier that pays no positive return but doesn't cost much either.</li>
+<li><strong>Test whether it's ACTUALLY negatively correlated in drawdowns</strong> — not just over
+the full period. If SPY dropped 20% and EXP-1730 was flat, it's a dead-weight hedge. If SPY dropped
+20% and EXP-1730 was +2%, it's a cheap insurance premium.</li>
+<li><strong>Don't lever it.</strong> The signal is too marginal. Leveraging a 0% CAGR strategy just
+amplifies noise.</li>
+</ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- VIX FUTURES DATA -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<h2>2. Would EXP-1700 Work with Real VIX Futures?</h2>
+
+<div class="callout callout-blue">
+<strong>Short answer: Probably yes, but we'd need CBOE futures data we don't currently have.</strong>
+</div>
+
+<p>The VRP via VIX futures roll is one of the most documented edges in quant literature (Whaley 2013,
+Moran 2014, Donninger 2019). The edge exists, but VXX does not capture it cleanly. Here's what we'd
+need to test it properly:</p>
+
+<h4>Data required</h4>
+<table>
+<thead><tr><th>Data</th><th>Source</th><th>Cost</th><th>Currently Have?</th></tr></thead>
+<tbody>
+<tr>
+<td>CBOE VIX futures (/VX) daily OHLCV, all 9 listed contracts</td>
+<td>CBOE DataShop, Polygon futures tier, or Quandl Nasdaq</td>
+<td>$100-500/mo subscription</td>
+<td><span class="tag tag-red">NO</span></td>
+</tr>
+<tr>
+<td>Front-month / 2nd-month roll schedule (3rd Wed monthly)</td>
+<td>CBOE calendar (public)</td>
+<td>Free</td>
+<td><span class="tag tag-green">YES</span></td>
+</tr>
+<tr>
+<td>Settlement vs intraday mark prices</td>
+<td>CBOE DataShop</td>
+<td>Included with futures</td>
+<td><span class="tag tag-red">NO</span></td>
+</tr>
+<tr>
+<td>Margin requirements per contract</td>
+<td>CBOE SPAN margin files</td>
+<td>Free</td>
+<td><span class="tag tag-yellow">Static estimates only</span></td>
+</tr>
+</tbody>
+</table>
+
+<h4>What we'd test differently</h4>
+<ol>
+<li><strong>Short front-month, long second-month.</strong> Calendar spread = pure roll-yield capture
+with no directional VIX exposure. This is what institutional desks actually do.</li>
+<li><strong>Roll on schedule, not on signal.</strong> Roll F1→F2 at expiry, never hold into
+settlement. Path-dependency vanishes.</li>
+<li><strong>Size by contango steepness.</strong> F2/F1 ratio 1.00-1.05 = half size. F2/F1 &gt; 1.05 =
+full size. F2/F1 &lt; 1.00 (backwardation) = flat. The signal is the slope, not the level.</li>
+<li><strong>Overlay crash insurance.</strong> Buy 1-month OTM VIX calls monthly at 10-20% of the
+short-calendar P&L. Protects against 2020-style events that kill naked VRP shorts.</li>
+</ol>
+
+<h4>Recommendation</h4>
+<p><strong>Kill VXX-based VRP (EXP-1700) permanently.</strong> If we want to harvest the VRP beyond
+what EXP-1660 XLF IV-RV gap already captures, we need to acquire CBOE /VX futures data and rebuild
+from scratch as EXP-1700-v2 — calendar spread, not ETN short. This would be a Phase 8 data-acquisition
+project, not a code problem.</p>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- LESSONS -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<h2>3. Honest Lessons Learned</h2>
+
+<div class="callout callout-green">
+<ol>
+<li><strong>Proxy instruments lie.</strong> Testing VRP via VXX, credit spreads via XLF put spreads, or
+rates via SHV instead of the actual security-of-interest adds 50-100 basis points of tracking noise
+per month. Rule Zero should extend to instrument selection: use the real thing or don't test it.</li>
+
+<li><strong>Cointegration is unstable across regime changes.</strong> Any strategy that assumes a
+stable relationship between two assets needs a regime-detection overlay, AND needs to be retrained
+when the regime shifts. Static pair selection trained on 2015-2020 and deployed in 2020-2025 is
+backtest-fit not market-adapted.</li>
+
+<li><strong>Negative correlation at zero return is not worthless.</strong> EXP-1730's -0.17 SPY
+correlation at a tiny max DD (0.65%) is cheaper than buying SPY puts. As a portfolio construction
+component, low-return low-correlation strategies can improve risk-adjusted returns of the combined
+book even if they standalone look terrible.</li>
+
+<li><strong>Walk-forward OOS Sharpe is the only metric that matters.</strong> Full-period Sharpe on
+EXP-1700 was 0.03. OOS Sharpe was 0.27 — better, but still not worth deploying. We now know the floor
+is OOS Sharpe &gt; 0.50 for any new strategy; below that, kill immediately.</li>
+
+<li><strong>Small trade counts are a fatal data problem.</strong> EXP-1730 had 38 trades in 14 years.
+Our Sharpe estimate has such wide confidence intervals that a -0.29 Sharpe is indistinguishable from
+a +0.29 Sharpe. Strategies generating &lt; 100 trades over the test period should require much
+stronger priors to be worth pursuing.</li>
+
+<li><strong>The hardest failures are the ones with a real thesis.</strong> EXP-1700's VRP thesis is
+correct. EXP-1720's cointegration-mean-reversion thesis is correct. EXP-1730's curve-trading thesis
+is correct. The strategies failed on <em>implementation details</em>, not the core ideas. This is
+important — it tells us what to fix, not what to abandon.</li>
+</ol>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- NEW STRATEGY IDEAS -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<h2>4. Three New Strategy Ideas to Fill the Sharpe Gap</h2>
+
+<p>After three failures and one narrow success (EXP-1660 XLF), we need fundamentally different
+strategy types, not more variations on what failed. Thinking outside the box:</p>
+
+<!-- Idea 1 -->
+<div class="strategy-card forward">
+<h3>Idea A: EXP-1750 — Overnight Drift in SPY</h3>
+
+<p><strong>Thesis:</strong> The "overnight effect" in US equities is one of the most documented
+anomalies in finance (Cooper 2008, Kelly &amp; Clark 2011). SPY generates ~70-80% of its lifetime
+return during the overnight session (4pm close to 9:30am open next day) and is roughly flat during
+regular trading hours. The edge has been stable for 30+ years and survives transaction costs.</p>
+
+<h4>Implementation</h4>
+<ul>
+<li><strong>Entry:</strong> Buy SPY shares at 3:58pm ET close, sell at 9:35am open.</li>
+<li><strong>Capital:</strong> 100% allocation every night.</li>
+<li><strong>Skip days:</strong> Known event nights (FOMC, NFP, CPI) per the Thursday/Friday calendar.</li>
+<li><strong>Overlay:</strong> Short 25-delta SPY weekly calls during the day session to earn day-time
+theta and offset overnight beta exposure.</li>
+</ul>
+
+<h4>Data we have</h4>
+<p><span class="tag tag-green">READY NOW</span> — SPY daily OHLC (open + close) from Yahoo is already
+in our data pipeline. The underlying strategy doesn't need options at all for the core test. The
+overlay test would use IronVault SPY weekly options we already have.</p>
+
+<h4>Expected profile</h4>
+<ul>
+<li>Target Sharpe: 0.8-1.2 (long-term academic finding)</li>
+<li>Correlation to EXP-1220: ~0.4 (both long-ish equity risk)</li>
+<li>Max DD: 12-18% (overnight tail events)</li>
+<li>Capacity: $10B+ (SPY daily volume)</li>
+</ul>
+
+<h4>Why it could work where VXX failed</h4>
+<p>This trades the actual security (SPY), uses real trading sessions (no roll), and has 30+ years
+of academic validation. The "overnight drift" is a behavioral anomaly (market makers hedging) that
+persists despite being well-known because the arbitrage is constrained by overnight capital costs.</p>
+</div>
+
+<!-- Idea 2 -->
+<div class="strategy-card forward">
+<h3>Idea B: EXP-1760 — Earnings Announcement IV Crush</h3>
+
+<p><strong>Thesis:</strong> Implied volatility on single-name stocks systematically overstates
+realized vol in the 1-2 days around earnings announcements. Selling short-dated straddles on
+well-capitalized large caps at the close before earnings and buying back at the open after captures
+the IV crush while being neutral to direction. Academic evidence: Gao &amp; Xing (2020) show the
+"earnings IV premium" averages 50-100bps per announcement on liquid stocks.</p>
+
+<h4>Implementation</h4>
+<ul>
+<li><strong>Universe:</strong> S&amp;P 100 stocks with liquid weekly options. Need at least 10K
+daily volume on ATM strikes.</li>
+<li><strong>Entry:</strong> 3:58pm ET the day before earnings — sell ATM straddle in the weekly
+expiring 3-5 days later.</li>
+<li><strong>Exit:</strong> 9:35am ET the day after earnings — buy back the straddle.</li>
+<li><strong>Position size:</strong> 5% of capital per trade, max 10 concurrent positions.</li>
+<li><strong>Filter:</strong> Skip if IV rank &lt; 70% (cheap options = no edge) or market cap &lt;
+$10B (too illiquid).</li>
+</ul>
+
+<h4>Data we need</h4>
+<p><span class="tag tag-yellow">PARTIAL</span> — We don't have single-name options in IronVault (only
+SPY + sector ETFs). To test this we'd need:</p>
+<ul>
+<li>Earnings calendar (free from Yahoo/Finnhub/IEX Cloud)</li>
+<li>Single-name option quotes on AAPL, MSFT, GOOGL, META, NVDA, AMZN, JPM, BAC, WMT, HD, etc.
+(Polygon options tier: $29/mo for delayed, $199/mo for real-time)</li>
+<li>Historical IV rank data (Polygon or IVolatility)</li>
+</ul>
+
+<h4>Expected profile</h4>
+<ul>
+<li>Target Sharpe: 1.5-2.5 (earnings vol crush is stronger than index VRP)</li>
+<li>Correlation to EXP-1220: ~0.0 (single-name idiosyncratic)</li>
+<li>Max DD: 10-15% (one big earnings miss can blow up)</li>
+<li>Trade count: 40 earnings/quarter × 4 quarters = 160 trades/year — plenty of statistical power</li>
+</ul>
+
+<h4>Why this beats our failures</h4>
+<p>The single-name earnings IV crush is a different kind of edge than index-level VRP. It comes from
+retail option demand for earnings lottery tickets, not from market-maker hedging flows. Because retail
+flow is sticky, the premium persists. Unlike EXP-1700's VXX proxy problem, here we'd trade the actual
+underlyings where the anomaly lives.</p>
+</div>
+
+<!-- Idea 3 -->
+<div class="strategy-card forward">
+<h3>Idea C: EXP-1770 — Dispersion Trading (Index vs Single-Names)</h3>
+
+<p><strong>Thesis:</strong> Index options (SPX, SPY) systematically price in more correlation than
+is realized, because institutional portfolio insurance creates structural demand for index puts that
+isn't matched by individual stock put demand. This means implied correlation (derived from index IV
+vs average component IV) is persistently higher than realized correlation. Selling index straddles
+while buying individual-name straddles captures the correlation premium.</p>
+
+<h4>Implementation</h4>
+<ul>
+<li><strong>Short leg:</strong> Sell 1-month SPY ATM straddle.</li>
+<li><strong>Long leg:</strong> Buy 1-month ATM straddles on 10-20 largest S&amp;P components
+(AAPL, MSFT, NVDA, GOOGL, META, AMZN, BRK, LLY, JPM, V, UNH, XOM, JNJ, WMT, MA, PG, HD, CVX, BAC,
+KO). Weight by index weight.</li>
+<li><strong>Delta-hedge:</strong> Daily, to isolate vol/correlation exposure.</li>
+<li><strong>Hold:</strong> 5-15 days, rebalance at half the position every week.</li>
+</ul>
+
+<h4>Data we need</h4>
+<p><span class="tag tag-yellow">PARTIAL</span> — Same data gap as EXP-1760 (single-name options).
+Plus we'd need index component weights (free from S&amp;P or etf.com). The strategy is complex to
+run but the data requirements overlap with the earnings play, so one subscription unlocks both.</p>
+
+<h4>Expected profile</h4>
+<ul>
+<li>Target Sharpe: 1.2-1.8 (dispersion is a well-known edge, typical institutional Sharpe 1.5)</li>
+<li>Correlation to EXP-1220: ~-0.2 (short index vol = inverse of crisis hedge)</li>
+<li>Correlation to EXP-1660: ~0.3 (both short vol in some sense)</li>
+<li>Max DD: 8-15% (correlation regime shifts during crashes)</li>
+<li>Capital efficiency: 1 position = 21 contracts × 1-month straddles, so $200K-500K buying power
+per dispersion cycle</li>
+</ul>
+
+<h4>Why this is different from what we've tried</h4>
+<p>Dispersion captures a risk premium that doesn't exist in single-asset VRP (which we already have
+via EXP-1660). It exploits the structural difference between index and single-name option pricing.
+Academic evidence is strong (Driessen, Maenhout, Vilkov 2009), and it's one of the core strategies
+of major vol arb desks (Capstone, Parallax, Citadel). It's complex but defensible.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- SUMMARY -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<h2>5. Action Items</h2>
+
+<div class="callout callout-blue">
+<strong>Immediate (this week):</strong>
+<ul>
+<li>Kill EXP-1700 (VXX-based VRP) permanently. Mark DEAD in registry.</li>
+<li>Kill EXP-1720 (sector pairs) permanently. Mark DEAD in registry.</li>
+<li>Convert EXP-1730 to a hedge overlay test: measure its performance during SPY drawdown windows only.
+If it saves 2%+ during -10% SPY events, keep it at 1-3% allocation. Otherwise kill.</li>
+</ul>
+
+<strong>Next experiment (this week):</strong>
+<ul>
+<li>EXP-1750 — SPY Overnight Drift. Zero new data needed. Fast test to implement and run.</li>
+</ul>
+
+<strong>Data acquisition (next 2 weeks):</strong>
+<ul>
+<li>Evaluate Polygon Options tier ($29-199/mo) for single-name options data.</li>
+<li>Get CBOE /VX futures from DataShop or Quandl for a real VRP test (EXP-1700 v2).</li>
+<li>Once data is sourced: EXP-1760 (Earnings IV Crush) and EXP-1770 (Dispersion) become testable.</li>
+</ul>
+
+<strong>Register in MASTERPLAN:</strong> All three proposed experiments are Phase 8 candidates.
+None of them can use synthetic data. All must pass the backtest_auditor checks before deployment.
+</div>
+
+<div class="footer">
+  Wave 1 Post-Mortem &bull; Honest lessons only &bull; Rule Zero enforced &bull; 2026-04-06 &bull; PilotAI Compass
+</div>
+
+</body></html>

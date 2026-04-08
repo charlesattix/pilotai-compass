@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>EXP-1730 Hedge Overlay Analysis</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e2e8f0;--text:#1a1a2e;--muted:#64748b;--green:#059669;--red:#dc2626;--blue:#2563eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;max-width:1100px;margin:0 auto;padding:28px}
+h1{font-size:1.55rem;font-weight:800;margin-bottom:4px}
+h2{font-size:1.15rem;font-weight:700;margin:32px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--border)}
+.sub{color:var(--muted);font-size:.86rem;margin-bottom:18px}
+.note{color:var(--muted);font-size:.82rem;font-style:italic;margin:6px 0}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.84rem}
+th{background:#f1f5f9;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:2px solid var(--border);font-size:.74rem;font-weight:600;text-transform:uppercase}
+td{padding:6px 10px;border-bottom:1px solid #f1f5f9;text-align:left}
+.r{text-align:right}
+tr:hover td{background:#fafafa}
+.hero{background:linear-gradient(135deg,#f0fdf4 if ctx["verdict_color"]=="#059669" else #fef2f2,#ffffff);border:2px solid #dc2626;border-radius:12px;padding:24px;margin:18px 0;text-align:center}
+.hero .title{font-size:1.1rem;font-weight:700;color:#dc2626}
+.hero .big{font-size:1.45rem;font-weight:800;color:#dc2626;margin:8px 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:16px 0}
+.c{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:13px;text-align:center}
+.c .l{color:var(--muted);font-size:.72rem;text-transform:uppercase}
+.c .v{font-weight:700;font-size:1.1rem;margin-top:3px}
+.box{border:1px solid var(--border);border-radius:8px;padding:16px;margin:12px 0;background:var(--card)}
+.box-green{border-left:5px solid var(--green)} .box-red{border-left:5px solid var(--red)}
+.box-blue{border-left:5px solid var(--blue)}
+.box h4{margin:0 0 6px;font-size:.95rem}
+</style></head><body>
+
+<h1>EXP-1730 Hedge Overlay Analysis</h1>
+<p class="sub">Does the Treasury Curve strategy act as a "free hedge" during equity stress?
+&bull; Real Yahoo Finance data &bull; Zero synthetic</p>
+
+<div class="hero">
+<div class="title">NOT A HEDGE: No positive contribution during stress</div>
+<div class="big">$-243 during 8 stress months
+&nbsp;&bull;&nbsp; $-192 during 30 normal months</div>
+<p class="note">SPY/EXP-1730 yearly correlation: -0.656
+&bull; Walk-forward OOS stress PnL: $-245</p>
+</div>
+
+<div class="cards">
+<div class="c"><div class="l">Stress Months Total</div><div class="v">43</div></div>
+<div class="c"><div class="l">With EXP-1730 Exits</div><div class="v">8</div></div>
+<div class="c"><div class="l">Coverage</div><div class="v">19%</div></div>
+<div class="c"><div class="l">Stress Win Rate</div><div class="v">38%</div></div>
+<div class="c"><div class="l">Normal Win Rate</div><div class="v">53%</div></div>
+<div class="c"><div class="l">Yearly Corr to Equity</div><div class="v">-0.656</div></div>
+</div>
+
+<h2>1. Hedge Behavior — Stress vs Normal</h2>
+<p class="note">Stress month = SPY monthly return &le; -5% OR peak-to-trough drawdown within the month &ge; 5%.</p>
+
+<table>
+<thead><tr><th>Regime</th><th class="r">Months w/ EXP-1730 Activity</th><th class="r">Total PnL</th><th class="r">% of Capital</th><th class="r">Win Rate</th></tr></thead>
+<tbody>
+<tr><td><strong>SPY Stress</strong> (43 stress months total)</td>
+    <td class="r">8</td>
+    <td class="r" style="color:#dc2626">$-243</td>
+    <td class="r" style="color:#dc2626">-0.24%</td>
+    <td class="r">38%</td></tr>
+<tr><td><strong>SPY Normal</strong></td>
+    <td class="r">30</td>
+    <td class="r" style="color:#dc2626">$-192</td>
+    <td class="r" style="color:#dc2626">-0.19%</td>
+    <td class="r">53%</td></tr>
+</tbody></table>
+
+<h2>2. Yearly Correlation to Equity Strategy</h2>
+<p class="note">Using champion_trade_log.json (EXP-400 regime-adaptive CS) as the equity-strategy proxy.</p>
+<table>
+<thead><tr><th>Year</th><th class="r">SPY Return</th><th class="r">Equity Strategy PnL</th><th class="r">EXP-1730 PnL</th></tr></thead>
+<tbody><tr><td>2020</td><td class="r" style="color:#059669">+18.3%</td><td class="r" style="color:#059669">$25,042</td><td class="r" style="color:#dc2626">$-90</td></tr>
+<tr><td>2021</td><td class="r" style="color:#059669">+28.7%</td><td class="r" style="color:#059669">$3,729</td><td class="r" style="color:#dc2626">$-20</td></tr>
+<tr><td>2022</td><td class="r" style="color:#dc2626">-18.2%</td><td class="r" style="color:#059669">$21,853</td><td class="r" style="color:#dc2626">$-131</td></tr>
+<tr><td>2023</td><td class="r" style="color:#059669">+26.2%</td><td class="r" style="color:#059669">$11,347</td><td class="r" style="color:#059669">$22</td></tr>
+<tr><td>2024</td><td class="r" style="color:#059669">+24.9%</td><td class="r" style="color:#059669">$11,414</td><td class="r" style="color:#059669">$63</td></tr>
+<tr><td>2025</td><td class="r" style="color:#059669">+17.7%</td><td class="r" style="color:#059669">$16,007</td><td class="r" style="color:#059669">$18</td></tr>
+</tbody></table>
+<p><strong>Yearly correlation (equity vs EXP-1730):</strong> <code>-0.656</code></p>
+
+<h2>3. Overlay Scenarios — Net Portfolio Improvement</h2>
+<table>
+<thead><tr><th>Scenario</th><th class="r">Total PnL</th><th class="r">CAGR</th><th class="r">Worst Year</th><th>Note</th></tr></thead>
+<tbody><tr><td>A Equity Alone</td><td class="r">$89,392</td><td class="r" style="color:#059669">+11.23%</td><td class="r">+3.7%</td><td></td></tr>
+<tr><td>B Equity Plus Continuous Puts</td><td class="r">$63,232</td><td class="r" style="color:#059669">+8.51%</td><td class="r">estimated -2% better</td><td>April 5 hedge_cost_resolution.py</td></tr>
+<tr><td>C Equity Plus T1730 Always</td><td class="r">$88,956</td><td class="r" style="color:#059669">+11.19%</td><td class="r">+3.7%</td><td>negative drag = POSITIVE contribution</td></tr>
+<tr><td>D Equity Plus T1730 Selective</td><td class="r">$89,149</td><td class="r" style="color:#059669">+11.21%</td><td class="r">—</td><td>EXP-1730 contribution ONLY during stress months</td></tr>
+</tbody></table>
+
+<h2>3a. Allocation Overlay Scenarios (5%, 7.5%, 10%)</h2>
+<p class="note">Equity strategy (champion/EXP-1220 proxy) + EXP-1730 overlay at different allocation levels.
+Scale factor = allocation / EXP-1730 native risk (2%).</p>
+<table>
+<thead><tr><th>Configuration</th><th class="r">Total PnL</th><th class="r">CAGR</th><th class="r">Max DD</th><th class="r">CAGR Drag</th><th class="r">DD Reduction</th></tr></thead>
+<tbody><tr><td><strong>Equity only (baseline)</strong></td><td class="r">$89,392</td><td class="r">+4.01%</td><td class="r">9.05%</td><td class="r">&mdash;</td><td class="r">&mdash;</td></tr>
+<tr><td><strong>+ EXP-1730 @ 5.0%</strong></td><td class="r">$88,303</td><td class="r">+3.97%</td><td class="r">9.14%</td><td class="r" style="color:#dc2626">-0.037%</td><td class="r" style="color:#dc2626">-0.08pp</td></tr>
+<tr><td><strong>+ EXP-1730 @ 7.5%</strong></td><td class="r">$87,759</td><td class="r">+3.96%</td><td class="r">9.18%</td><td class="r" style="color:#dc2626">-0.055%</td><td class="r" style="color:#dc2626">-0.13pp</td></tr>
+<tr><td><strong>+ EXP-1730 @ 10.0%</strong></td><td class="r">$87,214</td><td class="r">+3.94%</td><td class="r">9.22%</td><td class="r" style="color:#dc2626">-0.074%</td><td class="r" style="color:#dc2626">-0.17pp</td></tr>
+</tbody></table>
+
+<h2>3b. Drawdown During Specific Crash Windows (7.5% overlay)</h2>
+<p class="note">Crash-window DD comparison: equity-only vs equity + EXP-1730 at 7.5% allocation.
+COVID Mar 2020, 2022 Bear full year, Aug 2024 volmageddon unwind.</p>
+<table>
+<thead><tr><th>Crash</th><th class="r">Equity-Only DD</th><th class="r">With Overlay DD</th><th class="r">DD Reduction</th><th class="r">EXP-1730 PnL</th><th class="r">Equity PnL</th></tr></thead>
+<tbody><tr><td><strong>COVID Mar 2020</strong><br/><span style="color:#64748b;font-size:.72rem">2020-02-19 to 2020-03-23</span></td><td class="r">4.53%</td><td class="r">4.54%</td><td class="r" style="color:#dc2626">-0.01pp</td><td class="r" style="color:#dc2626">$-115</td><td class="r">$+8,123</td></tr>
+<tr><td><strong>2022 Bear</strong><br/><span style="color:#64748b;font-size:.72rem">2022-01-03 to 2022-10-12</span></td><td class="r">13.93%</td><td class="r">13.95%</td><td class="r" style="color:#dc2626">-0.03pp</td><td class="r" style="color:#dc2626">$-663</td><td class="r">$+20,563</td></tr>
+<tr><td><strong>Aug 2024 Unwind</strong><br/><span style="color:#64748b;font-size:.72rem">2024-07-16 to 2024-08-05</span></td><td class="r">5.77%</td><td class="r">5.77%</td><td class="r" style="color:#dc2626">+0.00pp</td><td class="r" style="color:#059669">$+3</td><td class="r">$-4,529</td></tr>
+</tbody></table>
+
+<h2>4. Walk-Forward: Does Hedge Behavior Persist OOS?</h2>
+<table>
+<thead><tr><th>Period</th><th class="r">Stress Months</th><th class="r">Stress PnL</th><th class="r">Total PnL</th></tr></thead>
+<tbody>
+<tr><td>IS (2010-2019)</td>
+    <td class="r">22</td>
+    <td class="r">$1</td>
+    <td class="r">$-297</td></tr>
+<tr><td>OOS (2020-2026)</td>
+    <td class="r">21</td>
+    <td class="r">$-245</td>
+    <td class="r">$-138</td></tr>
+</tbody></table>
+
+<h2>5. Comparison to April 5 Hedge Cost Finding</h2>
+<div class="box box-blue">
+<h4>Purchased hedges (from hedge_cost_resolution.py)</h4>
+<ul style="padding-left:20px;font-size:.87rem;line-height:1.85">
+<li><strong>Continuous puts:</strong> -2.86%/yr net drag (4.36% cost &minus; 1.50% alpha)</li>
+<li><strong>Selective VIX&lt;15 puts:</strong> -0.60%/yr net drag</li>
+<li><strong>Collar strategy:</strong> -0.31%/yr net drag (cheapest purchased hedge)</li>
+<li><strong>Conclusion:</strong> All purchased insurance is cash-flow negative until alpha &ge; 1.81%/yr</li>
+</ul>
+</div>
+
+<div class="box box-red">
+<h4>EXP-1730 as unpurchased hedge</h4>
+<p style="font-size:.87rem">EXP-1730 is structurally different from purchased insurance:
+it is a <strong>return-generating strategy</strong> (not a drag). The question isn't
+"how much does it cost?" but "does it contribute positive returns when equity strategies
+suffer?"</p>
+<ul style="padding-left:20px;font-size:.87rem;line-height:1.85;margin-top:8px">
+<li>Standalone CAGR: essentially 0% (14-year break-even)</li>
+<li>Stress-month contribution: <strong>$-243</strong> across 8 stress months</li>
+<li>Normal-month contribution: $-192 across 30 normal months</li>
+<li>Yearly correlation to equity strategy: -0.656 (moderate)</li>
+</ul>
+<p style="font-size:.87rem;margin-top:8px">
+<strong>Verdict:</strong> EXP-1730 does NOT deliver positive returns during stress months. It is not a hedge in the practical sense — it's just an uncorrelated break-even strategy.</p>
+</div>
+
+<h2>6. Rule Zero Compliance</h2>
+<div class="box box-green">
+<h4>ZERO SYNTHETIC DATA</h4>
+<ul style="padding-left:20px;font-size:.82rem">
+<li>SPY daily prices: Yahoo Finance (real)</li>
+<li>EXP-1730 trades: reports/exp1730_treasury_curve.json (from real TLT/SHY/IEF/TIP backtest)</li>
+<li>Equity strategy trades: output/champion_trade_log.json (real EXP-400 regime-adaptive CS)</li>
+<li>Hedge cost baselines: April 5 hedge_cost_resolution.py (real IronVault put prices)</li>
+</ul>
+</div>
+
+<p style="text-align:center;color:var(--muted);margin-top:36px;padding-top:14px;border-top:1px solid var(--border);font-size:.78rem">
+EXP-1730 Hedge Overlay Analysis &bull; scripts/exp1730_hedge_analysis.py &bull;
+2026-04-06
+</p>
+</body></html>

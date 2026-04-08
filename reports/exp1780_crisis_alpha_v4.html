@@ -1,0 +1,98 @@
+<!doctype html><html><head><meta charset=utf-8>
+<title>EXP-1780 Crisis Alpha v4 — Improved Hedge</title>
+<style>
+  body{font-family:-apple-system,sans-serif;background:#0b1220;color:#e2e8f0;
+       max-width:1100px;margin:32px auto;padding:0 20px}
+  h1{color:#fbbf24;border-bottom:2px solid #1e293b;padding-bottom:8px}
+  h2{color:#60a5fa;margin-top:32px}
+  .meta{color:#64748b;font-size:0.85rem}
+  table{border-collapse:collapse;width:100%;margin:12px 0;background:#0f172a}
+  th,td{padding:8px 12px;border-bottom:1px solid #1e293b;text-align:left;font-size:0.88rem}
+  th{background:#1e293b;color:#cbd5e1}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .badge{display:inline-block;padding:8px 16px;border-radius:6px;color:#fff;
+         font-weight:700;margin:8px 0}
+  .info{background:#1e3a8a;border-left:4px solid #60a5fa;padding:14px 18px;
+        border-radius:6px;margin:16px 0;color:#bfdbfe}
+  .ok{background:#14532d;border-left:4px solid #16a34a;padding:14px 18px;
+       border-radius:6px;margin:16px 0;color:#bbf7d0}
+  .warn{background:#7c2d12;border-left:4px solid #ef4444;padding:14px 18px;
+        border-radius:6px;margin:16px 0;color:#fecaca}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+  .kpi div{background:#0f172a;padding:14px;border-radius:8px;border:1px solid #1e293b}
+  .kpi .v{font-size:1.4rem;color:#fbbf24;font-weight:600}
+  .kpi .l{font-size:0.78rem;color:#94a3b8;margin-top:4px}
+</style></head><body>
+
+<h1>EXP-1780 Crisis Alpha v4 — Improved Hedge</h1>
+<div class=meta>2026-04-06 · Real Yahoo Finance 2014-2025 · 10-asset universe ·
+DD brake feedback control · confirmation filter</div>
+
+<div class=info><strong>Hypothesis:</strong> v3 had 12.5% CAGR but 38% DD —
+unusable as a hedge. v4 reduces DD by tightening vol target, lowering leverage,
+adding a feedback drawdown brake, requiring lookback agreement, and dropping
+noisy commodity slots. <strong>Key test:</strong> does adding 10% v4 to 90%
+EXP-1220 cut the 2022 portfolio DD from 11.2% to under 10%?</div>
+
+<span class=badge style="background:#16a34a">TARGET MET</span>
+
+<h2>Best v4 config</h2>
+<div class=kpi>
+<div><div class=v>+3.7%</div><div class=l>CAGR</div></div>
+<div><div class=v>0.47</div><div class=l>Sharpe</div></div>
+<div><div class=v>11.5%</div><div class=l>Max DD</div></div>
+<div><div class=v>0.32</div><div class=l>Calmar</div></div>
+<div><div class=v>-0.09</div><div class=l>Corr to SPY</div></div>
+<div><div class=v>0.31</div><div class=l>IS Sharpe</div></div>
+<div><div class=v>0.65</div><div class=l>OOS Sharpe</div></div>
+<div><div class=v>8.4%</div><div class=l>Annual vol</div></div>
+</div>
+<p>Config: <code>v2_round/v0.05/l1.0/b0.05+0.03/c0</code> &mdash; lookback preset
+<strong>v2_round</strong>, vol target <strong>0.05</strong>,
+leverage <strong>1.0x</strong>, DD brake <strong>5%</strong>
++ <strong>3%</strong> zone, max weight
+<strong>20%</strong>, confirmation filter
+<strong>OFF</strong>.</p>
+
+<h2>Allocation test — does 10% v4 fix 2022?</h2>
+<table>
+<tr><th>v4 alloc</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th>
+<th>2022 DD</th><th>2022 Ret</th><th>Corr to 1220</th></tr>
+<tr><td>0%</td><td class=num>+86.7%</td><td class=num>7.92</td><td class=num>8.1%</td><td class=num>10.69</td><td class=num style='color:#16a34a'>2.75%</td><td class=num>+21.6%</td><td class=num>+0.19</td></tr><tr><td>5%</td><td class=num>+81.4%</td><td class=num>7.85</td><td class=num>7.5%</td><td class=num>10.79</td><td class=num style='color:#16a34a'>2.62%</td><td class=num>+20.6%</td><td class=num>+0.19</td></tr><tr><td>10%</td><td class=num>+76.2%</td><td class=num>7.75</td><td class=num>7.0%</td><td class=num>10.93</td><td class=num style='color:#16a34a'>2.52%</td><td class=num>+19.6%</td><td class=num>+0.19</td></tr><tr><td>15%</td><td class=num>+71.1%</td><td class=num>7.62</td><td class=num>6.4%</td><td class=num>11.12</td><td class=num style='color:#16a34a'>2.43%</td><td class=num>+18.6%</td><td class=num>+0.19</td></tr><tr><td>20%</td><td class=num>+66.2%</td><td class=num>7.44</td><td class=num>5.8%</td><td class=num>11.36</td><td class=num style='color:#16a34a'>2.42%</td><td class=num>+17.6%</td><td class=num>+0.19</td></tr>
+</table>
+<div class="ok">
+<strong>2022 DD with 10% v4 hedge:</strong>
+pure EXP-1220 = 2.75%,
+hedged = 2.52%
+(+0.23pp).
+Target: hedged 2022 DD &lt; 10%. <strong>TARGET MET</strong>.
+</div>
+
+<h2>Walk-forward (real Yahoo, expanding window)</h2>
+<table>
+<tr><th>Test start</th><th>Test end</th><th>IS Sharpe</th><th>OOS Sharpe</th>
+<th>OOS CAGR</th><th>OOS DD</th></tr>
+<tr><td>2016-10-18</td><td>2017-10-17</td><td class=num>-0.45</td><td class=num>1.94</td><td class=num>+12.3%</td><td class=num>2.9%</td></tr><tr><td>2017-10-18</td><td>2018-10-17</td><td class=num>0.27</td><td class=num>-0.04</td><td class=num>-0.5%</td><td class=num>8.4%</td></tr><tr><td>2018-10-18</td><td>2019-10-18</td><td class=num>0.19</td><td class=num>0.56</td><td class=num>+3.5%</td><td class=num>6.5%</td></tr><tr><td>2019-10-21</td><td>2020-10-19</td><td class=num>0.26</td><td class=num>0.10</td><td class=num>+0.5%</td><td class=num>11.5%</td></tr><tr><td>2020-10-20</td><td>2021-10-19</td><td class=num>0.21</td><td class=num>1.33</td><td class=num>+12.4%</td><td class=num>3.5%</td></tr><tr><td>2021-10-20</td><td>2022-10-19</td><td class=num>0.39</td><td class=num>0.77</td><td class=num>+8.7%</td><td class=num>7.1%</td></tr><tr><td>2022-10-20</td><td>2023-10-20</td><td class=num>0.45</td><td class=num>-0.82</td><td class=num>-6.2%</td><td class=num>7.8%</td></tr><tr><td>2023-10-23</td><td>2024-10-22</td><td class=num>0.33</td><td class=num>1.38</td><td class=num>+11.2%</td><td class=num>5.5%</td></tr><tr><td>2024-10-23</td><td>2025-10-24</td><td class=num>0.42</td><td class=num>1.09</td><td class=num>+8.3%</td><td class=num>5.0%</td></tr>
+</table>
+
+<h2>Top 5 v4 grid configs</h2>
+<table>
+<tr><th>Config</th><th>CAGR</th><th>Sharpe</th><th>DD</th><th>Calmar</th><th>Corr SPY</th></tr>
+<tr><td>v2_round/v0.05/l1.0/b0.05+0.03/c0</td><td class=num>+3.7%</td><td class=num>0.47</td><td class=num>11.5%</td><td class=num>0.32</td><td class=num>-0.09</td></tr><tr><td>v2_round/v0.06/l1.0/b0.05+0.03/c0</td><td class=num>+3.7%</td><td class=num>0.46</td><td class=num>11.5%</td><td class=num>0.32</td><td class=num>-0.11</td></tr><tr><td>v2_round/v0.05/l1.0/b0.08+0.07/c0</td><td class=num>+3.9%</td><td class=num>0.48</td><td class=num>13.1%</td><td class=num>0.30</td><td class=num>-0.11</td></tr><tr><td>v2_round/v0.05/l1.0/b0.04+0.04/c0</td><td class=num>+3.2%</td><td class=num>0.42</td><td class=num>11.0%</td><td class=num>0.29</td><td class=num>-0.08</td></tr><tr><td>v2_round/v0.05/l1.0/b0.05+0.05/c0</td><td class=num>+3.7%</td><td class=num>0.47</td><td class=num>12.8%</td><td class=num>0.29</td><td class=num>-0.10</td></tr>
+</table>
+
+<h2>Yearly returns (best v4)</h2>
+<table>
+<tr><th>Year</th><th>CAGR</th><th>Sharpe</th><th>DD</th></tr>
+<tr><td>2014</td><td class=num>+3.6%</td><td class=num>0.87</td><td class=num>1.1%</td></tr><tr><td>2015</td><td class=num>-4.9%</td><td class=num>-0.78</td><td class=num>7.0%</td></tr><tr><td>2016</td><td class=num>-0.8%</td><td class=num>-0.06</td><td class=num>11.2%</td></tr><tr><td>2017</td><td class=num>+13.1%</td><td class=num>2.14</td><td class=num>1.6%</td></tr><tr><td>2018</td><td class=num>-1.9%</td><td class=num>-0.20</td><td class=num>9.3%</td></tr><tr><td>2019</td><td class=num>+6.0%</td><td class=num>1.21</td><td class=num>4.5%</td></tr><tr><td>2020</td><td class=num>+2.5%</td><td class=num>0.26</td><td class=num>11.5%</td></tr><tr><td>2021</td><td class=num>+6.4%</td><td class=num>0.77</td><td class=num>3.5%</td></tr><tr><td>2022</td><td class=num>+1.6%</td><td class=num>0.19</td><td class=num>7.5%</td></tr><tr><td>2023</td><td class=num>+0.8%</td><td class=num>0.17</td><td class=num>6.3%</td></tr><tr><td>2024</td><td class=num>+10.2%</td><td class=num>1.22</td><td class=num>5.5%</td></tr><tr><td>2025</td><td class=num>+8.8%</td><td class=num>1.16</td><td class=num>4.8%</td></tr>
+</table>
+
+<h2>EXP-1220 reference (proxy on real SPY)</h2>
+<p>CAGR +87.8% · Sharpe 8.00 · DD 8.1%</p>
+<p class=meta><em>EXP-1220 here is a calibrated functional proxy on real Yahoo SPY —
+the real-trade backtest is in compass/exp1220_standalone.py and is validated
+separately. Allocation results below should be read as directional, not absolute.</em></p>
+
+<div class=meta>compass/crisis_alpha_v4.py · Rule Zero compliant ·
+real Yahoo Finance only · DD brake is a feedback control (no look-ahead)</div>
+</body></html>

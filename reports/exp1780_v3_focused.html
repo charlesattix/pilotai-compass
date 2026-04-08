@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EXP-1780 v3 — Crisis Alpha Focused Optimization</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+         margin:0;padding:24px;background:#fff;color:#1e293b; }
+  h1 { font-size:1.4rem;margin-bottom:2px; }
+  h2 { font-size:1.05rem;color:#1d4ed8;margin:24px 0 8px;border-bottom:2px solid #e2e8f0;padding-bottom:4px; }
+  .meta { color:#64748b;font-size:0.82rem;margin-bottom:18px; }
+  .grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px; }
+  .card { background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px; }
+  .card-label { font-size:0.68rem;color:#64748b;text-transform:uppercase; }
+  .card-value { font-size:1.2rem;font-weight:700;margin-top:2px; }
+  table { width:100%;border-collapse:collapse;margin-bottom:12px;font-size:0.78rem; }
+  th { background:#f1f5f9;padding:5px 8px;text-align:right;font-size:0.7rem;color:#475569;border-bottom:2px solid #e2e8f0; }
+  th:first-child { text-align:left; }
+  td { padding:4px 8px;text-align:right;border-bottom:1px solid #f1f5f9; }
+  td:first-child { text-align:left;font-weight:500; }
+  .verdict { border:2px solid #16a34a;border-radius:10px;padding:14px;margin:16px 0;
+              background:#f0fdf4; }
+  .verdict h3 { color:#16a34a;margin:0 0 6px; }
+  .rule { background:#fef2f2;border:1px solid #dc2626;border-radius:6px;padding:10px;margin:10px 0;font-size:0.82rem; }
+</style></head><body>
+
+<h1>EXP-1780 v3 — Crisis Alpha Focused Optimization</h1>
+<div class="meta">Generated 2026-04-06 09:45 | 14-asset universe | Real Yahoo Finance data |
+Focused grid around v2 winner (v2_round / vol_target / 2.0x)</div>
+
+<div class="rule">
+  <strong>RULE ZERO:</strong> All prices from Yahoo Finance (real market data).
+  Zero synthetic pricing. 14 assets: SPY/IWM/EFA/EEM/QQQ/TLT/LQD/HYG/GLD/USO/DBA/DBB/UUP.
+</div>
+
+<div class="verdict">
+  <h3>40/72 configs PASS (CAGR ≥ 8% AND corr_during_DD &lt; 0)</h3>
+  <p style="margin:4px 0;font-size:0.85rem">
+    Best: <strong>v2_round / vol=0.10 / 2.5x</strong>
+  </p>
+  <p style="font-size:0.8rem;margin:4px 0">
+    CAGR +12.2% | Sharpe 0.63 |
+    SPY ρ -0.179 |
+    <strong>DD-period ρ -0.449</strong> |
+    Max DD +38.3%
+  </p>
+</div>
+
+<div class="grid">
+  <div class="card"><div class="card-label">Best CAGR</div><div class="card-value" style="color:#16a34a">+12.2%</div></div>
+  <div class="card"><div class="card-label">Best Sharpe</div><div class="card-value">0.63</div></div>
+  <div class="card"><div class="card-label">DD-period Corr</div><div class="card-value" style="color:#16a34a">-0.449</div></div>
+  <div class="card"><div class="card-label">Max DD</div><div class="card-value" style="color:#ca8a04">+38.3%</div></div>
+  <div class="card"><div class="card-label">Crisis Outperf</div><div class="card-value" style="color:#16a34a">+33.0%</div></div>
+  <div class="card"><div class="card-label">Universe Size</div><div class="card-value">13</div></div>
+</div>
+
+<h2>1. Grid Search Results (sorted: passing first)</h2>
+<p style="color:#64748b;font-size:0.78rem">Green rows = pass target (CAGR ≥ 8% AND DD-period correlation &lt; 0). Sorted by CAGR within groups.</p>
+<table><thead><tr><th>Config</th><th>CAGR</th><th>Sharpe</th><th>Sortino</th>
+<th>Max DD</th><th>Vol</th><th>SPY ρ</th><th>DD ρ</th><th>Crisis Δ</th><th>Status</th></tr></thead>
+<tbody><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">wide_around / vol=0.10 / 2.5x</td>
+            <td style="color:#16a34a">+12.3%</td>
+            <td>0.64</td>
+            <td>0.82</td>
+            <td style="color:#ca8a04">+37.2%</td>
+            <td>22.0%</td>
+            <td style="color:#16a34a">-0.168</td>
+            <td style="color:#16a34a;font-weight:700">-0.439</td>
+            <td style="color:#16a34a">+31.5%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">v2_round / vol=0.10 / 2.5x</td>
+            <td style="color:#16a34a">+12.2%</td>
+            <td>0.63</td>
+            <td>0.81</td>
+            <td style="color:#ca8a04">+38.3%</td>
+            <td>21.8%</td>
+            <td style="color:#16a34a">-0.179</td>
+            <td style="color:#16a34a;font-weight:700">-0.449</td>
+            <td style="color:#16a34a">+33.0%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">v2_round / vol=0.12 / 2.5x</td>
+            <td style="color:#16a34a">+11.8%</td>
+            <td>0.61</td>
+            <td>0.79</td>
+            <td style="color:#ca8a04">+39.0%</td>
+            <td>22.4%</td>
+            <td style="color:#16a34a">-0.193</td>
+            <td style="color:#16a34a;font-weight:700">-0.459</td>
+            <td style="color:#16a34a">+34.0%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">wide_around / vol=0.08 / 2.5x</td>
+            <td style="color:#16a34a">+11.6%</td>
+            <td>0.63</td>
+            <td>0.80</td>
+            <td style="color:#ca8a04">+35.4%</td>
+            <td>20.8%</td>
+            <td style="color:#16a34a">-0.134</td>
+            <td style="color:#16a34a;font-weight:700">-0.412</td>
+            <td style="color:#16a34a">+29.0%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">v2_round / vol=0.08 / 2.5x</td>
+            <td style="color:#16a34a">+11.5%</td>
+            <td>0.63</td>
+            <td>0.80</td>
+            <td style="color:#ca8a04">+35.3%</td>
+            <td>20.5%</td>
+            <td style="color:#16a34a">-0.152</td>
+            <td style="color:#16a34a;font-weight:700">-0.431</td>
+            <td style="color:#16a34a">+30.3%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">wide_around / vol=0.12 / 2.5x</td>
+            <td style="color:#16a34a">+11.5%</td>
+            <td>0.60</td>
+            <td>0.78</td>
+            <td style="color:#ca8a04">+38.1%</td>
+            <td>22.5%</td>
+            <td style="color:#16a34a">-0.185</td>
+            <td style="color:#16a34a;font-weight:700">-0.452</td>
+            <td style="color:#16a34a">+31.8%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">five_lb / vol=0.12 / 2.5x</td>
+            <td style="color:#16a34a">+11.4%</td>
+            <td>0.59</td>
+            <td>0.76</td>
+            <td style="color:#ca8a04">+35.1%</td>
+            <td>22.4%</td>
+            <td style="color:#16a34a">-0.192</td>
+            <td style="color:#16a34a;font-weight:700">-0.461</td>
+            <td style="color:#16a34a">+32.6%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">five_lb / vol=0.10 / 2.5x</td>
+            <td style="color:#16a34a">+11.4%</td>
+            <td>0.60</td>
+            <td>0.76</td>
+            <td style="color:#ca8a04">+33.8%</td>
+            <td>21.8%</td>
+            <td style="color:#16a34a">-0.173</td>
+            <td style="color:#16a34a;font-weight:700">-0.448</td>
+            <td style="color:#16a34a">+31.3%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">five_lb / vol=0.08 / 2.5x</td>
+            <td style="color:#16a34a">+10.4%</td>
+            <td>0.59</td>
+            <td>0.73</td>
+            <td style="color:#ca8a04">+31.1%</td>
+            <td>20.2%</td>
+            <td style="color:#16a34a">-0.137</td>
+            <td style="color:#16a34a;font-weight:700">-0.423</td>
+            <td style="color:#16a34a">+28.0%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">v2_round / vol=0.08 / 2.0x</td>
+            <td style="color:#16a34a">+10.4%</td>
+            <td>0.65</td>
+            <td>0.84</td>
+            <td style="color:#ca8a04">+31.2%</td>
+            <td>17.6%</td>
+            <td style="color:#16a34a">-0.163</td>
+            <td style="color:#16a34a;font-weight:700">-0.436</td>
+            <td style="color:#16a34a">+29.8%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">v2_round / vol=0.10 / 2.0x</td>
+            <td style="color:#16a34a">+10.4%</td>
+            <td>0.63</td>
+            <td>0.83</td>
+            <td style="color:#ca8a04">+32.7%</td>
+            <td>18.2%</td>
+            <td style="color:#16a34a">-0.185</td>
+            <td style="color:#16a34a;font-weight:700">-0.451</td>
+            <td style="color:#16a34a">+31.1%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">wide_around / vol=0.08 / 2.0x</td>
+            <td style="color:#16a34a">+10.3%</td>
+            <td>0.64</td>
+            <td>0.83</td>
+            <td style="color:#ca8a04">+30.9%</td>
+            <td>17.7%</td>
+            <td style="color:#16a34a">-0.146</td>
+            <td style="color:#16a34a;font-weight:700">-0.420</td>
+            <td style="color:#16a34a">+28.4%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">wide_around / vol=0.10 / 2.0x</td>
+            <td style="color:#16a34a">+10.2%</td>
+            <td>0.63</td>
+            <td>0.81</td>
+            <td style="color:#ca8a04">+32.1%</td>
+            <td>18.2%</td>
+            <td style="color:#16a34a">-0.174</td>
+            <td style="color:#16a34a;font-weight:700">-0.442</td>
+            <td style="color:#16a34a">+29.4%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">wide_around / vol=0.06 / 2.5x</td>
+            <td style="color:#16a34a">+10.2%</td>
+            <td>0.63</td>
+            <td>0.78</td>
+            <td style="color:#ca8a04">+31.9%</td>
+            <td>18.1%</td>
+            <td style="color:#16a34a">-0.080</td>
+            <td style="color:#16a34a;font-weight:700">-0.373</td>
+            <td style="color:#16a34a">+25.2%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">five_lb / vol=0.10 / 2.0x</td>
+            <td style="color:#16a34a">+10.1%</td>
+            <td>0.62</td>
+            <td>0.80</td>
+            <td style="color:#ca8a04">+29.5%</td>
+            <td>18.2%</td>
+            <td style="color:#16a34a">-0.178</td>
+            <td style="color:#16a34a;font-weight:700">-0.448</td>
+            <td style="color:#16a34a">+29.7%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">tight_around / vol=0.12 / 2.5x</td>
+            <td style="color:#16a34a">+9.9%</td>
+            <td>0.53</td>
+            <td>0.69</td>
+            <td style="color:#ca8a04">+36.3%</td>
+            <td>22.5%</td>
+            <td style="color:#16a34a">-0.217</td>
+            <td style="color:#16a34a;font-weight:700">-0.497</td>
+            <td style="color:#16a34a">+34.4%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">v2_round / vol=0.12 / 2.0x</td>
+            <td style="color:#16a34a">+9.8%</td>
+            <td>0.60</td>
+            <td>0.78</td>
+            <td style="color:#ca8a04">+34.3%</td>
+            <td>18.4%</td>
+            <td style="color:#16a34a">-0.198</td>
+            <td style="color:#16a34a;font-weight:700">-0.459</td>
+            <td style="color:#16a34a">+31.3%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">five_lb / vol=0.08 / 2.0x</td>
+            <td style="color:#16a34a">+9.8%</td>
+            <td>0.62</td>
+            <td>0.78</td>
+            <td style="color:#ca8a04">+28.4%</td>
+            <td>17.6%</td>
+            <td style="color:#16a34a">-0.154</td>
+            <td style="color:#16a34a;font-weight:700">-0.432</td>
+            <td style="color:#16a34a">+28.5%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">five_lb / vol=0.12 / 2.0x</td>
+            <td style="color:#16a34a">+9.7%</td>
+            <td>0.59</td>
+            <td>0.77</td>
+            <td style="color:#ca8a04">+30.4%</td>
+            <td>18.5%</td>
+            <td style="color:#16a34a">-0.198</td>
+            <td style="color:#16a34a;font-weight:700">-0.462</td>
+            <td style="color:#16a34a">+30.3%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">tight_around / vol=0.10 / 2.5x</td>
+            <td style="color:#16a34a">+9.7%</td>
+            <td>0.53</td>
+            <td>0.68</td>
+            <td style="color:#ca8a04">+34.6%</td>
+            <td>21.8%</td>
+            <td style="color:#16a34a">-0.203</td>
+            <td style="color:#16a34a;font-weight:700">-0.488</td>
+            <td style="color:#16a34a">+32.9%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">v2_round / vol=0.06 / 2.5x</td>
+            <td style="color:#16a34a">+9.6%</td>
+            <td>0.61</td>
+            <td>0.76</td>
+            <td style="color:#ca8a04">+30.9%</td>
+            <td>17.6%</td>
+            <td style="color:#16a34a">-0.103</td>
+            <td style="color:#16a34a;font-weight:700">-0.396</td>
+            <td style="color:#16a34a">+25.8%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">wide_around / vol=0.06 / 2.0x</td>
+            <td style="color:#16a34a">+9.6%</td>
+            <td>0.64</td>
+            <td>0.80</td>
+            <td style="color:#ca8a04">+29.1%</td>
+            <td>16.5%</td>
+            <td style="color:#16a34a">-0.112</td>
+            <td style="color:#16a34a;font-weight:700">-0.395</td>
+            <td style="color:#16a34a">+26.0%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">wide_around / vol=0.12 / 2.0x</td>
+            <td style="color:#16a34a">+9.5%</td>
+            <td>0.59</td>
+            <td>0.76</td>
+            <td style="color:#ca8a04">+33.4%</td>
+            <td>18.4%</td>
+            <td style="color:#16a34a">-0.191</td>
+            <td style="color:#16a34a;font-weight:700">-0.455</td>
+            <td style="color:#16a34a">+29.6%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">v2_round / vol=0.06 / 2.0x</td>
+            <td style="color:#16a34a">+9.3%</td>
+            <td>0.63</td>
+            <td>0.79</td>
+            <td style="color:#ca8a04">+28.7%</td>
+            <td>16.2%</td>
+            <td style="color:#16a34a">-0.129</td>
+            <td style="color:#16a34a;font-weight:700">-0.413</td>
+            <td style="color:#16a34a">+26.6%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">slow / vol=0.08 / 2.5x</td>
+            <td style="color:#16a34a">+9.0%</td>
+            <td>0.52</td>
+            <td>0.66</td>
+            <td style="color:#ca8a04">+39.5%</td>
+            <td>20.9%</td>
+            <td style="color:#16a34a">-0.091</td>
+            <td style="color:#16a34a;font-weight:700">-0.343</td>
+            <td style="color:#16a34a">+26.1%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">slow / vol=0.06 / 2.5x</td>
+            <td style="color:#16a34a">+9.0%</td>
+            <td>0.55</td>
+            <td>0.70</td>
+            <td style="color:#ca8a04">+35.3%</td>
+            <td>18.9%</td>
+            <td style="color:#16a34a">-0.031</td>
+            <td style="color:#16a34a;font-weight:700">-0.292</td>
+            <td style="color:#16a34a">+23.7%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">slow / vol=0.10 / 2.5x</td>
+            <td style="color:#16a34a">+9.0%</td>
+            <td>0.51</td>
+            <td>0.66</td>
+            <td style="color:#ca8a04">+40.1%</td>
+            <td>21.7%</td>
+            <td style="color:#16a34a">-0.130</td>
+            <td style="color:#16a34a;font-weight:700">-0.376</td>
+            <td style="color:#16a34a">+27.6%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">five_lb / vol=0.06 / 2.5x</td>
+            <td style="color:#16a34a">+9.0%</td>
+            <td>0.59</td>
+            <td>0.72</td>
+            <td style="color:#ca8a04">+26.4%</td>
+            <td>17.2%</td>
+            <td style="color:#16a34a">-0.085</td>
+            <td style="color:#16a34a;font-weight:700">-0.389</td>
+            <td style="color:#16a34a">+24.3%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">tight_around / vol=0.12 / 2.0x</td>
+            <td style="color:#16a34a">+8.8%</td>
+            <td>0.55</td>
+            <td>0.72</td>
+            <td style="color:#ca8a04">+31.5%</td>
+            <td>18.5%</td>
+            <td style="color:#16a34a">-0.219</td>
+            <td style="color:#16a34a;font-weight:700">-0.497</td>
+            <td style="color:#16a34a">+32.2%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">tight_around / vol=0.10 / 2.0x</td>
+            <td style="color:#16a34a">+8.8%</td>
+            <td>0.55</td>
+            <td>0.72</td>
+            <td style="color:#ca8a04">+30.4%</td>
+            <td>18.2%</td>
+            <td style="color:#16a34a">-0.207</td>
+            <td style="color:#16a34a;font-weight:700">-0.489</td>
+            <td style="color:#16a34a">+31.3%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">five_lb / vol=0.06 / 2.0x</td>
+            <td style="color:#16a34a">+8.8%</td>
+            <td>0.60</td>
+            <td>0.74</td>
+            <td style="color:#ca8a04">+25.1%</td>
+            <td>16.1%</td>
+            <td style="color:#16a34a">-0.118</td>
+            <td style="color:#16a34a;font-weight:700">-0.410</td>
+            <td style="color:#16a34a">+25.1%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">tight_around / vol=0.08 / 2.5x</td>
+            <td style="color:#16a34a">+8.7%</td>
+            <td>0.51</td>
+            <td>0.65</td>
+            <td style="color:#ca8a04">+32.5%</td>
+            <td>20.2%</td>
+            <td style="color:#16a34a">-0.179</td>
+            <td style="color:#16a34a;font-weight:700">-0.474</td>
+            <td style="color:#16a34a">+30.1%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">tight_around / vol=0.08 / 2.0x</td>
+            <td style="color:#16a34a">+8.5%</td>
+            <td>0.55</td>
+            <td>0.71</td>
+            <td style="color:#ca8a04">+28.8%</td>
+            <td>17.6%</td>
+            <td style="color:#16a34a">-0.188</td>
+            <td style="color:#16a34a;font-weight:700">-0.477</td>
+            <td style="color:#16a34a">+30.0%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">slow / vol=0.12 / 2.5x</td>
+            <td style="color:#16a34a">+8.4%</td>
+            <td>0.48</td>
+            <td>0.62</td>
+            <td style="color:#ca8a04">+40.7%</td>
+            <td>22.1%</td>
+            <td style="color:#16a34a">-0.154</td>
+            <td style="color:#16a34a;font-weight:700">-0.397</td>
+            <td style="color:#16a34a">+28.6%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">fast / vol=0.12 / 2.5x</td>
+            <td style="color:#16a34a">+8.3%</td>
+            <td>0.47</td>
+            <td>0.60</td>
+            <td style="color:#ca8a04">+31.9%</td>
+            <td>22.0%</td>
+            <td style="color:#16a34a">-0.286</td>
+            <td style="color:#16a34a;font-weight:700">-0.572</td>
+            <td style="color:#16a34a">+37.2%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">v2_round / vol=0.08 / 1.5x</td>
+            <td style="color:#16a34a">+8.1%</td>
+            <td>0.64</td>
+            <td>0.83</td>
+            <td style="color:#ca8a04">+26.0%</td>
+            <td>13.7%</td>
+            <td style="color:#16a34a">-0.170</td>
+            <td style="color:#16a34a;font-weight:700">-0.437</td>
+            <td style="color:#16a34a">+27.5%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">slow / vol=0.06 / 2.0x</td>
+            <td style="color:#16a34a">+8.1%</td>
+            <td>0.55</td>
+            <td>0.70</td>
+            <td style="color:#ca8a04">+32.7%</td>
+            <td>16.7%</td>
+            <td style="color:#16a34a">-0.065</td>
+            <td style="color:#16a34a;font-weight:700">-0.317</td>
+            <td style="color:#16a34a">+24.1%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">wide_around / vol=0.06 / 1.5x</td>
+            <td style="color:#16a34a">+8.1%</td>
+            <td>0.65</td>
+            <td>0.83</td>
+            <td style="color:#ca8a04">+23.7%</td>
+            <td>13.3%</td>
+            <td style="color:#16a34a">-0.128</td>
+            <td style="color:#16a34a;font-weight:700">-0.403</td>
+            <td style="color:#16a34a">+25.3%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">fast / vol=0.12 / 2.0x</td>
+            <td style="color:#16a34a">+8.1%</td>
+            <td>0.50</td>
+            <td>0.64</td>
+            <td style="color:#ca8a04">+27.4%</td>
+            <td>19.0%</td>
+            <td style="color:#16a34a">-0.278</td>
+            <td style="color:#16a34a;font-weight:700">-0.566</td>
+            <td style="color:#16a34a">+35.4%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">v2_round / vol=0.06 / 1.5x</td>
+            <td style="color:#16a34a">+8.0%</td>
+            <td>0.65</td>
+            <td>0.84</td>
+            <td style="color:#ca8a04">+23.6%</td>
+            <td>13.2%</td>
+            <td style="color:#16a34a">-0.146</td>
+            <td style="color:#16a34a;font-weight:700">-0.420</td>
+            <td style="color:#16a34a">+26.2%</td>
+            <td style="color:#16a34a;font-weight:600">PASS</td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">slow / vol=0.08 / 2.0x</td>
+            <td style="color:#16a34a">+8.0%</td>
+            <td>0.53</td>
+            <td>0.68</td>
+            <td style="color:#ca8a04">+34.5%</td>
+            <td>17.4%</td>
+            <td style="color:#16a34a">-0.107</td>
+            <td style="color:#16a34a;font-weight:700">-0.353</td>
+            <td style="color:#16a34a">+25.5%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">five_lb / vol=0.08 / 1.5x</td>
+            <td style="color:#16a34a">+8.0%</td>
+            <td>0.63</td>
+            <td>0.80</td>
+            <td style="color:#ca8a04">+23.4%</td>
+            <td>13.7%</td>
+            <td style="color:#16a34a">-0.162</td>
+            <td style="color:#16a34a;font-weight:700">-0.433</td>
+            <td style="color:#16a34a">+26.6%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">wide_around / vol=0.08 / 1.5x</td>
+            <td style="color:#16a34a">+7.9%</td>
+            <td>0.63</td>
+            <td>0.81</td>
+            <td style="color:#ca8a04">+25.8%</td>
+            <td>13.7%</td>
+            <td style="color:#16a34a">-0.154</td>
+            <td style="color:#16a34a;font-weight:700">-0.423</td>
+            <td style="color:#16a34a">+26.2%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">v2_round / vol=0.10 / 1.5x</td>
+            <td style="color:#16a34a">+7.8%</td>
+            <td>0.61</td>
+            <td>0.80</td>
+            <td style="color:#ca8a04">+28.1%</td>
+            <td>13.9%</td>
+            <td style="color:#16a34a">-0.188</td>
+            <td style="color:#16a34a;font-weight:700">-0.449</td>
+            <td style="color:#16a34a">+28.1%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">wide_around / vol=0.10 / 1.5x</td>
+            <td style="color:#16a34a">+7.7%</td>
+            <td>0.61</td>
+            <td>0.79</td>
+            <td style="color:#ca8a04">+27.2%</td>
+            <td>13.8%</td>
+            <td style="color:#16a34a">-0.179</td>
+            <td style="color:#16a34a;font-weight:700">-0.444</td>
+            <td style="color:#16a34a">+26.9%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">five_lb / vol=0.10 / 1.5x</td>
+            <td style="color:#16a34a">+7.7%</td>
+            <td>0.60</td>
+            <td>0.78</td>
+            <td style="color:#ca8a04">+24.6%</td>
+            <td>14.0%</td>
+            <td style="color:#16a34a">-0.185</td>
+            <td style="color:#16a34a;font-weight:700">-0.450</td>
+            <td style="color:#16a34a">+27.3%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">five_lb / vol=0.06 / 1.5x</td>
+            <td style="color:#16a34a">+7.7%</td>
+            <td>0.63</td>
+            <td>0.79</td>
+            <td style="color:#ca8a04">+21.6%</td>
+            <td>13.2%</td>
+            <td style="color:#16a34a">-0.139</td>
+            <td style="color:#16a34a;font-weight:700">-0.418</td>
+            <td style="color:#16a34a">+25.4%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">slow / vol=0.10 / 2.0x</td>
+            <td style="color:#16a34a">+7.7%</td>
+            <td>0.51</td>
+            <td>0.66</td>
+            <td style="color:#ca8a04">+35.3%</td>
+            <td>17.7%</td>
+            <td style="color:#16a34a">-0.138</td>
+            <td style="color:#16a34a;font-weight:700">-0.382</td>
+            <td style="color:#16a34a">+26.3%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">fast / vol=0.10 / 2.0x</td>
+            <td style="color:#16a34a">+7.6%</td>
+            <td>0.49</td>
+            <td>0.63</td>
+            <td style="color:#ca8a04">+25.8%</td>
+            <td>18.3%</td>
+            <td style="color:#16a34a">-0.277</td>
+            <td style="color:#16a34a;font-weight:700">-0.568</td>
+            <td style="color:#16a34a">+34.2%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">fast / vol=0.10 / 2.5x</td>
+            <td style="color:#16a34a">+7.5%</td>
+            <td>0.45</td>
+            <td>0.56</td>
+            <td style="color:#ca8a04">+29.6%</td>
+            <td>20.6%</td>
+            <td style="color:#16a34a">-0.285</td>
+            <td style="color:#16a34a;font-weight:700">-0.569</td>
+            <td style="color:#16a34a">+34.8%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">v2_round / vol=0.12 / 1.5x</td>
+            <td style="color:#16a34a">+7.4%</td>
+            <td>0.58</td>
+            <td>0.76</td>
+            <td style="color:#ca8a04">+28.9%</td>
+            <td>13.9%</td>
+            <td style="color:#16a34a">-0.199</td>
+            <td style="color:#16a34a;font-weight:700">-0.458</td>
+            <td style="color:#16a34a">+28.1%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">tight_around / vol=0.06 / 2.5x</td>
+            <td style="color:#16a34a">+7.4%</td>
+            <td>0.50</td>
+            <td>0.63</td>
+            <td style="color:#ca8a04">+27.6%</td>
+            <td>17.0%</td>
+            <td style="color:#16a34a">-0.139</td>
+            <td style="color:#16a34a;font-weight:700">-0.448</td>
+            <td style="color:#16a34a">+25.9%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">five_lb / vol=0.12 / 1.5x</td>
+            <td style="color:#16a34a">+7.3%</td>
+            <td>0.57</td>
+            <td>0.74</td>
+            <td style="color:#ca8a04">+25.6%</td>
+            <td>14.1%</td>
+            <td style="color:#16a34a">-0.201</td>
+            <td style="color:#16a34a;font-weight:700">-0.462</td>
+            <td style="color:#16a34a">+27.4%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">wide_around / vol=0.12 / 1.5x</td>
+            <td style="color:#16a34a">+7.3%</td>
+            <td>0.58</td>
+            <td>0.75</td>
+            <td style="color:#ca8a04">+27.1%</td>
+            <td>13.9%</td>
+            <td style="color:#16a34a">-0.193</td>
+            <td style="color:#16a34a;font-weight:700">-0.456</td>
+            <td style="color:#16a34a">+26.8%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">tight_around / vol=0.08 / 1.5x</td>
+            <td style="color:#16a34a">+7.1%</td>
+            <td>0.57</td>
+            <td>0.74</td>
+            <td style="color:#ca8a04">+24.1%</td>
+            <td>13.8%</td>
+            <td style="color:#16a34a">-0.192</td>
+            <td style="color:#16a34a;font-weight:700">-0.477</td>
+            <td style="color:#16a34a">+28.0%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">tight_around / vol=0.10 / 1.5x</td>
+            <td style="color:#16a34a">+7.0%</td>
+            <td>0.55</td>
+            <td>0.73</td>
+            <td style="color:#ca8a04">+25.3%</td>
+            <td>14.0%</td>
+            <td style="color:#16a34a">-0.208</td>
+            <td style="color:#16a34a;font-weight:700">-0.487</td>
+            <td style="color:#16a34a">+28.6%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">slow / vol=0.12 / 2.0x</td>
+            <td style="color:#16a34a">+7.0%</td>
+            <td>0.47</td>
+            <td>0.61</td>
+            <td style="color:#ca8a04">+35.5%</td>
+            <td>17.9%</td>
+            <td style="color:#16a34a">-0.159</td>
+            <td style="color:#16a34a;font-weight:700">-0.400</td>
+            <td style="color:#16a34a">+26.7%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">tight_around / vol=0.06 / 2.0x</td>
+            <td style="color:#16a34a">+6.9%</td>
+            <td>0.50</td>
+            <td>0.62</td>
+            <td style="color:#ca8a04">+26.7%</td>
+            <td>16.0%</td>
+            <td style="color:#16a34a">-0.161</td>
+            <td style="color:#16a34a;font-weight:700">-0.460</td>
+            <td style="color:#16a34a">+26.6%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">tight_around / vol=0.12 / 1.5x</td>
+            <td style="color:#16a34a">+6.8%</td>
+            <td>0.54</td>
+            <td>0.70</td>
+            <td style="color:#ca8a04">+26.4%</td>
+            <td>14.1%</td>
+            <td style="color:#16a34a">-0.220</td>
+            <td style="color:#16a34a;font-weight:700">-0.495</td>
+            <td style="color:#16a34a">+28.9%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">fast / vol=0.10 / 1.5x</td>
+            <td style="color:#16a34a">+6.7%</td>
+            <td>0.52</td>
+            <td>0.67</td>
+            <td style="color:#ca8a04">+20.9%</td>
+            <td>14.6%</td>
+            <td style="color:#16a34a">-0.270</td>
+            <td style="color:#16a34a;font-weight:700">-0.557</td>
+            <td style="color:#16a34a">+31.3%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">tight_around / vol=0.06 / 1.5x</td>
+            <td style="color:#16a34a">+6.5%</td>
+            <td>0.54</td>
+            <td>0.70</td>
+            <td style="color:#ca8a04">+22.5%</td>
+            <td>13.3%</td>
+            <td style="color:#16a34a">-0.175</td>
+            <td style="color:#16a34a;font-weight:700">-0.465</td>
+            <td style="color:#16a34a">+26.6%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">slow / vol=0.06 / 1.5x</td>
+            <td style="color:#16a34a">+6.5%</td>
+            <td>0.55</td>
+            <td>0.71</td>
+            <td style="color:#ca8a04">+27.4%</td>
+            <td>13.1%</td>
+            <td style="color:#16a34a">-0.083</td>
+            <td style="color:#16a34a;font-weight:700">-0.328</td>
+            <td style="color:#16a34a">+23.4%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">fast / vol=0.12 / 1.5x</td>
+            <td style="color:#16a34a">+6.5%</td>
+            <td>0.50</td>
+            <td>0.65</td>
+            <td style="color:#ca8a04">+23.2%</td>
+            <td>14.7%</td>
+            <td style="color:#16a34a">-0.273</td>
+            <td style="color:#16a34a;font-weight:700">-0.560</td>
+            <td style="color:#16a34a">+31.5%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">fast / vol=0.08 / 2.0x</td>
+            <td style="color:#16a34a">+6.5%</td>
+            <td>0.46</td>
+            <td>0.57</td>
+            <td style="color:#ca8a04">+23.2%</td>
+            <td>16.8%</td>
+            <td style="color:#16a34a">-0.277</td>
+            <td style="color:#16a34a;font-weight:700">-0.563</td>
+            <td style="color:#16a34a">+31.5%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">fast / vol=0.08 / 1.5x</td>
+            <td style="color:#16a34a">+6.2%</td>
+            <td>0.50</td>
+            <td>0.64</td>
+            <td style="color:#ca8a04">+18.5%</td>
+            <td>14.1%</td>
+            <td style="color:#16a34a">-0.268</td>
+            <td style="color:#16a34a;font-weight:700">-0.560</td>
+            <td style="color:#16a34a">+30.2%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">fast / vol=0.08 / 2.5x</td>
+            <td style="color:#16a34a">+6.1%</td>
+            <td>0.42</td>
+            <td>0.51</td>
+            <td style="color:#ca8a04">+25.6%</td>
+            <td>18.2%</td>
+            <td style="color:#16a34a">-0.281</td>
+            <td style="color:#16a34a;font-weight:700">-0.562</td>
+            <td style="color:#16a34a">+31.1%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">slow / vol=0.08 / 1.5x</td>
+            <td style="color:#16a34a">+6.1%</td>
+            <td>0.51</td>
+            <td>0.66</td>
+            <td style="color:#ca8a04">+29.1%</td>
+            <td>13.3%</td>
+            <td style="color:#16a34a">-0.114</td>
+            <td style="color:#16a34a;font-weight:700">-0.357</td>
+            <td style="color:#16a34a">+23.9%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">slow / vol=0.10 / 1.5x</td>
+            <td style="color:#16a34a">+5.8%</td>
+            <td>0.49</td>
+            <td>0.64</td>
+            <td style="color:#ca8a04">+28.9%</td>
+            <td>13.4%</td>
+            <td style="color:#16a34a">-0.141</td>
+            <td style="color:#16a34a;font-weight:700">-0.383</td>
+            <td style="color:#16a34a">+24.4%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">slow / vol=0.12 / 1.5x</td>
+            <td style="color:#16a34a">+5.4%</td>
+            <td>0.46</td>
+            <td>0.61</td>
+            <td style="color:#ca8a04">+28.2%</td>
+            <td>13.4%</td>
+            <td style="color:#16a34a">-0.159</td>
+            <td style="color:#16a34a;font-weight:700">-0.400</td>
+            <td style="color:#16a34a">+24.8%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">fast / vol=0.06 / 1.5x</td>
+            <td style="color:#16a34a">+4.9%</td>
+            <td>0.44</td>
+            <td>0.55</td>
+            <td style="color:#ca8a04">+17.8%</td>
+            <td>12.7%</td>
+            <td style="color:#16a34a">-0.270</td>
+            <td style="color:#16a34a;font-weight:700">-0.558</td>
+            <td style="color:#16a34a">+27.7%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">fast / vol=0.06 / 2.5x</td>
+            <td style="color:#16a34a">+4.7%</td>
+            <td>0.39</td>
+            <td>0.47</td>
+            <td style="color:#ca8a04">+19.6%</td>
+            <td>14.3%</td>
+            <td style="color:#16a34a">-0.271</td>
+            <td style="color:#16a34a;font-weight:700">-0.553</td>
+            <td style="color:#16a34a">+27.3%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">fast / vol=0.06 / 2.0x</td>
+            <td style="color:#16a34a">+4.7%</td>
+            <td>0.39</td>
+            <td>0.48</td>
+            <td style="color:#ca8a04">+19.6%</td>
+            <td>14.1%</td>
+            <td style="color:#16a34a">-0.274</td>
+            <td style="color:#16a34a;font-weight:700">-0.556</td>
+            <td style="color:#16a34a">+27.4%</td>
+            <td style="color:#94a3b8;font-weight:600"></td>
+        </tr></tbody></table>
+
+<h2>2. Best Config Year-by-Year</h2>
+<p style="color:#64748b;font-size:0.8rem">v2_round / vol=0.10 / 2.5x — IS Sharpe 0.69, OOS Sharpe 0.56</p>
+<table><thead><tr><th>Year</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th></tr></thead>
+<tbody><tr>
+            <td>2014</td>
+            <td style="color:#16a34a">+91.0%</td>
+            <td>4.31</td>
+            <td style="color:#ca8a04">+2.9%</td>
+        </tr><tr>
+            <td>2015</td>
+            <td style="color:#16a34a">+8.6%</td>
+            <td>0.50</td>
+            <td style="color:#ca8a04">+17.3%</td>
+        </tr><tr>
+            <td>2016</td>
+            <td style="color:#dc2626">-4.7%</td>
+            <td>-0.11</td>
+            <td style="color:#ca8a04">+29.7%</td>
+        </tr><tr>
+            <td>2017</td>
+            <td style="color:#16a34a">+30.2%</td>
+            <td>2.03</td>
+            <td style="color:#ca8a04">+5.2%</td>
+        </tr><tr>
+            <td>2018</td>
+            <td style="color:#16a34a">+9.4%</td>
+            <td>0.53</td>
+            <td style="color:#ca8a04">+15.8%</td>
+        </tr><tr>
+            <td>2019</td>
+            <td style="color:#16a34a">+3.0%</td>
+            <td>0.31</td>
+            <td style="color:#ca8a04">+13.4%</td>
+        </tr><tr>
+            <td>2020</td>
+            <td style="color:#16a34a">+27.2%</td>
+            <td>0.86</td>
+            <td style="color:#ca8a04">+25.7%</td>
+        </tr><tr>
+            <td>2021</td>
+            <td style="color:#16a34a">+32.0%</td>
+            <td>1.35</td>
+            <td style="color:#ca8a04">+9.4%</td>
+        </tr><tr>
+            <td>2022</td>
+            <td style="color:#16a34a">+7.0%</td>
+            <td>0.37</td>
+            <td style="color:#ca8a04">+24.4%</td>
+        </tr><tr>
+            <td>2023</td>
+            <td style="color:#dc2626">-14.8%</td>
+            <td>-1.13</td>
+            <td style="color:#ca8a04">+19.2%</td>
+        </tr><tr>
+            <td>2024</td>
+            <td style="color:#16a34a">+20.4%</td>
+            <td>1.06</td>
+            <td style="color:#ca8a04">+13.3%</td>
+        </tr><tr>
+            <td>2025</td>
+            <td style="color:#16a34a">+12.6%</td>
+            <td>0.78</td>
+            <td style="color:#ca8a04">+13.9%</td>
+        </tr></tbody></table>
+
+<h2>3. Crisis Performance (Best Config)</h2>
+<table><thead><tr><th>Crisis</th><th>vs SPY</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left">2022 Bear</td>
+            <td style="color:#16a34a;font-weight:600">+61.3%</td>
+        </tr><tr>
+            <td style="text-align:left">Aug 2015 China</td>
+            <td style="color:#16a34a;font-weight:600">+17.4%</td>
+        </tr><tr>
+            <td style="text-align:left">COVID 2020</td>
+            <td style="color:#16a34a;font-weight:600">+63.1%</td>
+        </tr><tr>
+            <td style="text-align:left">Feb 2018 Volmageddon</td>
+            <td style="color:#dc2626;font-weight:600">-6.2%</td>
+        </tr><tr>
+            <td style="text-align:left">Q4 2018 Selloff</td>
+            <td style="color:#16a34a;font-weight:600">+29.3%</td>
+        </tr></tbody></table>
+
+<h2>4. Key Finding: DD-Period Correlation</h2>
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px">
+  <ul style="font-size:0.85rem;margin:0;padding-left:18px">
+    <li><strong>DD-period correlation</strong> is the KEY metric for crisis alpha</li>
+    <li>Overall SPY correlation can be positive but still help if DD-period is negative</li>
+    <li>DD periods: SPY rolling 60d peak-to-current drawdown &lt; -3%</li>
+    <li>Best config achieves <strong>-0.449</strong> correlation during DD periods</li>
+    <li>Crisis outperformance: <strong>+33.0%</strong> avg across 5 historical crises</li>
+  </ul>
+</div>
+
+<div style="color:#94a3b8;font-size:0.68rem;margin-top:28px;border-top:1px solid #e2e8f0;padding-top:8px">
+  PilotAI — EXP-1780 v3 Crisis Alpha | 14 assets | Real Yahoo data | Rule Zero compliant
+</div></body></html>

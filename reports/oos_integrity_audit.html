@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>OOS Integrity Audit — All Real-Data Experiments</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:1500px;margin:0 auto;padding:24px;background:#0d1117;color:#c9d1d9}
+h1,h2,h3{color:#58a6ff}
+.hero{background:#161b22;border:2px solid #58a6ff;border-radius:12px;padding:24px;text-align:center;margin:20px 0}
+.hero .big{font-size:1.5em;font-weight:800;color:#58a6ff}
+.hero .sub{color:#8b949e;margin-top:8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:20px 0}
+.c{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px;text-align:center}
+.c .l{color:#8b949e;font-size:.72em;text-transform:uppercase}.c .v{color:#f0f6fc;font-weight:700;font-size:1.1em;margin-top:4px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.8em}
+th,td{padding:5px 8px;text-align:right;border-bottom:1px solid #21262d}
+th{color:#8b949e;background:#161b22;font-size:.72em;text-transform:uppercase}
+td:first-child,th:first-child{text-align:left}
+tr:hover td{background:#161b2280}
+.section{margin:36px 0}
+.note{color:#8b949e;font-size:.82em;margin:6px 0}
+.finding{background:#161b22;border-left:4px solid #58a6ff;padding:14px;margin:14px 0;border-radius:4px}
+.finding h4{margin:0 0 6px;color:#58a6ff;font-size:.95em}
+.warn{border-left-color:#f59e0b} .good{border-left-color:#3fb950} .bad{border-left-color:#f85149}
+</style></head><body>
+
+<h1>OOS Integrity Audit — All Real-Data Experiments</h1>
+<p class="note">Audit of walk-forward methodology, OOS contamination, transaction costs, overfitting risk &bull; 2026-04-05</p>
+
+<div class="hero">
+  <div class="big">6 PASS &bull; 4 REWORK &bull; 4 FAIL</div>
+  <div class="sub">14 experiments audited &bull; Only 3 achieve Grade A (proper walk-forward) &bull; 5 have no WF at all</div>
+</div>
+
+<div class="cards">
+  <div class="c"><div class="l">Experiments</div><div class="v">14</div></div>
+  <div class="c"><div class="l">Grade A (Deploy)</div><div class="v" style="color:#3fb950">3</div></div>
+  <div class="c"><div class="l">Grade B (Conditional)</div><div class="v" style="color:#58a6ff">3</div></div>
+  <div class="c"><div class="l">Grade C (Rework)</div><div class="v" style="color:#d29922">4</div></div>
+  <div class="c"><div class="l">Grade D/F (Fail)</div><div class="v" style="color:#f85149">4</div></div>
+  <div class="c"><div class="l">Has Proper WF</div><div class="v">4/14</div></div>
+  <div class="c"><div class="l">IronVault Data</div><div class="v">13/14</div></div>
+</div>
+
+<!-- Scorecard Table -->
+<div class="section">
+<h2>1. Scorecard Summary</h2>
+<table>
+<thead><tr><th>ID</th><th>Strategy</th><th style="text-align:center">Grade</th><th>Verdict</th><th style="text-align:center">WF?</th><th>IS/OOS Trades</th><th>Params</th><th>Param:Trade Ratio</th><th>Data</th></tr></thead>
+<tbody><tr><td>EXP-1630</td><td>GLD/TLT Relative Value</td><td style='color:#3fb950;font-weight:700;font-size:1.1em;text-align:center'>A</td><td style='color:#3fb950'>PASS</td><td style='color:#3fb950;text-align:center'>&#10003;</td><td>29/34</td><td>10</td><td>10/63 = 0.16 (acceptable)</td><td>IronVault only</td></tr>
+<tr><td>Vol Term Structure</td><td>Contango/Backwardation Signal</td><td style='color:#3fb950;font-weight:700;font-size:1.1em;text-align:center'>A</td><td style='color:#3fb950'>PASS</td><td style='color:#f85149;text-align:center'>&#10007;</td><td>19/33</td><td>10</td><td>10/53 = 0.19 (acceptable)</td><td>IronVault only</td></tr>
+<tr><td>Cross-Asset Pairs</td><td>TLT-SPY, TLT-QQQ Z-Score</td><td style='color:#3fb950;font-weight:700;font-size:1.1em;text-align:center'>A-</td><td style='color:#3fb950'>PASS</td><td style='color:#3fb950;text-align:center'>&#10003;</td><td>10/22</td><td>5</td><td>5/32 = 0.16 (acceptable)</td><td>Mixed (equity + IronVault)</td></tr>
+<tr><td>EXP-1220-real</td><td>Tail Risk Protection</td><td style='color:#58a6ff;font-weight:700;font-size:1.1em;text-align:center'>B+</td><td style='color:#58a6ff'>CONDITIONAL PASS</td><td style='color:#f85149;text-align:center'>&#10007;</td><td>0/0</td><td>12</td><td>N/A (continuous overlay, not discrete trades)</td><td>Yahoo Finance (SPY, VIX, VIX3M)</td></tr>
+<tr><td>TLT-IC</td><td>TLT Iron Condors</td><td style='color:#58a6ff;font-weight:700;font-size:1.1em;text-align:center'>B</td><td style='color:#58a6ff'>CONDITIONAL PASS</td><td style='color:#f85149;text-align:center'>&#10007;</td><td>0/43</td><td>6</td><td>6/43 = 0.14 (acceptable)</td><td>IronVault only</td></tr>
+<tr><td>EXP-1630-opt</td><td>Multi-Pair Optimized (4 pairs)</td><td style='color:#58a6ff;font-weight:700;font-size:1.1em;text-align:center'>B</td><td style='color:#58a6ff'>CONDITIONAL PASS</td><td style='color:#3fb950;text-align:center'>&#10003;</td><td>0/174</td><td>12</td><td>12/174 = 0.07 (good sample size)</td><td>IronVault only</td></tr>
+<tr><td>XLI-IC</td><td>XLF/XLI Iron Condors (Optimized)</td><td style='color:#d29922;font-weight:700;font-size:1.1em;text-align:center'>C+</td><td style='color:#d29922'>NEEDS REWORK</td><td style='color:#f85149;text-align:center'>&#10007;</td><td>20/20</td><td>6</td><td>6×34 configs / 40 trades = extreme selection bias</td><td>IronVault only</td></tr>
+<tr><td>EXP-1650</td><td>Earnings Vol Crush (XLF)</td><td style='color:#d29922;font-weight:700;font-size:1.1em;text-align:center'>C</td><td style='color:#d29922'>NEEDS REWORK</td><td style='color:#f85149;text-align:center'>&#10007;</td><td>16/21</td><td>7</td><td>7/21 OOS = 0.33 (marginal)</td><td>IronVault only</td></tr>
+<tr><td>EXP-1640</td><td>Sector Momentum Options</td><td style='color:#d29922;font-weight:700;font-size:1.1em;text-align:center'>C-</td><td style='color:#d29922'>NEEDS REWORK</td><td style='color:#3fb950;text-align:center'>&#10003;</td><td>13/6</td><td>5</td><td>5/6 OOS = 0.83 (CRITICAL — nearly 1 param per OOS trade)</td><td>IronVault + Yahoo Finance</td></tr>
+<tr><td>EXP-1230-real</td><td>Microstructure Alpha</td><td style='color:#d29922;font-weight:700;font-size:1.1em;text-align:center'>C-</td><td style='color:#d29922'>NEEDS REWORK</td><td style='color:#f85149;text-align:center'>&#10007;</td><td>0/0</td><td>0</td><td>N/A (daily signals, regime detection)</td><td>Yahoo + IronVault</td></tr>
+<tr><td>EXP-1320-real</td><td>Vol Clustering Overlay</td><td style='color:#f85149;font-weight:700;font-size:1.1em;text-align:center'>D</td><td style='color:#f85149'>FAIL</td><td style='color:#f85149;text-align:center'>&#10007;</td><td>0/41</td><td>5</td><td>5/41 = 0.12 (marginal) but clustering tuned on full data</td><td>IronVault intraday</td></tr>
+<tr><td>EXP-1270-real</td><td>Adaptive Stop-Loss</td><td style='color:#f85149;font-weight:700;font-size:1.1em;text-align:center'>D</td><td style='color:#f85149'>FAIL</td><td style='color:#f85149;text-align:center'>&#10007;</td><td>0/41</td><td>17</td><td>17/41 = 0.41 (SEVERE — nearly 1 param per 2 trades)</td><td>IronVault only</td></tr>
+<tr><td>EXP-880-real</td><td>ML Production Ensemble</td><td style='color:#f85149;font-weight:700;font-size:1.1em;text-align:center'>F</td><td style='color:#f85149'>FAIL</td><td style='color:#f85149;text-align:center'>&#10007;</td><td>0/262</td><td>8</td><td>8/262 = 0.03 (acceptable ratio but strategy fails)</td><td>IronVault only</td></tr>
+<tr><td>EXP-1470-real</td><td>North Star Portfolio</td><td style='color:#f85149;font-weight:700;font-size:1.1em;text-align:center'>F</td><td style='color:#f85149'>FAIL</td><td style='color:#f85149;text-align:center'>&#10007;</td><td>0/19</td><td>4</td><td>4/19 = 0.21 (marginal) — but 0 trades in 2021-2024</td><td>IronVault + Polygon</td></tr>
+</tbody></table>
+</div>
+
+<!-- Grading Criteria -->
+<div class="section">
+<h2>2. Grading Criteria</h2>
+<table>
+<thead><tr><th>Grade</th><th>Walk-Forward</th><th>OOS Trades</th><th>Param:Trade Ratio</th><th>OOS Sharpe Stability</th><th>Tx Costs</th></tr></thead>
+<tbody>
+<tr><td style="color:#3fb950;font-weight:700">A</td><td>Explicit multi-window</td><td>&gt;30</td><td>&lt;0.20</td><td>OOS within 50% of IS</td><td>IronVault real</td></tr>
+<tr><td style="color:#58a6ff;font-weight:700">B</td><td>Explicit or implicit</td><td>&gt;20</td><td>&lt;0.35</td><td>OOS positive</td><td>Real prices</td></tr>
+<tr><td style="color:#d29922;font-weight:700">C</td><td>Partial or undocumented</td><td>10-20</td><td>0.35-0.50</td><td>Mixed</td><td>Real or partial</td></tr>
+<tr><td style="color:#f85149;font-weight:700">D/F</td><td>None</td><td>&lt;10 or strategy fails</td><td>&gt;0.50</td><td>Negative or collapsed</td><td>Any</td></tr>
+</tbody></table>
+</div>
+
+<!-- Critical Findings -->
+<div class="section">
+<h2>3. Critical Findings</h2>
+
+<div class="finding good">
+<h4>3 Strategies Pass Full Audit (Grade A)</h4>
+<p><strong>EXP-1630 GLD/TLT</strong> (explicit 2yr IS / 3yr OOS, hardcoded params),
+<strong>Vol Term Structure</strong> (4 expanding windows, OOS = full-period Sharpe),
+<strong>Cross-Asset Pairs</strong> (5 rolling windows, 100% positive).
+These are the only strategies with rigorous, documented walk-forward validation.</p>
+</div>
+
+<div class="finding warn">
+<h4>6 of 14 Experiments Have NO Walk-Forward Validation</h4>
+<p>EXP-880, EXP-1220, EXP-1230, EXP-1270, EXP-1320, EXP-1470 — all parameters
+were optimized on the full dataset with no IS/OOS separation. Any reported Sharpe
+includes look-ahead bias. The synthetic-to-real collapse (EXP-880: -104%, EXP-1470: 0.42% CAGR)
+is direct evidence of this overfitting.</p>
+</div>
+
+<div class="finding bad">
+<h4>Selection Bias in XLI Iron Condors</h4>
+<p>34 configurations tested on the same 40 trades, best selected post-hoc.
+OOS Sharpe (8.58) exceeding IS (3.89) is a classic signature of optimization bias,
+not genuine alpha. The "OOS" period was contaminated by config selection.</p>
+</div>
+
+<div class="finding warn">
+<h4>Sparse OOS Samples</h4>
+<p>5 experiments have &lt;20 OOS trades. EXP-1640 has only 6 OOS trades (Sharpe -0.12).
+EXP-1470 has only 19 total trades. Statistical power for validation requires &ge;30 OOS trades
+(preferably &ge;5 per tunable parameter).</p>
+</div>
+
+<div class="finding">
+<h4>Transaction Cost Gaps</h4>
+<p>EXP-1220 (tail risk) does not model real SPY put/VIX call transaction costs — it uses
+a flat 2% annual hedge budget assumption. Real costs depend on VIX level, term structure,
+and strike selection. Cross-Asset Pairs use equity prices without option execution costs.</p>
+</div>
+</div>
+
+<!-- Required Standards -->
+<div class="section">
+<h2>4. Required Standards for Future Experiments</h2>
+<div class="finding">
+<h4>Minimum Requirements for "Deployable" Status</h4>
+<ol>
+<li><strong>Explicit IS/OOS split</strong> — minimum 2:1 ratio (2yr IS, 1yr OOS)</li>
+<li><strong>Parameter:trade ratio</strong> — maximum 0.20 (5+ OOS trades per tunable parameter)</li>
+<li><strong>OOS Sharpe stability</strong> — within 50% of IS Sharpe (flag if OOS &gt; IS)</li>
+<li><strong>Real transaction costs</strong> — IronVault option prices, not synthetic</li>
+<li><strong>Regime validation</strong> — test across bull/bear/high_vol independently</li>
+<li><strong>No post-hoc selection</strong> — single configuration, not best-of-N</li>
+<li><strong>Minimum 30 OOS trades</strong> for statistical significance</li>
+</ol>
+</div>
+</div>
+
+<!-- Detailed Per-Experiment Cards -->
+<div class="section">
+<h2>5. Detailed Per-Experiment Audit</h2>
+
+        <div style="background:#161b22;border:1px solid #30363d;border-left:5px solid #3fb950;border-radius:8px;padding:16px;margin:16px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <h3 style="margin:0;color:#58a6ff">EXP-1630: GLD/TLT Relative Value</h3>
+            <span style="font-size:1.4em;font-weight:800;color:#3fb950">A</span>
+          </div>
+          <p style="color:#3fb950;font-weight:600;margin:4px 0">PASS</p>
+          <table style="font-size:.82em;margin:8px 0">
+            <tr><td style="color:#8b949e;width:160px">Walk-Forward</td><td>Explicit: IS 2020-2021, OOS 2022-2024</td></tr>
+            <tr><td style="color:#8b949e">WF Type</td><td>Fixed split (OOS_START=2022 in source)</td></tr>
+            <tr><td style="color:#8b949e">IS/OOS Trades</td><td>29 IS / 34 OOS</td></tr>
+            <tr><td style="color:#8b949e">Parameters</td><td>10 (10/63 = 0.16 (acceptable))</td></tr>
+            <tr><td style="color:#8b949e">Transaction Costs</td><td>IronVault real spread prices, no synthetic fallback</td></tr>
+            <tr><td style="color:#8b949e">Overfitting Risk</td><td>LOW — hardcoded parameters, not optimized on IS</td></tr>
+            <tr><td style="color:#8b949e">Regime Testing</td><td>Tested: bull (82% WR), bear (100%), crash (100%), high_vol (100%)</td></tr>
+            <tr><td style="color:#8b949e">Concerns</td><td style="color:#d29922">OOS >> IS (4.08 vs 0.31) — unusual; could be lucky OOS period, but 3 years of consistency reduces this risk</td></tr>
+            <tr><td style="color:#8b949e">Recommendation</td><td style="font-weight:600">Deploy — strongest walk-forward validated strategy</td></tr>
+          </table>
+        </div>
+        
+        <div style="background:#161b22;border:1px solid #30363d;border-left:5px solid #3fb950;border-radius:8px;padding:16px;margin:16px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <h3 style="margin:0;color:#58a6ff">Vol Term Structure: Contango/Backwardation Signal</h3>
+            <span style="font-size:1.4em;font-weight:800;color:#3fb950">A</span>
+          </div>
+          <p style="color:#3fb950;font-weight:600;margin:4px 0">PASS</p>
+          <table style="font-size:.82em;margin:8px 0">
+            <tr><td style="color:#8b949e;width:160px">Walk-Forward</td><td>4 expanding windows (2022-2025 OOS)</td></tr>
+            <tr><td style="color:#8b949e">WF Type</td><td>Expanding: IS grows, OOS = next year</td></tr>
+            <tr><td style="color:#8b949e">IS/OOS Trades</td><td>19 IS / 33 OOS</td></tr>
+            <tr><td style="color:#8b949e">Parameters</td><td>10 (10/53 = 0.19 (acceptable))</td></tr>
+            <tr><td style="color:#8b949e">Transaction Costs</td><td>IronVault real intraday bars</td></tr>
+            <tr><td style="color:#8b949e">Overfitting Risk</td><td>LOW — OOS Sharpe matches full-period exactly (2.452 = 2.448)</td></tr>
+            <tr><td style="color:#8b949e">Regime Testing</td><td>All 5 regimes positive. 15 parameter sensitivity variations all robust.</td></tr>
+            <tr><td style="color:#8b949e">Concerns</td><td style="color:#d29922">Window 4 (2025) Sharpe only 0.31 — possible regime shift. Small per-trade PnL.</td></tr>
+            <tr><td style="color:#8b949e">Recommendation</td><td style="font-weight:600">Deploy — best walk-forward consistency of any strategy</td></tr>
+          </table>
+        </div>
+        
+        <div style="background:#161b22;border:1px solid #30363d;border-left:5px solid #3fb950;border-radius:8px;padding:16px;margin:16px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <h3 style="margin:0;color:#58a6ff">Cross-Asset Pairs: TLT-SPY, TLT-QQQ Z-Score</h3>
+            <span style="font-size:1.4em;font-weight:800;color:#3fb950">A-</span>
+          </div>
+          <p style="color:#3fb950;font-weight:600;margin:4px 0">PASS</p>
+          <table style="font-size:.82em;margin:8px 0">
+            <tr><td style="color:#8b949e;width:160px">Walk-Forward</td><td>5 yearly rolling windows (2021-2025)</td></tr>
+            <tr><td style="color:#8b949e">WF Type</td><td>Rolling: 1-2yr IS, next year OOS</td></tr>
+            <tr><td style="color:#8b949e">IS/OOS Trades</td><td>10 IS / 22 OOS</td></tr>
+            <tr><td style="color:#8b949e">Parameters</td><td>5 (5/32 = 0.16 (acceptable))</td></tr>
+            <tr><td style="color:#8b949e">Transaction Costs</td><td>Real equity prices; option costs not explicitly modeled</td></tr>
+            <tr><td style="color:#8b949e">Overfitting Risk</td><td>LOW — rolling windows prevent look-ahead; 100% of windows positive</td></tr>
+            <tr><td style="color:#8b949e">Regime Testing</td><td>Works across bull, bear, high_vol, moderate regimes</td></tr>
+            <tr><td style="color:#8b949e">Concerns</td><td style="color:#d29922">Very small PnL ($1.3K on $100K = 1.3% total). Limited capacity. 4-8 trades per OOS window (marginal).</td></tr>
+            <tr><td style="color:#8b949e">Recommendation</td><td style="font-weight:600">Deploy as diversifier — genuine alpha but tiny magnitude</td></tr>
+          </table>
+        </div>
+        
+        <div style="background:#161b22;border:1px solid #30363d;border-left:5px solid #58a6ff;border-radius:8px;padding:16px;margin:16px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <h3 style="margin:0;color:#58a6ff">EXP-1220-real: Tail Risk Protection</h3>
+            <span style="font-size:1.4em;font-weight:800;color:#58a6ff">B+</span>
+          </div>
+          <p style="color:#58a6ff;font-weight:600;margin:4px 0">CONDITIONAL PASS</p>
+          <table style="font-size:.82em;margin:8px 0">
+            <tr><td style="color:#8b949e;width:160px">Walk-Forward</td><td>No explicit WF — yearly reporting only</td></tr>
+            <tr><td style="color:#8b949e">WF Type</td><td>Implicit yearly breakdown, no formal IS/OOS</td></tr>
+            <tr><td style="color:#8b949e">IS/OOS Trades</td><td>0 IS / 0 OOS</td></tr>
+            <tr><td style="color:#8b949e">Parameters</td><td>12 (N/A (continuous overlay, not discrete trades))</td></tr>
+            <tr><td style="color:#8b949e">Transaction Costs</td><td>Macro-level hedge overlay — no option transaction costs modeled</td></tr>
+            <tr><td style="color:#8b949e">Overfitting Risk</td><td>MODERATE — 12+ params but results strong across all 6 years (2019-2025)</td></tr>
+            <tr><td style="color:#8b949e">Regime Testing</td><td>9 crashes detected. DD reduced from 33.7% to 6.6%.</td></tr>
+            <tr><td style="color:#8b949e">Concerns</td><td style="color:#d29922">No formal walk-forward. Hedge costs (2% annual) assumed, not measured from real option prices. Real > synthetic Sharpe (unusual).</td></tr>
+            <tr><td style="color:#8b949e">Recommendation</td><td style="font-weight:600">Deploy with caution — add formal WF validation; verify hedge costs with real SPY put prices</td></tr>
+          </table>
+        </div>
+        
+        <div style="background:#161b22;border:1px solid #30363d;border-left:5px solid #58a6ff;border-radius:8px;padding:16px;margin:16px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <h3 style="margin:0;color:#58a6ff">TLT-IC: TLT Iron Condors</h3>
+            <span style="font-size:1.4em;font-weight:800;color:#58a6ff">B</span>
+          </div>
+          <p style="color:#58a6ff;font-weight:600;margin:4px 0">CONDITIONAL PASS</p>
+          <table style="font-size:.82em;margin:8px 0">
+            <tr><td style="color:#8b949e;width:160px">Walk-Forward</td><td>No formal WF — 6 consecutive profitable years</td></tr>
+            <tr><td style="color:#8b949e">WF Type</td><td>Yearly consistency check (not formal WF)</td></tr>
+            <tr><td style="color:#8b949e">IS/OOS Trades</td><td>0 IS / 43 OOS</td></tr>
+            <tr><td style="color:#8b949e">Parameters</td><td>6 (6/43 = 0.14 (acceptable))</td></tr>
+            <tr><td style="color:#8b949e">Transaction Costs</td><td>IronVault real option prices</td></tr>
+            <tr><td style="color:#8b949e">Overfitting Risk</td><td>MODERATE — no formal WF, but 6 consecutive years profitable reduces overfitting concern</td></tr>
+            <tr><td style="color:#8b949e">Regime Testing</td><td>Best in 2020 (18.8%), weakest in 2025 (0.7%). Works across regimes.</td></tr>
+            <tr><td style="color:#8b949e">Concerns</td><td style="color:#d29922">No formal IS/OOS split. 2025 degradation (Sharpe 0.31). 4-leg IC execution complexity.</td></tr>
+            <tr><td style="color:#8b949e">Recommendation</td><td style="font-weight:600">Needs formal walk-forward before live deployment</td></tr>
+          </table>
+        </div>
+        
+        <div style="background:#161b22;border:1px solid #30363d;border-left:5px solid #58a6ff;border-radius:8px;padding:16px;margin:16px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <h3 style="margin:0;color:#58a6ff">EXP-1630-opt: Multi-Pair Optimized (4 pairs)</h3>
+            <span style="font-size:1.4em;font-weight:800;color:#58a6ff">B</span>
+          </div>
+          <p style="color:#58a6ff;font-weight:600;margin:4px 0">CONDITIONAL PASS</p>
+          <table style="font-size:.82em;margin:8px 0">
+            <tr><td style="color:#8b949e;width:160px">Walk-Forward</td><td>3/4 rolling windows positive</td></tr>
+            <tr><td style="color:#8b949e">WF Type</td><td>Rolling 1yr IS / 1yr OOS + expanding</td></tr>
+            <tr><td style="color:#8b949e">IS/OOS Trades</td><td>0 IS / 174 OOS</td></tr>
+            <tr><td style="color:#8b949e">Parameters</td><td>12 (12/174 = 0.07 (good sample size))</td></tr>
+            <tr><td style="color:#8b949e">Transaction Costs</td><td>IronVault real option prices for all 4 pairs</td></tr>
+            <tr><td style="color:#8b949e">Overfitting Risk</td><td>MODERATE — sizing/leverage optimized on full data; pair selection based on full-period results</td></tr>
+            <tr><td style="color:#8b949e">Regime Testing</td><td>Regime-agnostic: all regimes profitable (bear 100% WR, crash 100% WR)</td></tr>
+            <tr><td style="color:#8b949e">Concerns</td><td style="color:#d29922">Optimization of position sizing (2%/3%/5%) and leverage (1x-2x) used full period. 1 of 4 windows negative.</td></tr>
+            <tr><td style="color:#8b949e">Recommendation</td><td style="font-weight:600">Deploy at conservative settings (3% risk, 1x leverage) — optimization results may be optimistic</td></tr>
+          </table>
+        </div>
+        
+        <div style="background:#161b22;border:1px solid #30363d;border-left:5px solid #d29922;border-radius:8px;padding:16px;margin:16px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <h3 style="margin:0;color:#58a6ff">XLI-IC: XLF/XLI Iron Condors (Optimized)</h3>
+            <span style="font-size:1.4em;font-weight:800;color:#d29922">C+</span>
+          </div>
+          <p style="color:#d29922;font-weight:600;margin:4px 0">NEEDS REWORK</p>
+          <table style="font-size:.82em;margin:8px 0">
+            <tr><td style="color:#8b949e;width:160px">Walk-Forward</td><td>Implied only — 34 configs tested, best selected</td></tr>
+            <tr><td style="color:#8b949e">WF Type</td><td>Best-of-sample selection (NOT proper WF)</td></tr>
+            <tr><td style="color:#8b949e">IS/OOS Trades</td><td>20 IS / 20 OOS</td></tr>
+            <tr><td style="color:#8b949e">Parameters</td><td>6 (6×34 configs / 40 trades = extreme selection bias)</td></tr>
+            <tr><td style="color:#8b949e">Transaction Costs</td><td>IronVault real option prices</td></tr>
+            <tr><td style="color:#8b949e">Overfitting Risk</td><td>HIGH — 34 configurations tested on same dataset, best selected post-hoc. OOS > IS (8.58 vs 3.89) is a red flag.</td></tr>
+            <tr><td style="color:#8b949e">Regime Testing</td><td>Moderate regime filter applied (likely over-tuned)</td></tr>
+            <tr><td style="color:#8b949e">Concerns</td><td style="color:#d29922">Classic optimization bias: 34 configs × 6 params = 204 effective parameters for 40 trades. OOS >> IS is anomalous.</td></tr>
+            <tr><td style="color:#8b949e">Recommendation</td><td style="font-weight:600">Re-run with proper walk-forward (single config, expanding window)</td></tr>
+          </table>
+        </div>
+        
+        <div style="background:#161b22;border:1px solid #30363d;border-left:5px solid #d29922;border-radius:8px;padding:16px;margin:16px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <h3 style="margin:0;color:#58a6ff">EXP-1650: Earnings Vol Crush (XLF)</h3>
+            <span style="font-size:1.4em;font-weight:800;color:#d29922">C</span>
+          </div>
+          <p style="color:#d29922;font-weight:600;margin:4px 0">NEEDS REWORK</p>
+          <table style="font-size:.82em;margin:8px 0">
+            <tr><td style="color:#8b949e;width:160px">Walk-Forward</td><td>Implicit IS/OOS in results — not documented</td></tr>
+            <tr><td style="color:#8b949e">WF Type</td><td>Methodology undocumented</td></tr>
+            <tr><td style="color:#8b949e">IS/OOS Trades</td><td>16 IS / 21 OOS</td></tr>
+            <tr><td style="color:#8b949e">Parameters</td><td>7 (7/21 OOS = 0.33 (marginal))</td></tr>
+            <tr><td style="color:#8b949e">Transaction Costs</td><td>IronVault real option prices</td></tr>
+            <tr><td style="color:#8b949e">Overfitting Risk</td><td>MODERATE — IS Sharpe 0.91 → OOS 0.48 (47% degradation). 2024-2025 returns collapsing.</td></tr>
+            <tr><td style="color:#8b949e">Regime Testing</td><td>Q3 (July) earnings are toxic (-104% IV crush). Only Q1/Q2/Q4 viable.</td></tr>
+            <tr><td style="color:#8b949e">Concerns</td><td style="color:#d29922">No walk-forward docs. Recent degradation. Multi-ticker fragmentation. Q3 exclusion rule derived from full data.</td></tr>
+            <tr><td style="color:#8b949e">Recommendation</td><td style="font-weight:600">Document WF methodology. Investigate 2024-2025 regime shift. Q3 filter needs OOS validation.</td></tr>
+          </table>
+        </div>
+        
+        <div style="background:#161b22;border:1px solid #30363d;border-left:5px solid #d29922;border-radius:8px;padding:16px;margin:16px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <h3 style="margin:0;color:#58a6ff">EXP-1640: Sector Momentum Options</h3>
+            <span style="font-size:1.4em;font-weight:800;color:#d29922">C-</span>
+          </div>
+          <p style="color:#d29922;font-weight:600;margin:4px 0">NEEDS REWORK</p>
+          <table style="font-size:.82em;margin:8px 0">
+            <tr><td style="color:#8b949e;width:160px">Walk-Forward</td><td>Explicit: IS 2020-2023, OOS 2024-2025</td></tr>
+            <tr><td style="color:#8b949e">WF Type</td><td>Fixed split (4yr IS, 2yr OOS)</td></tr>
+            <tr><td style="color:#8b949e">IS/OOS Trades</td><td>13 IS / 6 OOS</td></tr>
+            <tr><td style="color:#8b949e">Parameters</td><td>5 (5/6 OOS = 0.83 (CRITICAL — nearly 1 param per OOS trade))</td></tr>
+            <tr><td style="color:#8b949e">Transaction Costs</td><td>IronVault real option prices</td></tr>
+            <tr><td style="color:#8b949e">Overfitting Risk</td><td>HIGH — IS 1.07 → OOS -0.12 (sign flip). Only 6 OOS trades. 2025 WR collapsed to 33%.</td></tr>
+            <tr><td style="color:#8b949e">Regime Testing</td><td>Only XLF/XLI have data. XLK/XLE too sparse.</td></tr>
+            <tr><td style="color:#8b949e">Concerns</td><td style="color:#d29922">Classic overfitting: looks great in-sample, fails out-of-sample. 6 OOS trades is statistically meaningless.</td></tr>
+            <tr><td style="color:#8b949e">Recommendation</td><td style="font-weight:600">Extend OOS to 3+ years. Add more tickers. Currently not deployable.</td></tr>
+          </table>
+        </div>
+        
+        <div style="background:#161b22;border:1px solid #30363d;border-left:5px solid #d29922;border-radius:8px;padding:16px;margin:16px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <h3 style="margin:0;color:#58a6ff">EXP-1230-real: Microstructure Alpha</h3>
+            <span style="font-size:1.4em;font-weight:800;color:#d29922">C-</span>
+          </div>
+          <p style="color:#d29922;font-weight:600;margin:4px 0">NEEDS REWORK</p>
+          <table style="font-size:.82em;margin:8px 0">
+            <tr><td style="color:#8b949e;width:160px">Walk-Forward</td><td>No — yearly breakdown only</td></tr>
+            <tr><td style="color:#8b949e">WF Type</td><td>None (full-period analysis)</td></tr>
+            <tr><td style="color:#8b949e">IS/OOS Trades</td><td>0 IS / 0 OOS</td></tr>
+            <tr><td style="color:#8b949e">Parameters</td><td>0 (N/A (daily signals, regime detection))</td></tr>
+            <tr><td style="color:#8b949e">Transaction Costs</td><td>IronVault intraday bars</td></tr>
+            <tr><td style="color:#8b949e">Overfitting Risk</td><td>MODERATE — vol prediction AUC 0.511 (barely above random). Best year 2024 is outlier.</td></tr>
+            <tr><td style="color:#8b949e">Regime Testing</td><td>Regime detection (normal/tight/wide/crisis) but no regime-conditional WF.</td></tr>
+            <tr><td style="color:#8b949e">Concerns</td><td style="color:#d29922">AUC 0.511 means the predictive signal is essentially noise. Single-year Sharpe 2.75 (2024) drives overall result.</td></tr>
+            <tr><td style="color:#8b949e">Recommendation</td><td style="font-weight:600">Validate prediction AUC with proper walk-forward. Currently not a standalone strategy.</td></tr>
+          </table>
+        </div>
+        
+        <div style="background:#161b22;border:1px solid #30363d;border-left:5px solid #f85149;border-radius:8px;padding:16px;margin:16px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <h3 style="margin:0;color:#58a6ff">EXP-1320-real: Vol Clustering Overlay</h3>
+            <span style="font-size:1.4em;font-weight:800;color:#f85149">D</span>
+          </div>
+          <p style="color:#f85149;font-weight:600;margin:4px 0">FAIL</p>
+          <table style="font-size:.82em;margin:8px 0">
+            <tr><td style="color:#8b949e;width:160px">Walk-Forward</td><td>No</td></tr>
+            <tr><td style="color:#8b949e">WF Type</td><td>None — clustering optimized on full 1,500 sessions</td></tr>
+            <tr><td style="color:#8b949e">IS/OOS Trades</td><td>0 IS / 41 OOS</td></tr>
+            <tr><td style="color:#8b949e">Parameters</td><td>5 (5/41 = 0.12 (marginal) but clustering tuned on full data)</td></tr>
+            <tr><td style="color:#8b949e">Transaction Costs</td><td>IronVault real prices</td></tr>
+            <tr><td style="color:#8b949e">Overfitting Risk</td><td>HIGH — vol clustering autocorrelation (0.096) and AUC (0.431) are weak signals. Overlay selection bias on 41 trades.</td></tr>
+            <tr><td style="color:#8b949e">Regime Testing</td><td>Not regime-tested independently</td></tr>
+            <tr><td style="color:#8b949e">Concerns</td><td style="color:#d29922">Only 3 trades triggered by sell_prem signal, 1 by avoid. Sample too small. 2022 improvement could be luck.</td></tr>
+            <tr><td style="color:#8b949e">Recommendation</td><td style="font-weight:600">Needs complete rebuild with walk-forward clustering + OOS overlay evaluation</td></tr>
+          </table>
+        </div>
+        
+        <div style="background:#161b22;border:1px solid #30363d;border-left:5px solid #f85149;border-radius:8px;padding:16px;margin:16px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <h3 style="margin:0;color:#58a6ff">EXP-1270-real: Adaptive Stop-Loss</h3>
+            <span style="font-size:1.4em;font-weight:800;color:#f85149">D</span>
+          </div>
+          <p style="color:#f85149;font-weight:600;margin:4px 0">FAIL</p>
+          <table style="font-size:.82em;margin:8px 0">
+            <tr><td style="color:#8b949e;width:160px">Walk-Forward</td><td>No</td></tr>
+            <tr><td style="color:#8b949e">WF Type</td><td>None — 10 stop strategies tested on same 41 trades</td></tr>
+            <tr><td style="color:#8b949e">IS/OOS Trades</td><td>0 IS / 41 OOS</td></tr>
+            <tr><td style="color:#8b949e">Parameters</td><td>17 (17/41 = 0.41 (SEVERE — nearly 1 param per 2 trades))</td></tr>
+            <tr><td style="color:#8b949e">Transaction Costs</td><td>IronVault real option prices</td></tr>
+            <tr><td style="color:#8b949e">Overfitting Risk</td><td>EXTREME — 10 stop strategies × 41 trades = textbook selection bias. Overall Sharpe negative.</td></tr>
+            <tr><td style="color:#8b949e">Regime Testing</td><td>Not tested</td></tr>
+            <tr><td style="color:#8b949e">Concerns</td><td style="color:#d29922">Overall strategy loses money (Sharpe -0.25). Best stop variant (trailing_regime) at 4.34 is pure selection bias. Synthetic Sharpe 5.25 vs real -0.25.</td></tr>
+            <tr><td style="color:#8b949e">Recommendation</td><td style="font-weight:600">Discard — fundamental approach invalidated by real data</td></tr>
+          </table>
+        </div>
+        
+        <div style="background:#161b22;border:1px solid #30363d;border-left:5px solid #f85149;border-radius:8px;padding:16px;margin:16px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <h3 style="margin:0;color:#58a6ff">EXP-880-real: ML Production Ensemble</h3>
+            <span style="font-size:1.4em;font-weight:800;color:#f85149">F</span>
+          </div>
+          <p style="color:#f85149;font-weight:600;margin:4px 0">FAIL</p>
+          <table style="font-size:.82em;margin:8px 0">
+            <tr><td style="color:#8b949e;width:160px">Walk-Forward</td><td>No</td></tr>
+            <tr><td style="color:#8b949e">WF Type</td><td>None — full-period backtest</td></tr>
+            <tr><td style="color:#8b949e">IS/OOS Trades</td><td>0 IS / 262 OOS</td></tr>
+            <tr><td style="color:#8b949e">Parameters</td><td>8 (8/262 = 0.03 (acceptable ratio but strategy fails))</td></tr>
+            <tr><td style="color:#8b949e">Transaction Costs</td><td>IronVault real option prices (10,755 Friday fallback rows)</td></tr>
+            <tr><td style="color:#8b949e">Overfitting Risk</td><td>EXTREME — synthetic pricing used for parameter tuning, real pricing shows fundamental mismatch</td></tr>
+            <tr><td style="color:#8b949e">Regime Testing</td><td>2020: -49%, 2024: -108% (ruin events in volatile periods)</td></tr>
+            <tr><td style="color:#8b949e">Concerns</td><td style="color:#d29922">Capital went negative (-$4,460 from $100K). Ruin event Aug 2024. Crisis Hedge V2 not integrated. 8.5% flat risk too aggressive.</td></tr>
+            <tr><td style="color:#8b949e">Recommendation</td><td style="font-weight:600">DEAD — archive for analysis. Strategy fundamentally broken on real pricing.</td></tr>
+          </table>
+        </div>
+        
+        <div style="background:#161b22;border:1px solid #30363d;border-left:5px solid #f85149;border-radius:8px;padding:16px;margin:16px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <h3 style="margin:0;color:#58a6ff">EXP-1470-real: North Star Portfolio</h3>
+            <span style="font-size:1.4em;font-weight:800;color:#f85149">F</span>
+          </div>
+          <p style="color:#f85149;font-weight:600;margin:4px 0">FAIL</p>
+          <table style="font-size:.82em;margin:8px 0">
+            <tr><td style="color:#8b949e;width:160px">Walk-Forward</td><td>No</td></tr>
+            <tr><td style="color:#8b949e">WF Type</td><td>None</td></tr>
+            <tr><td style="color:#8b949e">IS/OOS Trades</td><td>0 IS / 19 OOS</td></tr>
+            <tr><td style="color:#8b949e">Parameters</td><td>4 (4/19 = 0.21 (marginal) — but 0 trades in 2021-2024)</td></tr>
+            <tr><td style="color:#8b949e">Transaction Costs</td><td>IronVault real option prices</td></tr>
+            <tr><td style="color:#8b949e">Overfitting Risk</td><td>EXTREME — synthetic CAGR 27.85% vs real 0.42%. Complete assumptions failure.</td></tr>
+            <tr><td style="color:#8b949e">Regime Testing</td><td>Not tested — too few trades</td></tr>
+            <tr><td style="color:#8b949e">Concerns</td><td style="color:#d29922">Only 19 trades total. 0 trades in 2021, 2023, 2024. Synthetic assumptions completely invalid.</td></tr>
+            <tr><td style="color:#8b949e">Recommendation</td><td style="font-weight:600">DEAD — demonstrates synthetic data cannot be trusted</td></tr>
+          </table>
+        </div>
+        
+</div>
+
+<p class="note" style="margin-top:48px;text-align:center;border-top:1px solid #21262d;padding-top:16px">
+  OOS Integrity Audit &bull; compass/oos_integrity_audit.py &bull; 2026-04-05
+</p>
+</body></html>

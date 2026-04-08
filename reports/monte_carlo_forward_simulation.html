@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monte Carlo Forward Simulation — Ultimate Portfolio v4</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1000px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.5; }
+  h1 { font-size:1.8em; color:#0f172a; margin-bottom:4px; }
+  h2 { color:#334155; margin-top:2.5em; padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  h3 { color:#475569; margin-top:1.5em; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:24px; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:20px 0; }
+  .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:18px;
+          text-align:center; flex:1; min-width:130px; }
+  .kpi .value { font-size:1.7em; font-weight:800; color:#0f172a; }
+  .kpi .label { font-size:0.72em; color:#64748b; margin-top:4px; text-transform:uppercase; }
+  .good { color:#16a34a; } .warn { color:#ca8a04; } .bad { color:#dc2626; }
+  table { width:100%; border-collapse:collapse; margin:16px 0; font-size:0.86em; }
+  th { background:#f1f5f9; padding:10px 12px; text-align:right; font-weight:600; color:#475569;
+       border-bottom:2px solid #cbd5e1; font-size:0.80em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  .hist-row { display:flex; flex-wrap:wrap; gap:16px; justify-content:center; margin:16px 0; }
+  .callout { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:16px; margin:16px 0; font-size:0.88rem; }
+  .callout.warn { background:#fffbeb; border-color:#fde68a; }
+  .footer { margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0; font-size:0.78em; color:#94a3b8; text-align:center; }
+</style></head><body>
+
+<h1>Monte Carlo Forward Simulation</h1>
+<div class="subtitle">
+    Ultimate Portfolio v4 | 10,000 block-bootstrap paths | Block size: 5 days | 2026-04-05 11:28
+</div>
+
+<div class="kpi-row">
+    <div class="kpi"><div class="value good">100%</div><div class="label">1yr Median CAGR</div></div>
+    <div class="kpi"><div class="value good">101%</div><div class="label">3yr Median CAGR</div></div>
+    <div class="kpi"><div class="value good">101%</div><div class="label">5yr Median CAGR</div></div>
+    <div class="kpi"><div class="value">100%</div><div class="label">5yr Prob Profit</div></div>
+    <div class="kpi"><div class="value warn">13%</div><div class="label">5yr P95 Max DD</div></div>
+    <div class="kpi"><div class="value">96%</div><div class="label">Prob &gt;50% 1yr</div></div>
+    <div class="kpi"><div class="value">10.8×</div><div class="label">Half-Kelly</div></div>
+    <div class="kpi"><div class="value">$3,263,579</div><div class="label">5yr Median Wealth</div></div>
+</div>
+
+<h2>Wealth Fan Chart (5-Year)</h2>
+<svg width="920" height="380" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin:1rem 0">
+<text x="460" y="26" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e293b">5-Year Wealth Fan Chart (1,000 paths)</text>
+<line x1="80" y1="322" x2="895" y2="322" stroke="#e2e8f0" stroke-width="1"/>
+<text x="72" y="326" text-anchor="end" font-size="9" fill="#64748b">$88,188</text>
+<line x1="80" y1="275" x2="895" y2="275" stroke="#e2e8f0" stroke-width="1"/>
+<text x="72" y="279" text-anchor="end" font-size="9" fill="#64748b">$1.2M</text>
+<line x1="80" y1="229" x2="895" y2="229" stroke="#e2e8f0" stroke-width="1"/>
+<text x="72" y="233" text-anchor="end" font-size="9" fill="#64748b">$2.4M</text>
+<line x1="80" y1="182" x2="895" y2="182" stroke="#e2e8f0" stroke-width="1"/>
+<text x="72" y="186" text-anchor="end" font-size="9" fill="#64748b">$3.5M</text>
+<line x1="80" y1="135" x2="895" y2="135" stroke="#e2e8f0" stroke-width="1"/>
+<text x="72" y="139" text-anchor="end" font-size="9" fill="#64748b">$4.7M</text>
+<line x1="80" y1="89" x2="895" y2="89" stroke="#e2e8f0" stroke-width="1"/>
+<text x="72" y="93" text-anchor="end" font-size="9" fill="#64748b">$5.8M</text>
+<line x1="80" y1="42" x2="895" y2="42" stroke="#e2e8f0" stroke-width="1"/>
+<text x="72" y="46" text-anchor="end" font-size="9" fill="#64748b">$7.0M</text>
+<text x="80" y="366" text-anchor="middle" font-size="9" fill="#64748b">Yr 0</text>
+<text x="243" y="366" text-anchor="middle" font-size="9" fill="#64748b">Yr 1</text>
+<text x="406" y="366" text-anchor="middle" font-size="9" fill="#64748b">Yr 2</text>
+<text x="569" y="366" text-anchor="middle" font-size="9" fill="#64748b">Yr 3</text>
+<text x="732" y="366" text-anchor="middle" font-size="9" fill="#64748b">Yr 4</text>
+<polygon points="80.0,321.4 83.9,321.2 87.8,321.1 91.6,320.9 95.5,320.8 99.4,320.7 103.3,320.5 107.2,320.4 111.0,320.2 114.9,320.1 118.8,320.0 122.7,319.9 126.6,319.7 130.5,319.6 134.3,319.5 138.2,319.4 142.1,319.2 146.0,319.1 149.9,318.9 153.7,318.8 157.6,318.6 161.5,318.4 165.4,318.3 169.3,318.2 173.1,318.0 177.0,317.8 180.9,317.7 184.8,317.5 188.7,317.3 192.5,317.1 196.4,316.9 200.3,316.9 204.2,316.8 208.1,316.6 212.0,316.3 215.8,316.1 219.7,316.0 223.6,315.8 227.5,315.5 231.4,315.3 235.2,315.1 239.1,314.9 243.0,314.6 246.9,314.4 250.8,314.2 254.6,314.0 258.5,313.7 262.4,313.5 266.3,313.2 270.2,313.0 274.0,312.7 277.9,312.5 281.8,312.5 285.7,312.1 289.6,311.8 293.5,311.5 297.3,311.4 301.2,311.1 305.1,310.8 309.0,310.6 312.9,310.3 316.7,310.0 320.6,309.7 324.5,309.5 328.4,309.2 332.3,308.8 336.1,308.5 340.0,308.3 343.9,307.6 347.8,307.3 351.7,306.9 355.5,306.8 359.4,306.4 363.3,306.0 367.2,305.5 371.1,305.2 375.0,304.6 378.8,304.1 382.7,303.5 386.6,303.1 390.5,302.7 394.4,302.2 398.2,301.6 402.1,301.1 406.0,300.7 409.9,300.5 413.8,300.0 417.6,299.3 421.5,299.2 425.4,298.5 429.3,298.2 433.2,297.4 437.0,297.2 440.9,296.5 444.8,296.0 448.7,294.9 452.6,294.0 456.5,293.8 460.3,293.2 464.2,292.6 468.1,291.8 472.0,290.5 475.9,290.5 479.7,289.6 483.6,289.2 487.5,288.1 491.4,287.7 495.3,287.4 499.1,286.2 503.0,285.6 506.9,284.7 510.8,283.7 514.7,283.1 518.5,282.8 522.4,281.4 526.3,280.9 530.2,280.0 534.1,278.8 538.0,278.0 541.8,277.3 545.7,276.6 549.6,275.7 553.5,275.4 557.4,274.3 561.2,273.7 565.1,272.4 569.0,270.9 572.9,270.3 576.8,268.2 580.6,268.0 584.5,266.5 588.4,265.9 592.3,264.0 596.2,262.5 600.0,261.9 603.9,260.9 607.8,261.0 611.7,258.8 615.6,257.9 619.5,255.8 623.3,254.5 627.2,253.9 631.1,252.4 635.0,251.1 638.9,250.3 642.7,249.4 646.6,247.9 650.5,245.6 654.4,243.8 658.3,243.4 662.1,241.6 666.0,239.7 669.9,238.7 673.8,237.1 677.7,234.5 681.5,232.5 685.4,231.3 689.3,229.2 693.2,227.2 697.1,224.9 701.0,222.3 704.8,219.5 708.7,218.1 712.6,216.8 716.5,215.8 720.4,213.2 724.2,210.6 728.1,208.2 732.0,206.1 735.9,203.7 739.8,201.8 743.6,199.8 747.5,196.7 751.4,194.0 755.3,191.8 759.2,189.4 763.0,189.3 766.9,187.5 770.8,181.8 774.7,180.1 778.6,176.3 782.5,174.2 786.3,170.4 790.2,166.2 794.1,164.7 798.0,162.5 801.9,159.0 805.7,156.1 809.6,152.4 813.5,151.5 817.4,144.7 821.3,141.2 825.1,137.5 829.0,133.4 832.9,129.9 836.8,126.2 840.7,122.3 844.5,119.5 848.4,115.9 852.3,111.4 856.2,109.8 860.1,103.2 864.0,103.2 867.8,97.0 871.7,88.9 875.6,85.1 879.5,81.8 883.4,79.6 887.2,73.7 891.1,71.3 895.0,67.8 895.0,253.2 891.1,254.2 887.2,256.4 883.4,257.1 879.5,257.5 875.6,259.3 871.7,259.8 867.8,260.9 864.0,261.6 860.1,262.4 856.2,263.7 852.3,264.8 848.4,266.4 844.5,267.0 840.7,268.4 836.8,268.8 832.9,270.0 829.0,271.2 825.1,271.8 821.3,272.3 817.4,272.4 813.5,272.8 809.6,273.3 805.7,274.7 801.9,275.9 798.0,276.6 794.1,277.8 790.2,278.2 786.3,279.2 782.5,279.7 778.6,279.6 774.7,281.5 770.8,282.0 766.9,282.2 763.0,282.8 759.2,283.3 755.3,284.5 751.4,285.2 747.5,285.4 743.6,285.8 739.8,286.4 735.9,286.8 732.0,287.0 728.1,288.0 724.2,288.5 720.4,289.1 716.5,289.7 712.6,290.1 708.7,290.7 704.8,291.2 701.0,292.1 697.1,292.4 693.2,292.8 689.3,293.3 685.4,293.7 681.5,294.3 677.7,294.5 673.8,294.8 669.9,295.4 666.0,295.7 662.1,296.2 658.3,296.8 654.4,297.1 650.5,297.5 646.6,297.9 642.7,298.1 638.9,298.3 635.0,299.0 631.1,299.3 627.2,299.9 623.3,299.7 619.5,300.4 615.6,300.6 611.7,300.9 607.8,301.3 603.9,301.8 600.0,302.1 596.2,302.5 592.3,302.6 588.4,303.3 584.5,303.7 580.6,303.9 576.8,304.0 572.9,304.7 569.0,304.8 565.1,305.0 561.2,305.3 557.4,305.9 553.5,305.8 549.6,306.1 545.7,306.5 541.8,307.0 538.0,307.3 534.1,307.7 530.2,308.0 526.3,308.4 522.4,308.4 518.5,308.6 514.7,308.8 510.8,308.9 506.9,309.2 503.0,309.5 499.1,309.7 495.3,310.0 491.4,310.1 487.5,310.4 483.6,310.6 479.7,311.0 475.9,311.2 472.0,311.4 468.1,311.5 464.2,311.6 460.3,311.9 456.5,312.1 452.6,312.3 448.7,312.5 444.8,312.6 440.9,312.7 437.0,312.9 433.2,313.2 429.3,313.3 425.4,313.5 421.5,313.8 417.6,313.9 413.8,314.0 409.9,314.3 406.0,314.5 402.1,314.6 398.2,314.8 394.4,314.8 390.5,315.0 386.6,315.1 382.7,315.2 378.8,315.4 375.0,315.5 371.1,315.6 367.2,315.8 363.3,315.9 359.4,316.0 355.5,316.2 351.7,316.3 347.8,316.5 343.9,316.6 340.0,316.7 336.1,316.8 332.3,317.0 328.4,317.0 324.5,317.2 320.6,317.3 316.7,317.4 312.9,317.6 309.0,317.7 305.1,317.8 301.2,317.9 297.3,318.0 293.5,318.1 289.6,318.2 285.7,318.3 281.8,318.4 277.9,318.5 274.0,318.5 270.2,318.6 266.3,318.7 262.4,318.8 258.5,318.9 254.6,319.0 250.8,319.0 246.9,319.1 243.0,319.3 239.1,319.3 235.2,319.4 231.4,319.5 227.5,319.5 223.6,319.7 219.7,319.7 215.8,319.8 212.0,319.9 208.1,320.0 204.2,320.0 200.3,320.1 196.4,320.2 192.5,320.2 188.7,320.3 184.8,320.4 180.9,320.5 177.0,320.5 173.1,320.6 169.3,320.7 165.4,320.7 161.5,320.8 157.6,320.8 153.7,320.9 149.9,321.0 146.0,321.0 142.1,321.1 138.2,321.1 134.3,321.2 130.5,321.2 126.6,321.3 122.7,321.3 118.8,321.4 114.9,321.4 111.0,321.5 107.2,321.5 103.3,321.5 99.4,321.5 95.5,321.6 91.6,321.6 87.8,321.6 83.9,321.6 80.0,321.6" fill="#dc262640"/>
+<polygon points="80.0,321.5 83.9,321.4 87.8,321.3 91.6,321.2 95.5,321.1 99.4,321.0 103.3,320.9 107.2,320.8 111.0,320.7 114.9,320.6 118.8,320.5 122.7,320.4 126.6,320.3 130.5,320.2 134.3,320.1 138.2,320.0 142.1,319.9 146.0,319.8 149.9,319.7 153.7,319.6 157.6,319.4 161.5,319.3 165.4,319.3 169.3,319.1 173.1,319.0 177.0,318.9 180.9,318.7 184.8,318.6 188.7,318.5 192.5,318.3 196.4,318.2 200.3,318.0 204.2,317.9 208.1,317.7 212.0,317.6 215.8,317.4 219.7,317.3 223.6,317.1 227.5,317.0 231.4,316.9 235.2,316.7 239.1,316.6 243.0,316.4 246.9,316.3 250.8,316.1 254.6,315.9 258.5,315.7 262.4,315.5 266.3,315.4 270.2,315.2 274.0,314.9 277.9,314.7 281.8,314.5 285.7,314.4 289.6,314.2 293.5,314.0 297.3,313.8 301.2,313.4 305.1,313.2 309.0,313.1 312.9,312.8 316.7,312.7 320.6,312.4 324.5,312.2 328.4,312.0 332.3,311.7 336.1,311.5 340.0,311.2 343.9,311.0 347.8,310.7 351.7,310.4 355.5,310.2 359.4,309.9 363.3,309.6 367.2,309.4 371.1,309.1 375.0,308.8 378.8,308.5 382.7,308.3 386.6,308.0 390.5,307.7 394.4,307.3 398.2,307.1 402.1,306.7 406.0,306.4 409.9,306.0 413.8,305.5 417.6,305.2 421.5,304.9 425.4,304.6 429.3,304.3 433.2,303.8 437.0,303.3 440.9,303.0 444.8,302.6 448.7,302.2 452.6,301.8 456.5,301.2 460.3,300.9 464.2,300.4 468.1,299.8 472.0,299.4 475.9,299.0 479.7,298.7 483.6,298.2 487.5,297.8 491.4,297.4 495.3,296.9 499.1,296.4 503.0,295.9 506.9,295.1 510.8,294.5 514.7,294.1 518.5,293.8 522.4,293.1 526.3,292.3 530.2,291.7 534.1,291.1 538.0,290.7 541.8,290.0 545.7,289.6 549.6,288.9 553.5,288.1 557.4,287.3 561.2,286.9 565.1,286.3 569.0,285.3 572.9,284.6 576.8,284.0 580.6,283.2 584.5,282.4 588.4,281.5 592.3,280.7 596.2,280.3 600.0,279.4 603.9,278.5 607.8,278.3 611.7,277.1 615.6,276.4 619.5,275.5 623.3,274.2 627.2,273.1 631.1,272.6 635.0,271.8 638.9,271.1 642.7,270.2 646.6,268.9 650.5,267.6 654.4,266.6 658.3,266.0 662.1,264.7 666.0,263.2 669.9,262.0 673.8,261.0 677.7,260.0 681.5,258.9 685.4,257.5 689.3,256.1 693.2,255.3 697.1,253.5 701.0,251.4 704.8,250.2 708.7,249.0 712.6,247.7 716.5,246.4 720.4,245.7 724.2,244.1 728.1,242.8 732.0,241.1 735.9,239.9 739.8,237.7 743.6,236.1 747.5,234.3 751.4,233.6 755.3,232.3 759.2,230.4 763.0,228.5 766.9,227.4 770.8,225.6 774.7,223.6 778.6,222.5 782.5,220.6 786.3,218.1 790.2,216.8 794.1,214.9 798.0,212.0 801.9,210.8 805.7,209.4 809.6,206.1 813.5,204.8 817.4,202.5 821.3,200.7 825.1,199.2 829.0,196.9 832.9,193.9 836.8,192.3 840.7,190.1 844.5,187.5 848.4,184.9 852.3,181.7 856.2,178.9 860.1,177.3 864.0,174.2 867.8,171.8 871.7,169.0 875.6,167.2 879.5,164.3 883.4,161.1 887.2,158.5 891.1,155.6 895.0,153.5 895.0,222.8 891.1,223.8 887.2,225.1 883.4,227.0 879.5,228.4 875.6,230.2 871.7,231.1 867.8,232.7 864.0,233.9 860.1,235.3 856.2,237.0 852.3,238.7 848.4,240.2 844.5,241.3 840.7,242.5 836.8,243.9 832.9,245.4 829.0,246.2 825.1,247.3 821.3,248.6 817.4,249.6 813.5,250.4 809.6,252.3 805.7,254.3 801.9,254.9 798.0,256.1 794.1,256.9 790.2,258.3 786.3,259.3 782.5,260.2 778.6,261.8 774.7,263.0 770.8,264.1 766.9,265.0 763.0,265.9 759.2,266.7 755.3,268.1 751.4,269.0 747.5,270.2 743.6,270.9 739.8,271.6 735.9,272.1 732.0,272.6 728.1,273.7 724.2,274.2 720.4,275.1 716.5,276.0 712.6,277.4 708.7,277.7 704.8,278.6 701.0,279.0 697.1,279.9 693.2,280.3 689.3,281.2 685.4,281.6 681.5,282.3 677.7,283.1 673.8,283.6 669.9,284.6 666.0,285.4 662.1,285.7 658.3,286.3 654.4,287.1 650.5,287.5 646.6,288.2 642.7,289.0 638.9,289.4 635.0,290.0 631.1,290.6 627.2,291.2 623.3,291.7 619.5,292.3 615.6,292.7 611.7,293.3 607.8,293.7 603.9,294.1 600.0,294.5 596.2,294.9 592.3,295.5 588.4,295.9 584.5,296.6 580.6,297.0 576.8,297.2 572.9,297.9 569.0,298.2 565.1,298.8 561.2,299.3 557.4,299.7 553.5,300.2 549.6,300.5 545.7,300.9 541.8,301.3 538.0,301.8 534.1,302.0 530.2,302.3 526.3,302.8 522.4,303.0 518.5,303.5 514.7,303.9 510.8,304.2 506.9,304.4 503.0,304.7 499.1,305.2 495.3,305.5 491.4,305.6 487.5,306.0 483.6,306.2 479.7,306.6 475.9,306.9 472.0,307.3 468.1,307.4 464.2,307.7 460.3,308.2 456.5,308.4 452.6,308.7 448.7,309.0 444.8,309.2 440.9,309.4 437.0,309.6 433.2,309.9 429.3,310.1 425.4,310.4 421.5,310.6 417.6,310.9 413.8,311.1 409.9,311.4 406.0,311.5 402.1,311.8 398.2,312.0 394.4,312.3 390.5,312.5 386.6,312.7 382.7,313.0 378.8,313.1 375.0,313.3 371.1,313.4 367.2,313.6 363.3,313.8 359.4,314.0 355.5,314.2 351.7,314.3 347.8,314.5 343.9,314.7 340.0,314.9 336.1,315.1 332.3,315.3 328.4,315.4 324.5,315.6 320.6,315.7 316.7,315.9 312.9,316.1 309.0,316.2 305.1,316.3 301.2,316.4 297.3,316.6 293.5,316.7 289.6,316.9 285.7,317.0 281.8,317.1 277.9,317.2 274.0,317.4 270.2,317.5 266.3,317.6 262.4,317.7 258.5,317.9 254.6,318.0 250.8,318.1 246.9,318.2 243.0,318.3 239.1,318.4 235.2,318.5 231.4,318.6 227.5,318.7 223.6,318.8 219.7,318.9 215.8,319.0 212.0,319.1 208.1,319.2 204.2,319.3 200.3,319.4 196.4,319.5 192.5,319.6 188.7,319.7 184.8,319.8 180.9,319.9 177.0,319.9 173.1,320.0 169.3,320.1 165.4,320.2 161.5,320.3 157.6,320.3 153.7,320.4 149.9,320.5 146.0,320.6 142.1,320.6 138.2,320.7 134.3,320.8 130.5,320.8 126.6,320.9 122.7,321.0 118.8,321.0 114.9,321.1 111.0,321.2 107.2,321.2 103.3,321.3 99.4,321.3 95.5,321.4 91.6,321.4 87.8,321.5 83.9,321.5 80.0,321.5" fill="#ca8a0440"/>
+<path d="M80.0,321.5 L83.9,321.5 L87.8,321.4 L91.6,321.3 L95.5,321.2 L99.4,321.2 L103.3,321.1 L107.2,321.0 L111.0,321.0 L114.9,320.9 L118.8,320.8 L122.7,320.7 L126.6,320.6 L130.5,320.5 L134.3,320.5 L138.2,320.4 L142.1,320.3 L146.0,320.2 L149.9,320.1 L153.7,320.0 L157.6,319.9 L161.5,319.8 L165.4,319.7 L169.3,319.6 L173.1,319.5 L177.0,319.4 L180.9,319.3 L184.8,319.2 L188.7,319.1 L192.5,319.0 L196.4,318.9 L200.3,318.8 L204.2,318.7 L208.1,318.6 L212.0,318.4 L215.8,318.3 L219.7,318.2 L223.6,318.1 L227.5,318.0 L231.4,317.9 L235.2,317.7 L239.1,317.6 L243.0,317.5 L246.9,317.2 L250.8,317.1 L254.6,317.0 L258.5,316.8 L262.4,316.7 L266.3,316.6 L270.2,316.4 L274.0,316.3 L277.9,316.1 L281.8,316.0 L285.7,315.8 L289.6,315.7 L293.5,315.5 L297.3,315.3 L301.2,315.1 L305.1,315.0 L309.0,314.8 L312.9,314.6 L316.7,314.5 L320.6,314.2 L324.5,314.0 L328.4,313.8 L332.3,313.6 L336.1,313.4 L340.0,313.2 L343.9,313.0 L347.8,312.8 L351.7,312.6 L355.5,312.3 L359.4,312.1 L363.3,311.8 L367.2,311.6 L371.1,311.4 L375.0,311.1 L378.8,310.9 L382.7,310.7 L386.6,310.4 L390.5,310.1 L394.4,309.9 L398.2,309.7 L402.1,309.4 L406.0,309.1 L409.9,308.7 L413.8,308.5 L417.6,308.3 L421.5,308.0 L425.4,307.7 L429.3,307.3 L433.2,307.0 L437.0,306.7 L440.9,306.4 L444.8,306.0 L448.7,305.7 L452.6,305.4 L456.5,305.0 L460.3,304.8 L464.2,304.4 L468.1,304.1 L472.0,303.6 L475.9,303.3 L479.7,303.0 L483.6,302.6 L487.5,302.2 L491.4,301.9 L495.3,301.6 L499.1,301.2 L503.0,300.8 L506.9,300.4 L510.8,299.9 L514.7,299.5 L518.5,299.1 L522.4,298.5 L526.3,298.1 L530.2,297.6 L534.1,297.2 L538.0,296.7 L541.8,296.3 L545.7,295.7 L549.6,295.5 L553.5,294.8 L557.4,294.5 L561.2,293.9 L565.1,293.1 L569.0,292.8 L572.9,292.1 L576.8,291.6 L580.6,291.1 L584.5,290.8 L588.4,290.1 L592.3,289.3 L596.2,288.6 L600.0,287.9 L603.9,287.5 L607.8,286.9 L611.7,286.4 L615.6,285.5 L619.5,284.6 L623.3,283.8 L627.2,283.2 L631.1,282.4 L635.0,281.5 L638.9,280.9 L642.7,280.1 L646.6,279.3 L650.5,278.6 L654.4,277.6 L658.3,276.9 L662.1,275.9 L666.0,275.1 L669.9,274.2 L673.8,273.5 L677.7,272.4 L681.5,271.3 L685.4,270.9 L689.3,269.4 L693.2,268.7 L697.1,267.9 L701.0,267.2 L704.8,266.4 L708.7,265.5 L712.6,264.3 L716.5,263.7 L720.4,262.1 L724.2,261.3 L728.1,260.0 L732.0,258.8 L735.9,257.5 L739.8,256.3 L743.6,255.5 L747.5,254.5 L751.4,253.1 L755.3,252.1 L759.2,250.8 L763.0,249.9 L766.9,249.2 L770.8,247.2 L774.7,246.5 L778.6,245.0 L782.5,243.6 L786.3,242.7 L790.2,241.1 L794.1,239.4 L798.0,238.1 L801.9,236.9 L805.7,235.5 L809.6,234.2 L813.5,232.0 L817.4,230.9 L821.3,228.5 L825.1,228.2 L829.0,226.2 L832.9,224.1 L836.8,222.4 L840.7,220.7 L844.5,218.5 L848.4,217.1 L852.3,215.5 L856.2,214.1 L860.1,211.2 L864.0,210.4 L867.8,207.4 L871.7,205.5 L875.6,203.6 L879.5,201.6 L883.4,199.5 L887.2,197.3 L891.1,195.3 L895.0,193.8" fill="none" stroke="#16a34a" stroke-width="2.5"/>
+<line x1="80" y1="322" x2="895" y2="322" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4"/>
+<rect x="92" y="50" width="12" height="8" fill="#ca8a0440" stroke="#ca8a04"/>
+<text x="108" y="58" font-size="9" fill="#1e293b">P25-P75</text>
+<rect x="172" y="50" width="12" height="8" fill="#dc262640" stroke="#dc2626"/>
+<text x="188" y="58" font-size="9" fill="#1e293b">P5-P95</text>
+<rect x="247" y="53" width="14" height="3" fill="#16a34a"/>
+<text x="265" y="58" font-size="9" fill="#1e293b">Median</text>
+</svg>
+
+<h2>Forward CAGR & Risk Statistics</h2>
+<table>
+    <thead><tr><th>Horizon</th><th>Median CAGR</th><th>P5</th><th>P25</th><th>P75</th><th>P95</th><th>Prob &gt;50%</th><th>Prob &gt;20% DD</th><th>Median DD</th><th>P95 DD</th><th>Prob Profit</th></tr></thead>
+    <tbody><tr>
+            <td style="font-weight:700">1YR</td>
+            <td style="font-weight:700;color:#16a34a">100.2%</td>
+            <td style="color:#dc2626">51.9%</td>
+            <td>78.7%</td>
+            <td>125.4%</td>
+            <td style="color:#16a34a">167.5%</td>
+            <td style="font-weight:600">96%</td>
+            <td>0.0%</td>
+            <td>6.2%</td>
+            <td>10.4%</td>
+            <td>100%</td>
+        </tr><tr>
+            <td style="font-weight:700">3YR</td>
+            <td style="font-weight:700;color:#16a34a">100.9%</td>
+            <td style="color:#dc2626">71.3%</td>
+            <td>87.8%</td>
+            <td>114.7%</td>
+            <td style="color:#16a34a">136.2%</td>
+            <td style="font-weight:600">100%</td>
+            <td>0.0%</td>
+            <td>7.9%</td>
+            <td>12.1%</td>
+            <td>100%</td>
+        </tr><tr>
+            <td style="font-weight:700">5YR</td>
+            <td style="font-weight:700;color:#16a34a">100.8%</td>
+            <td style="color:#dc2626">77.4%</td>
+            <td>90.7%</td>
+            <td>111.5%</td>
+            <td style="color:#16a34a">127.5%</td>
+            <td style="font-weight:600">100%</td>
+            <td>0.0%</td>
+            <td>8.8%</td>
+            <td>12.9%</td>
+            <td>100%</td>
+        </tr></tbody>
+</table>
+
+<h2>Terminal Wealth ($100K Start)</h2>
+<table>
+    <thead><tr><th>Horizon</th><th>P5 (Worst Case)</th><th>Median</th><th>P95 (Best Case)</th></tr></thead>
+    <tbody><tr>
+            <td style="font-weight:700">1YR</td>
+            <td>$151,948</td>
+            <td style="font-weight:700">$200,184</td>
+            <td>$267,464</td>
+        </tr><tr>
+            <td style="font-weight:700">3YR</td>
+            <td>$502,407</td>
+            <td style="font-weight:700">$810,282</td>
+            <td>$1,318,109</td>
+        </tr><tr>
+            <td style="font-weight:700">5YR</td>
+            <td>$1,756,259</td>
+            <td style="font-weight:700">$3,263,579</td>
+            <td>$6,091,629</td>
+        </tr></tbody>
+</table>
+
+<h2>CAGR Distributions</h2>
+<div class="hist-row">
+<svg width="450" height="260" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px">
+<text x="225" y="22" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e293b">1YR CAGR Distribution (10,000 paths)</text>
+<rect x="55.0" y="214.6" width="7.5" height="0.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="62.5" y="213.6" width="7.5" height="1.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="70.0" y="209.6" width="7.5" height="5.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="77.5" y="204.9" width="7.5" height="10.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="85.0" y="188.8" width="7.5" height="26.2" fill="#3b82f6" opacity="0.7"/>
+<rect x="92.5" y="169.8" width="7.5" height="45.2" fill="#3b82f6" opacity="0.7"/>
+<rect x="100.0" y="141.2" width="7.5" height="73.8" fill="#3b82f6" opacity="0.7"/>
+<rect x="107.5" y="112.4" width="7.5" height="102.6" fill="#3b82f6" opacity="0.7"/>
+<rect x="115.0" y="92.6" width="7.5" height="122.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="122.5" y="52.9" width="7.5" height="162.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="130.0" y="41.2" width="7.5" height="173.8" fill="#3b82f6" opacity="0.7"/>
+<rect x="137.5" y="36.0" width="7.5" height="179.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="145.0" y="39.2" width="7.5" height="175.8" fill="#3b82f6" opacity="0.7"/>
+<rect x="152.5" y="57.2" width="7.5" height="157.8" fill="#3b82f6" opacity="0.7"/>
+<rect x="160.0" y="65.6" width="7.5" height="149.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="167.5" y="94.9" width="7.5" height="120.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="175.0" y="102.3" width="7.5" height="112.7" fill="#3b82f6" opacity="0.7"/>
+<rect x="182.5" y="125.9" width="7.5" height="89.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="190.0" y="144.6" width="7.5" height="70.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="197.5" y="161.0" width="7.5" height="54.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="205.0" y="176.7" width="7.5" height="38.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="212.5" y="184.0" width="7.5" height="31.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="220.0" y="193.4" width="7.5" height="21.6" fill="#3b82f6" opacity="0.7"/>
+<rect x="227.5" y="198.7" width="7.5" height="16.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="235.0" y="199.1" width="7.5" height="15.9" fill="#3b82f6" opacity="0.7"/>
+<rect x="242.5" y="206.7" width="7.5" height="8.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="250.0" y="209.2" width="7.5" height="5.8" fill="#3b82f6" opacity="0.7"/>
+<rect x="257.5" y="210.8" width="7.5" height="4.2" fill="#3b82f6" opacity="0.7"/>
+<rect x="265.0" y="211.2" width="7.5" height="3.8" fill="#3b82f6" opacity="0.7"/>
+<rect x="272.5" y="213.2" width="7.5" height="1.8" fill="#3b82f6" opacity="0.7"/>
+<rect x="280.0" y="213.2" width="7.5" height="1.8" fill="#3b82f6" opacity="0.7"/>
+<rect x="287.5" y="213.4" width="7.5" height="1.6" fill="#3b82f6" opacity="0.7"/>
+<rect x="295.0" y="213.6" width="7.5" height="1.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="302.5" y="214.4" width="7.5" height="0.6" fill="#3b82f6" opacity="0.7"/>
+<rect x="310.0" y="214.8" width="7.5" height="0.2" fill="#3b82f6" opacity="0.7"/>
+<rect x="317.5" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="325.0" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="332.5" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="340.0" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="347.5" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="355.0" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="362.5" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="370.0" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="377.5" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="385.0" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="392.5" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="400.0" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="407.5" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="415.0" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="422.5" y="214.8" width="7.5" height="0.2" fill="#3b82f6" opacity="0.7"/>
+<line x1="101" y1="36" x2="101" y2="215" stroke="#dc2626" stroke-width="2" stroke-dasharray="4"/>
+<text x="101" y="227" text-anchor="middle" font-size="8" font-weight="bold" fill="#dc2626">P5: 51.9</text>
+<line x1="149" y1="36" x2="149" y2="215" stroke="#1e293b" stroke-width="2" stroke-dasharray="4"/>
+<text x="149" y="227" text-anchor="middle" font-size="8" font-weight="bold" fill="#1e293b">P50: 100.2</text>
+<line x1="215" y1="36" x2="215" y2="215" stroke="#16a34a" stroke-width="2" stroke-dasharray="4"/>
+<text x="215" y="227" text-anchor="middle" font-size="8" font-weight="bold" fill="#16a34a">P95: 167.5</text>
+<text x="55" y="252" text-anchor="middle" font-size="8" fill="#64748b">5</text>
+<text x="149" y="252" text-anchor="middle" font-size="8" fill="#64748b">100</text>
+<text x="242" y="252" text-anchor="middle" font-size="8" fill="#64748b">195</text>
+<text x="336" y="252" text-anchor="middle" font-size="8" fill="#64748b">290</text>
+<text x="430" y="252" text-anchor="middle" font-size="8" fill="#64748b">384</text>
+<text x="225" y="259" text-anchor="middle" font-size="9" fill="#94a3b8">CAGR (%)</text>
+</svg>
+<svg width="450" height="260" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px">
+<text x="225" y="22" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e293b">3YR CAGR Distribution (10,000 paths)</text>
+<rect x="55.0" y="214.4" width="7.5" height="0.6" fill="#3b82f6" opacity="0.7"/>
+<rect x="62.5" y="214.1" width="7.5" height="0.9" fill="#3b82f6" opacity="0.7"/>
+<rect x="70.0" y="213.6" width="7.5" height="1.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="77.5" y="210.5" width="7.5" height="4.5" fill="#3b82f6" opacity="0.7"/>
+<rect x="85.0" y="208.5" width="7.5" height="6.5" fill="#3b82f6" opacity="0.7"/>
+<rect x="92.5" y="203.7" width="7.5" height="11.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="100.0" y="202.0" width="7.5" height="13.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="107.5" y="188.6" width="7.5" height="26.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="115.0" y="181.8" width="7.5" height="33.2" fill="#3b82f6" opacity="0.7"/>
+<rect x="122.5" y="171.6" width="7.5" height="43.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="130.0" y="154.6" width="7.5" height="60.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="137.5" y="132.2" width="7.5" height="82.8" fill="#3b82f6" opacity="0.7"/>
+<rect x="145.0" y="120.0" width="7.5" height="95.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="152.5" y="96.7" width="7.5" height="118.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="160.0" y="72.3" width="7.5" height="142.7" fill="#3b82f6" opacity="0.7"/>
+<rect x="167.5" y="70.9" width="7.5" height="144.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="175.0" y="62.7" width="7.5" height="152.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="182.5" y="41.4" width="7.5" height="173.6" fill="#3b82f6" opacity="0.7"/>
+<rect x="190.0" y="36.0" width="7.5" height="179.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="197.5" y="41.7" width="7.5" height="173.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="205.0" y="46.8" width="7.5" height="168.2" fill="#3b82f6" opacity="0.7"/>
+<rect x="212.5" y="53.3" width="7.5" height="161.7" fill="#3b82f6" opacity="0.7"/>
+<rect x="220.0" y="60.1" width="7.5" height="154.9" fill="#3b82f6" opacity="0.7"/>
+<rect x="227.5" y="78.3" width="7.5" height="136.7" fill="#3b82f6" opacity="0.7"/>
+<rect x="235.0" y="99.0" width="7.5" height="116.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="242.5" y="97.3" width="7.5" height="117.7" fill="#3b82f6" opacity="0.7"/>
+<rect x="250.0" y="112.6" width="7.5" height="102.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="257.5" y="133.0" width="7.5" height="82.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="265.0" y="141.2" width="7.5" height="73.8" fill="#3b82f6" opacity="0.7"/>
+<rect x="272.5" y="162.2" width="7.5" height="52.8" fill="#3b82f6" opacity="0.7"/>
+<rect x="280.0" y="167.9" width="7.5" height="47.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="287.5" y="171.9" width="7.5" height="43.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="295.0" y="185.8" width="7.5" height="29.2" fill="#3b82f6" opacity="0.7"/>
+<rect x="302.5" y="192.6" width="7.5" height="22.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="310.0" y="197.1" width="7.5" height="17.9" fill="#3b82f6" opacity="0.7"/>
+<rect x="317.5" y="204.2" width="7.5" height="10.8" fill="#3b82f6" opacity="0.7"/>
+<rect x="325.0" y="208.5" width="7.5" height="6.5" fill="#3b82f6" opacity="0.7"/>
+<rect x="332.5" y="205.1" width="7.5" height="9.9" fill="#3b82f6" opacity="0.7"/>
+<rect x="340.0" y="206.8" width="7.5" height="8.2" fill="#3b82f6" opacity="0.7"/>
+<rect x="347.5" y="211.9" width="7.5" height="3.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="355.0" y="211.9" width="7.5" height="3.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="362.5" y="213.3" width="7.5" height="1.7" fill="#3b82f6" opacity="0.7"/>
+<rect x="370.0" y="213.9" width="7.5" height="1.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="377.5" y="213.9" width="7.5" height="1.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="385.0" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="392.5" y="214.7" width="7.5" height="0.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="400.0" y="214.4" width="7.5" height="0.6" fill="#3b82f6" opacity="0.7"/>
+<rect x="407.5" y="214.4" width="7.5" height="0.6" fill="#3b82f6" opacity="0.7"/>
+<rect x="415.0" y="214.7" width="7.5" height="0.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="422.5" y="214.4" width="7.5" height="0.6" fill="#3b82f6" opacity="0.7"/>
+<line x1="130" y1="36" x2="130" y2="215" stroke="#dc2626" stroke-width="2" stroke-dasharray="4"/>
+<text x="130" y="227" text-anchor="middle" font-size="8" font-weight="bold" fill="#dc2626">P5: 71.3</text>
+<line x1="203" y1="36" x2="203" y2="215" stroke="#1e293b" stroke-width="2" stroke-dasharray="4"/>
+<text x="203" y="227" text-anchor="middle" font-size="8" font-weight="bold" fill="#1e293b">P50: 100.9</text>
+<line x1="291" y1="36" x2="291" y2="215" stroke="#16a34a" stroke-width="2" stroke-dasharray="4"/>
+<text x="291" y="227" text-anchor="middle" font-size="8" font-weight="bold" fill="#16a34a">P95: 136.2</text>
+<text x="55" y="252" text-anchor="middle" font-size="8" fill="#64748b">41</text>
+<text x="149" y="252" text-anchor="middle" font-size="8" fill="#64748b">79</text>
+<text x="242" y="252" text-anchor="middle" font-size="8" fill="#64748b">117</text>
+<text x="336" y="252" text-anchor="middle" font-size="8" fill="#64748b">155</text>
+<text x="430" y="252" text-anchor="middle" font-size="8" fill="#64748b">193</text>
+<text x="225" y="259" text-anchor="middle" font-size="9" fill="#94a3b8">CAGR (%)</text>
+</svg>
+<svg width="450" height="260" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px">
+<text x="225" y="22" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e293b">5YR CAGR Distribution (10,000 paths)</text>
+<rect x="55.0" y="213.9" width="7.5" height="1.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="62.5" y="213.9" width="7.5" height="1.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="70.0" y="213.3" width="7.5" height="1.7" fill="#3b82f6" opacity="0.7"/>
+<rect x="77.5" y="211.4" width="7.5" height="3.6" fill="#3b82f6" opacity="0.7"/>
+<rect x="85.0" y="211.7" width="7.5" height="3.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="92.5" y="206.9" width="7.5" height="8.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="100.0" y="201.6" width="7.5" height="13.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="107.5" y="192.7" width="7.5" height="22.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="115.0" y="189.1" width="7.5" height="25.9" fill="#3b82f6" opacity="0.7"/>
+<rect x="122.5" y="174.3" width="7.5" height="40.7" fill="#3b82f6" opacity="0.7"/>
+<rect x="130.0" y="167.3" width="7.5" height="47.7" fill="#3b82f6" opacity="0.7"/>
+<rect x="137.5" y="148.6" width="7.5" height="66.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="145.0" y="123.5" width="7.5" height="91.5" fill="#3b82f6" opacity="0.7"/>
+<rect x="152.5" y="113.0" width="7.5" height="102.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="160.0" y="96.2" width="7.5" height="118.8" fill="#3b82f6" opacity="0.7"/>
+<rect x="167.5" y="75.0" width="7.5" height="140.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="175.0" y="74.5" width="7.5" height="140.5" fill="#3b82f6" opacity="0.7"/>
+<rect x="182.5" y="52.5" width="7.5" height="162.5" fill="#3b82f6" opacity="0.7"/>
+<rect x="190.0" y="48.8" width="7.5" height="166.2" fill="#3b82f6" opacity="0.7"/>
+<rect x="197.5" y="43.2" width="7.5" height="171.8" fill="#3b82f6" opacity="0.7"/>
+<rect x="205.0" y="36.0" width="7.5" height="179.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="212.5" y="58.3" width="7.5" height="156.7" fill="#3b82f6" opacity="0.7"/>
+<rect x="220.0" y="61.7" width="7.5" height="153.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="227.5" y="56.1" width="7.5" height="158.9" fill="#3b82f6" opacity="0.7"/>
+<rect x="235.0" y="82.8" width="7.5" height="132.2" fill="#3b82f6" opacity="0.7"/>
+<rect x="242.5" y="91.8" width="7.5" height="123.2" fill="#3b82f6" opacity="0.7"/>
+<rect x="250.0" y="109.0" width="7.5" height="106.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="257.5" y="120.5" width="7.5" height="94.5" fill="#3b82f6" opacity="0.7"/>
+<rect x="265.0" y="142.8" width="7.5" height="72.2" fill="#3b82f6" opacity="0.7"/>
+<rect x="272.5" y="155.3" width="7.5" height="59.7" fill="#3b82f6" opacity="0.7"/>
+<rect x="280.0" y="157.3" width="7.5" height="57.7" fill="#3b82f6" opacity="0.7"/>
+<rect x="287.5" y="172.9" width="7.5" height="42.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="295.0" y="188.8" width="7.5" height="26.2" fill="#3b82f6" opacity="0.7"/>
+<rect x="302.5" y="187.4" width="7.5" height="27.6" fill="#3b82f6" opacity="0.7"/>
+<rect x="310.0" y="196.9" width="7.5" height="18.1" fill="#3b82f6" opacity="0.7"/>
+<rect x="317.5" y="202.5" width="7.5" height="12.5" fill="#3b82f6" opacity="0.7"/>
+<rect x="325.0" y="204.7" width="7.5" height="10.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="332.5" y="207.5" width="7.5" height="7.5" fill="#3b82f6" opacity="0.7"/>
+<rect x="340.0" y="210.3" width="7.5" height="4.7" fill="#3b82f6" opacity="0.7"/>
+<rect x="347.5" y="209.1" width="7.5" height="5.9" fill="#3b82f6" opacity="0.7"/>
+<rect x="355.0" y="210.0" width="7.5" height="5.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="362.5" y="213.0" width="7.5" height="2.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="370.0" y="213.6" width="7.5" height="1.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="377.5" y="213.6" width="7.5" height="1.4" fill="#3b82f6" opacity="0.7"/>
+<rect x="385.0" y="214.7" width="7.5" height="0.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="392.5" y="214.7" width="7.5" height="0.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="400.0" y="214.7" width="7.5" height="0.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="407.5" y="214.7" width="7.5" height="0.3" fill="#3b82f6" opacity="0.7"/>
+<rect x="415.0" y="215.0" width="7.5" height="0.0" fill="#3b82f6" opacity="0.7"/>
+<rect x="422.5" y="214.7" width="7.5" height="0.3" fill="#3b82f6" opacity="0.7"/>
+<line x1="134" y1="36" x2="134" y2="215" stroke="#dc2626" stroke-width="2" stroke-dasharray="4"/>
+<text x="134" y="227" text-anchor="middle" font-size="8" font-weight="bold" fill="#dc2626">P5: 77.4</text>
+<line x1="208" y1="36" x2="208" y2="215" stroke="#1e293b" stroke-width="2" stroke-dasharray="4"/>
+<text x="208" y="227" text-anchor="middle" font-size="8" font-weight="bold" fill="#1e293b">P50: 100.8</text>
+<line x1="292" y1="36" x2="292" y2="215" stroke="#16a34a" stroke-width="2" stroke-dasharray="4"/>
+<text x="292" y="227" text-anchor="middle" font-size="8" font-weight="bold" fill="#16a34a">P95: 127.5</text>
+<text x="55" y="252" text-anchor="middle" font-size="8" fill="#64748b">53</text>
+<text x="149" y="252" text-anchor="middle" font-size="8" fill="#64748b">82</text>
+<text x="242" y="252" text-anchor="middle" font-size="8" fill="#64748b">112</text>
+<text x="336" y="252" text-anchor="middle" font-size="8" fill="#64748b">141</text>
+<text x="430" y="252" text-anchor="middle" font-size="8" fill="#64748b">171</text>
+<text x="225" y="259" text-anchor="middle" font-size="9" fill="#94a3b8">CAGR (%)</text>
+</svg>
+
+</div>
+
+<h2>Max Drawdown Distribution (5yr)</h2>
+<div class="hist-row">
+<svg width="450" height="260" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px">
+<text x="225" y="22" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e293b">5-Year Max Drawdown Distribution</text>
+<rect x="55.0" y="214.3" width="7.5" height="0.7" fill="#dc2626" opacity="0.7"/>
+<rect x="62.5" y="209.3" width="7.5" height="5.7" fill="#dc2626" opacity="0.7"/>
+<rect x="70.0" y="205.2" width="7.5" height="9.8" fill="#dc2626" opacity="0.7"/>
+<rect x="77.5" y="194.7" width="7.5" height="20.3" fill="#dc2626" opacity="0.7"/>
+<rect x="85.0" y="160.7" width="7.5" height="54.3" fill="#dc2626" opacity="0.7"/>
+<rect x="92.5" y="124.8" width="7.5" height="90.2" fill="#dc2626" opacity="0.7"/>
+<rect x="100.0" y="88.3" width="7.5" height="126.7" fill="#dc2626" opacity="0.7"/>
+<rect x="107.5" y="64.1" width="7.5" height="150.9" fill="#dc2626" opacity="0.7"/>
+<rect x="115.0" y="49.2" width="7.5" height="165.8" fill="#dc2626" opacity="0.7"/>
+<rect x="122.5" y="39.9" width="7.5" height="175.1" fill="#dc2626" opacity="0.7"/>
+<rect x="130.0" y="36.0" width="7.5" height="179.0" fill="#dc2626" opacity="0.7"/>
+<rect x="137.5" y="46.7" width="7.5" height="168.3" fill="#dc2626" opacity="0.7"/>
+<rect x="145.0" y="50.8" width="7.5" height="164.2" fill="#dc2626" opacity="0.7"/>
+<rect x="152.5" y="67.3" width="7.5" height="147.7" fill="#dc2626" opacity="0.7"/>
+<rect x="160.0" y="92.6" width="7.5" height="122.4" fill="#dc2626" opacity="0.7"/>
+<rect x="167.5" y="94.7" width="7.5" height="120.3" fill="#dc2626" opacity="0.7"/>
+<rect x="175.0" y="116.6" width="7.5" height="98.4" fill="#dc2626" opacity="0.7"/>
+<rect x="182.5" y="124.4" width="7.5" height="90.6" fill="#dc2626" opacity="0.7"/>
+<rect x="190.0" y="144.2" width="7.5" height="70.8" fill="#dc2626" opacity="0.7"/>
+<rect x="197.5" y="152.0" width="7.5" height="63.0" fill="#dc2626" opacity="0.7"/>
+<rect x="205.0" y="167.1" width="7.5" height="47.9" fill="#dc2626" opacity="0.7"/>
+<rect x="212.5" y="174.6" width="7.5" height="40.4" fill="#dc2626" opacity="0.7"/>
+<rect x="220.0" y="181.2" width="7.5" height="33.8" fill="#dc2626" opacity="0.7"/>
+<rect x="227.5" y="186.5" width="7.5" height="28.5" fill="#dc2626" opacity="0.7"/>
+<rect x="235.0" y="194.2" width="7.5" height="20.8" fill="#dc2626" opacity="0.7"/>
+<rect x="242.5" y="195.4" width="7.5" height="19.6" fill="#dc2626" opacity="0.7"/>
+<rect x="250.0" y="201.5" width="7.5" height="13.5" fill="#dc2626" opacity="0.7"/>
+<rect x="257.5" y="204.3" width="7.5" height="10.7" fill="#dc2626" opacity="0.7"/>
+<rect x="265.0" y="207.2" width="7.5" height="7.8" fill="#dc2626" opacity="0.7"/>
+<rect x="272.5" y="207.5" width="7.5" height="7.5" fill="#dc2626" opacity="0.7"/>
+<rect x="280.0" y="208.4" width="7.5" height="6.6" fill="#dc2626" opacity="0.7"/>
+<rect x="287.5" y="210.9" width="7.5" height="4.1" fill="#dc2626" opacity="0.7"/>
+<rect x="295.0" y="212.3" width="7.5" height="2.7" fill="#dc2626" opacity="0.7"/>
+<rect x="302.5" y="210.7" width="7.5" height="4.3" fill="#dc2626" opacity="0.7"/>
+<rect x="310.0" y="212.7" width="7.5" height="2.3" fill="#dc2626" opacity="0.7"/>
+<rect x="317.5" y="214.1" width="7.5" height="0.9" fill="#dc2626" opacity="0.7"/>
+<rect x="325.0" y="213.2" width="7.5" height="1.8" fill="#dc2626" opacity="0.7"/>
+<rect x="332.5" y="213.2" width="7.5" height="1.8" fill="#dc2626" opacity="0.7"/>
+<rect x="340.0" y="215.0" width="7.5" height="0.0" fill="#dc2626" opacity="0.7"/>
+<rect x="347.5" y="213.6" width="7.5" height="1.4" fill="#dc2626" opacity="0.7"/>
+<rect x="355.0" y="214.8" width="7.5" height="0.2" fill="#dc2626" opacity="0.7"/>
+<rect x="362.5" y="214.8" width="7.5" height="0.2" fill="#dc2626" opacity="0.7"/>
+<rect x="370.0" y="214.3" width="7.5" height="0.7" fill="#dc2626" opacity="0.7"/>
+<rect x="377.5" y="214.5" width="7.5" height="0.5" fill="#dc2626" opacity="0.7"/>
+<rect x="385.0" y="214.8" width="7.5" height="0.2" fill="#dc2626" opacity="0.7"/>
+<rect x="392.5" y="214.8" width="7.5" height="0.2" fill="#dc2626" opacity="0.7"/>
+<rect x="400.0" y="215.0" width="7.5" height="0.0" fill="#dc2626" opacity="0.7"/>
+<rect x="407.5" y="215.0" width="7.5" height="0.0" fill="#dc2626" opacity="0.7"/>
+<rect x="415.0" y="215.0" width="7.5" height="0.0" fill="#dc2626" opacity="0.7"/>
+<rect x="422.5" y="214.8" width="7.5" height="0.2" fill="#dc2626" opacity="0.7"/>
+<line x1="95" y1="36" x2="95" y2="215" stroke="#dc2626" stroke-width="2" stroke-dasharray="4"/>
+<text x="95" y="227" text-anchor="middle" font-size="8" font-weight="bold" fill="#dc2626">P5: 6.5</text>
+<line x1="145" y1="36" x2="145" y2="215" stroke="#1e293b" stroke-width="2" stroke-dasharray="4"/>
+<text x="145" y="227" text-anchor="middle" font-size="8" font-weight="bold" fill="#1e293b">P50: 8.8</text>
+<line x1="233" y1="36" x2="233" y2="215" stroke="#16a34a" stroke-width="2" stroke-dasharray="4"/>
+<text x="233" y="227" text-anchor="middle" font-size="8" font-weight="bold" fill="#16a34a">P95: 12.9</text>
+<text x="55" y="252" text-anchor="middle" font-size="8" fill="#64748b">5</text>
+<text x="149" y="252" text-anchor="middle" font-size="8" fill="#64748b">9</text>
+<text x="242" y="252" text-anchor="middle" font-size="8" fill="#64748b">13</text>
+<text x="336" y="252" text-anchor="middle" font-size="8" fill="#64748b">18</text>
+<text x="430" y="252" text-anchor="middle" font-size="8" fill="#64748b">22</text>
+<text x="225" y="259" text-anchor="middle" font-size="9" fill="#94a3b8">Max DD (%)</text>
+</svg>
+</div>
+
+<h2>Prolonged Bear Scenario (2-Year, 2022-Style)</h2>
+<div class="callout warn">
+    <strong>Stress test:</strong> What if the portfolio enters a prolonged bear market (2022-style) for 2 full years?<br>
+    Using only bear/high_vol/neutral regime returns from historical data.
+</div>
+<table>
+    <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+    <tbody>
+        <tr><td>Median CAGR</td><td style="color:#16a34a">+18.8%</td></tr>
+        <tr><td>P5 CAGR (worst)</td><td style="color:#dc2626">+4.7%</td></tr>
+        <tr><td>P95 CAGR (best)</td><td>+35.1%</td></tr>
+        <tr><td>Prob Profitable</td><td style="font-weight:700">99%</td></tr>
+        <tr><td>Median Max DD</td><td>8.7%</td></tr>
+        <tr><td>P95 Max DD</td><td style="color:#ca8a04">15.4%</td></tr>
+        <tr><td>Worst DD</td><td style="color:#dc2626">35.9%</td></tr>
+        <tr><td>Prob &gt;20% DD</td><td>0.8%</td></tr>
+        <tr><td>Median Terminal ($100K)</td><td>$141,169</td></tr>
+    </tbody>
+</table>
+
+<h2>Kelly-Optimal Position Sizing</h2>
+<div class="callout">
+    <strong>Full Kelly:</strong> 21.7× leverage — mathematically optimal but high variance<br>
+    <strong>Half Kelly:</strong> 10.8× leverage — recommended for practical use (lower variance, ~75% of growth)<br>
+    <strong>Annual Edge:</strong> 71.5% — expected excess return above risk-free<br><br>
+    <em>Current portfolio runs at 1.37× avg leverage (v4) — within half-Kelly bounds.</em>
+</div>
+
+<div class="footer">
+    PilotAI Credit Spreads — Monte Carlo Forward Simulation<br>
+    10,000 block-bootstrap paths (block=5d) on Ultimate Portfolio v4 daily returns.<br>
+    Not a backtest — forward-looking confidence intervals from resampled historical distribution.
+</div>
+
+</body></html>

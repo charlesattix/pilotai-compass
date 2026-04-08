@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EXP-1810 Gamma Scalping</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1000px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.5; }
+  h1 { font-size:1.8em; color:#0f172a; margin-bottom:4px; }
+  h2 { color:#334155; margin-top:2.5em; padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:24px; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:20px 0; }
+  .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:18px;
+          text-align:center; flex:1; min-width:130px; }
+  .kpi .value { font-size:1.7em; font-weight:800; color:#0f172a; }
+  .kpi .label { font-size:0.72em; color:#64748b; margin-top:4px; text-transform:uppercase; }
+  .good { color:#16a34a; } .warn { color:#ca8a04; } .bad { color:#dc2626; }
+  table { width:100%; border-collapse:collapse; margin:16px 0; font-size:0.86em; }
+  th { background:#f1f5f9; padding:10px 12px; text-align:right; font-weight:600; color:#475569;
+       border-bottom:2px solid #cbd5e1; font-size:0.78em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  .callout { border-radius:8px; padding:16px; margin:16px 0; font-size:0.88rem; line-height:1.7; }
+  .callout.ok { background:#f0fdf4; border:1px solid #bbf7d0; }
+  .callout.warn { background:#fffbeb; border:1px solid #fde68a; }
+  .sources { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:16px; margin:16px 0; font-size:0.86rem; line-height:1.7; }
+  .footer { margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0; font-size:0.78em; color:#94a3b8; text-align:center; }
+</style></head><body>
+
+<h1>EXP-1810 — Gamma Scalping on SPY</h1>
+<div class="subtitle">Long ATM straddles with daily delta hedge | Real IronVault options | 2026-04-06 11:16</div>
+
+<div class="sources">
+    <strong>Data Sources (Rule Zero — zero synthetic):</strong><br>
+    SPY options: IronVault options_cache.db (Polygon real market data, 193K contracts, 4.5M daily bars)<br>
+    SPY spot: Yahoo Finance chart API<br>
+    EXP-1220 correlation: load_exp1220_dynamic() (Yahoo SPY/VIX/VIX3M)
+</div>
+
+<div class="kpi-row">
+    <div class="kpi"><div class="value bad">-22.1%</div><div class="label">CAGR</div></div>
+    <div class="kpi"><div class="value">-2.28</div><div class="label">Sharpe (correct)</div></div>
+    <div class="kpi"><div class="value">25.5%</div><div class="label">Max DD</div></div>
+    <div class="kpi"><div class="value">12.6%</div><div class="label">Vol</div></div>
+    <div class="kpi"><div class="value">222</div><div class="label">Trade Days</div></div>
+    <div class="kpi"><div class="value" style="color:#ca8a04">+0.039</div><div class="label">Corr EXP-1220</div></div>
+</div>
+
+<div class="callout warn">
+    <strong>The key question:</strong> Does gamma scalping provide negative correlation to credit spread selling?<br>
+    <strong>Answer:</strong> Correlation = +0.039 — near-zero — diversifier
+</div>
+
+<h2>Year-by-Year Results</h2>
+<table>
+    <thead><tr><th>Year</th><th>Trades</th><th>Win %</th><th>Total P&amp;L</th><th>Return</th><th>Sharpe</th></tr></thead>
+    <tbody><tr>
+            <td style="font-weight:700">2020</td>
+            <td>42</td>
+            <td>26%</td>
+            <td style="color:#16a34a;font-weight:700">$1,618</td>
+            <td style="color:#16a34a">1.6%</td>
+            <td>0.34</td>
+        </tr><tr>
+            <td style="font-weight:700">2021</td>
+            <td>46</td>
+            <td>22%</td>
+            <td style="color:#dc2626;font-weight:700">$-7,684</td>
+            <td style="color:#dc2626">-7.7%</td>
+            <td>-2.51</td>
+        </tr><tr>
+            <td style="font-weight:700">2022</td>
+            <td>41</td>
+            <td>17%</td>
+            <td style="color:#dc2626;font-weight:700">$-2,397</td>
+            <td style="color:#dc2626">-2.4%</td>
+            <td>-0.57</td>
+        </tr><tr>
+            <td style="font-weight:700">2023</td>
+            <td>45</td>
+            <td>33%</td>
+            <td style="color:#dc2626;font-weight:700">$-4,159</td>
+            <td style="color:#dc2626">-4.2%</td>
+            <td>-1.20</td>
+        </tr><tr>
+            <td style="font-weight:700">2024</td>
+            <td>48</td>
+            <td>35%</td>
+            <td style="color:#16a34a;font-weight:700">$1,598</td>
+            <td style="color:#16a34a">1.6%</td>
+            <td>0.39</td>
+        </tr><tr>
+            <td style="font-weight:700">2025</td>
+            <td>45</td>
+            <td>20%</td>
+            <td style="color:#dc2626;font-weight:700">$-10,274</td>
+            <td style="color:#dc2626">-10.3%</td>
+            <td>-1.93</td>
+        </tr></tbody>
+</table>
+
+<h2>Sample Trades (first 15)</h2>
+<table>
+    <thead><tr><th>Entry</th><th>Exit</th><th>Strike</th><th>Premium In</th><th>Premium Out</th><th>Spot</th><th>Contracts</th><th>Net P&amp;L</th></tr></thead>
+    <tbody><tr>
+            <td>2020-02-03</td>
+            <td>2020-02-24</td>
+            <td>324</td>
+            <td>$12.10</td>
+            <td>$10.83</td>
+            <td>$324.12 → $322.42</td>
+            <td>1</td>
+            <td style="color:#dc2626;font-weight:700">$-127</td>
+        </tr><tr>
+            <td>2020-02-10</td>
+            <td>2020-02-25</td>
+            <td>335</td>
+            <td>$9.64</td>
+            <td>$23.38</td>
+            <td>$334.68 → $312.65</td>
+            <td>2</td>
+            <td style="color:#16a34a;font-weight:700">$2,748</td>
+        </tr><tr>
+            <td>2020-02-24</td>
+            <td>2020-03-09</td>
+            <td>320</td>
+            <td>$17.10</td>
+            <td>$46.99</td>
+            <td>$322.42 → $274.23</td>
+            <td>1</td>
+            <td style="color:#16a34a;font-weight:700">$2,989</td>
+        </tr><tr>
+            <td>2020-03-02</td>
+            <td>2020-03-11</td>
+            <td>309</td>
+            <td>$18.90</td>
+            <td>$37.80</td>
+            <td>$309.09 → $274.36</td>
+            <td>1</td>
+            <td style="color:#16a34a;font-weight:700">$1,890</td>
+        </tr><tr>
+            <td>2020-03-09</td>
+            <td>2020-03-30</td>
+            <td>275</td>
+            <td>$33.70</td>
+            <td>$33.70</td>
+            <td>$274.23 → $261.65</td>
+            <td>1</td>
+            <td style="color:#dc2626;font-weight:700">$0</td>
+        </tr><tr>
+            <td>2020-03-23</td>
+            <td>2020-04-13</td>
+            <td>225</td>
+            <td>$27.90</td>
+            <td>$27.90</td>
+            <td>$222.95 → $275.66</td>
+            <td>1</td>
+            <td style="color:#dc2626;font-weight:700">$0</td>
+        </tr><tr>
+            <td>2020-04-06</td>
+            <td>2020-04-27</td>
+            <td>265</td>
+            <td>$23.45</td>
+            <td>$22.44</td>
+            <td>$264.86 → $287.05</td>
+            <td>1</td>
+            <td style="color:#dc2626;font-weight:700">$-101</td>
+        </tr><tr>
+            <td>2020-04-13</td>
+            <td>2020-05-04</td>
+            <td>275</td>
+            <td>$23.48</td>
+            <td>$14.38</td>
+            <td>$275.66 → $283.57</td>
+            <td>1</td>
+            <td style="color:#dc2626;font-weight:700">$-910</td>
+        </tr><tr>
+            <td>2020-04-20</td>
+            <td>2020-05-11</td>
+            <td>282</td>
+            <td>$23.70</td>
+            <td>$14.64</td>
+            <td>$281.59 → $292.50</td>
+            <td>1</td>
+            <td style="color:#dc2626;font-weight:700">$-906</td>
+        </tr><tr>
+            <td>2020-04-27</td>
+            <td>2020-05-18</td>
+            <td>285</td>
+            <td>$18.75</td>
+            <td>$18.75</td>
+            <td>$287.05 → $295.00</td>
+            <td>1</td>
+            <td style="color:#dc2626;font-weight:700">$0</td>
+        </tr><tr>
+            <td>2020-05-04</td>
+            <td>2020-05-22</td>
+            <td>284</td>
+            <td>$19.79</td>
+            <td>$19.79</td>
+            <td>$283.57 → $295.44</td>
+            <td>1</td>
+            <td style="color:#dc2626;font-weight:700">$0</td>
+        </tr><tr>
+            <td>2020-05-11</td>
+            <td>2020-06-01</td>
+            <td>292</td>
+            <td>$15.03</td>
+            <td>$16.04</td>
+            <td>$292.50 → $305.55</td>
+            <td>1</td>
+            <td style="color:#16a34a;font-weight:700">$101</td>
+        </tr><tr>
+            <td>2020-05-18</td>
+            <td>2020-06-08</td>
+            <td>295</td>
+            <td>$16.44</td>
+            <td>$27.38</td>
+            <td>$295.00 → $323.20</td>
+            <td>1</td>
+            <td style="color:#16a34a;font-weight:700">$1,094</td>
+        </tr><tr>
+            <td>2020-06-01</td>
+            <td>2020-06-22</td>
+            <td>305</td>
+            <td>$16.20</td>
+            <td>$12.34</td>
+            <td>$305.55 → $310.62</td>
+            <td>1</td>
+            <td style="color:#dc2626;font-weight:700">$-386</td>
+        </tr><tr>
+            <td>2020-06-08</td>
+            <td>2020-06-29</td>
+            <td>320</td>
+            <td>$14.95</td>
+            <td>$16.51</td>
+            <td>$323.20 → $304.46</td>
+            <td>1</td>
+            <td style="color:#16a34a;font-weight:700">$156</td>
+        </tr></tbody>
+</table>
+
+<div class="footer">
+    EXP-1810 Gamma Scalping — compass/gamma_scalp.py<br>
+    Long ATM straddle, daily delta hedge, close after 21 days or at profit target.<br>
+    All option prices from IronVault (real Polygon data). Zero synthetic pricing.
+</div>
+
+</body></html>

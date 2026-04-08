@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>Unified Risk Overlay Specification</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:1400px;margin:0 auto;padding:20px;background:#0d1117;color:#c9d1d9}
+h1,h2,h3{color:#58a6ff}
+.hero{background:#161b22;border:2px solid #58a6ff;border-radius:12px;padding:24px;text-align:center;margin:20px 0}
+.hero .big{font-size:1.6em;font-weight:800;color:#58a6ff}
+.hero .sub{color:#8b949e;margin-top:8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:20px 0}
+.c{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px;text-align:center}
+.c .l{color:#8b949e;font-size:.75em}.c .v{color:#f0f6fc;font-weight:600;font-size:1.05em;margin-top:4px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.82em}
+th,td{padding:5px 8px;text-align:right;border-bottom:1px solid #21262d}
+th{color:#8b949e;background:#161b22;font-size:.75em;text-transform:uppercase}
+td:first-child,th:first-child{text-align:left}
+tr:hover td{background:#161b2280}
+.section{margin:36px 0}
+.note{color:#8b949e;font-size:.82em;margin:6px 0}
+.layer{background:#161b22;border-left:4px solid #58a6ff;padding:14px;margin:14px 0;border-radius:4px}
+.layer h4{margin:0 0 8px 0;color:#58a6ff;font-size:.95em}
+.warn{border-left-color:#f59e0b} .win{border-left-color:#3fb950} .fail{border-left-color:#ef4444}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.85em;color:#f0883e}
+</style></head><body>
+
+<h1>Unified Risk Management Overlay</h1>
+<p class="note">Five-layer risk framework &bull; Dynamic leverage + Tail hedge + Event gates + Stops + DD breaker</p>
+
+<div class="hero">
+  <div class="big">DD Reduction: STRONG (+10.2pp)</div>
+  <div class="sub">
+    Protected: -2.4% CAGR / 17.0% DD / Sharpe -0.38 |
+    Unprotected: -0.9% CAGR / 27.2% DD / Sharpe 0.02
+  </div>
+</div>
+
+<div class="cards">
+  <div class="c"><div class="l">Protected CAGR</div><div class="v" style="color:#3fb950">-2.4%</div></div>
+  <div class="c"><div class="l">Protected Max DD</div><div class="v" style="color:#f59e0b">17.0%</div></div>
+  <div class="c"><div class="l">Protected Sharpe</div><div class="v">-0.38</div></div>
+  <div class="c"><div class="l">Avg Leverage</div><div class="v">0.40x</div></div>
+  <div class="c"><div class="l">Net Hedge Cost</div><div class="v">9.7%</div></div>
+  <div class="c"><div class="l">Event Gate Days</div><div class="v">697</div></div>
+  <div class="c"><div class="l">Stop Triggers</div><div class="v">3</div></div>
+  <div class="c"><div class="l">Breaker Activations</div><div class="v">2 (951d)</div></div>
+</div>
+
+<!-- Layer Specification -->
+<div class="section">
+<h2>Risk Layer Specification</h2>
+
+<div class="layer win">
+<h4>Layer 1: Dynamic Leverage (Regime-Aware 0.3x&ndash;1.8x)</h4>
+<p>Leverage = <code>target &times; vix_scale &times; ts_scale &times; rvol_scale</code>, EMA-smoothed (halflife=1.3135d).</p>
+<table>
+<thead><tr><th>VIX Zone</th><th>Threshold</th><th>Leverage Scale</th></tr></thead>
+<tbody>
+<tr><td>Calm</td><td>&lt; 15</td><td>1.0x (full)</td></tr>
+<tr><td>Normal</td><td>&lt; 20</td><td>~0.7x</td></tr>
+<tr><td>Elevated</td><td>&lt; 28</td><td>~0.4x</td></tr>
+<tr><td>Crisis</td><td>&ge; 35</td><td>0.0x (min floor)</td></tr>
+</tbody></table>
+<p>Also scales on VIX/VIX3M term structure (contango=full, deep inversion=min) and 20-day realized vol.</p>
+</div>
+
+<div class="layer">
+<h4>Layer 2: Tail Risk Hedging (SPY Puts + VIX Calls)</h4>
+<p>Annual budget: <strong>2%</strong> of portfolio. Allocates 60% to SPY puts, 40% to VIX calls.
+Budget scales up to 3x in crisis (crisis_score=1.0). Hedge ratio: 30% normal, 80% crisis.</p>
+<ul>
+<li><strong>SPY puts</strong>: 20-delta OTM puts. Payoff triggers on SPY drops &gt; 0.5%. 12x convex multiplier.</li>
+<li><strong>VIX calls</strong>: Payoff triggers on VIX spikes &gt; 5%. 20x convex multiplier for tail events.</li>
+<li><strong>Crisis score</strong>: Composite of VIX (30%), term structure (20%), DD (25%), realized vol (10%), momentum (15%).</li>
+</ul>
+</div>
+
+<div class="layer warn">
+<h4>Layer 3: Event Gates (FOMC / CPI / NFP)</h4>
+<p>Automatic position scaling around macro events:</p>
+<table>
+<thead><tr><th>Event</th><th>5d</th><th>4d</th><th>3d</th><th>2d</th><th>1d</th><th>Day-of</th><th>+1d</th></tr></thead>
+<tbody>
+<tr><td>FOMC</td><td>1.0x</td><td>0.9x</td><td>0.8x</td><td>0.7x</td><td>0.6x</td><td>0.5x</td><td>0.7x</td></tr>
+<tr><td>CPI</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>1.0x</td><td>0.75x</td><td>0.65x</td><td>0.8x</td></tr>
+<tr><td>NFP</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>1.0x</td><td>0.8x</td><td>0.75x</td><td>0.8x</td></tr>
+</tbody></table>
+<p>Multiple events: per-type minimum applied (not multiplicative).</p>
+</div>
+
+<div class="layer">
+<h4>Layer 4: Position-Level Stop Losses</h4>
+<ul>
+<li><strong>Fixed stop</strong>: Exit if single-day loss exceeds 3%</li>
+<li><strong>Trailing stop</strong>: Exit if drawdown from position peak exceeds 5%</li>
+<li>Position tracking resets every 14 days (rolling trade windows)</li>
+</ul>
+</div>
+
+<div class="layer fail">
+<h4>Layer 5: Portfolio DD Circuit Breaker</h4>
+<ul>
+<li><strong>Trigger</strong>: Portfolio drawdown hits 10% &rarr; cut leverage to 0.5x</li>
+<li><strong>Recovery</strong>: DD must recover below 5% before resuming normal leverage</li>
+<li>Prevents catastrophic ruin during extended drawdowns</li>
+<li>Hysteresis gap (10% on / 5% off) prevents whipsaw</li>
+</ul>
+</div>
+</div>
+
+<!-- Performance Comparison -->
+<div class="section">
+<h2>Performance: Protected vs Unprotected</h2>
+<div class="grid2">
+<div>
+<table>
+<thead><tr><th>Metric</th><th>Protected</th><th>Unprotected</th><th>Delta</th></tr></thead>
+<tbody>
+<tr><td>CAGR</td><td>-2.4%</td><td>-0.9%</td><td>-1.6pp</td></tr>
+<tr><td>Max DD</td><td style='color:#f59e0b'>17.0%</td><td>27.2%</td><td style='color:#3fb950'>+10.2pp</td></tr>
+<tr><td>Sharpe</td><td>-0.38</td><td>0.02</td><td>-0.40</td></tr>
+<tr><td>Calmar</td><td>-0.14</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>Sortino</td><td>-0.58</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>Vol</td><td>6.0%</td><td>&mdash;</td><td>&mdash;</td></tr>
+</tbody></table>
+</div>
+<div>
+<h3>Regime Distribution</h3>
+<table>
+<thead><tr><th>Regime</th><th>Days</th><th>% of Total</th><th>Contribution</th></tr></thead>
+<tbody><tr><td>calm</td><td>344</td><td>27.3%</td><td style='color:#3fb950'>+14.68%</td></tr>
+<tr><td>normal</td><td>146</td><td>11.6%</td><td style='color:#ef4444'>-20.26%</td></tr>
+<tr><td>elevated</td><td>38</td><td>3.0%</td><td style='color:#ef4444'>-8.42%</td></tr>
+<tr><td>crisis</td><td>732</td><td>58.1%</td><td style='color:#3fb950'>+2.57%</td></tr>
+</tbody></table>
+</div>
+</div>
+</div>
+
+<!-- Yearly -->
+<div class="section">
+<h2>Year-by-Year Performance</h2>
+<table>
+<thead><tr><th>Year</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Vol</th></tr></thead>
+<tbody><tr><td>2020</td><td style='color:#ef4444'>-6.8%</td><td>-1.02</td><td style='color:#f59e0b'>10.2%</td><td>6.7%</td></tr>
+<tr><td>2021</td><td style='color:#ef4444'>-0.8%</td><td>-0.11</td><td style='color:#f59e0b'>8.4%</td><td>6.2%</td></tr>
+<tr><td>2022</td><td style='color:#ef4444'>-3.3%</td><td>-0.61</td><td style='color:#f59e0b'>9.3%</td><td>5.2%</td></tr>
+<tr><td>2023</td><td style='color:#ef4444'>-0.8%</td><td>-0.12</td><td style='color:#f59e0b'>5.8%</td><td>5.9%</td></tr>
+<tr><td>2024</td><td style='color:#3fb950'>+0.2%</td><td>0.07</td><td style='color:#f59e0b'>6.8%</td><td>6.2%</td></tr>
+</tbody></table>
+</div>
+
+<!-- Layer Impact Summary -->
+<div class="section">
+<h2>Layer Impact Summary</h2>
+<table>
+<thead><tr><th>Layer</th><th>Active Days</th><th>Impact</th></tr></thead>
+<tbody>
+<tr><td>Dynamic Leverage</td><td>1260</td><td>Avg leverage 0.40x (target 1.8x)</td></tr>
+<tr><td>Tail Hedge</td><td>1260</td><td>Cost 21.4%, Payoff 11.7%, Net +9.7%</td></tr>
+<tr><td>Event Gates</td><td>697</td><td>Avg scaling 0.853</td></tr>
+<tr><td>Position Stops</td><td>3</td><td>3 stop triggers</td></tr>
+<tr><td>DD Circuit Breaker</td><td>951</td><td>2 activations, 951 days at 0.5x</td></tr>
+</tbody></table>
+</div>
+
+<p class="note" style="margin-top:40px;text-align:center">
+  Unified Risk Overlay &bull; compass/risk_overlay.py &bull; PilotAI &bull; 2026-04-05
+</p>
+</body></html>

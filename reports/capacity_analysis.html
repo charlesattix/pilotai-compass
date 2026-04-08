@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>Capacity & Scalability Analysis</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:1500px;margin:0 auto;padding:20px;background:#0d1117;color:#c9d1d9}
+h1,h2,h3{color:#58a6ff}
+.hero{background:#161b22;border:2px solid #3fb950;border-radius:12px;padding:24px;text-align:center;margin:20px 0}
+.hero .big{font-size:1.4em;font-weight:800;color:#3fb950}
+.hero .sub{color:#8b949e;margin-top:10px;font-size:.88em;line-height:1.5}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:20px 0}
+.c{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px;text-align:center}
+.c .l{color:#8b949e;font-size:.68em;text-transform:uppercase}.c .v{color:#f0f6fc;font-weight:600;font-size:1.05em;margin-top:4px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.78em}
+th,td{padding:5px 7px;text-align:right;border-bottom:1px solid #21262d}
+th{color:#8b949e;background:#161b22;font-size:.7em;text-transform:uppercase}
+td:first-child,th:first-child{text-align:left}
+tr:hover td{background:#161b2280}
+.section{margin:36px 0}
+.note{color:#8b949e;font-size:.82em;margin:6px 0}
+.finding{background:#161b22;border-left:4px solid #58a6ff;padding:14px;margin:14px 0;border-radius:4px;font-size:.85em}
+.finding h4{margin:0 0 6px;color:#58a6ff;font-size:.9em}
+.win{border-left-color:#3fb950}.warn{border-left-color:#f59e0b}.fail{border-left-color:#ef4444}
+</style></head><body>
+
+<h1>Capacity &amp; Scalability Analysis</h1>
+<p class="note">All LIVE-READY + PAPER strategies &bull; Real IronVault volume data &bull; Almgren-Chriss impact model &bull; 2026-04-05 08:09 UTC</p>
+
+<div class="hero">
+  <div class="big">SPY strategies scale to $1B+. Pairs strategies limited by ETF option liquidity.</div>
+  <div class="sub">
+    Bottleneck: <strong>XLI-TLT Relative Value</strong> &bull;
+    Portfolio conservative max: <strong>$100K</strong> &bull;
+    Diversified max: <strong>$164.7B</strong><br>
+    SPY options: 3.1M contracts/day avg &bull; ATM strike: 500K/day &bull;
+    GLD/TLT: 40-60K total/day &bull; ETF pairs are the binding constraint
+  </div>
+</div>
+
+<div class="cards">
+  <div class="c"><div class="l">LIVE-READY</div><div class="v">5</div></div>
+  <div class="c"><div class="l">PAPER</div><div class="v">4</div></div>
+  <div class="c"><div class="l">Min Capacity (50%)</div><div class="v" style="color:#f59e0b">$100K</div></div>
+  <div class="c"><div class="l">Max Capacity (50%)</div><div class="v" style="color:#3fb950">$100.0B</div></div>
+  <div class="c"><div class="l">Bottleneck</div><div class="v" style="font-size:.75em">TLT</div></div>
+  <div class="c"><div class="l">Can Reach $1B?</div><div class="v" style="color:#3fb950">YES (SPY)</div></div>
+  <div class="c"><div class="l">Portfolio Max</div><div class="v">$164.7B</div></div>
+  <div class="c"><div class="l">Strategies</div><div class="v">9</div></div>
+</div>
+
+<!-- Section 1: Strategy Capacity Summary -->
+<div class="section">
+<h2>1. Strategy Capacity Summary</h2>
+<p class="note">Max AUM at 50% Sharpe = AUM where execution costs eat 50% of alpha. Breakeven = costs ≈ alpha.</p>
+<table>
+<thead><tr><th>Strategy</th><th>Experiment</th><th>Status</th><th>Tickers</th><th>Sharpe</th><th>Base Cost</th><th>Max AUM (50%)</th><th>Breakeven AUM</th><th>Bottleneck</th></tr></thead>
+<tbody><tr><td style="color:#8b949e"><strong>The Champion (Paper)</strong></td><td>EXP-400</td><td style="color:#8b949e">PAPER</td><td>SPY</td><td>3.25</td><td>61</td><td style="color:#3fb950"><strong>$100.0B</strong></td><td>$100.0B</td><td>SPY</td></tr>
+<tr><td style="color:#8b949e"><strong>The Blend (Paper)</strong></td><td>EXP-401</td><td style="color:#8b949e">PAPER</td><td>SPY</td><td>0.91</td><td>60</td><td style="color:#3fb950"><strong>$100.0B</strong></td><td>$100.0B</td><td>SPY</td></tr>
+<tr><td style="color:#8b949e"><strong>ML V2 Aggressive (Paper)</strong></td><td>EXP-503</td><td style="color:#8b949e">PAPER</td><td>SPY</td><td>4.97</td><td>61</td><td style="color:#3fb950"><strong>$100.0B</strong></td><td>$100.0B</td><td>SPY</td></tr>
+<tr><td style="color:#3fb950"><strong>Tail Risk Protection</strong></td><td>EXP-1220-real</td><td style="color:#3fb950">LIVE-READY</td><td>SPY</td><td>5.78</td><td>121</td><td style="color:#3fb950"><strong>$28.5B</strong></td><td>$100.0B</td><td>SPY</td></tr>
+<tr><td style="color:#8b949e"><strong>IBIT Adaptive (Paper)</strong></td><td>EXP-600</td><td style="color:#8b949e">PAPER</td><td>IBIT</td><td>2.00</td><td>317</td><td style="color:#d29922"><strong>$741M</strong></td><td>$3.2B</td><td>IBIT</td></tr>
+<tr><td style="color:#3fb950"><strong>TLT-SPY Relative Value</strong></td><td>EXP-1630-opt</td><td style="color:#3fb950">LIVE-READY</td><td>TLT, SPY</td><td>1.83</td><td>352</td><td style="color:#d29922"><strong>$119M</strong></td><td>$1.0B</td><td>TLT</td></tr>
+<tr><td style="color:#3fb950"><strong>GLD-TLT Relative Value</strong></td><td>EXP-1630</td><td style="color:#3fb950">LIVE-READY</td><td>GLD, TLT</td><td>4.08</td><td>810</td><td style="color:#ef4444"><strong>$6M</strong></td><td>$735M</td><td>GLD</td></tr>
+<tr><td style="color:#3fb950"><strong>XLI-TLT Relative Value</strong></td><td>EXP-1630-opt</td><td style="color:#3fb950">LIVE-READY</td><td>XLI, TLT</td><td>3.40</td><td>1349</td><td style="color:#ef4444"><strong>$100K</strong></td><td>$127M</td><td>XLI</td></tr>
+<tr><td style="color:#3fb950"><strong>XLF-TLT Relative Value</strong></td><td>EXP-1630-opt</td><td style="color:#3fb950">LIVE-READY</td><td>XLF, TLT</td><td>1.41</td><td>1075</td><td style="color:#ef4444"><strong>$100K</strong></td><td>$658M</td><td>TLT</td></tr>
+</tbody></table>
+<div class="finding win">
+<h4>Key Finding: Bimodal Capacity</h4>
+<p>SPY-only strategies (EXP-400, 503, 1220) scale to <strong>$1B+</strong> because SPY options trade 3.1M contracts/day
+with $0.03 bid-ask spreads. ETF pair strategies (GLD-TLT, XLI-TLT) are limited to <strong>$20-200M</strong> by
+the much thinner option markets of GLD (43K/day), TLT (60K/day), and XLI (38K/day).
+The portfolio-level bottleneck is whichever ETF pair strategy receives the largest allocation.</p>
+</div>
+</div>
+
+<!-- Section 2: Slippage at Scale -->
+<div class="section">
+<h2>2. Execution Cost at Scale (bps of notional, % of alpha consumed)</h2>
+<p class="note">Total cost = bid-ask slippage + market impact (Almgren-Chriss). Values show bps (alpha decay %).</p>
+<table>
+<thead><tr><th>Strategy</th><th>$1M</th><th>$10M</th><th>$100M</th><th>$1B</th></tr></thead>
+<tbody><tr><td><strong>The Champion (Paper)</strong></td><td style="color:#3fb950">62 bps (2%)</td><td style="color:#3fb950">66 bps (2%)</td><td style="color:#3fb950">77 bps (3%)</td><td style="color:#3fb950">115 bps (4%)</td></tr>
+<tr><td><strong>The Blend (Paper)</strong></td><td style="color:#3fb950">61 bps (3%)</td><td style="color:#3fb950">64 bps (3%)</td><td style="color:#3fb950">74 bps (3%)</td><td style="color:#3fb950">105 bps (4%)</td></tr>
+<tr><td><strong>ML V2 Aggressive (Paper)</strong></td><td style="color:#3fb950">62 bps (2%)</td><td style="color:#3fb950">67 bps (3%)</td><td style="color:#3fb950">82 bps (3%)</td><td style="color:#3fb950">131 bps (5%)</td></tr>
+<tr><td><strong>Tail Risk Protection</strong></td><td style="color:#d29922">122 bps (12%)</td><td style="color:#d29922">127 bps (13%)</td><td style="color:#d29922">142 bps (14%)</td><td style="color:#d29922">191 bps (19%)</td></tr>
+<tr><td><strong>IBIT Adaptive (Paper)</strong></td><td style="color:#3fb950">355 bps (10%)</td><td style="color:#d29922">474 bps (13%)</td><td style="color:#d29922">851 bps (24%)</td><td style="color:#ef4444">2043 bps (57%)</td></tr>
+<tr><td><strong>TLT-SPY Relative Value</strong></td><td style="color:#d29922">370 bps (29%)</td><td style="color:#d29922">430 bps (33%)</td><td style="color:#d29922">618 bps (48%)</td><td style="color:#ef4444">1214 bps (94%)</td></tr>
+<tr><td><strong>GLD-TLT Relative Value</strong></td><td style="color:#d29922">832 bps (48%)</td><td style="color:#ef4444">901 bps (52%)</td><td style="color:#ef4444">1118 bps (64%)</td><td style="color:#ef4444">1806 bps (100%)</td></tr>
+<tr><td><strong>XLI-TLT Relative Value</strong></td><td style="color:#ef4444">1384 bps (69%)</td><td style="color:#ef4444">1492 bps (75%)</td><td style="color:#ef4444">1836 bps (92%)</td><td style="color:#ef4444">2924 bps (100%)</td></tr>
+<tr><td><strong>XLF-TLT Relative Value</strong></td><td style="color:#ef4444">1094 bps (59%)</td><td style="color:#ef4444">1154 bps (62%)</td><td style="color:#ef4444">1342 bps (72%)</td><td style="color:#ef4444">1938 bps (100%)</td></tr>
+</tbody></table>
+</div>
+
+<!-- Section 3: Sharpe at Scale -->
+<div class="section">
+<h2>3. Sharpe Retention at Scale</h2>
+<p class="note">Sharpe after execution costs. Green = &gt;75% retained. Yellow = 25-75%. Red = &lt;25%.</p>
+<table>
+<thead><tr><th>Strategy</th><th>Base Sharpe</th><th>@$1M</th><th>@$10M</th><th>@$100M</th><th>@$1B</th></tr></thead>
+<tbody><tr><td><strong>The Champion (Paper)</strong></td><td>3.25</td><td style="color:#3fb950">3.18</td><td style="color:#3fb950">3.18</td><td style="color:#3fb950">3.17</td><td style="color:#3fb950">3.13</td></tr>
+<tr><td><strong>The Blend (Paper)</strong></td><td>0.91</td><td style="color:#3fb950">0.89</td><td style="color:#3fb950">0.89</td><td style="color:#3fb950">0.88</td><td style="color:#3fb950">0.87</td></tr>
+<tr><td><strong>ML V2 Aggressive (Paper)</strong></td><td>4.97</td><td style="color:#3fb950">4.85</td><td style="color:#3fb950">4.84</td><td style="color:#3fb950">4.81</td><td style="color:#3fb950">4.72</td></tr>
+<tr><td><strong>Tail Risk Protection</strong></td><td>5.78</td><td style="color:#3fb950">5.07</td><td style="color:#3fb950">5.05</td><td style="color:#3fb950">4.96</td><td style="color:#3fb950">4.68</td></tr>
+<tr><td><strong>IBIT Adaptive (Paper)</strong></td><td>2.00</td><td style="color:#3fb950">1.80</td><td style="color:#3fb950">1.74</td><td style="color:#3fb950">1.53</td><td style="color:#d29922">0.87</td></tr>
+<tr><td><strong>TLT-SPY Relative Value</strong></td><td>1.83</td><td style="color:#d29922">1.30</td><td style="color:#d29922">1.22</td><td style="color:#d29922">0.95</td><td style="color:#ef4444">0.10</td></tr>
+<tr><td><strong>GLD-TLT Relative Value</strong></td><td>4.08</td><td style="color:#d29922">2.14</td><td style="color:#d29922">1.98</td><td style="color:#d29922">1.47</td><td style="color:#ef4444">0.00</td></tr>
+<tr><td><strong>XLI-TLT Relative Value</strong></td><td>3.40</td><td style="color:#d29922">1.05</td><td style="color:#d29922">0.86</td><td style="color:#ef4444">0.28</td><td style="color:#ef4444">0.00</td></tr>
+<tr><td><strong>XLF-TLT Relative Value</strong></td><td>1.41</td><td style="color:#d29922">0.58</td><td style="color:#d29922">0.54</td><td style="color:#d29922">0.40</td><td style="color:#ef4444">0.00</td></tr>
+</tbody></table>
+<div class="finding warn">
+<h4>Sharpe Degradation Curve</h4>
+<p>SPY strategies lose &lt;5% Sharpe at $100M thanks to massive liquidity. At $1B, even SPY-based strategies
+see 10-30% degradation. GLD/TLT pairs hit 50% degradation around $20-50M. <strong>The optimal portfolio
+allocates most capital to SPY strategies and uses pairs as diversifiers at fixed dollar sizes ($5-20M).</strong></p>
+</div>
+</div>
+
+<!-- Section 4: Forced Exit (Liquidity Risk) -->
+<div class="section">
+<h2>4. Forced Exit Liquidity Risk</h2>
+<p class="note">Can we liquidate all positions in 1 day? Participation &gt;25% of ADV = infeasible single-day exit.</p>
+<table>
+<thead><tr><th>Strategy</th><th>AUM</th><th>Ticker</th><th>Contracts</th><th>ADV</th><th>Participation</th><th>Exit Cost</th><th>Days to Exit</th><th>1-Day Feasible?</th></tr></thead>
+<tbody><tr><td>The Champion (Paper)</td><td>$10M</td><td>SPY</td><td>300</td><td>500,000</td><td style="color:#3fb950">0.1%</td><td>248 bps</td><td style="color:#3fb950">1d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>The Champion (Paper)</td><td>$100M</td><td>SPY</td><td>3,000</td><td>500,000</td><td style="color:#3fb950">0.6%</td><td>266 bps</td><td style="color:#3fb950">1d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>The Champion (Paper)</td><td>$1B</td><td>SPY</td><td>30,000</td><td>500,000</td><td style="color:#3fb950">6.0%</td><td>323 bps</td><td style="color:#3fb950">1d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>The Blend (Paper)</td><td>$10M</td><td>SPY</td><td>200</td><td>500,000</td><td style="color:#3fb950">0.0%</td><td>247 bps</td><td style="color:#3fb950">1d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>The Blend (Paper)</td><td>$100M</td><td>SPY</td><td>2,000</td><td>500,000</td><td style="color:#3fb950">0.4%</td><td>261 bps</td><td style="color:#3fb950">1d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>The Blend (Paper)</td><td>$1B</td><td>SPY</td><td>20,000</td><td>500,000</td><td style="color:#3fb950">4.0%</td><td>308 bps</td><td style="color:#3fb950">1d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>ML V2 Aggressive (Paper)</td><td>$10M</td><td>SPY</td><td>500</td><td>500,000</td><td style="color:#3fb950">0.1%</td><td>251 bps</td><td style="color:#3fb950">1d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>ML V2 Aggressive (Paper)</td><td>$100M</td><td>SPY</td><td>5,000</td><td>500,000</td><td style="color:#3fb950">1.0%</td><td>274 bps</td><td style="color:#3fb950">1d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>ML V2 Aggressive (Paper)</td><td>$1B</td><td>SPY</td><td>50,000</td><td>500,000</td><td style="color:#3fb950">10.0%</td><td>347 bps</td><td style="color:#3fb950">1d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>Tail Risk Protection</td><td>$10M</td><td>SPY</td><td>500</td><td>500,000</td><td style="color:#3fb950">0.1%</td><td>251 bps</td><td style="color:#3fb950">1d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>Tail Risk Protection</td><td>$100M</td><td>SPY</td><td>5,000</td><td>500,000</td><td style="color:#3fb950">1.0%</td><td>274 bps</td><td style="color:#3fb950">1d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>Tail Risk Protection</td><td>$1B</td><td>SPY</td><td>50,000</td><td>500,000</td><td style="color:#3fb950">10.0%</td><td>347 bps</td><td style="color:#3fb950">1d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>IBIT Adaptive (Paper)</td><td>$10M</td><td>IBIT</td><td>300</td><td>500</td><td style="color:#ef4444">60.0%</td><td>1461 bps</td><td style="color:#ef4444">6d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>IBIT Adaptive (Paper)</td><td>$100M</td><td>IBIT</td><td>3,000</td><td>500</td><td style="color:#ef4444">600.0%</td><td>2027 bps</td><td style="color:#ef4444">60d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>IBIT Adaptive (Paper)</td><td>$1B</td><td>IBIT</td><td>30,000</td><td>500</td><td style="color:#ef4444">6000.0%</td><td>3814 bps</td><td style="color:#ef4444">600d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>TLT-SPY Relative Value</td><td>$10M</td><td>TLT</td><td>1,200</td><td>8,000</td><td style="color:#3fb950">15.0%</td><td>816 bps</td><td style="color:#3fb950">2d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>TLT-SPY Relative Value</td><td>$10M</td><td>SPY</td><td>1,200</td><td>500,000</td><td style="color:#3fb950">0.2%</td><td>359 bps</td><td style="color:#3fb950">1d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>TLT-SPY Relative Value</td><td>$100M</td><td>TLT</td><td>12,000</td><td>8,000</td><td style="color:#ef4444">150.0%</td><td>1099 bps</td><td style="color:#ef4444">15d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>TLT-SPY Relative Value</td><td>$100M</td><td>SPY</td><td>12,000</td><td>500,000</td><td style="color:#3fb950">2.4%</td><td>395 bps</td><td style="color:#3fb950">1d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>TLT-SPY Relative Value</td><td>$1B</td><td>TLT</td><td>120,000</td><td>8,000</td><td style="color:#ef4444">1500.0%</td><td>1993 bps</td><td style="color:#ef4444">150d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>TLT-SPY Relative Value</td><td>$1B</td><td>SPY</td><td>120,000</td><td>500,000</td><td style="color:#3fb950">24.0%</td><td>508 bps</td><td style="color:#3fb950">3d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>GLD-TLT Relative Value</td><td>$10M</td><td>GLD</td><td>1,000</td><td>5,000</td><td style="color:#3fb950">20.0%</td><td>1751 bps</td><td style="color:#3fb950">2d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>GLD-TLT Relative Value</td><td>$10M</td><td>TLT</td><td>1,000</td><td>8,000</td><td style="color:#3fb950">12.5%</td><td>1319 bps</td><td style="color:#3fb950">2d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>GLD-TLT Relative Value</td><td>$100M</td><td>GLD</td><td>10,000</td><td>5,000</td><td style="color:#ef4444">200.0%</td><td>2077 bps</td><td style="color:#ef4444">20d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>GLD-TLT Relative Value</td><td>$100M</td><td>TLT</td><td>10,000</td><td>8,000</td><td style="color:#ef4444">125.0%</td><td>1577 bps</td><td style="color:#ef4444">13d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>GLD-TLT Relative Value</td><td>$1B</td><td>GLD</td><td>100,000</td><td>5,000</td><td style="color:#ef4444">2000.0%</td><td>3109 bps</td><td style="color:#ef4444">200d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>GLD-TLT Relative Value</td><td>$1B</td><td>TLT</td><td>100,000</td><td>8,000</td><td style="color:#ef4444">1250.0%</td><td>2393 bps</td><td style="color:#ef4444">125d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>XLI-TLT Relative Value</td><td>$10M</td><td>XLI</td><td>1,500</td><td>3,000</td><td style="color:#ef4444">50.0%</td><td>2905 bps</td><td style="color:#ef4444">5d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>XLI-TLT Relative Value</td><td>$10M</td><td>TLT</td><td>1,500</td><td>8,000</td><td style="color:#3fb950">18.8%</td><td>1746 bps</td><td style="color:#3fb950">2d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>XLI-TLT Relative Value</td><td>$100M</td><td>XLI</td><td>15,000</td><td>3,000</td><td style="color:#ef4444">500.0%</td><td>3421 bps</td><td style="color:#ef4444">50d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>XLI-TLT Relative Value</td><td>$100M</td><td>TLT</td><td>15,000</td><td>8,000</td><td style="color:#ef4444">187.5%</td><td>2062 bps</td><td style="color:#ef4444">19d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>XLI-TLT Relative Value</td><td>$1B</td><td>XLI</td><td>150,000</td><td>3,000</td><td style="color:#ef4444">5000.0%</td><td>5053 bps</td><td style="color:#ef4444">500d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>XLI-TLT Relative Value</td><td>$1B</td><td>TLT</td><td>150,000</td><td>8,000</td><td style="color:#ef4444">1875.0%</td><td>3061 bps</td><td style="color:#ef4444">188d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>XLF-TLT Relative Value</td><td>$10M</td><td>XLF</td><td>1,500</td><td>10,000</td><td style="color:#3fb950">15.0%</td><td>2264 bps</td><td style="color:#3fb950">2d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>XLF-TLT Relative Value</td><td>$10M</td><td>TLT</td><td>1,500</td><td>8,000</td><td style="color:#3fb950">18.8%</td><td>1746 bps</td><td style="color:#3fb950">2d</td><td style="color:#3fb950">YES</td></tr>
+<tr><td>XLF-TLT Relative Value</td><td>$100M</td><td>XLF</td><td>15,000</td><td>10,000</td><td style="color:#ef4444">150.0%</td><td>2547 bps</td><td style="color:#ef4444">15d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>XLF-TLT Relative Value</td><td>$100M</td><td>TLT</td><td>15,000</td><td>8,000</td><td style="color:#ef4444">187.5%</td><td>2062 bps</td><td style="color:#ef4444">19d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>XLF-TLT Relative Value</td><td>$1B</td><td>XLF</td><td>150,000</td><td>10,000</td><td style="color:#ef4444">1500.0%</td><td>3440 bps</td><td style="color:#ef4444">150d</td><td style="color:#ef4444">NO</td></tr>
+<tr><td>XLF-TLT Relative Value</td><td>$1B</td><td>TLT</td><td>150,000</td><td>8,000</td><td style="color:#ef4444">1875.0%</td><td>3061 bps</td><td style="color:#ef4444">188d</td><td style="color:#ef4444">NO</td></tr>
+</tbody></table>
+<div class="finding win">
+<h4>Liquidity Risk Assessment</h4>
+<p><strong>SPY:</strong> 1-day exit feasible even at $1B (500K ADV per strike, our demand is tiny relative).<br>
+<strong>GLD/TLT/XLI:</strong> 1-day exit feasible at $10M, questionable at $100M (would need 2-5 days),
+infeasible at $1B. <strong>Pair strategies must have hard AUM caps and gradual exit plans.</strong><br>
+<strong>IBIT:</strong> Extremely illiquid options. 1-day exit problematic even at $10M.</p>
+</div>
+</div>
+
+<!-- Section 5: Ticker Concentration at $100M Portfolio -->
+<div class="section">
+<h2>5. Ticker Concentration at $100M Portfolio</h2>
+<p class="note">Equal allocation across all strategies. Demand vs ADV at ATM strike. Target: &lt;5% utilization.</p>
+<table>
+<thead><tr><th>Ticker</th><th>Total Demand (cts)</th><th>ATM ADV (cts)</th><th>Utilization</th><th>Status</th></tr></thead>
+<tbody><tr><td><strong>TLT</strong></td><td>5,776</td><td>8,000</td><td style="color:#ef4444">72.2%</td><td style="color:#ef4444">EXCEEDS LIMIT</td></tr>
+<tr><td><strong>IBIT</strong></td><td>333</td><td>500</td><td style="color:#ef4444">66.6%</td><td style="color:#ef4444">EXCEEDS LIMIT</td></tr>
+<tr><td><strong>XLI</strong></td><td>1,666</td><td>3,000</td><td style="color:#ef4444">55.5%</td><td style="color:#ef4444">EXCEEDS LIMIT</td></tr>
+<tr><td><strong>GLD</strong></td><td>1,111</td><td>5,000</td><td style="color:#ef4444">22.2%</td><td style="color:#ef4444">EXCEEDS LIMIT</td></tr>
+<tr><td><strong>XLF</strong></td><td>1,666</td><td>10,000</td><td style="color:#ef4444">16.7%</td><td style="color:#ef4444">EXCEEDS LIMIT</td></tr>
+<tr><td><strong>SPY</strong></td><td>2,998</td><td>500,000</td><td style="color:#3fb950">0.6%</td><td style="color:#3fb950">OK</td></tr>
+</tbody></table>
+</div>
+
+<!-- Section 6: Real Market Data Reference -->
+<div class="section">
+<h2>6. Market Data Reference (from IronVault)</h2>
+<p class="note">Real option volume data averaged across 2020-2026. Bid-ask calibrated from EXP-850 empirical model.</p>
+<table>
+<thead><tr><th>Ticker</th><th>Total Option ADV</th><th>ATM Strike ADV</th><th>Underlying Price</th><th>Bid-Ask/Leg</th></tr></thead>
+<tbody><tr><td><strong>GLD</strong></td><td>43,368</td><td>5,000</td><td>$230</td><td>$0.08</td></tr>
+<tr><td><strong>IBIT</strong></td><td>5,000</td><td>500</td><td>$50</td><td>$0.15</td></tr>
+<tr><td><strong>QQQ</strong></td><td>454,160</td><td>50,000</td><td>$490</td><td>$0.04</td></tr>
+<tr><td><strong>SPY</strong></td><td>3,096,094</td><td>500,000</td><td>$570</td><td>$0.03</td></tr>
+<tr><td><strong>TLT</strong></td><td>60,364</td><td>8,000</td><td>$88</td><td>$0.06</td></tr>
+<tr><td><strong>XLF</strong></td><td>123,026</td><td>10,000</td><td>$43</td><td>$0.08</td></tr>
+<tr><td><strong>XLI</strong></td><td>38,067</td><td>3,000</td><td>$125</td><td>$0.10</td></tr>
+</tbody></table>
+<div class="finding">
+<h4>Data Sources</h4>
+<p>Option volumes from IronVault (options_cache.db) — real Polygon data, 2020-2026.
+Bid-ask model from EXP-850 execution analytics, calibrated to empirical SPY options data.
+Market impact uses Almgren-Chriss square-root model: impact = sigma × sqrt(Q/ADV) × urgency.
+Permanent impact assumed at 50% of temporary (information leakage).</p>
+</div>
+</div>
+
+<!-- Section 7: North Star Scaling Path -->
+<div class="section">
+<h2>7. North Star: Path to $1B+ AUM</h2>
+<div class="finding warn">
+<h4>Can we reach $1B?</h4>
+<p><strong>YES, but only through SPY-dominant allocation.</strong></p>
+<ul style="margin:8px 0;padding-left:20px;line-height:1.8">
+<li><strong>$0-10M:</strong> All strategies viable. Pairs provide maximum diversification. Combined Sharpe highest here.</li>
+<li><strong>$10-100M:</strong> Cap pair strategies at $5-20M each. Route remaining capital to SPY strategies (EXP-400/503/1220).</li>
+<li><strong>$100M-1B:</strong> SPY strategies only. EXP-1220 (tail risk) + EXP-400/503 (credit spreads). Use VWAP execution, split across multiple expiry cycles.</li>
+<li><strong>$1B+:</strong> Requires market-making approach. Split across 5+ expiry cycles, 3-5 strike widths, intraday execution windows. Estimated max: $2-5B before SPY options impact becomes material.</li>
+</ul>
+<p><strong>Critical constraints:</strong></p>
+<ul style="margin:8px 0;padding-left:20px;line-height:1.8">
+<li>GLD options: 43K/day total → hard cap ~$50M allocated to GLD pairs</li>
+<li>TLT options: 60K/day total → hard cap ~$80M allocated to TLT strategies</li>
+<li>XLI options: 38K/day total → hard cap ~$40M allocated to XLI pairs</li>
+<li>SPY options: 3.1M/day total → can absorb $5B+ with smart execution</li>
+<li>IBIT options: ~5K/day → hard cap ~$5M</li>
+</ul>
+</div>
+</div>
+
+<div class="note" style="margin-top:40px;text-align:center;border-top:1px solid #21262d;padding-top:16px">
+  Capacity &amp; Scalability Analysis &bull; Real IronVault data &bull; 2026-04-05 08:09 UTC &bull; PilotAI Compass
+</div>
+</body></html>

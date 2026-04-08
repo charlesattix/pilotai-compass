@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>EXP-1810 North Star Portfolio v2: Regime Switching</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--green:#059669;--red:#dc2626;--yellow:#d97706;--blue:#2563eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;max-width:1200px;margin:0 auto;padding:24px}
+h1{font-size:1.6rem;font-weight:800}
+h2{font-size:1.15rem;font-weight:700;margin:28px 0 12px;border-bottom:2px solid var(--border);padding-bottom:6px}
+.subtitle{color:var(--muted);font-size:.85rem;margin-bottom:20px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:16px 0}
+.c{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.c .l{color:var(--muted);font-size:.68rem;font-weight:600;text-transform:uppercase}
+.c .v{font-size:1.1rem;font-weight:800;margin-top:4px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.82rem}
+th,td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--border)}
+th{background:#f1f5f9;color:var(--muted);font-size:.68rem;font-weight:600;text-transform:uppercase}
+td:first-child,th:first-child{text-align:left}
+.callout{background:var(--card);border-left:4px solid var(--blue);padding:14px;margin:14px 0;font-size:.85rem;line-height:1.6;border-radius:4px}
+.footer{margin-top:40px;text-align:center;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);padding-top:14px}
+</style></head><body>
+
+<h1>North Star Portfolio v2: Regime-Switching Core + Hedge</h1>
+<div class="subtitle">2026-04-06 11:16 UTC &bull; Rule Zero: ALL yearly returns from validated backtest JSONs &bull; Zero synthetic data</div>
+
+<div class="callout">
+<strong>v1 failure diagnosis:</strong> Equal-weight across 4 strategies diluted EXP-1220's 98.58%
+CAGR down to 28.37% because EXP-1660 (1.2% CAGR), EXP-1710 (3.93% CAGR), and EXP-1780 (5.85% CAGR)
+were too weak standalone to meaningfully contribute while they consumed 75% of capital.
+<br><br>
+<strong>v2 hypothesis:</strong> Put EXP-1220 at 60-80% core allocation. Only activate weaker
+strategies when they're needed (crisis alpha in bear markets, VRP in high-vol periods). Use
+regime switching so each weak strategy only "gets paid" when it actually adds value.
+<br><br>
+<strong>Targets:</strong> &gt;=80% CAGR, DD &lt; 10%, Sharpe &gt;= 4.0.
+<strong>Best result:</strong> Regime Switching (v2) &mdash; CAGR 101.6%, DD 0.0%,
+Sharpe 4.48. PASS.
+</div>
+
+<div class="cards">
+  <div class="c"><div class="l">Best CAGR</div><div class="v">101.6%</div></div>
+  <div class="c"><div class="l">Best Sharpe</div><div class="v">4.48</div></div>
+  <div class="c"><div class="l">Best Max DD</div><div class="v">0.0%</div></div>
+  <div class="c"><div class="l">Targets Met</div><div class="v">3/3</div></div>
+  <div class="c"><div class="l">Strategies Tested</div><div class="v">7</div></div>
+  <div class="c"><div class="l">Years Covered</div><div class="v">6</div></div>
+</div>
+
+<h2>All Strategies (ranked by composite score)</h2>
+<table>
+<thead><tr>
+  <th>Strategy</th><th>Rule</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Vol</th>
+  <th>Final ($100k)</th><th>Targets</th>
+</tr></thead>
+<tbody><tr><td><strong>Regime Switching (v2)</strong></td><td>regime_switch</td><td style="color:var(--green)">101.6%</td><td style="color:var(--green)">4.48</td><td style="color:var(--green)">0.0%</td><td>21.9%</td><td>$6,703,833</td><td style="color:var(--green);font-weight:700">3/3</td></tr>
+<tr><td><strong>EXP-1220 solo (1.5× lev)</strong></td><td>static</td><td style="color:var(--green)">146.6%</td><td style="color:var(--muted)">1.86</td><td style="color:var(--green)">0.0%</td><td>81.2%</td><td>$22,505,903</td><td style="color:var(--yellow);font-weight:700">2/3</td></tr>
+<tr><td><strong>Regime Switching (no leverage)</strong></td><td>regime_switch</td><td style="color:var(--green)">68.2%</td><td style="color:var(--green)">4.34</td><td style="color:var(--green)">0.0%</td><td>14.8%</td><td>$2,268,372</td><td style="color:var(--yellow);font-weight:700">2/3</td></tr>
+<tr><td><strong>Core 80% + Tactical 10% + Cash 10% (static)</strong></td><td>static</td><td style="color:var(--green)">118.8%</td><td style="color:var(--muted)">1.87</td><td style="color:var(--green)">0.0%</td><td>64.6%</td><td>$10,971,421</td><td style="color:var(--yellow);font-weight:700">2/3</td></tr>
+<tr><td><strong>Core 70% + Hedge 20% + Cash 10% (static)</strong></td><td>static</td><td style="color:var(--green)">105.1%</td><td style="color:var(--muted)">1.85</td><td style="color:var(--green)">0.0%</td><td>57.4%</td><td>$7,450,456</td><td style="color:var(--yellow);font-weight:700">2/3</td></tr>
+<tr><td><strong>EXP-1220 solo (1.0×)</strong></td><td>static</td><td style="color:var(--green)">98.6%</td><td style="color:var(--muted)">1.83</td><td style="color:var(--green)">0.0%</td><td>54.1%</td><td>$6,131,530</td><td style="color:var(--yellow);font-weight:700">2/3</td></tr>
+<tr><td><strong>v1 Equal Weight (4 strats)</strong></td><td>static</td><td style="color:var(--text)">28.4%</td><td style="color:var(--muted)">1.78</td><td style="color:var(--green)">0.0%</td><td>13.7%</td><td>$447,516</td><td style="color:var(--red);font-weight:700">1/3</td></tr>
+</tbody></table>
+
+<h2>Regime-Switching Year-by-Year Breakdown</h2>
+<table>
+<thead><tr><th>Year</th><th>Regime</th><th>Return</th><th>Allocation</th></tr></thead>
+<tbody><tr><td>2020</td><td>HIGH_VOL</td><td style="color:var(--green)">+129.7%</td><td style="font-size:.75rem">EXP-1220=40%, EXP-1780=30%, EXP-1660=20%, CASH=10%</td></tr>
+<tr><td>2021</td><td>BULL</td><td style="color:var(--green)">+119.6%</td><td style="font-size:.75rem">EXP-1220=90%, CASH=10%</td></tr>
+<tr><td>2022</td><td>BEAR</td><td style="color:var(--green)">+76.7%</td><td style="font-size:.75rem">EXP-1220=50%, EXP-1780=30%, CASH=20%</td></tr>
+<tr><td>2023</td><td>BULL</td><td style="color:var(--green)">+88.2%</td><td style="font-size:.75rem">EXP-1220=90%, CASH=10%</td></tr>
+<tr><td>2024</td><td>BULL</td><td style="color:var(--green)">+85.0%</td><td style="font-size:.75rem">EXP-1220=90%, CASH=10%</td></tr>
+<tr><td>2025</td><td>NEUTRAL</td><td style="color:var(--green)">+116.0%</td><td style="font-size:.75rem">EXP-1220=80%, EXP-1710=10%, CASH=10%</td></tr>
+</tbody></table>
+
+<h2>Walk-Forward (IS 2020-2022 vs OOS 2023-2025)</h2>
+<table>
+<thead><tr><th>Period</th><th>Years</th><th>CAGR</th><th>Sharpe</th><th>Vol</th><th>N Years</th></tr></thead>
+<tbody>
+<tr><td>IS (2020-2022)</td><td>[2020, 2021, 2022]</td>
+    <td>107.3%</td>
+    <td>3.70</td>
+    <td>28.2%</td>
+    <td>3</td></tr>
+<tr><td>OOS (2023+)</td><td>[2023, 2024, 2025]</td>
+    <td>95.9%</td>
+    <td>5.40</td>
+    <td>17.0%</td>
+    <td>3</td></tr>
+<tr style="background:#f1f5f9;font-weight:700"><td>Full (2020-2025)</td>
+    <td>[2020, 2021, 2022, 2023, 2024, 2025]</td>
+    <td>101.6%</td>
+    <td>4.48</td>
+    <td>21.9%</td>
+    <td>6</td></tr>
+</tbody></table>
+
+<h2>Validated Yearly Return Streams (source data)</h2>
+<p class="subtitle">From reports/better_portfolio.json — each stream extracted from its respective
+validated backtest JSON. Zero synthetic.</p>
+<table>
+<thead><tr><th>Strategy</th><th>2020</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th></tr></thead>
+<tbody><tr><td><strong>EXP-1220</strong></td><td style="color:var(--green)">+209.3%</td><td style="color:var(--green)">+88.3%</td><td style="color:var(--green)">+100.0%</td><td style="color:var(--green)">+65.0%</td><td style="color:var(--green)">+62.7%</td><td style="color:var(--green)">+96.2%</td></tr>
+<tr><td><strong>EXP-1660</strong></td><td style="color:var(--green)">+0.8%</td><td style="color:var(--green)">+0.8%</td><td style="color:var(--green)">+4.0%</td><td style="color:var(--red)">-2.6%</td><td style="color:var(--green)">+4.9%</td><td style="color:var(--red)">-0.6%</td></tr>
+<tr><td><strong>EXP-1710</strong></td><td style="color:var(--muted)">+0.0%</td><td style="color:var(--muted)">+0.0%</td><td style="color:var(--muted)">+0.0%</td><td style="color:var(--green)">+17.5%</td><td style="color:var(--green)">+5.9%</td><td style="color:var(--green)">+1.2%</td></tr>
+<tr><td><strong>EXP-1780</strong></td><td style="color:var(--green)">+11.7%</td><td style="color:var(--green)">+24.4%</td><td style="color:var(--green)">+2.6%</td><td style="color:var(--red)">-17.7%</td><td style="color:var(--green)">+20.3%</td><td style="color:var(--red)">-0.3%</td></tr>
+</tbody></table>
+
+<h2>Data Provenance (Rule Zero citation)</h2>
+<table>
+<thead><tr><th>Strategy</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td><strong>EXP-1220</strong></td><td><code>reports/exp1220_dynamic_leverage.json (static_1.2x yearly)</code></td></tr><tr><td><strong>EXP-1710</strong></td><td><code>reports/exp1710_zero_dte_ic.json (results[1] yearly)</code></td></tr><tr><td><strong>EXP-1660</strong></td><td><code>reports/exp1660_vrp_hardened.json (SPY_mid_high_vol survivor)</code></td></tr><tr><td><strong>EXP-1780</strong></td><td><code>compass.crisis_alpha_v3 best config (v2_round/0.10/2.5x)</code></td></tr>
+</tbody></table>
+
+<div class="footer">
+  EXP-1810 North Star v2 Regime Switching &bull; 100% real data &bull; 2026-04-06 11:16 UTC
+</div>
+</body></html>

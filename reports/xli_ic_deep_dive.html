@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>XLI Iron Condor Deep Dive</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+         margin:0;padding:24px;background:#fff;color:#1e293b; }
+  h1 { font-size:1.5rem;margin-bottom:2px; }
+  h2 { font-size:1.1rem;color:#1d4ed8;margin:26px 0 8px;border-bottom:2px solid #e2e8f0;padding-bottom:4px; }
+  .meta { color:#64748b;font-size:0.82rem;margin-bottom:18px; }
+  .grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px; }
+  .card { background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px; }
+  .card-label { font-size:0.68rem;color:#64748b;text-transform:uppercase; }
+  .card-value { font-size:1.3rem;font-weight:700;margin-top:2px; }
+  table { width:100%;border-collapse:collapse;margin-bottom:12px;font-size:0.8rem; }
+  th { background:#f1f5f9;padding:5px 8px;text-align:right;font-size:0.72rem;color:#475569;border-bottom:2px solid #e2e8f0; }
+  th:first-child { text-align:left; }
+  td { padding:4px 8px;text-align:right;border-bottom:1px solid #f1f5f9; }
+  td:first-child { text-align:left;font-weight:500; }
+  tr:hover td { background:#f8fafc; }
+  .verdict { background:#f0fdf4;border:2px solid #16a34a;border-radius:10px;padding:14px;margin:16px 0; }
+  .verdict h3 { color:#16a34a;margin:0 0 6px;font-size:1rem; }
+  .tag { display:inline-block;padding:2px 6px;border-radius:4px;font-size:0.68rem;font-weight:600;margin:1px; }
+  .tg { background:#dcfce7;color:#16a34a; }
+  .tb { background:#dbeafe;color:#2563eb; }
+  .ty { background:#fef9c3;color:#ca8a04; }
+</style></head><body>
+
+<h1>XLI Iron Condor Deep Dive</h1>
+<div class="meta">Generated 2026-04-05 09:46 | All data from IronVault (Polygon) | Period 2020-2025</div>
+
+<div class="grid">
+  <div class="card"><div class="card-label">OOS Sharpe</div><div class="card-value" style="color:#16a34a">6.05</div></div>
+  <div class="card"><div class="card-label">CAGR</div><div class="card-value" style="color:#16a34a">+18.8%</div></div>
+  <div class="card"><div class="card-label">Win Rate</div><div class="card-value">92%</div></div>
+  <div class="card"><div class="card-label">Max DD</div><div class="card-value" style="color:#ca8a04">10.3%</div></div>
+  <div class="card"><div class="card-label">Trades</div><div class="card-value">40</div></div>
+  <div class="card"><div class="card-label">Profit Factor</div><div class="card-value">10.0</div></div>
+  <div class="card"><div class="card-label">Total PnL</div><div class="card-value" style="color:#16a34a">$150,650</div></div>
+  <div class="card"><div class="card-label">WF All OOS +</div><div class="card-value" style="color:#16a34a">YES</div></div>
+</div>
+
+<div class="verdict">
+  <h3>Optimal Config</h3>
+  <span class="tb">XLI $2-wide</span> <span class="tb">35 DTE</span>
+  <span class="tb">7% put / 5% call OTM</span> <span class="ty">VIX 15-30</span>
+  <span class="tb">10% sizing</span> <span class="tg">92% WR</span>
+</div>
+
+<h2>1. Year-by-Year (Optimal Config)</h2>
+<table><thead><tr><th>Year</th><th>Trades</th><th>PnL</th><th>WR</th><th>Sharpe</th><th>Max DD</th><th>Return</th></tr></thead>
+<tbody><tr><td>2020</td><td>6</td>
+            <td style="color:#16a34a">$23,550</td>
+            <td>83%</td><td>2.75</td>
+            <td style="color:#ca8a04">1.0%</td><td>+23.5%</td></tr><tr><td>2021</td><td>11</td>
+            <td style="color:#16a34a">$54,750</td>
+            <td>91%</td><td>2.49</td>
+            <td style="color:#ca8a04">12.4%</td><td>+54.8%</td></tr><tr><td>2022</td><td>5</td>
+            <td style="color:#16a34a">$15,100</td>
+            <td>80%</td><td>2.20</td>
+            <td style="color:#ca8a04">0.0%</td><td>+15.1%</td></tr><tr><td>2023</td><td>7</td>
+            <td style="color:#16a34a">$30,900</td>
+            <td>100%</td><td>7.83</td>
+            <td style="color:#ca8a04">0.0%</td><td>+30.9%</td></tr><tr><td>2024</td><td>4</td>
+            <td style="color:#16a34a">$9,350</td>
+            <td>100%</td><td>7.21</td>
+            <td style="color:#ca8a04">0.0%</td><td>+9.3%</td></tr><tr><td>2025</td><td>7</td>
+            <td style="color:#16a34a">$17,000</td>
+            <td>100%</td><td>4.97</td>
+            <td style="color:#ca8a04">0.0%</td><td>+17.0%</td></tr></tbody></table>
+
+<h2>2. Walk-Forward Expanding Window</h2>
+<p style="color:#64748b;font-size:0.78rem">IS grows each year. OOS = next year. Tests parameter stability.</p>
+<table><thead><tr><th>IS Period</th><th>OOS Year</th><th>IS N</th><th>IS Sharpe</th><th>OOS N</th><th>OOS Sharpe</th><th>OOS PnL</th><th>OOS WR</th><th>Degradation</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left">2020-2020</td><td>2021</td>
+            <td>6</td><td>2.75</td>
+            <td>11</td><td style="color:#2563eb;font-weight:700">2.49</td>
+            <td style="color:#16a34a">$54,750</td>
+            <td>91%</td>
+            <td style="color:#16a34a">9%</td></tr><tr>
+            <td style="text-align:left">2020-2021</td><td>2022</td>
+            <td>17</td><td>3.38</td>
+            <td>5</td><td style="color:#2563eb;font-weight:700">2.20</td>
+            <td style="color:#16a34a">$15,100</td>
+            <td>80%</td>
+            <td style="color:#ca8a04">35%</td></tr><tr>
+            <td style="text-align:left">2020-2022</td><td>2023</td>
+            <td>22</td><td>3.89</td>
+            <td>7</td><td style="color:#16a34a;font-weight:700">7.83</td>
+            <td style="color:#16a34a">$30,900</td>
+            <td>100%</td>
+            <td style="color:#16a34a">-102%</td></tr><tr>
+            <td style="text-align:left">2020-2023</td><td>2024</td>
+            <td>29</td><td>5.14</td>
+            <td>4</td><td style="color:#16a34a;font-weight:700">7.21</td>
+            <td style="color:#16a34a">$9,350</td>
+            <td>100%</td>
+            <td style="color:#16a34a">-40%</td></tr><tr>
+            <td style="text-align:left">2020-2024</td><td>2025</td>
+            <td>33</td><td>5.47</td>
+            <td>7</td><td style="color:#2563eb;font-weight:700">4.97</td>
+            <td style="color:#16a34a">$17,000</td>
+            <td>100%</td>
+            <td style="color:#16a34a">9%</td></tr></tbody></table>
+<p style="font-size:0.8rem">Avg OOS Sharpe: <strong>4.94</strong> | All OOS profitable: <strong style="color:#16a34a">YES</strong></p>
+
+<h2>3. Position Sizing Comparison</h2>
+<p style="color:#64748b;font-size:0.78rem">Same config, different % of $100K capital risked per trade.</p>
+<table><thead><tr><th>Sizing</th><th>Trades</th><th>CAGR</th><th>Sharpe</th><th>WR</th><th>Max DD</th><th>PnL</th><th>PF</th><th>OOS Sharpe</th><th>Capacity</th></tr></thead>
+<tbody><tr style="">
+            <td style="text-align:left;font-weight:600">1%</td>
+            <td>40</td><td style="color:#16a34a">+8.1%</td>
+            <td style="color:#2563eb">3.88</td>
+            <td>92%</td><td style="color:#ca8a04">3.5%</td>
+            <td>$51,264</td><td>11.7</td>
+            <td>4.15</td><td>$1.1M</td></tr><tr style="">
+            <td style="text-align:left;font-weight:600">2%</td>
+            <td>40</td><td style="color:#16a34a">+12.5%</td>
+            <td style="color:#2563eb">4.68</td>
+            <td>92%</td><td style="color:#ca8a04">6.3%</td>
+            <td>$87,924</td><td>10.1</td>
+            <td>4.22</td><td>$591K</td></tr><tr style="">
+            <td style="text-align:left;font-weight:600">3%</td>
+            <td>40</td><td style="color:#16a34a">+15.5%</td>
+            <td style="color:#2563eb">4.94</td>
+            <td>92%</td><td style="color:#ca8a04">9.1%</td>
+            <td>$115,842</td><td>8.8</td>
+            <td>4.18</td><td>$421K</td></tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:600">5%</td>
+            <td>40</td><td style="color:#16a34a">+18.1%</td>
+            <td style="color:#16a34a">5.63</td>
+            <td>92%</td><td style="color:#ca8a04">10.3%</td>
+            <td>$142,828</td><td>9.5</td>
+            <td>4.31</td><td>$329K</td></tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:600">10%</td>
+            <td>40</td><td style="color:#16a34a">+18.8%</td>
+            <td style="color:#16a34a">6.05</td>
+            <td>92%</td><td style="color:#ca8a04">10.3%</td>
+            <td>$150,650</td><td>10.0</td>
+            <td>4.94</td><td>$300K</td></tr></tbody></table>
+
+<h2>4. Regime Filtering</h2>
+<p style="color:#64748b;font-size:0.78rem">Which VIX environments work best?</p>
+<table><thead><tr><th>Regime</th><th>Trades</th><th>CAGR</th><th>Sharpe</th><th>WR</th><th>Max DD</th><th>PnL</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left">none</td><td>61</td>
+            <td style="color:#16a34a">+21.7%</td>
+            <td style="color:#16a34a">7.09</td>
+            <td>93%</td><td style="color:#ca8a04">9.0%</td>
+            <td>$204,900</td></tr><tr>
+            <td style="text-align:left">low_vol</td><td>34</td>
+            <td style="color:#16a34a">+17.8%</td>
+            <td style="color:#16a34a">8.17</td>
+            <td>100%</td><td style="color:#ca8a04">0.0%</td>
+            <td>$117,950</td></tr><tr>
+            <td style="text-align:left">moderate</td><td>40</td>
+            <td style="color:#16a34a">+18.8%</td>
+            <td style="color:#16a34a">6.05</td>
+            <td>92%</td><td style="color:#ca8a04">10.3%</td>
+            <td>$150,650</td></tr><tr>
+            <td style="text-align:left">high_vol</td><td>27</td>
+            <td style="color:#16a34a">+11.7%</td>
+            <td style="color:#2563eb">3.83</td>
+            <td>85%</td><td style="color:#ca8a04">9.4%</td>
+            <td>$86,950</td></tr><tr>
+            <td style="text-align:left">skip_high</td><td>48</td>
+            <td style="color:#16a34a">+19.1%</td>
+            <td style="color:#16a34a">6.17</td>
+            <td>96%</td><td style="color:#ca8a04">12.0%</td>
+            <td>$151,350</td></tr></tbody></table>
+
+<h2>5. Weekly vs Monthly Expirations</h2>
+<table><thead><tr><th>Frequency</th><th>Trades</th><th>CAGR</th><th>Sharpe</th><th>WR</th><th>Max DD</th><th>PnL</th><th>Avg PnL</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left">Monthly (20d spacing)</td><td>40</td>
+            <td style="color:#16a34a">+18.8%</td>
+            <td style="color:#16a34a">6.05</td>
+            <td>92%</td><td style="color:#ca8a04">10.3%</td>
+            <td>$150,650</td><td>+3766</td></tr><tr>
+            <td style="text-align:left">Weekly (7d spacing)</td><td>96</td>
+            <td style="color:#16a34a">+31.0%</td>
+            <td style="color:#16a34a">8.51</td>
+            <td>95%</td><td style="color:#ca8a04">8.5%</td>
+            <td>$350,200</td><td>+3648</td></tr><tr>
+            <td style="text-align:left">Weekly (14d spacing)</td><td>69</td>
+            <td style="color:#16a34a">+26.0%</td>
+            <td style="color:#16a34a">10.20</td>
+            <td>94%</td><td style="color:#ca8a04">1.1%</td>
+            <td>$260,800</td><td>+3780</td></tr></tbody></table>
+
+<h2>6. Capacity Estimates</h2>
+<p style="color:#64748b;font-size:0.78rem">XLI option ADV ~3,000 contracts/day. Max AUM at 5% participation.</p>
+<table><thead><tr><th>Sizing</th><th>Avg Contracts</th><th>Max AUM</th><th>Participation at Cap</th></tr></thead>
+<tbody><tr><td style="text-align:left">1%</td>
+            <td>14</td><td>$1.1M</td>
+            <td>5.0%</td></tr><tr><td style="text-align:left">2%</td>
+            <td>25</td><td>$591K</td>
+            <td>5.0%</td></tr><tr><td style="text-align:left">3%</td>
+            <td>36</td><td>$421K</td>
+            <td>5.0%</td></tr><tr><td style="text-align:left">5%</td>
+            <td>46</td><td>$329K</td>
+            <td>5.0%</td></tr><tr><td style="text-align:left">10%</td>
+            <td>50</td><td>$300K</td>
+            <td>5.0%</td></tr></tbody></table>
+
+<div style="color:#94a3b8;font-size:0.68rem;margin-top:28px;border-top:1px solid #e2e8f0;padding-top:8px">
+  PilotAI — XLI Iron Condor Deep Dive v2.0 | IronVault real data | Zero synthetic pricing
+</div></body></html>

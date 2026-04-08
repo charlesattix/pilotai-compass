@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>Vol Term Structure — Deep Dive</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         max-width: 1300px; margin: 0 auto; padding: 24px; background: #0d1117; color: #c9d1d9; }
+  h1 { color: #58a6ff; margin-bottom: 4px; }
+  h2 { color: #58a6ff; border-bottom: 1px solid #21262d; padding-bottom: 6px; margin-top: 36px; }
+  h3 { color: #79c0ff; }  h4 { color: #79c0ff; margin: 8px 0; }
+  .meta { color: #8b949e; font-size: 0.88em; }
+  .hero { background: #161b22; border: 2px solid #d29922; border-radius: 12px;
+           padding: 24px; margin: 20px 0; text-align: center; }
+  .hero .big { font-size: 2.5em; font-weight: 800; color: #d29922; }
+  .hero .sub { color: #8b949e; font-size: 1.1em; margin-top: 4px; }
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 16px; }
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .mg { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 6px; margin-top: 8px; }
+  .mg .l { display: block; color: #8b949e; font-size: 0.72em; }
+  .mg .v { display: block; font-weight: 600; }
+  table.dt { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.84em; }
+  table.dt th, table.dt td { padding: 5px 8px; text-align: right; border-bottom: 1px solid #21262d; }
+  table.dt th { color: #8b949e; background: #161b22; }
+  table.dt td:first-child { text-align: left; }
+  .kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 16px 0; }
+  .kpi > div { background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+                padding: 10px; text-align: center; }
+  .kpi .l { display: block; color: #8b949e; font-size: 0.72em; }
+  .kpi .v { display: block; font-weight: 600; font-size: 1.1em; }
+  footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #21262d;
+            color: #484f58; font-size: 0.78em; }
+</style></head><body>
+
+<h1>Vol Term Structure — Deep Dive</h1>
+<p class="meta">Generated 2026-04-04 19:47 &middot; Real IronVault data only &middot; Zero synthetic pricing</p>
+
+<div class="hero">
+  <div class="big">2.45 Sharpe</div>
+  <div class="sub">53 trades &middot; 96.2% win rate &middot;
+    0.2% max DD &middot; 0.5% CAGR &middot; SPY corr -0.32</div>
+</div>
+
+<h2>1. Baseline Performance (SPY, 2020-2025)</h2>
+<div class="kpi">
+  <div><span class="l">Total P&L</span><span class="v" style="color:#3fb950">$3,171</span></div>
+  <div><span class="l">Win Rate</span><span class="v">96.2%</span></div>
+  <div><span class="l">Max Drawdown</span><span class="v">0.2%</span></div>
+  <div><span class="l">Sharpe</span><span class="v" style="color:#3fb950">2.45</span></div>
+  <div><span class="l">CAGR</span><span class="v" style="color:#3fb950">0.5%</span></div>
+  <div><span class="l">SPY Correlation</span><span class="v">-0.32</span></div>
+  <div><span class="l">Avg P&L / Trade</span><span class="v" style="color:#3fb950">$60</span></div>
+</div>
+<table class="dt"><tr><th>Year</th><th>Trades</th><th>P&L</th><th>Win Rate</th><th>Max DD</th><th>Sharpe</th></tr>
+<tr><td>2020</td><td>9</td>
+          <td style="color:#3fb950">$1,884</td>
+          <td>100.0%</td><td>0.0%</td>
+          <td style="color:#3fb950">1.58</td></tr><tr><td>2021</td><td>10</td>
+          <td style="color:#3fb950">$318</td>
+          <td>100.0%</td><td>0.0%</td>
+          <td style="color:#3fb950">7.45</td></tr><tr><td>2022</td><td>6</td>
+          <td style="color:#3fb950">$537</td>
+          <td>100.0%</td><td>0.0%</td>
+          <td style="color:#3fb950">2.98</td></tr><tr><td>2023</td><td>10</td>
+          <td style="color:#3fb950">$144</td>
+          <td>90.0%</td><td>0.1%</td>
+          <td style="color:#3fb950">1.28</td></tr><tr><td>2024</td><td>11</td>
+          <td style="color:#3fb950">$219</td>
+          <td>100.0%</td><td>0.0%</td>
+          <td style="color:#3fb950">5.53</td></tr><tr><td>2025</td><td>7</td>
+          <td style="color:#3fb950">$69</td>
+          <td>85.7%</td><td>0.2%</td>
+          <td style="color:#3fb950">0.31</td></tr></table>
+
+<h2>2. Multi-Ticker Analysis</h2>
+<p class="meta">VTS applied to all tickers with sufficient data in IronVault (contango threshold 1.10 for thinner tickers)</p>
+<table class="dt"><tr><th style="text-align:left">Ticker</th><th>Trades</th><th>P&L</th><th>Win Rate</th>
+  <th>Max DD</th><th>Sharpe</th><th>SPY Corr</th></tr>
+<tr><td style="text-align:left">SPY</td>
+          <td>53</td><td style="color:#3fb950">$3,171</td>
+          <td>96.2%</td><td>0.2%</td>
+          <td style="color:#3fb950">2.45</td>
+          <td>-0.32</td></tr><tr><td style="text-align:left">XLF</td>
+          <td>45</td><td style="color:#3fb950">$552</td>
+          <td>93.3%</td><td>0.1%</td>
+          <td style="color:#3fb950">3.73</td>
+          <td>0.35</td></tr><tr><td style="text-align:left">XLI</td>
+          <td>21</td><td style="color:#3fb950">$699</td>
+          <td>100.0%</td><td>0.0%</td>
+          <td style="color:#3fb950">5.69</td>
+          <td>0.32</td></tr><tr><td style="text-align:left">TLT</td>
+          <td>4</td><td style="color:#3fb950">$138</td>
+          <td>75.0%</td><td>0.1%</td>
+          <td style="color:#3fb950">0.71</td>
+          <td>0.00</td></tr><tr><td style="text-align:left">GLD</td>
+          <td>24</td><td style="color:#3fb950">$96</td>
+          <td>87.5%</td><td>0.2%</td>
+          <td style="color:#3fb950">0.27</td>
+          <td>0.31</td></tr><tr><td style="text-align:left">QQQ</td>
+          <td>9</td><td style="color:#3fb950">$1,092</td>
+          <td>100.0%</td><td>0.0%</td>
+          <td style="color:#3fb950">3.64</td>
+          <td>0.00</td></tr></table>
+
+<h2>3. Walk-Forward Validation (2-yr IS → 1-yr OOS)</h2>
+<p class="meta">Each window trains on 2 years, tests on the next year. Consistent positive OOS = robust signal.</p>
+<div class="kpi">
+  <div><span class="l">Combined OOS Trades</span><span class="v">33</span></div>
+  <div><span class="l">Combined OOS P&L</span><span class="v" style="color:#3fb950">$951</span></div>
+  <div><span class="l">Combined OOS Sharpe</span><span class="v" style="color:#3fb950">2.81</span></div>
+  <div><span class="l">Combined OOS WR</span><span class="v">93.9%</span></div>
+</div>
+<table class="dt"><tr><th>IS Period</th><th>OOS Year</th><th>IS Trades</th><th>IS P&L</th><th>IS WR</th>
+  <th>OOS Trades</th><th>OOS P&L</th><th>OOS WR</th><th>OOS Sharpe</th></tr>
+<tr><td>2020-2021</td><td>2022</td>
+          <td>19</td><td style="color:#3fb950">$2,202</td>
+          <td>100.0%</td><td>5</td>
+          <td style="color:#3fb950">$498</td>
+          <td>100.0%</td>
+          <td style="color:#3fb950">2.88</td></tr><tr><td>2021-2022</td><td>2023</td>
+          <td>16</td><td style="color:#3fb950">$837</td>
+          <td>100.0%</td><td>10</td>
+          <td style="color:#3fb950">$174</td>
+          <td>90.0%</td>
+          <td style="color:#3fb950">1.52</td></tr><tr><td>2022-2023</td><td>2024</td>
+          <td>15</td><td style="color:#3fb950">$672</td>
+          <td>93.3%</td><td>11</td>
+          <td style="color:#3fb950">$210</td>
+          <td>100.0%</td>
+          <td style="color:#3fb950">5.11</td></tr><tr><td>2023-2024</td><td>2025</td>
+          <td>21</td><td style="color:#3fb950">$384</td>
+          <td>95.2%</td><td>7</td>
+          <td style="color:#3fb950">$69</td>
+          <td>85.7%</td>
+          <td style="color:#3fb950">0.31</td></tr></table>
+
+<h2>4. Parameter Sensitivity</h2>
+<p class="meta">Each row changes ONE parameter vs baseline. Sorted by Sharpe.</p>
+<table class="dt"><tr><th style="text-align:left">Configuration</th><th>Trades</th><th>P&L</th>
+  <th>Win Rate</th><th>Max DD</th><th>Sharpe</th></tr>
+<tr style=""><td style="text-align:left">Wide stop (5x)</td>
+          <td>53</td><td style="color:#3fb950">$3,486</td>
+          <td>100.0%</td><td>0.0%</td>
+          <td style="color:#3fb950">2.76</td></tr><tr style=""><td style="text-align:left">Patient profit (65%)</td>
+          <td>53</td><td style="color:#3fb950">$3,471</td>
+          <td>96.2%</td><td>0.2%</td>
+          <td style="color:#3fb950">2.67</td></tr><tr style=""><td style="text-align:left">Narrow $3 spread</td>
+          <td>40</td><td style="color:#3fb950">$2,782</td>
+          <td>92.5%</td><td>0.3%</td>
+          <td style="color:#3fb950">2.51</td></tr><tr style=""><td style="text-align:left">Further OTM (92%)</td>
+          <td>49</td><td style="color:#3fb950">$3,057</td>
+          <td>100.0%</td><td>0.0%</td>
+          <td style="color:#3fb950">2.45</td></tr><tr style="border-left:3px solid #d29922;"><td style="text-align:left">Baseline (ratio≥1.15)</td>
+          <td>53</td><td style="color:#3fb950">$3,171</td>
+          <td>96.2%</td><td>0.2%</td>
+          <td style="color:#3fb950">2.45</td></tr><tr style=""><td style="text-align:left">Loose (ratio≥1.05)</td>
+          <td>53</td><td style="color:#3fb950">$3,171</td>
+          <td>96.2%</td><td>0.2%</td>
+          <td style="color:#3fb950">2.45</td></tr><tr style=""><td style="text-align:left">Tight (ratio≥1.25)</td>
+          <td>53</td><td style="color:#3fb950">$3,171</td>
+          <td>96.2%</td><td>0.2%</td>
+          <td style="color:#3fb950">2.45</td></tr><tr style=""><td style="text-align:left">Very Tight (ratio≥1.35)</td>
+          <td>53</td><td style="color:#3fb950">$3,171</td>
+          <td>96.2%</td><td>0.2%</td>
+          <td style="color:#3fb950">2.45</td></tr><tr style=""><td style="text-align:left">Frequent (interval 10d)</td>
+          <td>59</td><td style="color:#3fb950">$3,321</td>
+          <td>96.6%</td><td>0.2%</td>
+          <td style="color:#3fb950">2.43</td></tr><tr style=""><td style="text-align:left">Closer OTM (96%)</td>
+          <td>54</td><td style="color:#3fb950">$3,339</td>
+          <td>94.4%</td><td>0.5%</td>
+          <td style="color:#3fb950">2.33</td></tr><tr style=""><td style="text-align:left">Tight stop (2x)</td>
+          <td>53</td><td style="color:#3fb950">$3,024</td>
+          <td>94.3%</td><td>0.3%</td>
+          <td style="color:#3fb950">2.31</td></tr><tr style=""><td style="text-align:left">Quick profit (40%)</td>
+          <td>53</td><td style="color:#3fb950">$3,000</td>
+          <td>96.2%</td><td>0.2%</td>
+          <td style="color:#3fb950">2.31</td></tr><tr style=""><td style="text-align:left">Rare (interval 21d)</td>
+          <td>48</td><td style="color:#3fb950">$2,787</td>
+          <td>95.8%</td><td>0.2%</td>
+          <td style="color:#3fb950">2.19</td></tr><tr style=""><td style="text-align:left">Wide $10 spread</td>
+          <td>53</td><td style="color:#3fb950">$2,365</td>
+          <td>94.3%</td><td>0.1%</td>
+          <td style="color:#3fb950">1.74</td></tr><tr style=""><td style="text-align:left">Longer hold (entry 32d)</td>
+          <td>50</td><td style="color:#3fb950">$558</td>
+          <td>94.0%</td><td>0.8%</td>
+          <td style="color:#3fb950">0.36</td></tr><tr style=""><td style="text-align:left">Shorter hold (entry 18d)</td>
+          <td>82</td><td style="color:#f85149">$-2,733</td>
+          <td>90.2%</td><td>0.7%</td>
+          <td style="color:#f85149">-0.46</td></tr></table>
+
+<h2>5. Regime Filter (compass/regime.py)</h2>
+<p class="meta">RegimeClassifier: only trade in BULL + LOW_VOL regimes. Skip BEAR / HIGH_VOL / CRASH.</p>
+
+    <div class="g2">
+      <div class="card"><h4>Unfiltered</h4>
+        <div class="mg"><div><span class="l">Trades</span><span class="v">53</span></div>
+        <div><span class="l">P&L</span><span class="v" style="color:#3fb950">$3,171</span></div>
+        <div><span class="l">Win Rate</span><span class="v">96.2%</span></div>
+        <div><span class="l">Sharpe</span><span class="v" style="color:#3fb950">2.45</span></div>
+        <div><span class="l">Max DD</span><span class="v">0.2%</span></div></div></div>
+      <div class="card"><h4>Regime-Filtered (Bull + Low Vol only)</h4>
+        <div class="mg"><div><span class="l">Trades</span><span class="v">48</span></div>
+        <div><span class="l">P&L</span><span class="v" style="color:#3fb950">$2,844</span></div>
+        <div><span class="l">Win Rate</span><span class="v">95.8%</span></div>
+        <div><span class="l">Sharpe</span><span class="v" style="color:#3fb950">2.20</span></div>
+        <div><span class="l">Max DD</span><span class="v">0.2%</span></div></div></div>
+    </div>
+
+<h2>6. Capacity Analysis</h2>
+<div class="kpi">
+  <div><span class="l">Avg Daily Volume (SPY puts)</span><span class="v">1,288</span></div>
+  <div><span class="l">Median Trade Volume</span><span class="v">67,106</span></div>
+  <div><span class="l">Fill Limit (5% of volume)</span><span class="v">3,355 contracts</span></div>
+  <div><span class="l">Max Notional / Trade</span><span class="v">$1,677,500</span></div>
+  <div><span class="l">Max Capital @ 1.5% Risk</span><span class="v">$105,684,610</span></div>
+  <div><span class="l">Institutional Viable (&gt;$1M)</span><span class="v" style="color:#3fb950">Yes</span></div>
+</div>
+
+<footer>
+  Data: IronVault options_cache.db &middot; SPY (187K contracts, 644 expirations), XLF, XLI, TLT, GLD, QQQ &middot;
+  No synthetic pricing &middot; Cache miss → trade skipped
+</footer>
+</body></html>

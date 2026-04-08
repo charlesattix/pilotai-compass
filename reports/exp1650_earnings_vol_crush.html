@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>EXP-1650: Earnings Vol Crush</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         max-width: 1400px; margin: 0 auto; padding: 24px; background: #0d1117; color: #c9d1d9; }
+  h1 { color: #58a6ff; margin-bottom: 4px; }
+  h2 { color: #58a6ff; border-bottom: 1px solid #21262d; padding-bottom: 6px; margin-top: 36px; }
+  h3 { color: #79c0ff; } h4 { color: #79c0ff; margin: 8px 0; }
+  .meta { color: #8b949e; font-size: 0.88em; }
+  .verdict { background: #161b22; border: 2px solid #d29922; border-radius: 12px;
+              padding: 24px; margin: 20px 0; text-align: center; }
+  .verdict .big { font-size: 2.5em; font-weight: 800; color: #d29922; }
+  .verdict .detail { color: #8b949e; margin-top: 8px; }
+  .kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 16px 0; }
+  .kpi > div { background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+                padding: 10px; text-align: center; }
+  .kpi .l { display: block; color: #8b949e; font-size: 0.72em; }
+  .kpi .v { display: block; font-weight: 600; font-size: 1.1em; }
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 16px; }
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+  table.dt { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.84em; }
+  table.dt th, table.dt td { padding: 5px 8px; text-align: right; border-bottom: 1px solid #21262d; }
+  table.dt th { color: #8b949e; background: #161b22; }
+  table.dt td:first-child { text-align: left; }
+  footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #21262d;
+            color: #484f58; font-size: 0.78em; }
+</style></head><body>
+
+<h1>EXP-1650: Earnings Vol Crush on Sector ETFs</h1>
+<p class="meta">Generated 2026-04-04 21:51 &middot; Real IronVault data only &middot;
+   XLF/XLK/XLE strangles &middot; IS 2020-2022 / OOS 2023-2025</p>
+
+<div class="verdict">
+  <div class="big">IV Overstatement at ETF Level: MIXED</div>
+  <div class="detail">IV overstatement ratio: 0.96× (implied premium is 0.96× the realized move). Average IV crush: 5.1% of entry premium. Average realized move: 3.4%.</div>
+</div>
+
+<h2>Combined Portfolio</h2>
+<div class="kpi">
+  <div><span class="l">Total Trades</span><span class="v">50</span></div>
+  <div><span class="l">Total P&L</span><span class="v" style="color:#3fb950">$2,854</span></div>
+  <div><span class="l">Win Rate</span><span class="v">80.0%</span></div>
+  <div><span class="l">Max DD</span><span class="v">0.9%</span></div>
+  <div><span class="l">Full Sharpe</span><span class="v" style="color:#3fb950">1.55</span></div>
+  <div><span class="l">OOS Sharpe</span><span class="v" style="color:#3fb950">0.59</span></div>
+  <div><span class="l">OOS Trades</span><span class="v">29</span></div>
+  <div><span class="l">OOS P&L</span><span class="v" style="color:#3fb950">$766</span></div>
+  <div><span class="l">IV Overstatement</span><span class="v">0.96×</span></div>
+  <div><span class="l">Avg IV Crush</span><span class="v">5.1%</span></div>
+</div>
+
+<h2>Per-Ticker Analysis</h2>
+<table class="dt">
+  <tr><th style="text-align:left">Ticker</th><th>Trades</th><th>P&L</th><th>WR</th><th>DD</th>
+      <th>Sharpe</th><th>IV Crush</th><th>Real Move</th><th>IV/Real</th>
+      <th>OOS Sharpe</th><th>OOS Status</th></tr>
+<tr>
+          <td style="text-align:left"><strong>XLF</strong> (Financials)</td>
+          <td>13</td>
+          <td style="color:#3fb950">$1,160</td>
+          <td>84.6%</td><td>0.4%</td>
+          <td style="color:#3fb950">1.43</td>
+          <td>15.0%</td><td>3.1%</td>
+          <td>1.18×</td>
+          <td style="color:#3fb950">0.32</td>
+          <td>✓ 8 trades</td></tr><tr>
+          <td style="text-align:left"><strong>XLK</strong> (Technology)</td>
+          <td>0</td>
+          <td style="color:#3fb950">$0</td>
+          <td>0.0%</td><td>0.0%</td>
+          <td style="color:#3fb950">0.00</td>
+          <td>0.0%</td><td>0.0%</td>
+          <td>0.00×</td>
+          <td style="color:#3fb950">0.00</td>
+          <td>⚠ 0 trades</td></tr><tr>
+          <td style="text-align:left"><strong>XLE</strong> (Energy)</td>
+          <td>0</td>
+          <td style="color:#3fb950">$0</td>
+          <td>0.0%</td><td>0.0%</td>
+          <td style="color:#3fb950">0.00</td>
+          <td>0.0%</td><td>0.0%</td>
+          <td>0.00×</td>
+          <td style="color:#3fb950">0.00</td>
+          <td>⚠ 0 trades</td></tr><tr>
+          <td style="text-align:left"><strong>XLF-AllMonth</strong> (Financials All-Month)</td>
+          <td>37</td>
+          <td style="color:#3fb950">$1,694</td>
+          <td>78.4%</td><td>0.9%</td>
+          <td style="color:#3fb950">1.02</td>
+          <td>1.6%</td><td>3.5%</td>
+          <td>0.89×</td>
+          <td style="color:#3fb950">0.48</td>
+          <td>✓ 21 trades</td></tr>
+</table>
+
+<h2>Walk-Forward Validation</h2>
+<p class="meta">IS: 2020-2022 / OOS: 2023-2025. Per-ticker quarterly and yearly breakdown.</p>
+<h3>XLF (Financials)</h3>
+        <div class="g2">
+          <div class="card"><h4>In-Sample (2020-2022)</h4>
+            <p>5 trades, Sharpe 17.23, WR 100.0%</p></div>
+          <div class="card"><h4>Out-of-Sample (2023-2025)</h4>
+            <p>8 trades, Sharpe 0.32, WR 75.0%, P&L $247</p></div>
+        </div><table class="dt"><tr><th>Quarter</th><th>Trades</th>
+              <th>P&L</th><th>Win Rate</th><th>Avg IV Crush</th></tr><tr><td>Q1</td><td>2</td>
+                  <td style="color:#3fb950">$297</td>
+                  <td>100.0%</td><td>46.7%</td></tr><tr><td>Q2</td><td>4</td>
+                  <td style="color:#3fb950">$795</td>
+                  <td>100.0%</td><td>55.3%</td></tr><tr><td>Q3</td><td>3</td>
+                  <td style="color:#f85149">$-655</td>
+                  <td>33.3%</td><td>-104.3%</td></tr><tr><td>Q4</td><td>4</td>
+                  <td style="color:#3fb950">$723</td>
+                  <td>100.0%</td><td>48.3%</td></tr></table><table class="dt"><tr><th>Year</th><th>N</th><th>P&L</th>
+              <th>WR</th><th>DD</th><th>Sharpe</th><th>Avg Crush</th></tr><tr><td>2020</td><td>1</td>
+                  <td style="color:#3fb950">$221</td>
+                  <td>100.0%</td><td>0.0%</td>
+                  <td style="color:#3fb950">221.00</td>
+                  <td>50.0%</td></tr><tr><td>2021</td><td>3</td>
+                  <td style="color:#3fb950">$522</td>
+                  <td>100.0%</td><td>0.0%</td>
+                  <td style="color:#3fb950">21.53</td>
+                  <td>48.4%</td></tr><tr><td>2022</td><td>1</td>
+                  <td style="color:#3fb950">$170</td>
+                  <td>100.0%</td><td>0.0%</td>
+                  <td style="color:#3fb950">170.00</td>
+                  <td>40.0%</td></tr><tr><td>2023 (OOS)</td><td>4</td>
+                  <td style="color:#3fb950">$232</td>
+                  <td>75.0%</td><td>0.4%</td>
+                  <td style="color:#3fb950">0.35</td>
+                  <td>1.3%</td></tr><tr><td>2024 (OOS)</td><td>4</td>
+                  <td style="color:#3fb950">$15</td>
+                  <td>75.0%</td><td>0.4%</td>
+                  <td style="color:#3fb950">0.03</td>
+                  <td>-11.4%</td></tr></table><h3>XLF-AllMonth (Financials All-Month)</h3>
+        <div class="g2">
+          <div class="card"><h4>In-Sample (2020-2022)</h4>
+            <p>16 trades, Sharpe 0.91, WR 81.2%</p></div>
+          <div class="card"><h4>Out-of-Sample (2023-2025)</h4>
+            <p>21 trades, Sharpe 0.48, WR 76.2%, P&L $519</p></div>
+        </div><table class="dt"><tr><th>Quarter</th><th>Trades</th>
+              <th>P&L</th><th>Win Rate</th><th>Avg IV Crush</th></tr><tr><td>Q1</td><td>2</td>
+                  <td style="color:#3fb950">$297</td>
+                  <td>100.0%</td><td>46.7%</td></tr><tr><td>Q2</td><td>4</td>
+                  <td style="color:#3fb950">$795</td>
+                  <td>100.0%</td><td>55.3%</td></tr><tr><td>Q3</td><td>3</td>
+                  <td style="color:#f85149">$-655</td>
+                  <td>33.3%</td><td>-104.3%</td></tr><tr><td>Q4</td><td>4</td>
+                  <td style="color:#3fb950">$723</td>
+                  <td>100.0%</td><td>48.3%</td></tr></table><table class="dt"><tr><th>Year</th><th>N</th><th>P&L</th>
+              <th>WR</th><th>DD</th><th>Sharpe</th><th>Avg Crush</th></tr><tr><td>2020</td><td>4</td>
+                  <td style="color:#f85149">$-688</td>
+                  <td>50.0%</td><td>0.9%</td>
+                  <td style="color:#f85149">-0.74</td>
+                  <td>-69.8%</td></tr><tr><td>2021</td><td>4</td>
+                  <td style="color:#3fb950">$912</td>
+                  <td>100.0%</td><td>0.0%</td>
+                  <td style="color:#3fb950">4.20</td>
+                  <td>56.5%</td></tr><tr><td>2022</td><td>8</td>
+                  <td style="color:#3fb950">$952</td>
+                  <td>87.5%</td><td>0.6%</td>
+                  <td style="color:#3fb950">1.21</td>
+                  <td>27.8%</td></tr><tr><td>2023 (OOS)</td><td>9</td>
+                  <td style="color:#3fb950">$674</td>
+                  <td>77.8%</td><td>0.4%</td>
+                  <td style="color:#3fb950">0.97</td>
+                  <td>-4.5%</td></tr><tr><td>2024 (OOS)</td><td>8</td>
+                  <td style="color:#3fb950">$80</td>
+                  <td>75.0%</td><td>0.4%</td>
+                  <td style="color:#3fb950">0.13</td>
+                  <td>-3.2%</td></tr><tr><td>2025 (OOS)</td><td>4</td>
+                  <td style="color:#f85149">$-235</td>
+                  <td>75.0%</td><td>0.5%</td>
+                  <td style="color:#f85149">-0.39</td>
+                  <td>-10.7%</td></tr></table>
+
+<h2>Top Trades by P&L</h2>
+<table class="dt">
+  <tr><th>Ticker</th><th>Entry</th><th>Exit</th><th>Strikes</th>
+      <th>Entry $</th><th>Exit $</th><th>P&L</th><th>IV Crush</th>
+      <th>Real Move</th><th>Reason</th></tr>
+<tr><td>XLF</td><td>2021-06-01</td><td>2021-06-18</td>
+          <td>33.5/37.0</td>
+          <td>1.61</td><td>0.31</td>
+          <td style="color:#3fb950">$390</td>
+          <td>80.8%</td><td>7.8%</td>
+          <td>profit_target</td></tr><tr><td>XLF</td><td>2023-04-03</td><td>2023-04-26</td>
+          <td>29.0/32.0</td>
+          <td>1.08</td><td>0.43</td>
+          <td style="color:#3fb950">$260</td>
+          <td>60.2%</td><td>0.2%</td>
+          <td>time_exit</td></tr><tr><td>XLF</td><td>2023-04-03</td><td>2023-04-26</td>
+          <td>29.0/32.0</td>
+          <td>1.08</td><td>0.43</td>
+          <td style="color:#3fb950">$260</td>
+          <td>60.2%</td><td>0.2%</td>
+          <td>time_exit</td></tr><tr><td>XLF</td><td>2023-03-01</td><td>2023-03-09</td>
+          <td>31.0/35.0</td>
+          <td>1.11</td><td>0.48</td>
+          <td style="color:#3fb950">$252</td>
+          <td>56.8%</td><td>5.8%</td>
+          <td>profit_target</td></tr><tr><td>XLF</td><td>2022-12-01</td><td>2022-12-05</td>
+          <td>32.0/36.0</td>
+          <td>0.98</td><td>0.48</td>
+          <td style="color:#3fb950">$250</td>
+          <td>51.0%</td><td>2.9%</td>
+          <td>profit_target</td></tr><tr><td>XLF</td><td>2022-11-01</td><td>2022-11-23</td>
+          <td>30.5/33.5</td>
+          <td>1.61</td><td>0.81</td>
+          <td style="color:#3fb950">$242</td>
+          <td>50.0%</td><td>5.6%</td>
+          <td>time_exit</td></tr><tr><td>XLF</td><td>2022-03-01</td><td>2022-03-23</td>
+          <td>33.0/36.0</td>
+          <td>2.38</td><td>1.19</td>
+          <td style="color:#3fb950">$238</td>
+          <td>50.0%</td><td>4.8%</td>
+          <td>time_exit</td></tr><tr><td>XLF</td><td>2023-01-03</td><td>2023-01-26</td>
+          <td>31.0/34.0</td>
+          <td>1.16</td><td>0.58</td>
+          <td style="color:#3fb950">$232</td>
+          <td>50.0%</td><td>5.6%</td>
+          <td>time_exit</td></tr><tr><td>XLF</td><td>2023-01-03</td><td>2023-01-26</td>
+          <td>31.0/34.0</td>
+          <td>1.16</td><td>0.58</td>
+          <td style="color:#3fb950">$232</td>
+          <td>50.0%</td><td>5.6%</td>
+          <td>time_exit</td></tr><tr><td>XLF</td><td>2020-04-01</td><td>2020-04-24</td>
+          <td>16.5/19.5</td>
+          <td>2.21</td><td>1.10</td>
+          <td style="color:#3fb950">$221</td>
+          <td>50.0%</td><td>11.2%</td>
+          <td>time_exit</td></tr>
+</table>
+
+<footer>
+  Data: IronVault options_cache.db &middot; XLF (243K bars), XLK (18.7K), XLE (20.5K) &middot;
+  No synthetic pricing &middot; Strangles priced from real put + call closes
+</footer>
+</body></html>

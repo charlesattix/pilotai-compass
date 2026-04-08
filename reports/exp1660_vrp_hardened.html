@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>EXP-1660 VRP Hardening</title>
+<style>
+body{font-family:-apple-system,sans-serif;margin:0;padding:24px;background:#fff;color:#1e293b}
+h1{font-size:1.4rem;color:#0f172a}h2{font-size:1.05rem;color:#334155;margin-top:1.5rem;border-bottom:1px solid #e2e8f0;padding-bottom:4px}
+h3{font-size:0.95rem;color:#475569;margin-top:1rem}
+.meta{color:#64748b;font-size:0.82rem;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:16px 0}
+.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;text-align:center}
+.card .l{font-size:0.65rem;color:#64748b;text-transform:uppercase}
+.card .v{font-size:1.1rem;font-weight:700;margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:0.82rem;margin:10px 0}
+th{background:#f1f5f9;padding:6px 8px;text-align:right;font-size:0.7rem;color:#64748b;text-transform:uppercase;border-bottom:2px solid #e2e8f0}
+th:first-child{text-align:left}td{padding:5px 8px;text-align:right;border-bottom:1px solid #f1f5f9}td:first-child{text-align:left}
+.callout{background:#eff6ff;border-left:4px solid #3b82f6;padding:12px;margin:12px 0;border-radius:4px;font-size:0.85rem}
+</style></head><body>
+<h1>EXP-1660 VRP Hardening</h1>
+<p class="meta">3 survivors re-run on real IronVault data | 2026-04-06 09:46 UTC | Rule Zero compliant</p>
+
+<div class="callout">
+<strong>Hardening steps:</strong> (1) Re-run 3 survivors for trade-level data
+(2) Expanding-window walk-forward year-by-year
+(3) Regime sensitivity analysis
+(4) Inverse-vol VRP portfolio
+(5) Correlation vs EXP-1220/EXP-1710
+(6) Monthly distribution + fat tail detection
+(7) Capacity estimates
+(8) Combined 3-strategy portfolio
+</div>
+
+<div class="grid">
+  <div class="card"><div class="l">Survivors</div><div class="v">3</div></div>
+  <div class="card"><div class="l">VRP Port Sharpe</div><div class="v">0.27</div></div>
+  <div class="card"><div class="l">VRP Port CAGR</div><div class="v">+0.2%</div></div>
+  <div class="card"><div class="l">VRP Port DD</div><div class="v">2.9%</div></div>
+  <div class="card"><div class="l">Combined Sharpe</div><div class="v" style="color:#16a34a">0.29</div></div>
+  <div class="card"><div class="l">Combined CAGR</div><div class="v">+0.2%</div></div>
+  <div class="card"><div class="l">Combined DD</div><div class="v">2.9%</div></div>
+  <div class="card"><div class="l">Streams</div><div class="v">2</div></div>
+</div>
+
+<h2>1. Survivor Configs (Re-run)</h2>
+<table>
+<tr><th>Name</th><th>Ticker</th><th>Filter</th><th>N</th><th>PnL</th><th>Win%</th><th>Sharpe</th><th>OOS SR</th><th>OOS N</th><th>SPY ρ</th></tr>
+<tr>
+          <td>XLF_no_filter</td>
+          <td>XLF</td>
+          <td>no_filter</td>
+          <td>34</td>
+          <td style="color:#dc2626;font-weight:700">$-675</td>
+          <td>62%</td>
+          <td>-4.39</td>
+          <td style="color:#16a34a;font-weight:700">2.13</td>
+          <td>12</td>
+          <td>-0.68</td>
+        </tr><tr>
+          <td>XLF_low_mid_vol</td>
+          <td>XLF</td>
+          <td>low_vol+mid_vol</td>
+          <td>14</td>
+          <td style="color:#16a34a;font-weight:700">$893</td>
+          <td>79%</td>
+          <td>-7.57</td>
+          <td style="color:#16a34a;font-weight:700">1.78</td>
+          <td>11</td>
+          <td>-0.75</td>
+        </tr><tr>
+          <td>SPY_mid_high_vol</td>
+          <td>SPY</td>
+          <td>mid_vol+high_vol</td>
+          <td>45</td>
+          <td style="color:#16a34a;font-weight:700">$7,378</td>
+          <td>58%</td>
+          <td>-1.41</td>
+          <td style="color:#16a34a;font-weight:700">0.27</td>
+          <td>23</td>
+          <td>-0.76</td>
+        </tr>
+</table>
+
+<h2>2. Expanding-Window Walk-Forward</h2>
+<h3>XLF_no_filter</h3><table><tr><th>Test Year</th><th>Train</th><th>N Train</th><th>N Test</th><th>IS SR</th><th>OOS SR</th><th>OOS PnL</th><th>OOS WR</th></tr><tr>
+              <td>2021</td>
+              <td>2020</td>
+              <td>9</td>
+              <td>5</td>
+              <td>0.06</td>
+              <td style="color:#dc2626;font-weight:700">-2.76</td>
+              <td>$-2,815</td>
+              <td>20%</td>
+            </tr><tr>
+              <td>2022</td>
+              <td>2020,2021</td>
+              <td>14</td>
+              <td>8</td>
+              <td>-1.01</td>
+              <td style="color:#16a34a;font-weight:700">0.40</td>
+              <td>$535</td>
+              <td>62%</td>
+            </tr><tr>
+              <td>2023</td>
+              <td>2020,2021,2022</td>
+              <td>22</td>
+              <td>5</td>
+              <td>-0.72</td>
+              <td style="color:#16a34a;font-weight:700">0.87</td>
+              <td>$620</td>
+              <td>80%</td>
+            </tr><tr>
+              <td>2024</td>
+              <td>2020,2021,2022,2023</td>
+              <td>27</td>
+              <td>5</td>
+              <td>-0.50</td>
+              <td style="color:#16a34a;font-weight:700">4.38</td>
+              <td>$535</td>
+              <td>100%</td>
+            </tr></table><h3>XLF_low_mid_vol</h3><table><tr><th>Test Year</th><th>Train</th><th>N Train</th><th>N Test</th><th>IS SR</th><th>OOS SR</th><th>OOS PnL</th><th>OOS WR</th></tr><tr>
+              <td>2023</td>
+              <td>2020,2021,2022</td>
+              <td>3</td>
+              <td>5</td>
+              <td>-0.16</td>
+              <td style="color:#16a34a;font-weight:700">0.87</td>
+              <td>$620</td>
+              <td>80%</td>
+            </tr><tr>
+              <td>2024</td>
+              <td>2020,2021,2022,2023</td>
+              <td>8</td>
+              <td>5</td>
+              <td>0.16</td>
+              <td style="color:#16a34a;font-weight:700">4.38</td>
+              <td>$535</td>
+              <td>100%</td>
+            </tr></table><h3>SPY_mid_high_vol</h3><table><tr><th>Test Year</th><th>Train</th><th>N Train</th><th>N Test</th><th>IS SR</th><th>OOS SR</th><th>OOS PnL</th><th>OOS WR</th></tr><tr>
+              <td>2022</td>
+              <td>2020,2021</td>
+              <td>11</td>
+              <td>11</td>
+              <td>0.45</td>
+              <td style="color:#16a34a;font-weight:700">1.38</td>
+              <td>$3,989</td>
+              <td>73%</td>
+            </tr><tr>
+              <td>2023</td>
+              <td>2020,2021,2022</td>
+              <td>22</td>
+              <td>14</td>
+              <td>1.23</td>
+              <td style="color:#dc2626;font-weight:700">-0.75</td>
+              <td>$-2,593</td>
+              <td>43%</td>
+            </tr><tr>
+              <td>2024</td>
+              <td>2020,2021,2022,2023</td>
+              <td>36</td>
+              <td>7</td>
+              <td>0.52</td>
+              <td style="color:#16a34a;font-weight:700">1.10</td>
+              <td>$4,921</td>
+              <td>71%</td>
+            </tr></table>
+
+<h2>3. Regime Sensitivity</h2>
+<h3>XLF_no_filter</h3><table><tr><th>Regime</th><th>N</th><th>PnL</th><th>Avg PnL</th><th>Win%</th></tr><tr>
+              <td>crash</td>
+              <td>5</td>
+              <td style="color:#16a34a">$225</td>
+              <td>$45</td>
+              <td>40%</td>
+            </tr><tr>
+              <td>high_vol</td>
+              <td>17</td>
+              <td style="color:#dc2626">$-1,235</td>
+              <td>$-73</td>
+              <td>53%</td>
+            </tr><tr>
+              <td>low_vol</td>
+              <td>4</td>
+              <td style="color:#16a34a">$330</td>
+              <td>$82</td>
+              <td>100%</td>
+            </tr><tr>
+              <td>mid_vol</td>
+              <td>8</td>
+              <td style="color:#16a34a">$5</td>
+              <td>$1</td>
+              <td>75%</td>
+            </tr></table><h3>XLF_low_mid_vol</h3><table><tr><th>Regime</th><th>N</th><th>PnL</th><th>Avg PnL</th><th>Win%</th></tr><tr>
+              <td>low_vol</td>
+              <td>4</td>
+              <td style="color:#16a34a">$330</td>
+              <td>$82</td>
+              <td>100%</td>
+            </tr><tr>
+              <td>mid_vol</td>
+              <td>10</td>
+              <td style="color:#16a34a">$563</td>
+              <td>$56</td>
+              <td>70%</td>
+            </tr></table><h3>SPY_mid_high_vol</h3><table><tr><th>Regime</th><th>N</th><th>PnL</th><th>Avg PnL</th><th>Win%</th></tr><tr>
+              <td>high_vol</td>
+              <td>9</td>
+              <td style="color:#16a34a">$112</td>
+              <td>$12</td>
+              <td>56%</td>
+            </tr><tr>
+              <td>mid_vol</td>
+              <td>36</td>
+              <td style="color:#16a34a">$7,266</td>
+              <td>$202</td>
+              <td>58%</td>
+            </tr></table>
+
+<h2>4. Monthly Return Distribution + Left Tail</h2>
+<table>
+<tr><th>Name</th><th>Months</th><th>Mean</th><th>Std</th><th>Skew</th><th>Kurt</th><th>P1</th><th>P5</th><th>Worst</th><th>Pos %</th><th>Tail</th></tr>
+<tr>
+          <td>XLF_no_filter</td>
+          <td>22</td>
+          <td>-0.03%</td>
+          <td>0.76%</td>
+          <td>+0.47</td>
+          <td>+1.46</td>
+          <td>-1.42%</td>
+          <td>-0.98%</td>
+          <td>-1.54%</td>
+          <td>54%</td>
+          <td><span style="color:#16a34a">NORMAL</span></td>
+        </tr><tr>
+          <td>XLF_low_mid_vol</td>
+          <td>10</td>
+          <td>+0.09%</td>
+          <td>0.61%</td>
+          <td>+0.05</td>
+          <td>-0.02</td>
+          <td>-0.85%</td>
+          <td>-0.76%</td>
+          <td>-0.88%</td>
+          <td>70%</td>
+          <td><span style="color:#16a34a">NORMAL</span></td>
+        </tr><tr>
+          <td>SPY_mid_high_vol</td>
+          <td>29</td>
+          <td>+0.25%</td>
+          <td>1.55%</td>
+          <td>+0.12</td>
+          <td>-0.75</td>
+          <td>-2.14%</td>
+          <td>-2.01%</td>
+          <td>-2.19%</td>
+          <td>52%</td>
+          <td><span style="color:#16a34a">NORMAL</span></td>
+        </tr>
+</table>
+
+<h2>5. Capacity Estimates</h2>
+<table>
+<tr><th>Name</th><th>Ticker</th><th>10-delta ADV</th><th>Max Contracts/Day</th><th>Max Strangles/Day</th><th>Max AUM</th></tr>
+<tr>
+          <td>XLF_no_filter</td>
+          <td>XLF</td>
+          <td>3,000</td>
+          <td>60</td>
+          <td>30</td>
+          <td>$4.5M</td>
+        </tr><tr>
+          <td>XLF_low_mid_vol</td>
+          <td>XLF</td>
+          <td>3,000</td>
+          <td>60</td>
+          <td>30</td>
+          <td>$4.5M</td>
+        </tr><tr>
+          <td>SPY_mid_high_vol</td>
+          <td>SPY</td>
+          <td>50,000</td>
+          <td>1,000</td>
+          <td>500</td>
+          <td>$75.0M</td>
+        </tr>
+</table>
+
+<h2>6. VRP Portfolio (Inverse-Vol Weighted)</h2>
+<table><tr><th>Survivor</th><th>Weight</th></tr><tr><td>XLF_no_filter</td><td>37.5%</td></tr><tr><td>XLF_low_mid_vol</td><td>44.1%</td></tr><tr><td>SPY_mid_high_vol</td><td>18.3%</td></tr></table>
+<p class="meta">
+  Portfolio: CAGR +0.2% |
+  Sharpe 0.27 |
+  Max DD 2.9% |
+  Vol 0.9%
+</p>
+
+<h2>7. Correlation Analysis</h2>
+<table><tr><th>Pair</th><th>Correlation</th></tr><tr><td>vrp_vs_exp1220</td><td style="color:#64748b">N/A</td></tr><tr><td>vrp_vs_exp1710</td><td style="color:#64748b">N/A</td></tr><tr><td>exp1220_vs_exp1710</td><td style="color:#64748b">N/A</td></tr></table>
+<p class="meta">Target: low absolute correlation (&lt;0.3) to EXP-1220 and EXP-1710 for diversification.</p>
+
+<h2>8. Combined Portfolio (VRP + EXP-1220 + EXP-1710)</h2>
+<table><tr><th>Stream</th><th>Weight</th></tr><tr><td>VRP_portfolio</td><td>98.4%</td></tr><tr><td>EXP-1710</td><td>1.6%</td></tr></table>
+<p class="meta">
+  <strong>Combined Sharpe: 0.29</strong> |
+  CAGR: +0.2% |
+  Max DD: 2.9% |
+  Streams: 2
+</p>
+
+<div style="color:#94a3b8;font-size:0.75rem;margin-top:2rem;border-top:1px solid #e2e8f0;padding-top:8px">
+scripts/harden_exp1660_vrp.py | Real IronVault data |
+Corrected Sharpe (arithmetic mean × √252 / std daily, ddof=1)
+</div>
+</body></html>

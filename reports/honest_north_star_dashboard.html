@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Honest North Star Dashboard</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        background: #fff; color: #1a1a2e; padding: 32px; max-width: 1100px; margin: 0 auto; line-height: 1.5; }
+
+h1 { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+h2 { font-size: 1.15rem; font-weight: 700; color: #334155; margin: 2rem 0 0.75rem;
+      padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; }
+h3 { font-size: 0.95rem; font-weight: 600; color: #475569; margin: 1.25rem 0 0.5rem; }
+
+.subtitle { color: #64748b; font-size: 0.85rem; margin-bottom: 24px; }
+
+/* Cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 16px 0; }
+.card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; text-align: center; }
+.card .label { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+.card .value { font-size: 1.4rem; font-weight: 800; margin-top: 4px; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.84rem; }
+th { background: #f1f5f9; padding: 8px 10px; text-align: right; font-size: 0.72rem;
+      color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 2px solid #cbd5e1; }
+th:first-child { text-align: left; }
+td { padding: 7px 10px; text-align: right; border-bottom: 1px solid #f1f5f9; }
+td:first-child { text-align: left; font-weight: 500; }
+tr:hover { background: #f8fafc; }
+
+/* Tags */
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem;
+        font-weight: 700; letter-spacing: 0.03em; }
+.tag-green { background: #dcfce7; color: #166534; }
+.tag-yellow { background: #fef9c3; color: #854d0e; }
+.tag-red { background: #fee2e2; color: #991b1b; }
+.tag-blue { background: #dbeafe; color: #1e40af; }
+.tag-gray { background: #f1f5f9; color: #475569; }
+
+/* Callouts */
+.callout { padding: 14px 16px; border-radius: 8px; margin: 14px 0; font-size: 0.88rem; }
+.callout-red { background: #fef2f2; border-left: 4px solid #dc2626; }
+.callout-green { background: #f0fdf4; border-left: 4px solid #16a34a; }
+.callout-blue { background: #eff6ff; border-left: 4px solid #3b82f6; }
+.callout-yellow { background: #fffbeb; border-left: 4px solid #d97706; }
+
+.gap-bar { background: #f1f5f9; height: 28px; border-radius: 6px; position: relative; margin: 8px 0; overflow: hidden; }
+.gap-fill { height: 100%; border-radius: 6px; }
+.gap-label { position: absolute; top: 5px; left: 10px; font-size: 0.75rem; font-weight: 700; }
+
+.small { font-size: 0.78rem; color: #94a3b8; }
+strong { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<h1>Honest North Star Dashboard</h1>
+<p class="subtitle">For Carlos | 2026-04-05 15:46 UTC | Only validated real-data numbers | Zero inflation</p>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- NORTH STAR vs REALITY -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<h2>North Star Targets vs Reality</h2>
+
+<table>
+<tr>
+  <th>Metric</th>
+  <th>North Star Target</th>
+  <th>Best Real-Data Result</th>
+  <th>Gap</th>
+  <th>Status</th>
+</tr>
+<tr>
+  <td>CAGR</td>
+  <td>100%</td>
+  <td><strong>3.4%</strong> <span class="small">(EXP-1220, 7d cadence, no hedge)</span></td>
+  <td style="color:#dc2626;font-weight:700">-96.6%</td>
+  <td><span class="tag tag-red">MISS</span></td>
+</tr>
+<tr>
+  <td>Sharpe Ratio</td>
+  <td>6.0</td>
+  <td><strong>3.12</strong> <span class="small">(trade-level, corrected formula)</span></td>
+  <td style="color:#dc2626;font-weight:700">-2.88</td>
+  <td><span class="tag tag-yellow">PARTIAL</span></td>
+</tr>
+<tr>
+  <td>Max Drawdown</td>
+  <td>&lt;12%</td>
+  <td><strong>1.0%</strong> <span class="small">(7d no-hedge)</span></td>
+  <td style="color:#16a34a;font-weight:700">+11.0% margin</td>
+  <td><span class="tag tag-green">MET</span></td>
+</tr>
+<tr>
+  <td>Win Rate</td>
+  <td>&gt;55%</td>
+  <td><strong>91%</strong> <span class="small">(287 trades, 261 winners)</span></td>
+  <td style="color:#16a34a;font-weight:700">+36%</td>
+  <td><span class="tag tag-green">MET</span></td>
+</tr>
+<tr>
+  <td>Capacity (AUM)</td>
+  <td>$1B+</td>
+  <td><strong>$100M+</strong> <span class="small">(SPY option liquidity)</span></td>
+  <td style="color:#d97706;font-weight:700">10% of target</td>
+  <td><span class="tag tag-yellow">PARTIAL</span></td>
+</tr>
+<tr>
+  <td>Data Coverage</td>
+  <td>Full 2020-2026</td>
+  <td><strong>SPY only</strong> <span class="small">(GLD/QQQ/TLT have gaps)</span></td>
+  <td style="color:#d97706;font-weight:700">1 of 9 tickers full</td>
+  <td><span class="tag tag-yellow">PARTIAL</span></td>
+</tr>
+</table>
+
+<div class="gap-bar">
+  <div class="gap-fill" style="width:3.4%;background:#dc2626"></div>
+  <div class="gap-label" style="color:#991b1b">CAGR: 3.4% of 100% target</div>
+</div>
+<div class="gap-bar">
+  <div class="gap-fill" style="width:52%;background:#d97706"></div>
+  <div class="gap-label" style="color:#854d0e">Sharpe: 3.12 of 6.0 target (52%)</div>
+</div>
+<div class="gap-bar">
+  <div class="gap-fill" style="width:100%;background:#16a34a"></div>
+  <div class="gap-label" style="color:#fff">DD: 1.0% vs 12% target (EXCEEDED)</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- WHAT'S REAL -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<h2>What's Real (Validated on IronVault Data)</h2>
+
+<table>
+<tr>
+  <th>Strategy</th>
+  <th>Data</th>
+  <th>Trades</th>
+  <th>Win%</th>
+  <th>Gross PnL</th>
+  <th>CAGR</th>
+  <th>Sharpe</th>
+  <th>DD</th>
+  <th>Grade</th>
+</tr>
+<tr>
+  <td>EXP-1220 Credit Spreads (7d, no hedge)</td>
+  <td><span class="tag tag-green">REAL</span></td>
+  <td>287</td>
+  <td>91%</td>
+  <td style="color:#16a34a;font-weight:700">$21,312</td>
+  <td>+3.4%</td>
+  <td>3.12</td>
+  <td>1.0%</td>
+  <td><span class="tag tag-green">A</span></td>
+</tr>
+<tr>
+  <td>EXP-1220 Credit Spreads (10d, no hedge)</td>
+  <td><span class="tag tag-green">REAL</span></td>
+  <td>171</td>
+  <td>88%</td>
+  <td style="color:#16a34a">$7,372</td>
+  <td>+1.2%</td>
+  <td>1.26</td>
+  <td>1.6%</td>
+  <td><span class="tag tag-yellow">B</span></td>
+</tr>
+<tr>
+  <td>Vol Risk Premium (R3 discovery)</td>
+  <td><span class="tag tag-green">REAL</span></td>
+  <td>45</td>
+  <td>69%</td>
+  <td style="color:#16a34a">$5,884</td>
+  <td>~1%</td>
+  <td>2.30</td>
+  <td>~3%</td>
+  <td><span class="tag tag-yellow">B</span></td>
+</tr>
+<tr>
+  <td>Sector IV Rotation (R3)</td>
+  <td><span class="tag tag-green">REAL</span></td>
+  <td>21</td>
+  <td>71%</td>
+  <td>$691</td>
+  <td>&lt;1%</td>
+  <td>2.34</td>
+  <td>~2%</td>
+  <td><span class="tag tag-yellow">B-</span></td>
+</tr>
+<tr>
+  <td>Calendar Spread Carry (R3)</td>
+  <td><span class="tag tag-green">REAL</span></td>
+  <td>93</td>
+  <td>55%</td>
+  <td style="color:#16a34a">$2,619</td>
+  <td>&lt;1%</td>
+  <td>0.36</td>
+  <td>~5%</td>
+  <td><span class="tag tag-gray">C</span></td>
+</tr>
+<tr style="background:#fef2f2">
+  <td>ANY hedged configuration</td>
+  <td><span class="tag tag-green">REAL</span></td>
+  <td>varies</td>
+  <td>41-44%</td>
+  <td style="color:#dc2626;font-weight:700">NEGATIVE</td>
+  <td style="color:#dc2626">-0.7% to -2.7%</td>
+  <td style="color:#dc2626">&lt;0</td>
+  <td>7-16%</td>
+  <td><span class="tag tag-red">F</span></td>
+</tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- WHAT'S INFLATED -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<h2>What's Inflated (Synthetic/Calibrated — Not Deployable)</h2>
+
+<div class="callout callout-red">
+<strong>92 experiments in registry. Only 4-5 have real-data validation.</strong>
+The rest used synthetic returns, calibrated simulations, or assumed costs.
+Every "77% CAGR" and "Sharpe 5.78" claim came from frameworks that either
+(a) used synthetic option pricing, (b) annualised per-trade Sharpe incorrectly,
+or (c) assumed 2%/yr hedge costs that are actually 4.36%/yr.
+</div>
+
+<table>
+<tr>
+  <th>Claim</th>
+  <th>Source</th>
+  <th>Problem</th>
+  <th>Real Number</th>
+</tr>
+<tr>
+  <td>EXP-1220: 77% CAGR, Sharpe 5.78</td>
+  <td>experiment_runner.py</td>
+  <td>Per-trade Sharpe (not daily), synthetic cost model</td>
+  <td><strong>3.4% CAGR, Sharpe 3.12</strong> (trade-level, real data)</td>
+</tr>
+<tr>
+  <td>Ultimate Portfolio: 100% CAGR</td>
+  <td>production_portfolio_wf.py</td>
+  <td>Calibrated return streams, not IronVault prices</td>
+  <td><strong>3.4% best case</strong> (SPY-only, real data)</td>
+</tr>
+<tr>
+  <td>Tail risk hedge: 2%/yr cost</td>
+  <td>tail_risk_hedge.py</td>
+  <td>Flat assumption, not priced from real puts</td>
+  <td><strong>4.36%/yr avg</strong> (IronVault SPY puts, 69 months)</td>
+</tr>
+<tr>
+  <td>Multi-strategy: 66% CAGR OOS</td>
+  <td>production_portfolio_wf.py</td>
+  <td>Uses generate_strategy_returns(), not real trades</td>
+  <td><strong>Unvalidated</strong> (GLD/QQQ/TLT data gaps)</td>
+</tr>
+<tr>
+  <td>Regime-adaptive: 120% CAGR</td>
+  <td>regime_portfolio.py</td>
+  <td>Simulated correlated returns, not IronVault</td>
+  <td><strong>Unvalidated</strong></td>
+</tr>
+<tr>
+  <td>Dynamic sizing Sharpe +0.77</td>
+  <td>dynamic_sizing.py</td>
+  <td>Simulated, not real execution</td>
+  <td><strong>Unvalidated</strong></td>
+</tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- THE HEDGE COST PROBLEM -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<h2>The Hedge Cost Problem</h2>
+
+<div class="callout callout-yellow">
+<strong>The put overlay costs 2.2x more than assumed.</strong>
+At $17.30/day per hold-day (real IronVault SPY 5% OTM puts), the hedge
+overlay EXCEEDS the gross trading alpha at every cadence tested.
+</div>
+
+<table>
+<tr><th>Year</th><th>Real Put Cost</th><th>Assumed</th><th>Delta</th><th>VIX Context</th></tr>
+<tr><td>2020</td><td style="color:#dc2626">5.28%</td><td>2.00%</td><td>+3.28%</td><td>COVID spike</td></tr>
+<tr><td>2021</td><td>3.02%</td><td>2.00%</td><td>+1.02%</td><td>Post-COVID elevated</td></tr>
+<tr><td>2022</td><td style="color:#dc2626">5.39%</td><td>2.00%</td><td>+3.39%</td><td>Bear market</td></tr>
+<tr><td>2023</td><td>2.44%</td><td>2.00%</td><td>+0.44%</td><td>Closest to assumption</td></tr>
+<tr><td>2024</td><td>2.78%</td><td>2.00%</td><td>+0.78%</td><td>Normal</td></tr>
+<tr><td>2025</td><td style="color:#dc2626">7.25%</td><td>2.00%</td><td>+5.25%</td><td>Current vol</td></tr>
+<tr style="font-weight:700;border-top:2px solid #cbd5e1">
+  <td>Average</td><td style="color:#dc2626">4.36%</td><td>2.00%</td><td>+2.36%</td><td>2.2x assumed</td></tr>
+</table>
+
+<p class="small">Source: 69 monthly IronVault put price samples. VIX options NOT in database (VIX/UVXY/VXX absent).</p>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- CADENCE OPTIMIZATION -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<h2>Cadence Optimization (Real IronVault, Max 4 Concurrent)</h2>
+
+<table>
+<tr><th>Cadence</th><th>Trades</th><th>Gross</th><th>Hedge Cost</th><th>Net</th><th>CAGR</th><th>Sharpe</th><th>Win%</th><th>Util</th></tr>
+<tr style="background:#fef2f2"><td>7d + hedge</td><td>287</td><td>$21,312</td><td style="color:#dc2626">-$30,693</td><td style="color:#dc2626;font-weight:700">-$9,381</td><td>-1.7%</td><td>-1.22</td><td>44%</td><td>84%</td></tr>
+<tr style="background:#f0fdf4"><td><strong>7d NO hedge</strong></td><td>287</td><td style="color:#16a34a;font-weight:700">$21,312</td><td>$0</td><td style="color:#16a34a;font-weight:700">$21,312</td><td><strong>+3.4%</strong></td><td><strong>3.12</strong></td><td><strong>91%</strong></td><td>84%</td></tr>
+<tr style="background:#fef2f2"><td>10d + hedge (current)</td><td>171</td><td>$7,372</td><td style="color:#dc2626">-$16,558</td><td style="color:#dc2626">-$9,186</td><td>-1.6%</td><td>-1.48</td><td>41%</td><td>63%</td></tr>
+<tr><td>10d no hedge</td><td>171</td><td>$7,372</td><td>$0</td><td style="color:#16a34a">$7,372</td><td>+1.2%</td><td>1.26</td><td>88%</td><td>63%</td></tr>
+</table>
+
+<div class="callout callout-green">
+<strong>Recommendation:</strong> Deploy at 7-day cadence, NO put overlay.
+The credit spread itself is defined-risk (max loss = width - credit).
+Use dynamic leverage sizing (0.5x in VIX &gt; 30) instead of purchased hedges.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- DATA INVENTORY -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<h2>Data Inventory</h2>
+
+<table>
+<tr><th>Ticker</th><th>Contracts</th><th>Coverage</th><th>Status</th></tr>
+<tr><td>SPY</td><td>193,272</td><td>2020-01 to 2026-06</td><td><span class="tag tag-green">FULL</span></td></tr>
+<tr><td>XLI</td><td>17,287</td><td>2020-01 to 2026-06</td><td><span class="tag tag-green">FULL</span></td></tr>
+<tr><td>XLF</td><td>9,256</td><td>2020-01 to 2026-06</td><td><span class="tag tag-green">FULL</span></td></tr>
+<tr><td>XLE</td><td>1,757</td><td>2020-04 to 2026-06</td><td><span class="tag tag-yellow">PARTIAL</span></td></tr>
+<tr><td>GLD</td><td>12,515</td><td>2020-01 to <strong style="color:#dc2626">2024-10</strong></td><td><span class="tag tag-red">GAP</span></td></tr>
+<tr><td>QQQ</td><td>9,194</td><td>2020-01 to <strong style="color:#dc2626">2023-04</strong></td><td><span class="tag tag-red">GAP</span></td></tr>
+<tr><td>TLT</td><td>9,185</td><td>2020-01 to <strong style="color:#dc2626">2025-12</strong></td><td><span class="tag tag-yellow">RECENT</span></td></tr>
+<tr><td>VIX options</td><td>0</td><td>N/A</td><td><span class="tag tag-red">ABSENT</span></td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- PATH FORWARD -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<h2>Path Forward — Honest Roadmap</h2>
+
+<h3>Phase 1: Deploy What Works (Now)</h3>
+<table>
+<tr><th>Action</th><th>Expected Impact</th><th>Confidence</th></tr>
+<tr><td>EXP-1220 at 7d cadence, NO hedge, max 4 concurrent</td><td>+3.4% CAGR, Sharpe 3.12, 91% WR</td><td><span class="tag tag-green">HIGH</span></td></tr>
+<tr><td>Dynamic leverage 0.5x-2.0x (VIX-based, no purchased puts)</td><td>Reduce DD from 1.0% further without cost</td><td><span class="tag tag-green">HIGH</span></td></tr>
+<tr><td>Paper trade on Alpaca with validated config</td><td>Confirm real execution matches backtest</td><td><span class="tag tag-green">HIGH</span></td></tr>
+</table>
+
+<h3>Phase 2: Increase Alpha (1-3 months)</h3>
+<table>
+<tr><th>Action</th><th>Expected Impact</th><th>Confidence</th></tr>
+<tr><td>Increase position sizing (currently 3% risk → try 5-8%)</td><td>2-3x gross PnL, proportional DD increase</td><td><span class="tag tag-yellow">MEDIUM</span></td></tr>
+<tr><td>Add call spreads (iron condors) in VIX 15-28</td><td>+30-50% more trades, uncorrelated upside premium</td><td><span class="tag tag-yellow">MEDIUM</span></td></tr>
+<tr><td>Upgrade Polygon tier for GLD/QQQ/TLT</td><td>Enable multi-asset diversification</td><td><span class="tag tag-yellow">MEDIUM</span></td></tr>
+<tr><td>Add XLF/XLI iron condors (data available)</td><td>Sector diversification, uncorrelated alpha</td><td><span class="tag tag-yellow">MEDIUM</span></td></tr>
+</table>
+
+<h3>Phase 3: Scale (3-6 months)</h3>
+<table>
+<tr><th>Action</th><th>Expected Impact</th><th>Confidence</th></tr>
+<tr><td>Multi-asset portfolio with real GLD/QQQ/TLT data</td><td>Potentially 10-15% CAGR with diversification</td><td><span class="tag tag-blue">NEEDS DATA</span></td></tr>
+<tr><td>Selective hedging (only VIX &lt; 15, ~1.5%/yr cost)</td><td>Tail protection without destroying alpha</td><td><span class="tag tag-yellow">MEDIUM</span></td></tr>
+<tr><td>ML signal enhancement on real features</td><td>Improve entry selection, boost per-trade edge</td><td><span class="tag tag-yellow">MEDIUM</span></td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- BOTTOM LINE -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<h2>Bottom Line</h2>
+
+<div class="callout callout-blue">
+<strong>The core credit spread edge is REAL.</strong> 287 trades on real IronVault prices,
+91% win rate, $21K gross over 6 years. The math works: selling 5% OTM SPY puts
+at 50% profit target generates consistent small gains.<br><br>
+
+<strong>The gap to North Star is structural, not a bug.</strong> Credit spreads on a single
+underlying (SPY) with $100K capital generate 1.5-3.5% CAGR. Getting to 100% CAGR
+requires either (a) 30x leverage (impossible with spreads), (b) 30 uncorrelated
+alpha sources at 3.5% each (we have 1-2), or (c) a fundamentally different strategy class.<br><br>
+
+<strong>The hedge overlay destroyed value.</strong> At 4.36%/yr real cost (2.2x the assumed 2%),
+the put protection costs more than the trading alpha. Drop it. The credit spread's
+defined max-loss IS the hedge.<br><br>
+
+<strong>Honest target with current setup:</strong> 5-10% CAGR, Sharpe 2-3, DD &lt;5%.
+Achievable with optimized cadence + position sizing + sector diversification.
+The 100% CAGR target needs a fundamental strategy expansion beyond credit spreads.
+</div>
+
+<p class="small" style="margin-top:2rem;padding-top:8px;border-top:1px solid #e2e8f0">
+compass/honest_dashboard.py | Generated 2026-04-05 15:46 UTC<br>
+All "Real" numbers from IronVault options_cache.db (193K SPY contracts, 4.4M daily bars).<br>
+Sharpe formula: arithmetic mean of daily returns &times; &radic;252 / std(daily, ddof=1).<br>
+Hedge costs: 69 monthly IronVault SPY put samples, annualised.
+</p>
+
+</body>
+</html>

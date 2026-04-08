@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>Better Portfolio — Integration</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e2e8f0;--text:#1a1a2e;--muted:#64748b;--green:#059669;--red:#dc2626;--blue:#2563eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;max-width:1100px;margin:0 auto;padding:28px}
+h1{font-size:1.55rem;font-weight:800;margin-bottom:4px}
+h2{font-size:1.15rem;font-weight:700;margin:32px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--border)}
+.sub{color:var(--muted);font-size:.86rem;margin-bottom:18px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.84rem}
+th{background:#f1f5f9;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:2px solid var(--border);font-size:.74rem;font-weight:600;text-transform:uppercase}
+td{padding:6px 10px;border-bottom:1px solid #f1f5f9;text-align:left}
+.r{text-align:right}
+tr:hover td{background:#fafafa}
+.hero{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #dc2626;border-radius:12px;padding:24px;margin:18px 0;text-align:center}
+.hero .title{font-size:1.1rem;font-weight:700;color:#1e40af}
+.hero .big{font-size:1.55rem;font-weight:800;color:#dc2626;margin:8px 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:16px 0}
+.c{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:13px;text-align:center}
+.c .l{color:var(--muted);font-size:.72rem;text-transform:uppercase}
+.c .v{font-weight:700;font-size:1.15rem;margin-top:3px}
+.box{border:1px solid var(--border);border-radius:8px;padding:16px;margin:12px 0;background:var(--card)}
+.box-green{border-left:5px solid var(--green)} .box-red{border-left:5px solid var(--red)}
+.box h4{margin:0 0 6px;font-size:.95rem}
+</style></head><body>
+
+<h1>Better Portfolio — 4-Strategy Integration</h1>
+<p class="sub">EXP-1220 + EXP-1710 + EXP-1660 + EXP-1780 &bull; 4 allocation methods &bull;
+Walk-forward 2020-2025 &bull; Real data only &bull; 2026-04-06</p>
+
+<div class="hero">
+<div class="title">Best Method: Custom Dd Constrained</div>
+<div class="big">NORTH STAR NOT MET</div>
+<p style="color:#1e3a8a;font-size:.9rem;margin-top:6px">
+CAGR +19.14% (target 100.0%) &bull;
+Sharpe 2.14 (target 6.0) &bull;
+Max DD 0.00% (target &lt;12.0%)
+</p>
+</div>
+
+<div class="cards">
+<div class="c"><div class="l">CAGR</div><div class="v" style="color:#dc2626">+19.1%</div></div>
+<div class="c"><div class="l">Sharpe</div><div class="v" style="color:#dc2626">2.14</div></div>
+<div class="c"><div class="l">Max DD</div><div class="v" style="color:#059669">0.0%</div></div>
+<div class="c"><div class="l">Vol</div><div class="v">6.9%</div></div>
+<div class="c"><div class="l">Total Return</div><div class="v">+186%</div></div>
+<div class="c"><div class="l">Strategies</div><div class="v">4</div></div>
+</div>
+
+<h2>1. Yearly Return Streams (Real Data)</h2>
+<table>
+<thead><tr><th>Strategy</th><th class="r">2020</th><th class="r">2021</th><th class="r">2022</th><th class="r">2023</th><th class="r">2024</th><th class="r">2025</th></tr></thead>
+<tbody><tr><td><strong>EXP-1220</strong></td><td class="r" style="color:#059669">+209.32%</td><td class="r" style="color:#059669">+88.28%</td><td class="r" style="color:#059669">+100.00%</td><td class="r" style="color:#059669">+64.99%</td><td class="r" style="color:#059669">+62.66%</td><td class="r" style="color:#059669">+96.15%</td></tr>
+<tr><td><strong>EXP-1660</strong></td><td class="r" style="color:#059669">+0.85%</td><td class="r" style="color:#059669">+0.80%</td><td class="r" style="color:#059669">+3.99%</td><td class="r" style="color:#dc2626">-2.59%</td><td class="r" style="color:#059669">+4.92%</td><td class="r" style="color:#dc2626">-0.59%</td></tr>
+<tr><td><strong>EXP-1710</strong></td><td class="r" style="color:#dc2626">+0.00%</td><td class="r" style="color:#dc2626">+0.00%</td><td class="r" style="color:#dc2626">+0.00%</td><td class="r" style="color:#059669">+17.51%</td><td class="r" style="color:#059669">+5.93%</td><td class="r" style="color:#059669">+1.24%</td></tr>
+<tr><td><strong>EXP-1780</strong></td><td class="r" style="color:#059669">+11.71%</td><td class="r" style="color:#059669">+24.39%</td><td class="r" style="color:#059669">+2.63%</td><td class="r" style="color:#dc2626">-17.72%</td><td class="r" style="color:#059669">+20.30%</td><td class="r" style="color:#dc2626">-0.34%</td></tr>
+</tbody></table>
+
+<h2>2. Standalone Metrics</h2>
+<table>
+<thead><tr><th>Strategy</th><th class="r">CAGR</th><th class="r">Sharpe</th><th class="r">Max DD</th><th class="r">Vol</th></tr></thead>
+<tbody><tr><td><strong>EXP-1220</strong></td><td class="r">+98.58%</td><td class="r" style="color:#059669">1.83</td><td class="r">0.00%</td><td class="r">54.12%</td></tr>
+<tr><td><strong>EXP-1660</strong></td><td class="r">+1.20%</td><td class="r" style="color:#dc2626">-1.16</td><td class="r">2.59%</td><td class="r">2.81%</td></tr>
+<tr><td><strong>EXP-1710</strong></td><td class="r">+3.93%</td><td class="r" style="color:#dc2626">-0.06</td><td class="r">0.00%</td><td class="r">6.96%</td></tr>
+<tr><td><strong>EXP-1780</strong></td><td class="r">+5.85%</td><td class="r" style="color:#d97706">0.15</td><td class="r">17.72%</td><td class="r">15.40%</td></tr>
+</tbody></table>
+
+<h2>3. Correlation Matrix</h2>
+<table><tr><td></td><th>EXP-1220</th><th>EXP-1660</th><th>EXP-1710</th><th>EXP-1780</th></tr>
+<tr><td><strong>EXP-1220</strong></td><td class="r" style="color:#dc2626">+1.000</td><td class="r" style="color:#059669">-0.044</td><td class="r" style="color:#d97706">-0.493</td><td class="r" style="color:#059669">+0.171</td></tr>
+<tr><td><strong>EXP-1660</strong></td><td class="r" style="color:#059669">-0.044</td><td class="r" style="color:#dc2626">+1.000</td><td class="r" style="color:#d97706">-0.484</td><td class="r" style="color:#dc2626">+0.627</td></tr>
+<tr><td><strong>EXP-1710</strong></td><td class="r" style="color:#d97706">-0.493</td><td class="r" style="color:#d97706">-0.484</td><td class="r" style="color:#dc2626">+1.000</td><td class="r" style="color:#dc2626">-0.670</td></tr>
+<tr><td><strong>EXP-1780</strong></td><td class="r" style="color:#059669">+0.171</td><td class="r" style="color:#dc2626">+0.627</td><td class="r" style="color:#dc2626">-0.670</td><td class="r" style="color:#dc2626">+1.000</td></tr>
+</table>
+
+<h2>4. Allocation Methods Comparison</h2>
+<table>
+<thead><tr><th>Method</th><th>Weights</th><th class="r">CAGR</th><th class="r">Sharpe</th><th class="r">Max DD</th><th class="r">Vol</th><th class="r">Total Ret</th></tr></thead>
+<tbody><tr><td><strong>Equal Weight</strong></td><td style="font-size:.75rem;color:#64748b">1220=25%, 1660=25%, 1710=25%, 1780=25%</td><td class="r" style="color:#059669">+28.37%</td><td class="r" style="color:#dc2626">1.78</td><td class="r" style="color:#059669">0.00%</td><td class="r">13.73%</td><td class="r">+347.5%</td></tr>
+<tr><td><strong>Inverse Vol</strong></td><td style="font-size:.75rem;color:#64748b">1220=3%, 1660=61%, 1710=25%, 1780=11%</td><td class="r" style="color:#059669">+5.78%</td><td class="r" style="color:#dc2626">0.51</td><td class="r" style="color:#059669">0.00%</td><td class="r">2.55%</td><td class="r">+40.1%</td></tr>
+<tr><td><strong>Max Sharpe</strong></td><td style="font-size:.75rem;color:#64748b">1220=12%, 1660=0%, 1710=59%, 1780=30%</td><td class="r" style="color:#059669">+16.31%</td><td class="r" style="color:#dc2626">1.98</td><td class="r" style="color:#059669">0.00%</td><td class="r">6.02%</td><td class="r">+147.6%</td></tr>
+<tr style="background:#f0fdf4"><td><strong>Custom Dd Constrained</strong></td><td style="font-size:.75rem;color:#64748b">1220=15%, 1660=5%, 1710=65%, 1780=15%</td><td class="r" style="color:#059669">+19.14%</td><td class="r" style="color:#dc2626">2.14</td><td class="r" style="color:#059669">0.00%</td><td class="r">6.90%</td><td class="r">+185.9%</td></tr>
+</tbody></table>
+
+<h2>5. Walk-Forward Validation (Expanding Window)</h2>
+<p class="sub">IS = first N years (minimum 2). OOS = year N+1. Weights refit each year.</p>
+<table>
+<thead><tr><th>Method</th><th class="r">OOS CAGR</th><th class="r">OOS Sharpe</th><th class="r">OOS Max DD</th><th class="r">Years</th></tr></thead>
+<tbody><tr><td><strong>Equal</strong></td><td class="r">+22.37%</td><td class="r">3.74</td><td class="r">0.00%</td><td class="r">4</td></tr>
+<tr><td><strong>Inverse Vol</strong></td><td class="r">+6.96%</td><td class="r">0.35</td><td class="r">0.00%</td><td class="r">4</td></tr>
+<tr><td><strong>Max Sharpe</strong></td><td class="r">+12.83%</td><td class="r">0.82</td><td class="r">0.00%</td><td class="r">4</td></tr>
+<tr><td><strong>Custom</strong></td><td class="r">+11.71%</td><td class="r">0.65</td><td class="r">1.99%</td><td class="r">4</td></tr>
+</tbody></table>
+
+<h2>6. Data Sources (Rule Zero)</h2>
+<div class="box box-green">
+<h4>ZERO SYNTHETIC DATA</h4>
+<ul style="padding-left:20px;font-size:.82rem;line-height:1.9">
+<li><strong>EXP-1220</strong>: reports/exp1220_dynamic_leverage.json (static 1.2x yearly)</li>
+<li><strong>EXP-1710</strong>: reports/exp1710_zero_dte_ic.json (results[1] yearly)</li>
+<li><strong>EXP-1660</strong>: reports/exp1660_vrp_hardened.json (SPY_mid_high_vol survivor)</li>
+<li><strong>EXP-1780</strong>: compass.crisis_alpha_v3 best config (v2_round / vol=0.10 / 2.5x)</li>
+</ul>
+<p class="sub" style="margin-top:8px">Every number traces to a real IronVault or Yahoo Finance price bar.
+No np.random. No Black-Scholes estimates. No fabricated trades.</p>
+</div>
+
+<p style="text-align:center;color:var(--muted);margin-top:36px;padding-top:14px;border-top:1px solid var(--border);font-size:.78rem">
+Better Portfolio Integration &bull; scripts/build_better_portfolio.py &bull;
+2026-04-06
+</p>
+</body></html>

@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Master Strategy Dashboard — PilotAI Credit Spreads</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+         max-width: 1500px; margin: 0 auto; padding: 24px; background: #fff; color: #1e293b;
+         line-height: 1.5; }
+  h1 { color: #0f172a; font-size: 2em; margin-bottom: 4px; }
+  h2 { color: #334155; margin-top: 2.5em; padding-bottom: 8px;
+       border-bottom: 2px solid #e2e8f0; }
+  h3 { color: #475569; }
+  h4 { color: #64748b; margin-bottom: 8px; }
+  .meta { color: #64748b; font-size: 0.9em; margin-bottom: 24px; }
+  .muted { color: #94a3b8; }
+  .good { color: #16a34a; }
+  .warn { color: #ca8a04; }
+  .bad { color: #dc2626; }
+
+  /* KPI row */
+  .kpi-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0; }
+  .kpi { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+          padding: 20px; text-align: center; flex: 1; min-width: 140px; }
+  .kpi .value { font-size: 2em; font-weight: 800; color: #0f172a; }
+  .kpi .label { font-size: 0.78em; color: #64748b; margin-top: 4px; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88em; }
+  th { background: #f1f5f9; padding: 10px 12px; text-align: right; font-weight: 600;
+       color: #475569; border-bottom: 2px solid #cbd5e1; font-size: 0.82em;
+       text-transform: uppercase; letter-spacing: 0.03em; cursor: pointer; }
+  th:first-child { text-align: left; }
+  td { padding: 8px 12px; text-align: right; border-bottom: 1px solid #e2e8f0; }
+  td:first-child { text-align: left; }
+  tr:hover { background: #f8fafc; }
+
+  /* Badges */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px;
+            font-size: 0.72em; font-weight: 700; letter-spacing: 0.04em; }
+  .badge.real { background: #dcfce7; color: #166534; }
+  .badge.heur { background: #f1f5f9; color: #64748b; }
+  .status { display: inline-block; padding: 2px 10px; border-radius: 10px;
+             font-size: 0.72em; font-weight: 600; }
+  .status.live { background: #dcfce7; color: #166534; }
+  .status.validated { background: #dbeafe; color: #1e40af; }
+  .status.marginal { background: #fef3c7; color: #92400e; }
+  .status.dead { background: #fee2e2; color: #991b1b; }
+  .status.heuristic { background: #f1f5f9; color: #64748b; }
+
+  /* Correlation table */
+  .corr-table { font-size: 0.78em; }
+  .corr-table th, .corr-table td { padding: 6px 8px; text-align: center; }
+  .corr-th span { writing-mode: vertical-lr; transform: rotate(180deg); font-size: 0.85em; }
+
+  /* Status groups */
+  .status-group { background: #f8fafc; border-left: 4px solid #e2e8f0; border-radius: 0 8px 8px 0;
+                   padding: 16px 20px; margin: 12px 0; }
+  .status-item { padding: 4px 0; border-bottom: 1px solid #e2e8f0; font-size: 0.88em; }
+  .status-item:last-child { border-bottom: none; }
+
+  /* Progress bars */
+  .progress { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px;
+               margin: 4px 0; }
+  .bar { height: 100%; background: #3b82f6; border-radius: 4px; min-width: 2px; }
+  .bar-good { background: #16a34a; }
+  .bar-bad { background: #dc2626; }
+
+  /* Callout */
+  .callout { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;
+              padding: 16px; margin: 16px 0; }
+  .callout.danger { background: #fef2f2; border-color: #fecaca; }
+  .callout.info { background: #eff6ff; border-color: #bfdbfe; }
+
+  footer { margin-top: 3em; padding-top: 1em; border-top: 1px solid #e2e8f0;
+            font-size: 0.8em; color: #94a3b8; }
+  small { font-size: 0.82em; }
+  code { background: #f1f5f9; padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
+</style>
+<script>
+// Minimal sortable table
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const table = th.closest('table');
+      const tbody = table.querySelector('tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      const col = th.cellIndex;
+      const type = th.dataset.sort;
+      const asc = th.classList.toggle('asc');
+      rows.sort((a, b) => {
+        let av = a.cells[col].textContent.replace(/[$,%]/g, '').trim();
+        let bv = b.cells[col].textContent.replace(/[$,%]/g, '').trim();
+        if (type === 'num') { av = parseFloat(av) || 0; bv = parseFloat(bv) || 0; }
+        return asc ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
+      });
+      rows.forEach(r => tbody.appendChild(r));
+    });
+  });
+});
+</script>
+</head>
+<body>
+
+<h1>Master Strategy Dashboard</h1>
+<p class="meta">PilotAI Credit Spreads &middot; All strategies ranked &middot; Generated 2026-04-04 19:47</p>
+
+<div class="kpi-row">
+  <div class="kpi"><div class="value">19</div><div class="label">Total Strategies</div></div>
+  <div class="kpi"><div class="value">7</div><div class="label">Real-Data Tested</div></div>
+  <div class="kpi"><div class="value">12</div><div class="label">Heuristic Only</div></div>
+  <div class="kpi"><div class="value good">4</div><div class="label">Profitable (Real)</div></div>
+  <div class="kpi"><div class="value">5.78</div><div class="label">Best Real Sharpe</div></div>
+</div>
+
+<div class="callout danger">
+  <strong>Critical Finding:</strong> Of 7 strategies tested on real IronVault data,
+  only <strong>4</strong> are profitable. Heuristic backtests dramatically overstate
+  performance — the average real-data Sharpe is 1.23
+  vs 3.10 heuristic.
+</div>
+
+<h2>1. League Table — All Strategies Ranked by Sharpe</h2>
+<p class="muted">Click column headers to sort. <span class="badge real">REAL</span> = IronVault data.
+   <span class="badge heur">HEUR</span> = heuristic/synthetic pricing (unvalidated).</p>
+<table>
+  <thead>
+    <tr>
+      <th data-sort="num">#</th>
+      <th data-sort="str">Strategy</th>
+      <th data-sort="str">Ticker</th>
+      <th>Data</th>
+      <th>Status</th>
+      <th data-sort="num">Sharpe</th>
+      <th data-sort="num">CAGR</th>
+      <th data-sort="num">Max DD</th>
+      <th data-sort="num">Win Rate</th>
+      <th data-sort="num">Trades</th>
+      <th data-sort="num">PF</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+          <td>1</td>
+          <td><strong>EXP-860-max</strong><br><small class="muted">Production Ensemble (Quarterly)</small></td>
+          <td>SPY</td>
+          <td><span class="badge heur">HEUR</span></td>
+          <td><span class="status heuristic">HEURISTIC</span></td>
+          <td class="good">12.30</td>
+          <td class="bad">0.0%</td>
+          <td class="good">-1.9%</td>
+          <td>89.6%</td>
+          <td>134</td>
+          <td>5.45</td>
+        </tr><tr>
+          <td>2</td>
+          <td><strong>EXP-1000-max</strong><br><small class="muted">Straddle-Strangle Overlay</small></td>
+          <td>SPY</td>
+          <td><span class="badge heur">HEUR</span></td>
+          <td><span class="status heuristic">HEURISTIC</span></td>
+          <td class="good">9.92</td>
+          <td class="good">10.6%</td>
+          <td class="good">-1.1%</td>
+          <td>85.9%</td>
+          <td>404</td>
+          <td>5.25</td>
+        </tr><tr>
+          <td>3</td>
+          <td><strong>EXP-910-max</strong><br><small class="muted">North Star Portfolio (Heuristic)</small></td>
+          <td>Multi</td>
+          <td><span class="badge heur">HEUR</span></td>
+          <td><span class="status heuristic">HEURISTIC</span></td>
+          <td class="good">8.46</td>
+          <td class="good">79.8%</td>
+          <td class="good">-2.9%</td>
+          <td>85.0%</td>
+          <td>1152</td>
+          <td>7.84</td>
+        </tr><tr>
+          <td>4</td>
+          <td><strong>EXP-1220-real</strong><br><small class="muted">Tail Risk Protection (Real)</small></td>
+          <td>SPY</td>
+          <td><span class="badge real">REAL</span></td>
+          <td><span class="status validated">VALIDATED</span></td>
+          <td class="good">5.78</td>
+          <td class="good">77.3%</td>
+          <td class="good">-6.6%</td>
+          <td>0.0%</td>
+          <td>0</td>
+          <td>0.00</td>
+        </tr><tr>
+          <td>5</td>
+          <td><strong>EXP-880-max</strong><br><small class="muted">ML Ensemble + Crisis Hedge V2</small></td>
+          <td>SPY</td>
+          <td><span class="badge heur">HEUR</span></td>
+          <td><span class="status heuristic">HEURISTIC</span></td>
+          <td class="good">4.97</td>
+          <td class="good">76.9%</td>
+          <td class="good">-10.2%</td>
+          <td>0.0%</td>
+          <td>0</td>
+          <td>0.00</td>
+        </tr><tr>
+          <td>6</td>
+          <td><strong>EXP-1220-max</strong><br><small class="muted">Tail Risk Protection</small></td>
+          <td>SPY</td>
+          <td><span class="badge heur">HEUR</span></td>
+          <td><span class="status heuristic">HEURISTIC</span></td>
+          <td class="good">2.12</td>
+          <td class="bad">0.0%</td>
+          <td class="good">0.0%</td>
+          <td>0.0%</td>
+          <td>0</td>
+          <td>0.00</td>
+        </tr><tr>
+          <td>7</td>
+          <td><strong>EXP-1320-real</strong><br><small class="muted">Vol Clustering Overlay (Real)</small></td>
+          <td>SPY</td>
+          <td><span class="badge real">REAL</span></td>
+          <td><span class="status marginal">MARGINAL</span></td>
+          <td class="warn">0.92</td>
+          <td class="warn">0.1%</td>
+          <td class="good">-0.4%</td>
+          <td>90.2%</td>
+          <td>41</td>
+          <td>0.00</td>
+        </tr><tr>
+          <td>8</td>
+          <td><strong>EXP-1230-real</strong><br><small class="muted">Microstructure Alpha (Real)</small></td>
+          <td>SPY</td>
+          <td><span class="badge real">REAL</span></td>
+          <td><span class="status dead">DEAD</span></td>
+          <td class="warn">0.89</td>
+          <td class="bad">0.0%</td>
+          <td class="good">0.0%</td>
+          <td>0.0%</td>
+          <td>0</td>
+          <td>0.00</td>
+        </tr><tr>
+          <td>9</td>
+          <td><strong>EXP-880-puts-only</strong><br><small class="muted">Puts Only (MA Regime) [Salvage]</small></td>
+          <td>SPY</td>
+          <td><span class="badge real">REAL</span></td>
+          <td><span class="status validated">VALIDATED</span></td>
+          <td class="warn">0.84</td>
+          <td class="warn">6.0%</td>
+          <td class="good">-7.6%</td>
+          <td>85.3%</td>
+          <td>266</td>
+          <td>2.50</td>
+        </tr><tr>
+          <td>10</td>
+          <td><strong>EXP-880-real</strong><br><small class="muted">ML Ensemble (Real Data)</small></td>
+          <td>SPY</td>
+          <td><span class="badge real">REAL</span></td>
+          <td><span class="status dead">DEAD</span></td>
+          <td class="bad">0.41</td>
+          <td class="bad">0.0%</td>
+          <td class="bad">-106.0%</td>
+          <td>71.4%</td>
+          <td>262</td>
+          <td>0.68</td>
+        </tr><tr>
+          <td>11</td>
+          <td><strong>EXP-1470-real</strong><br><small class="muted">North Star Portfolio (Real)</small></td>
+          <td>SPY</td>
+          <td><span class="badge real">REAL</span></td>
+          <td><span class="status validated">VALIDATED</span></td>
+          <td class="bad">0.00</td>
+          <td class="good">42.0%</td>
+          <td class="good">0.0%</td>
+          <td>89.5%</td>
+          <td>19</td>
+          <td>0.00</td>
+        </tr><tr>
+          <td>12</td>
+          <td><strong>EXP-950-max</strong><br><small class="muted">Leverage Optimization</small></td>
+          <td>SPY</td>
+          <td><span class="badge heur">HEUR</span></td>
+          <td><span class="status heuristic">HEURISTIC</span></td>
+          <td class="bad">0.00</td>
+          <td class="bad">0.0%</td>
+          <td class="good">0.0%</td>
+          <td>0.0%</td>
+          <td>0</td>
+          <td>0.00</td>
+        </tr><tr>
+          <td>13</td>
+          <td><strong>EXP-960-max</strong><br><small class="muted">Path to 100% CAGR</small></td>
+          <td>Multi</td>
+          <td><span class="badge heur">HEUR</span></td>
+          <td><span class="status heuristic">HEURISTIC</span></td>
+          <td class="bad">0.00</td>
+          <td class="bad">0.0%</td>
+          <td class="good">0.0%</td>
+          <td>0.0%</td>
+          <td>0</td>
+          <td>0.00</td>
+        </tr><tr>
+          <td>14</td>
+          <td><strong>EXP-970-max</strong><br><small class="muted">Walk-Forward Validation</small></td>
+          <td>Multi</td>
+          <td><span class="badge heur">HEUR</span></td>
+          <td><span class="status heuristic">HEURISTIC</span></td>
+          <td class="bad">0.00</td>
+          <td class="bad">0.0%</td>
+          <td class="good">0.0%</td>
+          <td>0.0%</td>
+          <td>0</td>
+          <td>0.00</td>
+        </tr><tr>
+          <td>15</td>
+          <td><strong>EXP-1040-max</strong><br><small class="muted">Cross-Asset Momentum</small></td>
+          <td>Multi</td>
+          <td><span class="badge heur">HEUR</span></td>
+          <td><span class="status heuristic">HEURISTIC</span></td>
+          <td class="bad">0.00</td>
+          <td class="bad">0.0%</td>
+          <td class="good">0.0%</td>
+          <td>0.0%</td>
+          <td>0</td>
+          <td>0.00</td>
+        </tr><tr>
+          <td>16</td>
+          <td><strong>EXP-1200-max</strong><br><small class="muted">Dispersion Trading</small></td>
+          <td>Multi</td>
+          <td><span class="badge heur">HEUR</span></td>
+          <td><span class="status heuristic">HEURISTIC</span></td>
+          <td class="bad">0.00</td>
+          <td class="bad">0.0%</td>
+          <td class="good">0.0%</td>
+          <td>0.0%</td>
+          <td>756</td>
+          <td>0.00</td>
+        </tr><tr>
+          <td>17</td>
+          <td><strong>EXP-1470-max</strong><br><small class="muted">North Star Portfolio V3</small></td>
+          <td>Multi</td>
+          <td><span class="badge heur">HEUR</span></td>
+          <td><span class="status heuristic">HEURISTIC</span></td>
+          <td class="bad">0.00</td>
+          <td class="bad">0.0%</td>
+          <td class="good">0.0%</td>
+          <td>0.0%</td>
+          <td>0</td>
+          <td>0.00</td>
+        </tr><tr>
+          <td>18</td>
+          <td><strong>EXP-1270-real</strong><br><small class="muted">Stop Loss Optimization (Real)</small></td>
+          <td>SPY</td>
+          <td><span class="badge real">REAL</span></td>
+          <td><span class="status dead">DEAD</span></td>
+          <td class="bad">-0.25</td>
+          <td class="bad">-0.1%</td>
+          <td class="good">-1.1%</td>
+          <td>90.2%</td>
+          <td>41</td>
+          <td>0.00</td>
+        </tr><tr>
+          <td>19</td>
+          <td><strong>EXP-1150-max</strong><br><small class="muted">Order Flow Alpha</small></td>
+          <td>SPY</td>
+          <td><span class="badge heur">HEUR</span></td>
+          <td><span class="status heuristic">HEURISTIC</span></td>
+          <td class="bad">-0.54</td>
+          <td class="bad">0.0%</td>
+          <td class="bad">-33.6%</td>
+          <td>0.0%</td>
+          <td>0</td>
+          <td>0.00</td>
+        </tr>
+  </tbody>
+</table>
+
+<h2>2. Correlation Matrix — Real-Data Strategies</h2>
+<p class="muted">Estimated from per-year PnL direction, ticker overlap, and strategy type similarity.
+   <span class="good">Green = low correlation (diversified)</span>,
+   <span class="bad">Red = high correlation (redundant)</span>.</p>
+
+    <table class="corr-table">
+      <tr><th></th><th class="corr-th"><span>880R</span></th><th class="corr-th"><span>1220R</span></th><th class="corr-th"><span>1230R</span></th><th class="corr-th"><span>1270R</span></th><th class="corr-th"><span>1320R</span></th><th class="corr-th"><span>1470R</span></th><th class="corr-th"><span>880-puts-only</span></th></tr>
+      <tr><td><strong>880R</strong></td><td style="background:#1e293b;color:#fff;text-align:center;font-size:0.8em">1.00</td><td style="background:rgb(140,89,60);color:#fff;text-align:center;font-size:0.8em">0.55</td><td style="background:rgb(140,89,60);color:#fff;text-align:center;font-size:0.8em">0.55</td><td style="background:rgb(140,89,60);color:#fff;text-align:center;font-size:0.8em">0.55</td><td style="background:rgb(140,89,60);color:#fff;text-align:center;font-size:0.8em">0.55</td><td style="background:rgb(140,89,60);color:#fff;text-align:center;font-size:0.8em">0.55</td><td style="background:rgb(114,110,60);color:#fff;text-align:center;font-size:0.8em">0.45</td></tr><tr><td><strong>1220R</strong></td><td style="background:rgb(140,89,60);color:#fff;text-align:center;font-size:0.8em">0.55</td><td style="background:#1e293b;color:#fff;text-align:center;font-size:0.8em">1.00</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(63,150,60);color:#fff;text-align:center;font-size:0.8em">0.25</td></tr><tr><td><strong>1230R</strong></td><td style="background:rgb(140,89,60);color:#fff;text-align:center;font-size:0.8em">0.55</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:#1e293b;color:#fff;text-align:center;font-size:0.8em">1.00</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(63,150,60);color:#fff;text-align:center;font-size:0.8em">0.25</td></tr><tr><td><strong>1270R</strong></td><td style="background:rgb(140,89,60);color:#fff;text-align:center;font-size:0.8em">0.55</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:#1e293b;color:#fff;text-align:center;font-size:0.8em">1.00</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(63,150,60);color:#fff;text-align:center;font-size:0.8em">0.25</td></tr><tr><td><strong>1320R</strong></td><td style="background:rgb(140,89,60);color:#fff;text-align:center;font-size:0.8em">0.55</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:#1e293b;color:#fff;text-align:center;font-size:0.8em">1.00</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(63,150,60);color:#fff;text-align:center;font-size:0.8em">0.25</td></tr><tr><td><strong>1470R</strong></td><td style="background:rgb(140,89,60);color:#fff;text-align:center;font-size:0.8em">0.55</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:rgb(191,50,60);color:#fff;text-align:center;font-size:0.8em">0.75</td><td style="background:#1e293b;color:#fff;text-align:center;font-size:0.8em">1.00</td><td style="background:rgb(63,150,60);color:#fff;text-align:center;font-size:0.8em">0.25</td></tr><tr><td><strong>880-puts-only</strong></td><td style="background:rgb(114,110,60);color:#fff;text-align:center;font-size:0.8em">0.45</td><td style="background:rgb(63,150,60);color:#fff;text-align:center;font-size:0.8em">0.25</td><td style="background:rgb(63,150,60);color:#fff;text-align:center;font-size:0.8em">0.25</td><td style="background:rgb(63,150,60);color:#fff;text-align:center;font-size:0.8em">0.25</td><td style="background:rgb(63,150,60);color:#fff;text-align:center;font-size:0.8em">0.25</td><td style="background:rgb(63,150,60);color:#fff;text-align:center;font-size:0.8em">0.25</td><td style="background:#1e293b;color:#fff;text-align:center;font-size:0.8em">1.00</td></tr>
+    </table>
+
+<h2>3. Best Portfolio Candidates (Most Diversified Pairs)</h2>
+<p class="muted">Ranked by Score = Avg Sharpe x Diversification (1 - Correlation). Higher is better.</p>
+<table>
+  <thead>
+    <tr><th>#</th><th>Strategies</th><th>Avg Sharpe</th><th>Correlation</th>
+        <th>Diversification</th><th>Est. Worst DD</th><th>Score</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+          <td>1</td>
+          <td>Tail Risk Protection (Real)<br>Puts Only (MA Regime) [Salvage]</td>
+          <td>3.31</td>
+          <td>0.25</td>
+          <td>0.75</td>
+          <td>-4.1%</td>
+          <td><strong>2.482</strong></td>
+        </tr><tr>
+          <td>2</td>
+          <td>Tail Risk Protection (Real)<br>Vol Clustering Overlay (Real)</td>
+          <td>3.35</td>
+          <td>0.75</td>
+          <td>0.25</td>
+          <td>-0.3%</td>
+          <td><strong>0.838</strong></td>
+        </tr><tr>
+          <td>3</td>
+          <td>Tail Risk Protection (Real)<br>North Star Portfolio (Real)</td>
+          <td>2.89</td>
+          <td>0.75</td>
+          <td>0.25</td>
+          <td>0.0%</td>
+          <td><strong>0.723</strong></td>
+        </tr><tr>
+          <td>4</td>
+          <td>Vol Clustering Overlay (Real)<br>Puts Only (MA Regime) [Salvage]</td>
+          <td>0.88</td>
+          <td>0.25</td>
+          <td>0.75</td>
+          <td>-0.2%</td>
+          <td><strong>0.660</strong></td>
+        </tr><tr>
+          <td>5</td>
+          <td>North Star Portfolio (Real)<br>Puts Only (MA Regime) [Salvage]</td>
+          <td>0.42</td>
+          <td>0.25</td>
+          <td>0.75</td>
+          <td>0.0%</td>
+          <td><strong>0.315</strong></td>
+        </tr><tr>
+          <td>6</td>
+          <td>Vol Clustering Overlay (Real)<br>North Star Portfolio (Real)</td>
+          <td>0.46</td>
+          <td>0.75</td>
+          <td>0.25</td>
+          <td>0.0%</td>
+          <td><strong>0.115</strong></td>
+        </tr>
+  </tbody>
+</table>
+
+<h2>4. Strategy Status Tracker</h2>
+
+        <div class="status-group" style="border-left-color:#58a6ff">
+          <h4 style="color:#58a6ff">VALIDATED (3)</h4>
+          <p class="muted">Profitable on real IronVault data</p>
+          <div class="status-item"><strong>EXP-1220-real</strong> <small>Tail Risk Protection (Real)</small> — Sharpe 5.78, CAGR 77.3%</div><div class="status-item"><strong>EXP-880-puts-only</strong> <small>Puts Only (MA Regime) [Salvage]</small> — Sharpe 0.84, CAGR 6.0%</div><div class="status-item"><strong>EXP-1470-real</strong> <small>North Star Portfolio (Real)</small> — Sharpe 0.00, CAGR 42.0%</div>
+        </div>
+        <div class="status-group" style="border-left-color:#d29922">
+          <h4 style="color:#d29922">MARGINAL (1)</h4>
+          <p class="muted">Breakeven or marginal on real data</p>
+          <div class="status-item"><strong>EXP-1320-real</strong> <small>Vol Clustering Overlay (Real)</small> — Sharpe 0.92, CAGR 0.1%</div>
+        </div>
+        <div class="status-group" style="border-left-color:#f85149">
+          <h4 style="color:#f85149">DEAD (3)</h4>
+          <p class="muted">Failed on real data — documented</p>
+          <div class="status-item"><strong>EXP-1230-real</strong> <small>Microstructure Alpha (Real)</small> — Sharpe 0.89, CAGR 0.0%</div><div class="status-item"><strong>EXP-880-real</strong> <small>ML Ensemble (Real Data)</small> — Sharpe 0.41, CAGR 0.0%</div><div class="status-item"><strong>EXP-1270-real</strong> <small>Stop Loss Optimization (Real)</small> — Sharpe -0.25, CAGR -0.1%</div>
+        </div>
+        <div class="status-group" style="border-left-color:#8b949e">
+          <h4 style="color:#8b949e">HEURISTIC (12)</h4>
+          <p class="muted">Only heuristic backtest — unvalidated</p>
+          <div class="status-item"><strong>EXP-860-max</strong> <small>Production Ensemble (Quarterly)</small> — Sharpe 12.30, CAGR 0.0%</div><div class="status-item"><strong>EXP-1000-max</strong> <small>Straddle-Strangle Overlay</small> — Sharpe 9.92, CAGR 10.6%</div><div class="status-item"><strong>EXP-910-max</strong> <small>North Star Portfolio (Heuristic)</small> — Sharpe 8.46, CAGR 79.8%</div><div class="status-item"><strong>EXP-880-max</strong> <small>ML Ensemble + Crisis Hedge V2</small> — Sharpe 4.97, CAGR 76.9%</div><div class="status-item"><strong>EXP-1220-max</strong> <small>Tail Risk Protection</small> — Sharpe 2.12, CAGR 0.0%</div><div class="status-item"><strong>EXP-950-max</strong> <small>Leverage Optimization</small> — Sharpe 0.00, CAGR 0.0%</div><div class="status-item"><strong>EXP-960-max</strong> <small>Path to 100% CAGR</small> — Sharpe 0.00, CAGR 0.0%</div><div class="status-item"><strong>EXP-970-max</strong> <small>Walk-Forward Validation</small> — Sharpe 0.00, CAGR 0.0%</div><div class="status-item"><strong>EXP-1040-max</strong> <small>Cross-Asset Momentum</small> — Sharpe 0.00, CAGR 0.0%</div><div class="status-item"><strong>EXP-1200-max</strong> <small>Dispersion Trading</small> — Sharpe 0.00, CAGR 0.0%</div><div class="status-item"><strong>EXP-1470-max</strong> <small>North Star Portfolio V3</small> — Sharpe 0.00, CAGR 0.0%</div><div class="status-item"><strong>EXP-1150-max</strong> <small>Order Flow Alpha</small> — Sharpe -0.54, CAGR 0.0%</div>
+        </div>
+
+<h2>5. North Star Gap Analysis</h2>
+<p class="muted">Target: 100% CAGR, 12% max DD, 6.0 Sharpe.
+   Progress bars show distance to each target.</p>
+<table>
+  <thead>
+    <tr><th>Strategy</th><th>CAGR Progress</th><th>DD Progress</th>
+        <th>Sharpe Progress</th><th>Overall</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+          <td><strong>EXP-860-max</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.0% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>1.9% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:100%"></div></div>
+            <small>12.30 / 6.0</small>
+          </td>
+          <td><strong>67%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-1000-max</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:11%"></div></div>
+            <small>10.6% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>1.1% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:100%"></div></div>
+            <small>9.92 / 6.0</small>
+          </td>
+          <td><strong>70%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-910-max</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:80%"></div></div>
+            <small>79.8% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>2.9% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:100%"></div></div>
+            <small>8.46 / 6.0</small>
+          </td>
+          <td><strong>93%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-1220-real</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:77%"></div></div>
+            <small>77.3% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>6.6% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:96%"></div></div>
+            <small>5.78 / 6.0</small>
+          </td>
+          <td><strong>91%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-880-max</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:77%"></div></div>
+            <small>76.9% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>10.2% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:83%"></div></div>
+            <small>4.97 / 6.0</small>
+          </td>
+          <td><strong>87%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-1220-max</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.0% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>0.0% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:35%"></div></div>
+            <small>2.12 / 6.0</small>
+          </td>
+          <td><strong>45%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-1320-real</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.1% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>0.4% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:15%"></div></div>
+            <small>0.92 / 6.0</small>
+          </td>
+          <td><strong>38%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-1230-real</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.0% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>0.0% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:15%"></div></div>
+            <small>0.89 / 6.0</small>
+          </td>
+          <td><strong>38%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-880-puts-only</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:6%"></div></div>
+            <small>6.0% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>7.6% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:14%"></div></div>
+            <small>0.84 / 6.0</small>
+          </td>
+          <td><strong>40%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-880-real</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.0% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-bad" style="width:6%"></div></div>
+            <small>106.0% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:7%"></div></div>
+            <small>0.41 / 6.0</small>
+          </td>
+          <td><strong>4%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-1470-real</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:42%"></div></div>
+            <small>42.0% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>0.0% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.00 / 6.0</small>
+          </td>
+          <td><strong>47%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-950-max</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.0% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>0.0% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.00 / 6.0</small>
+          </td>
+          <td><strong>33%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-960-max</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.0% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>0.0% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.00 / 6.0</small>
+          </td>
+          <td><strong>33%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-970-max</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.0% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>0.0% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.00 / 6.0</small>
+          </td>
+          <td><strong>33%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-1040-max</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.0% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>0.0% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.00 / 6.0</small>
+          </td>
+          <td><strong>33%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-1200-max</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.0% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>0.0% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.00 / 6.0</small>
+          </td>
+          <td><strong>33%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-1470-max</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.0% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>0.0% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.00 / 6.0</small>
+          </td>
+          <td><strong>33%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-1270-real</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>-0.1% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-good" style="width:100%"></div></div>
+            <small>1.1% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>-0.25 / 6.0</small>
+          </td>
+          <td><strong>33%</strong></td>
+        </tr><tr>
+          <td><strong>EXP-1150-max</strong></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>0.0% / 100%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar bar-bad" style="width:78%"></div></div>
+            <small>33.6% / 12%</small>
+          </td>
+          <td>
+            <div class="progress"><div class="bar" style="width:0%"></div></div>
+            <small>-0.54 / 6.0</small>
+          </td>
+          <td><strong>26%</strong></td>
+        </tr>
+  </tbody>
+</table>
+
+<div class="callout info">
+  <strong>Path to North Star:</strong> No single strategy on real data comes close to
+  100% CAGR / 12% DD / 6.0 Sharpe. The best real-data result
+  (EXP-880-puts-only: 0.84 Sharpe, 6% CAGR)
+  needs ~17x CAGR improvement. Either (a) the North Star targets need recalibration
+  to real-data expectations, or (b) a fundamentally different approach is needed
+  (broader ticker universe, higher leverage with integrated crisis hedge, ML in the backtest loop).
+</div>
+
+<footer>
+  Generated by <code>scripts/master_dashboard.py</code> &middot;
+  19 strategies analyzed &middot; 7 on real IronVault data &middot;
+  Data as of 2026-04-04 19:47
+</footer>
+
+</body>
+</html>

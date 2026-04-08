@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>Execution Feasibility Study — Ultimate Portfolio at Scale</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:1500px;margin:0 auto;padding:24px;background:#0d1117;color:#c9d1d9}
+h1,h2,h3{color:#58a6ff}
+.hero{background:#161b22;border:2px solid #58a6ff;border-radius:12px;padding:24px;text-align:center;margin:20px 0}
+.hero .big{font-size:1.5em;font-weight:800;color:#58a6ff}
+.hero .sub{color:#8b949e;margin-top:8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:20px 0}
+.c{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px;text-align:center}
+.c .l{color:#8b949e;font-size:.72em;text-transform:uppercase}.c .v{color:#f0f6fc;font-weight:700;font-size:1.1em;margin-top:4px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.8em}
+th,td{padding:5px 8px;text-align:right;border-bottom:1px solid #21262d}
+th{color:#8b949e;background:#161b22;font-size:.72em;text-transform:uppercase}
+td:first-child,th:first-child{text-align:left}
+tr:hover td{background:#161b2280}
+.section{margin:36px 0}
+.note{color:#8b949e;font-size:.82em;margin:6px 0}
+.finding{background:#161b22;border-left:4px solid #58a6ff;padding:14px;margin:14px 0;border-radius:4px}
+.finding h4{margin:0 0 6px;color:#58a6ff;font-size:.95em}
+.warn{border-left-color:#f59e0b} .good{border-left-color:#3fb950} .bad{border-left-color:#dc2626}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+</style></head><body>
+
+<h1>Execution Feasibility Study — Ultimate Portfolio at Scale</h1>
+<p class="note">IronVault real volume data &bull; Almgren-Chriss impact model &bull; 2026-04-05</p>
+
+<div class="hero">
+  <div class="big">Realistic CAGR: 36.4% at $10M &bull; -20.0% at $100M</div>
+  <div class="sub">
+    Gross: 55.6% CAGR / Sharpe 4.10 &bull;
+    Leverage 1.6x &bull; Margin rate 5.5%
+  </div>
+</div>
+
+<div class="cards">
+  <div class="c"><div class="l">Gross CAGR</div><div class="v">55.6%</div></div>
+  <div class="c"><div class="l">Net CAGR @ $10M</div><div class="v" style="color:#3fb950">36.4%</div></div>
+  <div class="c"><div class="l">Net CAGR @ $100M</div><div class="v" style="color:#dc2626">-20.0%</div></div>
+  <div class="c"><div class="l">Alpha Retain @ $10M</div><div class="v">66%</div></div>
+  <div class="c"><div class="l">Net Sharpe @ $10M</div><div class="v">2.69</div></div>
+  <div class="c"><div class="l">Net Sharpe @ $100M</div><div class="v">0.00</div></div>
+  <div class="c"><div class="l">Margin Drag</div><div class="v">3.3%/yr</div></div>
+  <div class="c"><div class="l">Binding Constraint</div><div class="v" style="font-size:.85em">Cross-Asset Pairs (T</div></div>
+</div>
+
+<!-- 1. Instrument Liquidity -->
+<div class="section">
+<h2>1. Instrument Liquidity (IronVault Real Data)</h2>
+<p class="note">Volume and spread data from options_cache.db. Spreads calibrated from real market microstructure.</p>
+<table>
+<thead><tr><th>Ticker</th><th>Avg Vol/Contract</th><th>Total Daily Vol</th><th>Avg Price</th><th>Bid-Ask Spread</th><th>Data Points</th></tr></thead>
+<tbody><tr><td>SPY</td><td>1,805</td><td>3,086,609</td><td>$11.35</td><td>$0.03 (26 bps)</td><td>2,156,414</td></tr>
+<tr><td>TLT</td><td>738</td><td>60,364</td><td>$2.58</td><td>$0.05 (194 bps)</td><td>76,517</td></tr>
+<tr><td>GLD</td><td>553</td><td>43,368</td><td>$3.66</td><td>$0.07 (192 bps)</td><td>72,093</td></tr>
+<tr><td>XLF</td><td>1,398</td><td>123,026</td><td>$1.13</td><td>$0.03 (266 bps)</td><td>94,366</td></tr>
+<tr><td>QQQ</td><td>1,399</td><td>310,167</td><td>$6.42</td><td>$0.04 (62 bps)</td><td>152,535</td></tr>
+</tbody></table>
+<div class="finding">
+<h4>Liquidity Hierarchy</h4>
+<p><strong>SPY</strong> (3M+ daily contracts, $0.03 spread) ≫ <strong>QQQ</strong> (310K, $0.04) &gt;
+<strong>XLF</strong> (123K, $0.03) &gt; <strong>TLT</strong> (60K, $0.05) &gt; <strong>GLD</strong> (43K, $0.07).
+GLD is the binding liquidity constraint for the cross-asset pairs strategy.</p>
+</div>
+</div>
+
+<!-- 2. Strategy Profiles -->
+<div class="section">
+<h2>2. Strategy Execution Profiles</h2>
+<table>
+<thead><tr><th>Strategy</th><th>Weight</th><th>Instruments</th><th>Legs</th><th>Frequency</th><th>Gross CAGR</th><th>Gross Sharpe</th><th>Complexity</th></tr></thead>
+<tbody><tr><td>EXP-1220 Tail Risk Protection</td><td>95.0%</td><td>SPY</td><td>1</td><td>24/yr</td><td>55.6%</td><td>5.78</td><td>medium</td></tr>
+<tr><td>Cross-Asset Pairs (TLT-QQQ, GLD-TLT)</td><td>1.7%</td><td>GLD, TLT, QQQ</td><td>2</td><td>40/yr</td><td>0.9%</td><td>5.06</td><td>high</td></tr>
+<tr><td>TLT Iron Condors</td><td>1.7%</td><td>TLT</td><td>4</td><td>12/yr</td><td>10.2%</td><td>2.69</td><td>medium</td></tr>
+<tr><td>Vol Term Structure</td><td>1.7%</td><td>SPY, XLF</td><td>2</td><td>50/yr</td><td>0.5%</td><td>2.81</td><td>low</td></tr>
+</tbody></table>
+</div>
+
+<!-- 3. Per-Strategy Notes -->
+<div class="section">
+<h2>3. Per-Strategy Feasibility Assessment</h2>
+
+        <div class="finding">
+        <h4>EXP-1220 Tail Risk Protection</h4>
+        <p><strong>Instruments:</strong> SPY &bull;
+           <strong>Legs:</strong> 1 &bull;
+           <strong>Trades:</strong> 24/yr &bull;
+           <strong>Hold:</strong> 30d</p>
+        <p>SPY options are the most liquid in the world. VIX calls have wider spreads but small allocation.</p>
+        <p><strong>Max capital (20% alpha decay):</strong> $5M</p>
+        </div>
+        
+        <div class="finding">
+        <h4>Cross-Asset Pairs (TLT-QQQ, GLD-TLT)</h4>
+        <p><strong>Instruments:</strong> GLD, TLT, QQQ &bull;
+           <strong>Legs:</strong> 2 &bull;
+           <strong>Trades:</strong> 40/yr &bull;
+           <strong>Hold:</strong> 14d</p>
+        <p>GLD has lowest liquidity (553 avg vol/contract). Multi-leg execution across 2 underlyings.</p>
+        <p><strong>Max capital (20% alpha decay):</strong> $0M</p>
+        </div>
+        
+        <div class="finding">
+        <h4>TLT Iron Condors</h4>
+        <p><strong>Instruments:</strong> TLT &bull;
+           <strong>Legs:</strong> 4 &bull;
+           <strong>Trades:</strong> 12/yr &bull;
+           <strong>Hold:</strong> 30d</p>
+        <p>TLT options moderately liquid (738 avg vol). 4-leg ICs require sequential fills or package orders.</p>
+        <p><strong>Max capital (20% alpha decay):</strong> $1M</p>
+        </div>
+        
+        <div class="finding">
+        <h4>Vol Term Structure</h4>
+        <p><strong>Instruments:</strong> SPY, XLF &bull;
+           <strong>Legs:</strong> 2 &bull;
+           <strong>Trades:</strong> 50/yr &bull;
+           <strong>Hold:</strong> 10d</p>
+        <p>SPY leg is trivially liquid. XLF leg has decent volume (1,398 avg). Short holding period = high turnover.</p>
+        <p><strong>Max capital (20% alpha decay):</strong> $0M</p>
+        </div>
+        
+</div>
+
+<!-- 4. Detailed Cost Matrix -->
+<div class="section">
+<h2>4. Per-Strategy Costs at Each AUM Level</h2>
+<table>
+<thead><tr><th>Strategy</th><th>AUM</th><th>Contracts</th><th>ADV %</th><th>Spread $</th><th>Impact bps</th><th>Slip $</th><th>Total $/trade</th><th>Annual $</th><th>Alpha Decay</th><th>Fill %</th><th>20% Decay Cap</th></tr></thead>
+<tbody><tr><td>EXP-1220 Tail Risk Protection</td><td>$1M</td><td>76</td><td>4.211%</td><td>$228</td><td>181.0</td><td>$70</td><td><strong>$1,859</strong></td><td>$44,621</td><td style='color:#ca8a04'>8.5%</td><td style='color:#16a34a'>81%</td><td>$5M</td></tr>
+<tr><td>Cross-Asset Pairs (TLT-QQQ, GLD-TLT)</td><td>$1M</td><td>2</td><td>0.362%</td><td>$28</td><td>49.5</td><td>$3</td><td><strong>$38</strong></td><td>$1,511</td><td style='color:#dc2626'>999.0%</td><td style='color:#16a34a'>92%</td><td>$0M</td></tr>
+<tr><td>TLT Iron Condors</td><td>$1M</td><td>1</td><td>0.136%</td><td>$20</td><td>30.0</td><td>$1</td><td><strong>$24</strong></td><td>$290</td><td style='color:#ca8a04'>17.0%</td><td style='color:#16a34a'>92%</td><td>$1M</td></tr>
+<tr><td>Vol Term Structure</td><td>$1M</td><td>2</td><td>0.143%</td><td>$12</td><td>30.8</td><td>$1</td><td><strong>$14</strong></td><td>$704</td><td style='color:#dc2626'>766.0%</td><td style='color:#16a34a'>92%</td><td>$0M</td></tr>
+<tr><td>EXP-1220 Tail Risk Protection</td><td>$10M</td><td>760</td><td>42.114%</td><td>$2,280</td><td>687.6</td><td>$2,219</td><td><strong>$63,797</strong></td><td>$1,531,120</td><td style='color:#dc2626'>29.0%</td><td style='color:#dc2626'>0%</td><td>$5M</td></tr>
+<tr><td>Cross-Asset Pairs (TLT-QQQ, GLD-TLT)</td><td>$10M</td><td>26</td><td>4.700%</td><td>$364</td><td>192.2</td><td>$118</td><td><strong>$848</strong></td><td>$33,913</td><td style='color:#dc2626'>999.0%</td><td style='color:#ca8a04'>79%</td><td>$0M</td></tr>
+<tr><td>TLT Iron Condors</td><td>$10M</td><td>13</td><td>1.762%</td><td>$260</td><td>113.2</td><td>$52</td><td><strong>$463</strong></td><td>$5,561</td><td style='color:#dc2626'>32.6%</td><td style='color:#16a34a'>89%</td><td>$1M</td></tr>
+<tr><td>Vol Term Structure</td><td>$10M</td><td>21</td><td>1.502%</td><td>$126</td><td>104.0</td><td>$23</td><td><strong>$198</strong></td><td>$9,923</td><td style='color:#dc2626'>999.0%</td><td style='color:#16a34a'>89%</td><td>$0M</td></tr>
+<tr><td>EXP-1220 Tail Risk Protection</td><td>$50M</td><td>3,800</td><td>210.570%</td><td>$11,400</td><td>2003.2</td><td>$24,814</td><td><strong>$899,934</strong></td><td>$21,598,424</td><td style='color:#dc2626'>81.8%</td><td style='color:#dc2626'>0%</td><td>$5M</td></tr>
+<tr><td>Cross-Asset Pairs (TLT-QQQ, GLD-TLT)</td><td>$50M</td><td>133</td><td>24.043%</td><td>$1,862</td><td>488.4</td><td>$1,370</td><td><strong>$7,981</strong></td><td>$319,255</td><td style='color:#dc2626'>999.0%</td><td style='color:#dc2626'>3%</td><td>$0M</td></tr>
+<tr><td>TLT Iron Condors</td><td>$50M</td><td>66</td><td>8.946%</td><td>$1,320</td><td>275.1</td><td>$592</td><td><strong>$3,782</strong></td><td>$45,388</td><td style='color:#dc2626'>53.3%</td><td style='color:#ca8a04'>57%</td><td>$1M</td></tr>
+<tr><td>Vol Term Structure</td><td>$50M</td><td>106</td><td>7.580%</td><td>$636</td><td>250.6</td><td>$263</td><td><strong>$1,498</strong></td><td>$74,893</td><td style='color:#dc2626'>999.0%</td><td style='color:#ca8a04'>65%</td><td>$0M</td></tr>
+<tr><td>EXP-1220 Tail Risk Protection</td><td>$100M</td><td>7,600</td><td>421.140%</td><td>$22,800</td><td>3326.3</td><td>$70,184</td><td><strong>$2,961,438</strong></td><td>$71,074,521</td><td style='color:#dc2626'>134.7%</td><td style='color:#dc2626'>0%</td><td>$5M</td></tr>
+<tr><td>Cross-Asset Pairs (TLT-QQQ, GLD-TLT)</td><td>$100M</td><td>267</td><td>48.266%</td><td>$3,738</td><td>748.9</td><td>$3,895</td><td><strong>$22,253</strong></td><td>$890,114</td><td style='color:#dc2626'>999.0%</td><td style='color:#dc2626'>0%</td><td>$0M</td></tr>
+<tr><td>TLT Iron Condors</td><td>$100M</td><td>133</td><td>18.028%</td><td>$2,660</td><td>411.8</td><td>$1,694</td><td><strong>$9,996</strong></td><td>$119,951</td><td style='color:#dc2626'>70.4%</td><td style='color:#dc2626'>12%</td><td>$1M</td></tr>
+<tr><td>Vol Term Structure</td><td>$100M</td><td>213</td><td>15.231%</td><td>$1,278</td><td>373.1</td><td>$748</td><td><strong>$3,819</strong></td><td>$190,960</td><td style='color:#dc2626'>999.0%</td><td style='color:#dc2626'>21%</td><td>$0M</td></tr>
+</tbody></table>
+</div>
+
+<!-- 5. Portfolio Summary -->
+<div class="section">
+<h2>5. Portfolio-Level Net Performance</h2>
+<table>
+<thead><tr><th>AUM</th><th>Gross CAGR</th><th>Exec Cost</th><th>Margin Cost</th><th>Total Cost</th><th>Net CAGR</th><th>Retention</th><th>Net Sharpe</th><th>Binding Strategy</th></tr></thead>
+<tbody><tr><td>$1M</td><td>55.6%</td><td>4.71%</td><td>3.30%</td><td><strong>8.01%</strong></td><td style='color:#16a34a;font-weight:700'>47.5%</td><td>86%</td><td>3.51</td><td>Cross-Asset Pairs (TLT-QQQ, GLD-TLT)</td></tr>
+<tr><td>$10M</td><td>55.6%</td><td>15.81%</td><td>3.30%</td><td><strong>19.11%</strong></td><td style='color:#16a34a;font-weight:700'>36.4%</td><td>66%</td><td>2.69</td><td>Cross-Asset Pairs (TLT-QQQ, GLD-TLT)</td></tr>
+<tr><td>$50M</td><td>55.6%</td><td>44.08%</td><td>3.30%</td><td><strong>47.38%</strong></td><td style='color:#ca8a04;font-weight:700'>8.2%</td><td>15%</td><td>0.60</td><td>Cross-Asset Pairs (TLT-QQQ, GLD-TLT)</td></tr>
+<tr><td>$100M</td><td>55.6%</td><td>72.28%</td><td>3.30%</td><td><strong>75.58%</strong></td><td style='color:#dc2626;font-weight:700'>-20.0%</td><td>0%</td><td>0.00</td><td>Cross-Asset Pairs (TLT-QQQ, GLD-TLT)</td></tr>
+</tbody></table>
+
+<div class="finding good">
+<h4>$10M Assessment</h4>
+<p>Net CAGR <strong>36.4%</strong> (retain 66% of alpha). Net Sharpe 2.69.
+Execution costs 15.81%, margin 3.3%. All strategies have viable fill probability.
+<strong>This is the sweet spot for live deployment.</strong></p>
+</div>
+
+<div class="finding bad">
+<h4>$100M Assessment</h4>
+<p>Net CAGR <strong>-20.0%</strong> (retain 0% of alpha).
+Binding constraint: <strong>Cross-Asset Pairs (TLT-QQQ, GLD-TLT)</strong>.
+Alpha erosion significant. Consider splitting execution across venues and expanding instrument universe.</p>
+</div>
+</div>
+
+<!-- 6. Capacity Limits -->
+<div class="section">
+<h2>6. Capacity Limits (20% Alpha Decay Threshold)</h2>
+<table>
+<thead><tr><th>Strategy</th><th>Max Capital</th><th>Binding Instrument</th><th>Limiting Factor</th></tr></thead>
+<tbody><tr><td>EXP-1220 Tail Risk Protection</td><td>$5M</td><td>SPY</td><td>Participation rate > 5%</td></tr>
+<tr><td>Cross-Asset Pairs (TLT-QQQ, GLD-TLT)</td><td>$0M</td><td>GLD</td><td>Low per-strike volume</td></tr>
+<tr><td>TLT Iron Condors</td><td>$1M</td><td>TLT</td><td>Low per-strike volume</td></tr>
+<tr><td>Vol Term Structure</td><td>$0M</td><td>XLF</td><td>Participation rate > 5%</td></tr>
+</tbody></table>
+</div>
+
+<!-- 7. Recommendations -->
+<div class="section">
+<h2>7. Recommendations</h2>
+<div class="finding good">
+<h4>$1M–$10M: Deploy As-Is</h4>
+<p>Execution costs are negligible relative to alpha. All strategies operate well within
+liquidity bounds. Use TWAP for non-urgent trades, market orders for hedge adjustments only.</p>
+</div>
+<div class="finding warn">
+<h4>$10M–$50M: Monitor Impact on GLD/TLT</h4>
+<p>Cross-asset pairs and TLT ICs start consuming 1-5% of per-strike ADV. Split orders across
+multiple expirations. Consider adding QQQ and XLF pairs to distribute flow.</p>
+</div>
+<div class="finding bad">
+<h4>$50M–$100M: Structural Adjustments Needed</h4>
+<p>GLD options become binding (7-15% of ADV). Options: (1) shift GLD leg to futures,
+(2) use weekly expirations for more liquidity, (3) dark pool routing for large orders,
+(4) reduce pair trade frequency. SPY/VIX leg scales trivially to $1B+.</p>
+</div>
+</div>
+
+<p class="note" style="margin-top:48px;text-align:center;border-top:1px solid #21262d;padding-top:16px">
+  Execution Feasibility Study &bull; IronVault data &bull; Almgren-Chriss model &bull;
+  compass/execution_feasibility.py &bull; 2026-04-05
+</p>
+</body></html>

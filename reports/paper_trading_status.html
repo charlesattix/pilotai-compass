@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Paper Trading Status — 2026-04-06 08:32 UTC</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--green:#059669;--red:#dc2626;--yellow:#d97706;--blue:#2563eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;max-width:1200px;margin:0 auto;padding:24px}
+h1{font-size:1.6rem;font-weight:800;margin-bottom:4px}
+h2{font-size:1.15rem;font-weight:700;margin:8px 0 12px}
+h3{font-size:.95rem;font-weight:600;margin:18px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.subtitle{color:var(--muted);font-size:.9rem;margin-bottom:24px}
+.hero-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:20px 0}
+.hero{background:linear-gradient(135deg,#f8fafc 0%,#eff6ff 100%);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center}
+.hero .l{color:var(--muted);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.hero .v{font-size:1.6rem;font-weight:800;margin-top:4px}
+.section-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin:16px 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:12px 0}
+.c{background:#fff;border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center}
+.c .l{color:var(--muted);font-size:.65rem;font-weight:600;text-transform:uppercase}
+.c .v{font-size:1rem;font-weight:700;margin-top:2px}
+table{width:100%;border-collapse:collapse;margin:8px 0;font-size:.82rem}
+th,td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--border)}
+th{background:#f1f5f9;color:var(--muted);font-size:.68rem;font-weight:600;text-transform:uppercase}
+td:first-child,th:first-child{text-align:left}
+.note{color:var(--muted);font-size:.82rem;font-style:italic;margin:8px 0}
+.callout{padding:14px;border-radius:8px;margin:12px 0;font-size:.85rem;line-height:1.6}
+.callout-green{background:#ecfdf5;border-left:4px solid var(--green)}
+.callout-yellow{background:#fffbeb;border-left:4px solid var(--yellow)}
+.callout-red{background:#fef2f2;border-left:4px solid var(--red)}
+.callout-blue{background:#eff6ff;border-left:4px solid var(--blue)}
+.footer{margin-top:40px;text-align:center;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);padding-top:16px}
+pre,code{font-family:'Menlo','Courier New',monospace}
+</style></head><body>
+
+<h1>Paper Trading Status Report</h1>
+<div class="subtitle">
+  Live query of Alpaca paper trading accounts &bull; Since inception 2026-03-15 (22 days) &bull; 2026-04-06 08:32 UTC
+</div>
+
+<!-- Summary -->
+<div class="hero-cards">
+  <div class="hero">
+    <div class="l">Total Equity</div>
+    <div class="v">$236,022</div>
+  </div>
+  <div class="hero">
+    <div class="l">P&L Since Launch</div>
+    <div class="v" style="color:var(--green)">$+36,022</div>
+  </div>
+  <div class="hero">
+    <div class="l">Unrealized P&L</div>
+    <div class="v" style="color:var(--green)">$+11,597</div>
+  </div>
+  <div class="hero">
+    <div class="l">Open Positions</div>
+    <div class="v">20</div>
+  </div>
+  <div class="hero">
+    <div class="l">Filled Orders</div>
+    <div class="v">40</div>
+  </div>
+  <div class="hero">
+    <div class="l">Accounts Verified</div>
+    <div class="v">2/3</div>
+  </div>
+</div>
+
+<div class="callout callout-green">
+<strong>Both verified accounts are profitable.</strong>
+EXP-400 is +14.6% ($14,622 above $100K start) and EXP-401 is +21.4% ($21,400 above). Combined P&amp;L across the two accounts is +$36,022 on $200K of starting capital (22 days since launch on March 15).
+All 40 orders (22 + 18) have filled cleanly — zero open, zero canceled, zero rejected.
+</div>
+
+<div class="callout callout-yellow">
+<strong>EXP-1220 (PA3YFVQCXTD6) could not be verified.</strong>
+The credentials for this account are not present on this machine. The other two accounts (EXP-400 and EXP-401)
+are fully queried via the Alpaca REST API.
+</div>
+
+
+    <div class="section-card">
+      <h2>EXP400 — <span style="font-family:monospace;font-size:.75rem;color:var(--muted)">7a84dd94-7a9b-42fb-a105-4e51058ce5c3</span></h2>
+      <div class="cards">
+        <div class="c"><div class="l">Equity</div><div class="v">$114,622.28</div></div>
+        <div class="c"><div class="l">P&L Since Start</div><div class="v" style="color:var(--green)">$+14,622.28</div></div>
+        <div class="c"><div class="l">Return</div><div class="v" style="color:var(--green)">+14.62%</div></div>
+        <div class="c"><div class="l">Unrealized P&L</div><div class="v" style="color:var(--green)">$+5,700.00</div></div>
+        <div class="c"><div class="l">Cash</div><div class="v">$136,782.28</div></div>
+        <div class="c"><div class="l">Buying Power</div><div class="v">$129,564.56</div></div>
+        <div class="c"><div class="l">Open Positions</div><div class="v">12</div></div>
+        <div class="c"><div class="l">Filled Orders</div><div class="v">22</div></div>
+      </div>
+      
+        <h3>Open Positions (12)</h3>
+        <table>
+        <thead><tr><th>Symbol</th><th>Side</th><th>Qty</th><th>Market Value</th><th>Unrealized P&L</th></tr></thead>
+        <tbody><tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00660000</td><td><span style="background:#fef2f2;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">SHORT</span></td><td>10</td><td>$-5,770.00</td><td style="color:var(--green);font-weight:600">$+3,430.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00661000</td><td><span style="background:#fef2f2;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">SHORT</span></td><td>10</td><td>$-5,260.00</td><td style="color:var(--green);font-weight:600">$+3,690.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00662000</td><td><span style="background:#fef2f2;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">SHORT</span></td><td>10</td><td>$-4,760.00</td><td style="color:var(--green);font-weight:600">$+4,020.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00664000</td><td><span style="background:#fef2f2;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">SHORT</span></td><td>10</td><td>$-3,840.00</td><td style="color:var(--green);font-weight:600">$+4,400.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00665000</td><td><span style="background:#fef2f2;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">SHORT</span></td><td>10</td><td>$-3,400.00</td><td style="color:var(--green);font-weight:600">$+4,890.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00666000</td><td><span style="background:#fef2f2;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">SHORT</span></td><td>10</td><td>$-3,000.00</td><td style="color:var(--green);font-weight:600">$+4,600.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00672000</td><td><span style="background:#eff6ff;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">LONG</span></td><td>10</td><td>$1,130.00</td><td style="color:var(--red);font-weight:600">$-3,290.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00673000</td><td><span style="background:#eff6ff;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">LONG</span></td><td>10</td><td>$920.00</td><td style="color:var(--red);font-weight:600">$-3,340.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00674000</td><td><span style="background:#eff6ff;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">LONG</span></td><td>10</td><td>$740.00</td><td style="color:var(--red);font-weight:600">$-3,340.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00676000</td><td><span style="background:#eff6ff;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">LONG</span></td><td>10</td><td>$460.00</td><td style="color:var(--red);font-weight:600">$-3,130.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00677000</td><td><span style="background:#eff6ff;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">LONG</span></td><td>10</td><td>$350.00</td><td style="color:var(--red);font-weight:600">$-3,350.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00678000</td><td><span style="background:#eff6ff;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">LONG</span></td><td>10</td><td>$270.00</td><td style="color:var(--red);font-weight:600">$-2,880.00</td></tr>
+</tbody></table>
+      
+        <h3>Recent Fills (last 10)</h3>
+        <table>
+        <thead><tr><th>Time</th><th>Side</th><th>Symbol</th><th>Qty</th><th>Price</th></tr></thead>
+        <tbody><tr><td style="font-size:.75rem">2026-04-02 14:04:54</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>10</td><td>$1.12</td></tr>
+<tr><td style="font-size:.75rem">2026-04-01 14:04:36</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>10</td><td>$6.79</td></tr>
+<tr><td style="font-size:.75rem">2026-04-01 14:04:35</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>10</td><td>$6.96</td></tr>
+<tr><td style="font-size:.75rem">2026-04-01 14:04:34</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>10</td><td>$7.36</td></tr>
+<tr><td style="font-size:.75rem">2026-03-27 17:30:09</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>10</td><td>$-4.89</td></tr>
+<tr><td style="font-size:.75rem">2026-03-27 15:00:15</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>10</td><td>$-4.84</td></tr>
+<tr><td style="font-size:.75rem">2026-03-27 14:00:09</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>10</td><td>$-4.56</td></tr>
+<tr><td style="font-size:.75rem">2026-03-27 13:45:05</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>10</td><td>$1.51</td></tr>
+<tr><td style="font-size:.75rem">2026-03-23 13:45:09</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>10</td><td>$-4.07</td></tr>
+<tr><td style="font-size:.75rem">2026-03-20 19:30:09</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>10</td><td>$-4.78</td></tr>
+</tbody></table>
+    </div>
+
+    <div class="section-card">
+      <h2>EXP401 — <span style="font-family:monospace;font-size:.75rem;color:var(--muted)">511ae591-1fc8-4ed0-ad95-094f5aa6fb7f</span></h2>
+      <div class="cards">
+        <div class="c"><div class="l">Equity</div><div class="v">$121,399.88</div></div>
+        <div class="c"><div class="l">P&L Since Start</div><div class="v" style="color:var(--green)">$+21,399.88</div></div>
+        <div class="c"><div class="l">Return</div><div class="v" style="color:var(--green)">+21.40%</div></div>
+        <div class="c"><div class="l">Unrealized P&L</div><div class="v" style="color:var(--green)">$+5,897.00</div></div>
+        <div class="c"><div class="l">Cash</div><div class="v">$139,897.88</div></div>
+        <div class="c"><div class="l">Buying Power</div><div class="v">$147,795.76</div></div>
+        <div class="c"><div class="l">Open Positions</div><div class="v">8</div></div>
+        <div class="c"><div class="l">Filled Orders</div><div class="v">18</div></div>
+      </div>
+      
+        <h3>Open Positions (8)</h3>
+        <table>
+        <thead><tr><th>Symbol</th><th>Side</th><th>Qty</th><th>Market Value</th><th>Unrealized P&L</th></tr></thead>
+        <tbody><tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00662000</td><td><span style="background:#fef2f2;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">SHORT</span></td><td>13</td><td>$-6,188.00</td><td style="color:var(--green);font-weight:600">$+2,496.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00663000</td><td><span style="background:#fef2f2;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">SHORT</span></td><td>14</td><td>$-6,006.00</td><td style="color:var(--green);font-weight:600">$+5,600.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00665000</td><td><span style="background:#fef2f2;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">SHORT</span></td><td>14</td><td>$-4,760.00</td><td style="color:var(--green);font-weight:600">$+6,846.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00666000</td><td><span style="background:#fef2f2;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">SHORT</span></td><td>14</td><td>$-4,200.00</td><td style="color:var(--green);font-weight:600">$+6,748.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00674000</td><td><span style="background:#eff6ff;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">LONG</span></td><td>13</td><td>$962.00</td><td style="color:var(--red);font-weight:600">$-2,353.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00675000</td><td><span style="background:#eff6ff;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">LONG</span></td><td>14</td><td>$826.00</td><td style="color:var(--red);font-weight:600">$-4,452.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00677000</td><td><span style="background:#eff6ff;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">LONG</span></td><td>14</td><td>$490.00</td><td style="color:var(--red);font-weight:600">$-4,690.00</td></tr>
+<tr><td style="font-family:monospace;font-size:.78rem">SPY260410C00678000</td><td><span style="background:#eff6ff;padding:2px 6px;border-radius:3px;font-size:.7rem;font-weight:600">LONG</span></td><td>14</td><td>$378.00</td><td style="color:var(--red);font-weight:600">$-4,298.00</td></tr>
+</tbody></table>
+      
+        <h3>Recent Fills (last 10)</h3>
+        <table>
+        <thead><tr><th>Time</th><th>Side</th><th>Symbol</th><th>Qty</th><th>Price</th></tr></thead>
+        <tbody><tr><td style="font-size:.75rem">2026-04-02 14:04:54</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>14</td><td>$1.12</td></tr>
+<tr><td style="font-size:.75rem">2026-04-01 14:04:34</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>14</td><td>$7.37</td></tr>
+<tr><td style="font-size:.75rem">2026-03-27 18:00:02</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>14</td><td>$-4.86</td></tr>
+<tr><td style="font-size:.75rem">2026-03-26 17:30:12</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>13</td><td>$-4.13</td></tr>
+<tr><td style="font-size:.75rem">2026-03-20 18:30:13</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>14</td><td>$-4.52</td></tr>
+<tr><td style="font-size:.75rem">2026-03-20 15:00:11</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>14</td><td>$-4.48</td></tr>
+<tr><td style="font-size:.75rem">2026-03-20 14:30:01</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>14</td><td>$-4.59</td></tr>
+<tr><td style="font-size:.75rem">2026-03-20 13:45:01</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>14</td><td>$-4.45</td></tr>
+<tr><td style="font-size:.75rem">2026-03-19 18:00:12</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>13</td><td>$-3.43</td></tr>
+<tr><td style="font-size:.75rem">2026-03-19 14:00:13</td><td style="color:var(--blue);font-weight:600"></td><td style="font-family:monospace;font-size:.75rem"></td><td>13</td><td>$-3.58</td></tr>
+</tbody></table>
+    </div>
+
+<div class="section-card" style="border-color:var(--yellow);background:#fffbeb">
+  <h2>EXP-1220 — <span style="font-family:monospace;font-size:.75rem;color:var(--muted)">PA3YFVQCXTD6</span></h2>
+  <div class="callout callout-yellow">
+    <strong>Credentials not available on this machine.</strong> The .env.exp1220 file is not present in the project root.
+    This account was listed in the Round 14 deployment plan but has not been verified live yet.<br><br>
+    <strong>To check manually:</strong> Copy the ALPACA_API_KEY and ALPACA_API_SECRET for PA3YFVQCXTD6 into
+    <code>.env.exp1220</code>, then re-run:
+    <pre style="background:#fff;padding:10px;margin:8px 0;border-radius:4px;font-size:.78rem">python3 scripts/account_status.py --exp 1220</pre>
+  </div>
+</div>
+
+<!-- Context section -->
+<div class="section-card">
+<h2>Context — Where This Fits in the North Star</h2>
+<div class="callout callout-blue">
+<strong>MASTERPLAN v6 honest numbers:</strong> Trade-level Sharpe 1.26, per-trade CAGR 1.2% (dilution bug in daily returns),
+88% win rate on 171 real IronVault trades. The paper trading accounts above are a live forward test of that thesis.
+<br><br>
+After 22 days, <strong>both accounts are positive and above their backtest pace.</strong> EXP-400's +14.6% and
+EXP-401's +21.4% in 22 days annualize to far more than the trade-level CAGR would suggest — which is consistent
+with the fact that the current positions are concentrated in SPY credit spreads expiring 2026-04-10 (4 days away)
+and most of the gains are from time decay on short calls.
+</div>
+</div>
+
+<!-- Methodology -->
+<div class="section-card">
+<h2>Data Source &amp; Methodology</h2>
+<ul style="padding-left:20px;line-height:1.8">
+<li><strong>Alpaca REST API</strong> queried via <code>scripts/account_status.py</code>
+  (v2 endpoints: /v2/account, /v2/positions, /v2/orders)</li>
+<li><strong>Credentials</strong> loaded from <code>.env.expNNN</code> files, never hardcoded</li>
+<li><strong>Since date</strong>: 2026-03-15 (paper trading launch per registry.json)</li>
+<li><strong>Position snapshot</strong>: real-time via /v2/positions</li>
+<li><strong>Orders</strong>: filtered status=all, after=2026-03-15, limit=500, sorted desc</li>
+<li><strong>P&L since inception</strong>: current equity minus $100,000 starting capital</li>
+</ul>
+</div>
+
+<div class="footer">
+  Paper Trading Status &bull; 2026-04-06 08:32 UTC &bull; PilotAI Compass
+</div>
+</body></html>

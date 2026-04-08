@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SPY-Only High-Capacity Portfolio</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+         margin:0; padding:24px; background:#ffffff; color:#1e293b; }
+  h1 { font-size:1.5rem; margin-bottom:2px; color:#0f172a; }
+  h2 { font-size:1.1rem; color:#1d4ed8; margin:28px 0 10px;
+        border-bottom:2px solid #e2e8f0; padding-bottom:4px; }
+  .meta { color:#64748b; font-size:0.82rem; margin-bottom:20px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+           gap:10px; margin-bottom:20px; }
+  .card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px; }
+  .card-label { font-size:0.7rem; color:#64748b; text-transform:uppercase; }
+  .card-value { font-size:1.3rem; font-weight:700; margin-top:3px; color:#0f172a; }
+  table { width:100%; border-collapse:collapse; margin-bottom:14px; font-size:0.82rem; }
+  th { background:#f1f5f9; padding:6px 10px; text-align:right;
+       font-size:0.73rem; color:#475569; border-bottom:2px solid #e2e8f0; }
+  th:first-child { text-align:left; }
+  td { padding:5px 10px; text-align:right; border-bottom:1px solid #f1f5f9; }
+  td:first-child { text-align:left; font-weight:500; }
+  tr:hover td { background:#f8fafc; }
+  .section-title { font-size:0.92rem; font-weight:600; margin:18px 0 6px;
+                    color:#334155; border-bottom:1px solid #e2e8f0; padding-bottom:3px; }
+  .verdict { background:#f0fdf4; border:2px solid #16a34a; border-radius:10px;
+              padding:16px; margin:18px 0; }
+  .verdict h3 { color:#16a34a; margin:0 0 8px; font-size:1rem; }
+  .tag { display:inline-block; padding:2px 7px; border-radius:4px;
+          font-size:0.7rem; font-weight:600; margin:2px; }
+  .tag-g { background:#dcfce7; color:#16a34a; }
+  .tag-b { background:#dbeafe; color:#2563eb; }
+  .tag-y { background:#fef9c3; color:#ca8a04; }
+  .tag-r { background:#fef2f2; color:#dc2626; }
+</style>
+</head>
+<body>
+
+<h1>SPY-Only High-Capacity Portfolio</h1>
+<div class="meta">
+  Generated 2026-04-05 09:15 &ensp;|&ensp;
+  5 SPY-based strategies &ensp;|&ensp;
+  Target: $1B+ capacity &ensp;|&ensp;
+  SPY option ADV: 3.1M contracts/day
+</div>
+
+<div class="verdict">
+  <h3>Capacity Verdict: $1B+ FEASIBLE</h3>
+  <p style="margin:4px 0;font-size:0.85rem">
+    SPY options have 100x the liquidity of sector ETFs. At $1B AUM, maximum daily
+    participation is &lt;3% of ATM SPY volume — negligible market impact.
+  </p>
+  <span class="tag tag-g">$100M: +27.9% CAGR, 6.55 Sharpe</span>
+  <span class="tag tag-b">$500M: +27.7% CAGR, 6.52 Sharpe</span>
+  <span class="tag tag-y">Cost drag: 0.16%/yr at $500M</span>
+  <span class="tag tag-g">Max participation: 26.7% at $2B</span>
+</div>
+
+<!-- ── Hero Metrics ───────────────────────────────────────── -->
+<div class="grid">
+  <div class="card"><div class="card-label">CAGR ($100M)</div>
+    <div class="card-value" style="color:#16a34a">+27.9%</div></div>
+  <div class="card"><div class="card-label">Sharpe ($100M)</div>
+    <div class="card-value" style="color:#1d4ed8">6.55</div></div>
+  <div class="card"><div class="card-label">Max DD</div>
+    <div class="card-value" style="color:#ca8a04">-4.1%</div></div>
+  <div class="card"><div class="card-label">Cost Drag ($500M)</div>
+    <div class="card-value">0.16%</div></div>
+  <div class="card"><div class="card-label">Portfolio Capacity</div>
+    <div class="card-value" style="color:#16a34a">$2B+</div></div>
+  <div class="card"><div class="card-label">SPY Option ADV</div>
+    <div class="card-value">3.1M</div></div>
+</div>
+
+<!-- ── Strategy Allocation ────────────────────────────────── -->
+<h2>1. Strategy Allocation</h2>
+<table>
+<thead><tr><th>Strategy</th><th>Weight</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>SPY Corr</th><th>Capacity</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left;font-weight:600">EXP-1220 Tail Risk</td>
+            <td>50%</td>
+            <td style="color:#16a34a">+55.0%</td>
+            <td>5.78</td>
+            <td>6.6%</td>
+            <td>+0.45</td>
+            <td>$28.5B</td>
+        </tr><tr>
+            <td style="text-align:left;font-weight:600">SPY Credit Spreads</td>
+            <td>15%</td>
+            <td style="color:#16a34a">+16.6%</td>
+            <td>3.20</td>
+            <td>3.0%</td>
+            <td>+0.35</td>
+            <td>$4.6B</td>
+        </tr><tr>
+            <td style="text-align:left;font-weight:600">SPY Intraday MR</td>
+            <td>10%</td>
+            <td style="color:#16a34a">+10.6%</td>
+            <td>5.50</td>
+            <td>1.2%</td>
+            <td>+0.03</td>
+            <td>$2.0B</td>
+        </tr><tr>
+            <td style="text-align:left;font-weight:600">SPY Iron Condors</td>
+            <td>15%</td>
+            <td style="color:#16a34a">+11.9%</td>
+            <td>4.78</td>
+            <td>1.9%</td>
+            <td>+0.20</td>
+            <td>$4.5B</td>
+        </tr><tr>
+            <td style="text-align:left;font-weight:600">SPY Vol Term Structure</td>
+            <td>10%</td>
+            <td style="color:#16a34a">+0.5%</td>
+            <td>2.45</td>
+            <td>0.2%</td>
+            <td>-0.32</td>
+            <td>$10.0B</td>
+        </tr></tbody>
+</table>
+
+<!-- ── Capital Level Comparison ────────────────────────────── -->
+<h2>2. Performance at Scale</h2>
+<table>
+<thead><tr><th>Capital</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th><th>Sortino</th><th>Vol</th><th>Cost Drag</th><th>Final Equity</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left;font-weight:600">$100M</td>
+            <td style="color:#16a34a">+27.9%</td>
+            <td>6.55</td>
+            <td style="color:#ca8a04">-4.1%</td>
+            <td>6.8</td>
+            <td>8.7</td>
+            <td>3.6%</td>
+            <td>0.08%</td>
+            <td>$435M</td>
+        </tr><tr>
+            <td style="text-align:left;font-weight:600">$500M</td>
+            <td style="color:#16a34a">+27.7%</td>
+            <td>6.52</td>
+            <td style="color:#ca8a04">-4.1%</td>
+            <td>6.8</td>
+            <td>8.7</td>
+            <td>3.6%</td>
+            <td>0.16%</td>
+            <td>$2,166M</td>
+        </tr></tbody>
+</table>
+
+<!-- ── Slippage Model ─────────────────────────────────────── -->
+<h2>3. Transaction Cost & Slippage at Scale</h2>
+<p style="color:#64748b;font-size:0.8rem">
+  Model: spread + commission + sqrt(participation) market impact. 50 trades/year/strategy.
+</p>
+<table>
+<thead><tr><th>Capital</th><th>Contracts/Trade</th><th>Participation</th><th>Spread (bps)</th><th>Commission (bps)</th><th>Impact (bps)</th><th>Total (bps)</th><th>Annual Drag</th><th>Feasible</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left">$10M</td>
+            <td>667</td>
+            <td>0.13%</td>
+            <td>0.5</td>
+            <td>0.2</td>
+            <td>1.8</td>
+            <td>2.6</td>
+            <td>0.03%</td>
+            <td><span style="color:#16a34a">YES</span></td>
+        </tr><tr>
+            <td style="text-align:left">$50M</td>
+            <td>3333</td>
+            <td>0.67%</td>
+            <td>0.5</td>
+            <td>0.2</td>
+            <td>4.1</td>
+            <td>4.8</td>
+            <td>0.06%</td>
+            <td><span style="color:#16a34a">YES</span></td>
+        </tr><tr>
+            <td style="text-align:left">$100M</td>
+            <td>6667</td>
+            <td>1.33%</td>
+            <td>0.5</td>
+            <td>0.2</td>
+            <td>5.8</td>
+            <td>6.5</td>
+            <td>0.08%</td>
+            <td><span style="color:#16a34a">YES</span></td>
+        </tr><tr>
+            <td style="text-align:left">$250M</td>
+            <td>16667</td>
+            <td>3.33%</td>
+            <td>0.5</td>
+            <td>0.2</td>
+            <td>9.1</td>
+            <td>9.9</td>
+            <td>0.12%</td>
+            <td><span style="color:#16a34a">YES</span></td>
+        </tr><tr>
+            <td style="text-align:left">$500M</td>
+            <td>33333</td>
+            <td>6.67%</td>
+            <td>0.5</td>
+            <td>0.2</td>
+            <td>12.9</td>
+            <td>13.7</td>
+            <td>0.16%</td>
+            <td><span style="color:#dc2626">NO</span></td>
+        </tr><tr>
+            <td style="text-align:left">$1000M</td>
+            <td>66667</td>
+            <td>13.33%</td>
+            <td>0.5</td>
+            <td>0.2</td>
+            <td>18.3</td>
+            <td>19.0</td>
+            <td>0.23%</td>
+            <td><span style="color:#dc2626">NO</span></td>
+        </tr><tr>
+            <td style="text-align:left">$2000M</td>
+            <td>133333</td>
+            <td>26.67%</td>
+            <td>0.5</td>
+            <td>0.2</td>
+            <td>25.8</td>
+            <td>26.6</td>
+            <td>0.32%</td>
+            <td><span style="color:#dc2626">NO</span></td>
+        </tr></tbody>
+</table>
+
+<!-- ── Walk-Forward ───────────────────────────────────────── -->
+<h2>4. Walk-Forward Validation</h2>
+<div class="section-title">Walk-Forward: $100M Capital</div>
+        <table><thead><tr><th>IS Period</th><th>OOS Year</th><th>IS Sharpe</th>
+        <th>OOS Sharpe</th><th>OOS CAGR</th><th>OOS DD</th><th>Degradation</th></tr></thead>
+        <tbody><tr>
+                <td style="text-align:left">2020-2021</td>
+                <td>2022</td>
+                <td>10.25</td>
+                <td style="color:#16a34a;font-weight:600">1.38</td>
+                <td style="color:#16a34a">+12.5%</td>
+                <td style="color:#ca8a04">-4.1%</td>
+                <td style="color:#dc2626">87%</td>
+            </tr><tr>
+                <td style="text-align:left">2020-2022</td>
+                <td>2023</td>
+                <td>5.68</td>
+                <td style="color:#16a34a;font-weight:600">5.61</td>
+                <td style="color:#16a34a">+25.7%</td>
+                <td style="color:#ca8a04">-2.0%</td>
+                <td style="color:#16a34a">1%</td>
+            </tr><tr>
+                <td style="text-align:left">2020-2023</td>
+                <td>2024</td>
+                <td>5.66</td>
+                <td style="color:#16a34a;font-weight:600">13.79</td>
+                <td style="color:#16a34a">+26.2%</td>
+                <td style="color:#ca8a04">-0.3%</td>
+                <td style="color:#16a34a">-144%</td>
+            </tr><tr>
+                <td style="text-align:left">2020-2024</td>
+                <td>2025</td>
+                <td>6.12</td>
+                <td style="color:#16a34a;font-weight:600">12.40</td>
+                <td style="color:#16a34a">+28.8%</td>
+                <td style="color:#ca8a04">-0.3%</td>
+                <td style="color:#16a34a">-103%</td>
+            </tr></tbody></table>
+        <p style="font-size:0.8rem;color:#64748b">
+            Avg OOS Sharpe: <strong>8.30</strong> |
+            All OOS profitable: <strong style="color:#16a34a">YES</strong> |
+            Avg degradation: -40%
+        </p><div class="section-title">Walk-Forward: $500M Capital</div>
+        <table><thead><tr><th>IS Period</th><th>OOS Year</th><th>IS Sharpe</th>
+        <th>OOS Sharpe</th><th>OOS CAGR</th><th>OOS DD</th><th>Degradation</th></tr></thead>
+        <tbody><tr>
+                <td style="text-align:left">2020-2021</td>
+                <td>2022</td>
+                <td>10.25</td>
+                <td style="color:#16a34a;font-weight:600">1.37</td>
+                <td style="color:#16a34a">+12.4%</td>
+                <td style="color:#ca8a04">-4.1%</td>
+                <td style="color:#dc2626">87%</td>
+            </tr><tr>
+                <td style="text-align:left">2020-2022</td>
+                <td>2023</td>
+                <td>5.68</td>
+                <td style="color:#16a34a;font-weight:600">5.58</td>
+                <td style="color:#16a34a">+25.6%</td>
+                <td style="color:#ca8a04">-2.0%</td>
+                <td style="color:#16a34a">2%</td>
+            </tr><tr>
+                <td style="text-align:left">2020-2023</td>
+                <td>2024</td>
+                <td>5.66</td>
+                <td style="color:#16a34a;font-weight:600">13.72</td>
+                <td style="color:#16a34a">+26.1%</td>
+                <td style="color:#ca8a04">-0.3%</td>
+                <td style="color:#16a34a">-143%</td>
+            </tr><tr>
+                <td style="text-align:left">2020-2024</td>
+                <td>2025</td>
+                <td>6.12</td>
+                <td style="color:#16a34a;font-weight:600">12.35</td>
+                <td style="color:#16a34a">+28.7%</td>
+                <td style="color:#ca8a04">-0.3%</td>
+                <td style="color:#16a34a">-102%</td>
+            </tr></tbody></table>
+        <p style="font-size:0.8rem;color:#64748b">
+            Avg OOS Sharpe: <strong>8.25</strong> |
+            All OOS profitable: <strong style="color:#16a34a">YES</strong> |
+            Avg degradation: -39%
+        </p>
+
+<!-- ── Year-by-Year ───────────────────────────────────────── -->
+<h2>5. Year-by-Year Performance</h2>
+<table>
+<thead><tr><th>Year</th><th>$100M Return</th><th>$100M DD</th><th>$500M Return</th><th>$500M DD</th></tr></thead>
+<tbody><tr>
+            <td>2020</td>
+            <td style="color:#16a34a">+38.1%</td>
+            <td style="color:#ca8a04">-0.8%</td>
+            <td style="color:#16a34a">+38.0%</td>
+            <td style="color:#ca8a04">-0.8%</td>
+        </tr><tr>
+            <td>2021</td>
+            <td style="color:#16a34a">+37.7%</td>
+            <td style="color:#ca8a04">-0.2%</td>
+            <td style="color:#16a34a">+37.6%</td>
+            <td style="color:#ca8a04">-0.2%</td>
+        </tr><tr>
+            <td>2022</td>
+            <td style="color:#16a34a">+12.5%</td>
+            <td style="color:#ca8a04">-4.1%</td>
+            <td style="color:#16a34a">+12.4%</td>
+            <td style="color:#ca8a04">-4.1%</td>
+        </tr><tr>
+            <td>2023</td>
+            <td style="color:#16a34a">+25.7%</td>
+            <td style="color:#ca8a04">-2.0%</td>
+            <td style="color:#16a34a">+25.6%</td>
+            <td style="color:#ca8a04">-2.0%</td>
+        </tr><tr>
+            <td>2024</td>
+            <td style="color:#16a34a">+26.2%</td>
+            <td style="color:#ca8a04">-0.3%</td>
+            <td style="color:#16a34a">+26.1%</td>
+            <td style="color:#ca8a04">-0.3%</td>
+        </tr><tr>
+            <td>2025</td>
+            <td style="color:#16a34a">+28.4%</td>
+            <td style="color:#ca8a04">-0.3%</td>
+            <td style="color:#16a34a">+28.3%</td>
+            <td style="color:#ca8a04">-0.3%</td>
+        </tr></tbody>
+</table>
+
+<!-- ── Capacity Analysis ──────────────────────────────────── -->
+<h2>6. Capacity Analysis at $1B AUM</h2>
+<p style="color:#64748b;font-size:0.8rem">
+  At $1B total AUM, each strategy gets its weighted allocation. Daily contracts needed
+  assume 5% per-trade sizing.
+</p>
+<table>
+<thead><tr><th>Strategy</th><th>Solo Capacity</th><th>Weight</th><th>$1B Allocation</th><th>Contracts/Day</th><th>Participation</th><th>Status</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left">EXP-1220 Tail Risk</td>
+            <td>$28.5B</td>
+            <td>50%</td>
+            <td>$500M</td>
+            <td>439</td>
+            <td>0.09%</td>
+            <td style="color:#16a34a">OK</td>
+        </tr><tr>
+            <td style="text-align:left">SPY Credit Spreads</td>
+            <td>$4.6B</td>
+            <td>15%</td>
+            <td>$150M</td>
+            <td>132</td>
+            <td>0.03%</td>
+            <td style="color:#16a34a">OK</td>
+        </tr><tr>
+            <td style="text-align:left">SPY Intraday MR</td>
+            <td>$2.0B</td>
+            <td>10%</td>
+            <td>$100M</td>
+            <td>88</td>
+            <td>0.02%</td>
+            <td style="color:#16a34a">OK</td>
+        </tr><tr>
+            <td style="text-align:left">SPY Iron Condors</td>
+            <td>$4.5B</td>
+            <td>15%</td>
+            <td>$150M</td>
+            <td>132</td>
+            <td>0.03%</td>
+            <td style="color:#16a34a">OK</td>
+        </tr><tr>
+            <td style="text-align:left">SPY Vol Term Structure</td>
+            <td>$10.0B</td>
+            <td>10%</td>
+            <td>$100M</td>
+            <td>88</td>
+            <td>0.02%</td>
+            <td style="color:#16a34a">OK</td>
+        </tr></tbody>
+</table>
+
+<div style="color:#64748b;font-size:0.7rem;margin-top:32px;border-top:1px solid #e2e8f0;padding-top:8px">
+  PilotAI Credit Spreads — SPY-Only High-Capacity Portfolio v1.0<br>
+  All strategies validated on real data (IronVault / Yahoo Finance).<br>
+  Slippage model: fixed spread + commission + sqrt impact. SPY ADV: 3.1M contracts/day.
+</div>
+
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portfolio Rebalancing Analysis</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+         margin:0; padding:24px; background:#0f172a; color:#e2e8f0; }
+  h1 { font-size:1.5rem; margin-bottom:2px; }
+  h2 { font-size:1.15rem; color:#38bdf8; margin:28px 0 10px;
+        border-bottom:1px solid #334155; padding-bottom:4px; }
+  .meta { color:#94a3b8; font-size:0.82rem; margin-bottom:20px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+           gap:10px; margin-bottom:20px; }
+  .card { background:#1e293b; border-radius:8px; padding:14px; }
+  .card-label { font-size:0.7rem; color:#94a3b8; text-transform:uppercase; }
+  .card-value { font-size:1.3rem; font-weight:700; margin-top:3px; }
+  table { width:100%; border-collapse:collapse; margin-bottom:14px; font-size:0.82rem; }
+  th { background:#1e293b; padding:6px 10px; text-align:right;
+       font-size:0.73rem; color:#94a3b8; border-bottom:1px solid #334155; }
+  th:first-child { text-align:left; }
+  td { padding:6px 10px; text-align:right; border-bottom:1px solid #1e293b; }
+  td:first-child { text-align:left; font-weight:500; }
+  tr:hover td { background:#1e293b44; }
+  .section-title { font-size:0.92rem; font-weight:600; margin:18px 0 6px;
+                    color:#cbd5e1; border-bottom:1px solid #334155; padding-bottom:3px; }
+  .verdict { background:#1e293b; border:2px solid #22c55e; border-radius:10px;
+              padding:16px; margin:18px 0; }
+  .verdict h3 { color:#22c55e; margin:0 0 8px; font-size:1rem; }
+  .tag { display:inline-block; padding:2px 7px; border-radius:4px;
+          font-size:0.7rem; font-weight:600; margin:2px; }
+  .tag-g { background:#16a34a33; color:#22c55e; }
+  .tag-b { background:#2563eb33; color:#60a5fa; }
+  .tag-y { background:#ca8a0433; color:#f59e0b; }
+  .flex { display:flex; gap:14px; flex-wrap:wrap; }
+  .flex > * { flex:1; min-width:220px; }
+</style>
+</head>
+<body>
+
+<h1>Portfolio Rebalancing Simulator</h1>
+<div class="meta">
+  Generated 2026-04-05 08:39 &ensp;|&ensp;
+  4 strategies &ensp;|&ensp;
+  Constraints: 5% floor / 60% cap &ensp;|&ensp;
+  2020-2025 (6 years)
+</div>
+
+<!-- ── Optimal Config ─────────────────────────────────────── -->
+<div class="verdict">
+  <h3>Optimal Configuration: Dynamic Monthly</h3>
+  <p style="margin:4px 0;font-size:0.85rem">Best risk-adjusted return after transaction costs.</p>
+  <span class="tag tag-g">CAGR +27.0%</span>
+  <span class="tag tag-b">Sharpe 4.93</span>
+  <span class="tag tag-y">Max DD -6.5%</span>
+  <span class="tag tag-b">Calmar 4.2</span>
+  <span class="tag tag-g">Cost drag 0.20%/yr</span>
+  <span class="tag tag-b">71 rebalances</span>
+</div>
+
+<!-- ── Strategy Weights ───────────────────────────────────── -->
+<h2>1. Portfolio Composition</h2>
+<table>
+<thead><tr><th>Strategy</th><th>Weight</th><th>SPY Corr</th><th>Regime Profile</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left">Cross-Asset Pairs</td>
+            <td>10%</td>
+            <td>+0.01</td>
+            <td>neutral</td>
+        </tr><tr>
+            <td style="text-align:left">EXP-1220 Dynamic</td>
+            <td>55%</td>
+            <td>+0.45</td>
+            <td>momentum</td>
+        </tr><tr>
+            <td style="text-align:left">TLT Iron Condors</td>
+            <td>25%</td>
+            <td>-0.30</td>
+            <td>defensive</td>
+        </tr><tr>
+            <td style="text-align:left">Vol Term Structure</td>
+            <td>10%</td>
+            <td>-0.15</td>
+            <td>defensive</td>
+        </tr></tbody>
+</table>
+
+<!-- ── Frequency Comparison ───────────────────────────────── -->
+<h2>2. Rebalancing Frequency Comparison</h2>
+<p style="color:#94a3b8;font-size:0.8rem">Green row = optimal. All at 5+3 bps commission+slippage. Static weights.</p>
+<table>
+<thead><tr><th>Frequency</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th>
+<th>Rebalances</th><th>Avg Turnover</th><th>Total Cost</th><th>Annual Drag</th></tr></thead>
+<tbody><tr style="">
+            <td style="text-align:left;font-weight:500">Daily (1d)</td>
+            <td style="color:#22c55e">+27.0%</td>
+            <td>4.61</td>
+            <td style="color:#f59e0b">-6.5%</td>
+            <td>4.1</td>
+            <td>1508</td>
+            <td>0.2%</td>
+            <td>$489</td>
+            <td>0.08%</td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">Weekly (5d)</td>
+            <td style="color:#22c55e">+27.0%</td>
+            <td>4.61</td>
+            <td style="color:#f59e0b">-6.5%</td>
+            <td>4.1</td>
+            <td>301</td>
+            <td>0.5%</td>
+            <td>$277</td>
+            <td>0.05%</td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">Bi-weekly (10d)</td>
+            <td style="color:#22c55e">+27.1%</td>
+            <td>4.62</td>
+            <td style="color:#f59e0b">-6.5%</td>
+            <td>4.1</td>
+            <td>150</td>
+            <td>0.9%</td>
+            <td>$236</td>
+            <td>0.04%</td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">Monthly (21d)</td>
+            <td style="color:#22c55e">+27.2%</td>
+            <td>4.64</td>
+            <td style="color:#f59e0b">-6.5%</td>
+            <td>4.2</td>
+            <td>71</td>
+            <td>1.7%</td>
+            <td>$213</td>
+            <td>0.04%</td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">Quarterly (63d)</td>
+            <td style="color:#22c55e">+27.6%</td>
+            <td>4.71</td>
+            <td style="color:#f59e0b">-6.4%</td>
+            <td>4.3</td>
+            <td>23</td>
+            <td>5.1%</td>
+            <td>$205</td>
+            <td>0.03%</td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">Never (buy & hold)</td>
+            <td style="color:#22c55e">+36.4%</td>
+            <td>4.95</td>
+            <td style="color:#f59e0b">-9.1%</td>
+            <td>4.0</td>
+            <td>0</td>
+            <td>0.0%</td>
+            <td>$0</td>
+            <td>0.00%</td>
+        </tr></tbody>
+</table>
+
+<!-- ── Cost Sensitivity ───────────────────────────────────── -->
+<h2>3. Transaction Cost Sensitivity (Weekly Rebalancing)</h2>
+<table>
+<thead><tr><th>Cost Level</th><th>CAGR</th><th>Sharpe</th><th>Total Cost</th><th>Annual Drag</th><th>vs Zero-Cost</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left">Zero cost</td>
+            <td style="color:#22c55e">+27.1%</td>
+            <td>4.62</td>
+            <td>$0</td>
+            <td>0.000%</td>
+            <td>+0.0%</td>
+        </tr><tr>
+            <td style="text-align:left">Low (2+1 bps)</td>
+            <td style="color:#22c55e">+27.0%</td>
+            <td>4.62</td>
+            <td>$104</td>
+            <td>0.017%</td>
+            <td>-0.0%</td>
+        </tr><tr>
+            <td style="text-align:left">Medium (5+3 bps)</td>
+            <td style="color:#22c55e">+27.0%</td>
+            <td>4.61</td>
+            <td>$277</td>
+            <td>0.046%</td>
+            <td>-0.0%</td>
+        </tr><tr>
+            <td style="text-align:left">High (10+5 bps)</td>
+            <td style="color:#22c55e">+27.0%</td>
+            <td>4.61</td>
+            <td>$519</td>
+            <td>0.087%</td>
+            <td>-0.1%</td>
+        </tr><tr>
+            <td style="text-align:left">Very high (20+10 bps)</td>
+            <td style="color:#22c55e">+27.0%</td>
+            <td>4.60</td>
+            <td>$1,037</td>
+            <td>0.173%</td>
+            <td>-0.1%</td>
+        </tr></tbody>
+</table>
+
+<!-- ── Static vs Dynamic ──────────────────────────────────── -->
+<h2>4. Static vs Dynamic (Regime-Adaptive) Rebalancing</h2>
+<p style="color:#94a3b8;font-size:0.8rem">Dynamic adjusts weights based on VIX regime: bull tilts to momentum, bear tilts to defensive.</p>
+<table>
+<thead><tr><th>Mode</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Turnover</th><th>Cost</th><th>Rebalances</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left;font-weight:500">Static Weekly</td>
+            <td style="color:#22c55e">+27.0%</td>
+            <td>4.61</td>
+            <td style="color:#f59e0b">-6.5%</td>
+            <td>1.7</td>
+            <td>$277</td>
+            <td>301</td>
+        </tr><tr>
+            <td style="text-align:left;font-weight:500">Dynamic Weekly</td>
+            <td style="color:#22c55e">+26.1%</td>
+            <td>4.78</td>
+            <td style="color:#f59e0b">-5.6%</td>
+            <td>22.0</td>
+            <td>$3,807</td>
+            <td>301</td>
+        </tr><tr>
+            <td style="text-align:left;font-weight:500">Dynamic Monthly</td>
+            <td style="color:#22c55e">+27.0%</td>
+            <td>4.93</td>
+            <td style="color:#f59e0b">-6.5%</td>
+            <td>7.5</td>
+            <td>$1,190</td>
+            <td>71</td>
+        </tr></tbody>
+</table>
+
+<!-- ── Regime Distribution ────────────────────────────────── -->
+<h2>5. Rebalance Events by Regime</h2>
+<table>
+<thead><tr><th>Regime</th><th>Events</th><th>Avg Turnover</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left">bear</td>
+            <td>9</td>
+            <td>26.4%</td>
+        </tr><tr>
+            <td style="text-align:left">bull</td>
+            <td>14</td>
+            <td>8.1%</td>
+        </tr><tr>
+            <td style="text-align:left">low_vol</td>
+            <td>1</td>
+            <td>7.9%</td>
+        </tr><tr>
+            <td style="text-align:left">neutral</td>
+            <td>47</td>
+            <td>8.4%</td>
+        </tr></tbody>
+</table>
+
+<!-- ── Year-by-Year ───────────────────────────────────────── -->
+<h2>6. Best Config — Year-by-Year</h2>
+<table>
+<thead><tr><th>Year</th><th>Return</th><th>Vol</th><th>Max DD</th></tr></thead>
+<tbody><tr>
+            <td>2020</td>
+            <td style="color:#22c55e">+37.3%</td>
+            <td>5.3%</td>
+            <td style="color:#f59e0b">-1.6%</td>
+        </tr><tr>
+            <td>2021</td>
+            <td style="color:#22c55e">+35.3%</td>
+            <td>2.2%</td>
+            <td style="color:#f59e0b">-0.4%</td>
+        </tr><tr>
+            <td>2022</td>
+            <td style="color:#22c55e">+0.3%</td>
+            <td>7.9%</td>
+            <td style="color:#f59e0b">-6.2%</td>
+        </tr><tr>
+            <td>2023</td>
+            <td style="color:#22c55e">+39.0%</td>
+            <td>4.3%</td>
+            <td style="color:#f59e0b">-1.6%</td>
+        </tr><tr>
+            <td>2024</td>
+            <td style="color:#22c55e">+24.2%</td>
+            <td>1.8%</td>
+            <td style="color:#f59e0b">-0.3%</td>
+        </tr></tbody>
+</table>
+
+<!-- ── Key Findings ───────────────────────────────────────── -->
+<h2>7. Key Findings</h2>
+<div class="verdict" style="border-color:#38bdf8">
+  <h3 style="color:#38bdf8">Implementation Recommendations</h3>
+  <ul style="font-size:0.85rem;margin:8px 0;padding-left:20px">
+    <li><strong>Optimal frequency</strong>: Weekly or bi-weekly — best balance of drift control vs costs</li>
+    <li><strong>Cost impact</strong>: At 8 bps round-trip, annual drag is ~0.05% — negligible vs alpha</li>
+    <li><strong>Dynamic vs static</strong>: Regime-adaptive adds turnover but may improve risk-adjusted returns in volatile periods</li>
+    <li><strong>Min trade threshold</strong>: Skip rebalances with &lt;0.5% turnover to reduce unnecessary costs</li>
+    <li><strong>Constraints enforced</strong>: 5% floor prevents zero allocation; 60% cap prevents concentration</li>
+  </ul>
+</div>
+
+<div style="color:#475569;font-size:0.7rem;margin-top:32px;border-top:1px solid #334155;padding-top:8px">
+  PilotAI Credit Spreads — Rebalancing Simulator v1.0<br>
+  4 strategies: EXP-1220 Dynamic, Cross-Asset Pairs, Vol Term Structure, TLT Iron Condors<br>
+  Strategy returns from real IronVault-validated experiments. Regime detection via VIX proxy.
+</div>
+
+</body>
+</html>

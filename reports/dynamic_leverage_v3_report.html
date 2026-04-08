@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dynamic Leverage v3 — 1× to 5× with Multi-Signal</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1100px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.5; }
+  h1 { font-size:1.8em; color:#0f172a; margin-bottom:4px; }
+  h2 { color:#334155; margin-top:2.5em; padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:24px; }
+  .verdict { text-align:center; padding:14px; border-radius:8px; font-size:1.1rem; font-weight:800;
+              background:#ca8a0410; color:#ca8a04; border:2px solid #ca8a0440; margin:20px 0; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:20px 0; }
+  .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:18px;
+          text-align:center; flex:1; min-width:120px; }
+  .kpi .value { font-size:1.7em; font-weight:800; color:#0f172a; }
+  .kpi .label { font-size:0.72em; color:#64748b; margin-top:4px; text-transform:uppercase; }
+  .good { color:#16a34a; } .warn { color:#ca8a04; } .bad { color:#dc2626; }
+  table { width:100%; border-collapse:collapse; margin:16px 0; font-size:0.84em; }
+  th { background:#f1f5f9; padding:10px 12px; text-align:right; font-weight:600; color:#475569;
+       border-bottom:2px solid #cbd5e1; font-size:0.76em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  .sources { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:16px; margin:16px 0; font-size:0.86rem; line-height:1.7; }
+  .signal-box { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:16px; margin:16px 0; font-size:0.86rem; line-height:1.7; }
+  .footer { margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0; font-size:0.78em; color:#94a3b8; text-align:center; }
+</style></head><body>
+
+<h1>Dynamic Leverage v3 — 1× to 5×</h1>
+<div class="subtitle">Multi-signal leverage controller for EXP-1220, t-1 lagged | 2026-04-06 14:18</div>
+
+<div class="verdict">PARTIAL — review tradeoff carefully</div>
+
+<div class="sources">
+    <strong>Data Sources (Rule Zero — all REAL):</strong><br>
+    EXP-1220 daily returns: load_exp1220_dynamic() (Yahoo SPY/^VIX/^VIX3M)<br>
+    ^VIX, ^VIX3M, SPY: Yahoo Finance chart API (lagged t-1, no look-ahead)<br>
+    Sharpe: compass/metrics.py annualized_sharpe (arithmetic mean)
+</div>
+
+<div class="signal-box">
+    <strong>5 Lagged Signals:</strong><br>
+    1. <strong>VIX bands</strong>: &lt;15 → 5×, 15-25 → 3×, 25-35 → 2×, &gt;35 → 1×<br>
+    2. <strong>Term structure</strong>: VIX/VIX3M &lt;0.95 = full, 0.95-1.0 = -1 tier, &gt;1.0 = -2 tiers<br>
+    3. <strong>DD brake</strong>: linear scale to 1× as DD goes 5% → 10%, force 1× above 10%<br>
+    4. <strong>Trailing pos-day rate</strong>: rolling 50d &lt; 50% positive → -1 tier<br>
+    5. <strong>COMPASS regime</strong>: bull = full, bear = -1, crash (VIX&gt;40) = -2
+</div>
+
+<h2>The Key Question</h2>
+<p>Can dynamic leverage get us 3×-like returns (285%+) with 2×-like drawdowns (&lt;15%)?</p>
+
+<div class="kpi-row">
+    <div class="kpi"><div class="value good">169.0%</div><div class="label">Dynamic CAGR</div>
+        <div style="font-size:0.7em;color:#64748b">Target: ~285% ✗</div></div>
+    <div class="kpi"><div class="value">3.27</div><div class="label">Dynamic Sharpe</div></div>
+    <div class="kpi"><div class="value good">13.5%</div><div class="label">Dynamic DD</div>
+        <div style="font-size:0.7em;color:#64748b">vs Static 3×: 21.5% ✓ better</div></div>
+    <div class="kpi"><div class="value">12.52</div><div class="label">Dynamic Calmar</div></div>
+    <div class="kpi"><div class="value">2.278×</div><div class="label">Avg Leverage</div></div>
+</div>
+
+<h2>Static vs Dynamic Comparison</h2>
+<table>
+    <thead><tr><th>Strategy</th><th>Leverage</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th><th>Vol</th><th>Sortino</th></tr></thead>
+    <tbody><tr>
+            <td style="font-weight:600">Static 1.5×</td>
+            <td>1.5× constant</td>
+            <td style="color:#16a34a;font-weight:700">99.2%</td>
+            <td style="font-weight:700">3.83</td>
+            <td style="color:#16a34a">11.2%</td>
+            <td>8.85</td>
+            <td>17.2%</td>
+            <td>6.79</td>
+        </tr><tr>
+            <td style="font-weight:600">Static 3×</td>
+            <td>3.0× constant</td>
+            <td style="color:#16a34a;font-weight:700">285.0%</td>
+            <td style="font-weight:700">3.96</td>
+            <td style="color:#ca8a04">21.5%</td>
+            <td>13.26</td>
+            <td>34.5%</td>
+            <td>7.03</td>
+        </tr><tr>
+            <td style="font-weight:600">Dynamic 1×-5× (v3)</td>
+            <td>2.278× avg</td>
+            <td style="color:#16a34a;font-weight:700">169.0%</td>
+            <td style="font-weight:700">3.27</td>
+            <td style="color:#16a34a">13.5%</td>
+            <td>12.52</td>
+            <td>30.3%</td>
+            <td>4.57</td>
+        </tr></tbody>
+</table>
+
+<h2>Year-by-Year Comparison</h2>
+<table>
+    <thead><tr>
+        <th rowspan="2">Year</th>
+        <th colspan="3">Static 1.5×</th>
+        <th colspan="3">Static 3×</th>
+        <th colspan="3">Dynamic v3</th>
+    </tr><tr>
+        <th>CAGR</th><th>Sharpe</th><th>DD</th>
+        <th>CAGR</th><th>Sharpe</th><th>DD</th>
+        <th>CAGR</th><th>Sharpe</th><th>DD</th>
+    </tr></thead>
+    <tbody><tr>
+            <td style="font-weight:700">2020</td>
+            <td>81.5%</td>
+            <td>4.61</td>
+            <td>3.9%</td>
+            <td>224.3%</td>
+            <td>4.80</td>
+            <td>7.8%</td>
+            <td style="font-weight:700">142.2%</td>
+            <td style="font-weight:700">3.66</td>
+            <td style="font-weight:700">6.8%</td>
+        </tr><tr>
+            <td style="font-weight:700">2021</td>
+            <td>149.7%</td>
+            <td>5.44</td>
+            <td>2.7%</td>
+            <td>505.5%</td>
+            <td>5.58</td>
+            <td>5.3%</td>
+            <td style="font-weight:700">369.9%</td>
+            <td style="font-weight:700">5.09</td>
+            <td style="font-weight:700">5.3%</td>
+        </tr><tr>
+            <td style="font-weight:700">2022</td>
+            <td>32.5%</td>
+            <td>1.35</td>
+            <td>11.2%</td>
+            <td>69.7%</td>
+            <td>1.47</td>
+            <td>21.5%</td>
+            <td style="font-weight:700">10.6%</td>
+            <td style="font-weight:700">0.42</td>
+            <td style="font-weight:700">12.5%</td>
+        </tr><tr>
+            <td style="font-weight:700">2023</td>
+            <td>132.0%</td>
+            <td>3.59</td>
+            <td>6.5%</td>
+            <td>409.8%</td>
+            <td>3.68</td>
+            <td>12.8%</td>
+            <td style="font-weight:700">157.1%</td>
+            <td style="font-weight:700">2.42</td>
+            <td style="font-weight:700">13.5%</td>
+        </tr><tr>
+            <td style="font-weight:700">2024</td>
+            <td>106.2%</td>
+            <td>4.60</td>
+            <td>2.4%</td>
+            <td>314.9%</td>
+            <td>4.75</td>
+            <td>4.8%</td>
+            <td style="font-weight:700">261.5%</td>
+            <td style="font-weight:700">3.70</td>
+            <td style="font-weight:700">7.8%</td>
+        </tr><tr>
+            <td style="font-weight:700">2025</td>
+            <td>118.1%</td>
+            <td>4.68</td>
+            <td>4.0%</td>
+            <td>362.9%</td>
+            <td>4.82</td>
+            <td>7.9%</td>
+            <td style="font-weight:700">223.7%</td>
+            <td style="font-weight:700">4.11</td>
+            <td style="font-weight:700">9.2%</td>
+        </tr></tbody>
+</table>
+
+<h2>Leverage Distribution (Dynamic v3)</h2>
+<table>
+    <thead><tr><th>Tier</th><th>% of Days</th></tr></thead>
+    <tbody><tr><td>1×</td><td>31.1%</td></tr><tr><td>2×</td><td>27.3%</td></tr><tr><td>3×</td><td>28.9%</td></tr><tr><td>4×</td><td>0.7%</td></tr><tr><td>5×</td><td>10.2%</td></tr><tr><td>other</td><td>1.8%</td></tr></tbody>
+</table>
+<p>Avg: 2.278× | Median: 2.0× | Range: 1.0× → 5.0×</p>
+
+<div class="footer">
+    Dynamic Leverage v3 — compass/dynamic_leverage_v3.py<br>
+    All data REAL (Yahoo + IronVault-derived). All signals t-1 lagged. No look-ahead.<br>
+    Sharpe via compass/metrics.py (arithmetic mean, correct formula).
+</div>
+
+</body></html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EXP-1700 VIX Futures Roll Yield</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1000px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.5; }
+  h1 { font-size:1.8em; color:#0f172a; margin-bottom:4px; }
+  h2 { color:#334155; margin-top:2.5em; padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:24px; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:20px 0; }
+  .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:18px;
+          text-align:center; flex:1; min-width:130px; }
+  .kpi .value { font-size:1.7em; font-weight:800; color:#0f172a; }
+  .kpi .label { font-size:0.72em; color:#64748b; margin-top:4px; text-transform:uppercase; }
+  .good { color:#16a34a; } .warn { color:#ca8a04; } .bad { color:#dc2626; }
+  table { width:100%; border-collapse:collapse; margin:16px 0; font-size:0.86em; }
+  th { background:#f1f5f9; padding:10px 12px; text-align:right; font-weight:600; color:#475569;
+       border-bottom:2px solid #cbd5e1; font-size:0.80em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  .callout { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:16px; margin:16px 0; font-size:0.86rem; line-height:1.7; }
+  .sources { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:16px; margin:16px 0; font-size:0.86rem; }
+  .footer { margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0; font-size:0.78em; color:#94a3b8; text-align:center; }
+</style></head><body>
+
+<h1>EXP-1700 — VIX Futures Roll Yield</h1>
+<div class="subtitle">Phase 7 Wave 1 | Short VXX in contango | Real Yahoo Finance data | 2026-04-06 08:41</div>
+
+<div class="sources">
+    <strong>Data Sources (Rule Zero compliant — zero synthetic):</strong><br>
+    • <code>^VIX</code> — CBOE Volatility Index, Yahoo Finance chart API<br>
+    • <code>^VIX3M</code> — CBOE 3-Month VIX Index, Yahoo Finance chart API<br>
+    • <code>VXX</code> — iPath VIX Short-Term Futures ETN, Yahoo Finance chart API<br>
+    • <code>SPY</code> — SPDR S&P 500 ETF (correlation ref), Yahoo Finance chart API<br>
+    • EXP-1220 returns — derived from same Yahoo VIX/SPY (already validated)
+</div>
+
+<div class="kpi-row">
+    <div class="kpi"><div class="value good">4.4%</div><div class="label">Full CAGR</div></div>
+    <div class="kpi"><div class="value">0.03</div><div class="label">Sharpe (correct)</div></div>
+    <div class="kpi"><div class="value">19.1%</div><div class="label">Max DD</div></div>
+    <div class="kpi"><div class="value">7.0%</div><div class="label">OOS CAGR</div></div>
+    <div class="kpi"><div class="value">0.27</div><div class="label">OOS Sharpe</div></div>
+    <div class="kpi"><div class="value" style="color:#ca8a04">+0.448</div><div class="label">Corr to EXP-1220</div></div>
+</div>
+
+<div class="callout">
+    <strong>Market context:</strong> VIX/VIX3M ratio was in contango (&lt;1.0)
+    <strong>91%</strong> of the sample period (avg ratio 0.903).
+    Strategy held a short VXX position <strong>86%</strong> of the time.
+    Theory: VXX decays in contango due to negative roll yield on VIX futures.
+</div>
+
+<h2>Walk-Forward OOS (expanding window, train 2018-N, test N+1)</h2>
+<table>
+    <thead><tr><th>Year</th><th>Days</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Vol</th><th>% Short</th></tr></thead>
+    <tbody><tr>
+            <td style="font-weight:700">2020</td>
+            <td>253</td>
+            <td style="color:#dc2626;font-weight:600">-1.8%</td>
+            <td style="font-weight:700">-0.86</td>
+            <td>8.6%</td>
+            <td>7.0%</td>
+            <td>77%</td>
+        </tr><tr>
+            <td style="font-weight:700">2021</td>
+            <td>252</td>
+            <td style="color:#16a34a;font-weight:600">9.2%</td>
+            <td style="font-weight:700">0.56</td>
+            <td>4.3%</td>
+            <td>8.4%</td>
+            <td>98%</td>
+        </tr><tr>
+            <td style="font-weight:700">2022</td>
+            <td>251</td>
+            <td style="color:#16a34a;font-weight:600">6.0%</td>
+            <td style="font-weight:700">0.20</td>
+            <td>4.9%</td>
+            <td>8.4%</td>
+            <td>80%</td>
+        </tr><tr>
+            <td style="font-weight:700">2023</td>
+            <td>250</td>
+            <td style="color:#16a34a;font-weight:600">37.4%</td>
+            <td style="font-weight:700">1.76</td>
+            <td>9.8%</td>
+            <td>16.2%</td>
+            <td>100%</td>
+        </tr><tr>
+            <td style="font-weight:700">2024</td>
+            <td>252</td>
+            <td style="color:#dc2626;font-weight:600">-7.8%</td>
+            <td style="font-weight:700">-0.91</td>
+            <td>17.6%</td>
+            <td>13.0%</td>
+            <td>91%</td>
+        </tr><tr>
+            <td style="font-weight:700">2025</td>
+            <td>249</td>
+            <td style="color:#16a34a;font-weight:600">4.4%</td>
+            <td style="font-weight:700">-0.02</td>
+            <td>3.3%</td>
+            <td>4.5%</td>
+            <td>83%</td>
+        </tr></tbody>
+</table>
+
+<h2>Strategy Parameters</h2>
+<table>
+    <thead><tr><th>Parameter</th><th>Value</th><th>Notes</th></tr></thead>
+    <tbody>
+        <tr><td>Contango enter</td><td>0.95</td><td>Short VXX when VIX/VIX3M &lt; this</td></tr>
+        <tr><td>Contango exit</td><td>1.0</td><td>Flat when ratio crosses this</td></tr>
+        <tr><td>Backwardation flat</td><td>1.05</td><td>Hard exit in crisis</td></tr>
+        <tr><td>Target vol</td><td>10%</td><td>Inverse-vol position sizing</td></tr>
+        <tr><td>Vol lookback</td><td>20 days</td><td>Realized vol window</td></tr>
+        <tr><td>Max position</td><td>1.0</td><td>Absolute cap on notional</td></tr>
+        <tr><td>Signal lag</td><td>1 day (t-1)</td><td>No look-ahead</td></tr>
+    </tbody>
+</table>
+
+<div class="footer">
+    EXP-1700 VIX Roll Yield — compass/vix_roll_yield.py<br>
+    All data from Yahoo Finance chart API. No synthetic data. Sharpe via compass/metrics.py.
+</div>
+
+</body></html>

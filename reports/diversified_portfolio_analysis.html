@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diversified Portfolio Analysis — 4 Strategies</title>
+<style>
+  body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+         margin:0; padding:24px; background:#0f172a; color:#e2e8f0; }
+  h1 { font-size:1.5rem; margin-bottom:2px; }
+  h2 { font-size:1.15rem; color:#38bdf8; margin:28px 0 10px;
+        border-bottom:1px solid #334155; padding-bottom:4px; }
+  .meta { color:#94a3b8; font-size:0.82rem; margin-bottom:20px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+           gap:10px; margin-bottom:20px; }
+  .card { background:#1e293b; border-radius:8px; padding:14px; }
+  .card-label { font-size:0.72rem; color:#94a3b8; text-transform:uppercase; letter-spacing:.04em; }
+  .card-value { font-size:1.4rem; font-weight:700; margin-top:3px; }
+  table { width:100%; border-collapse:collapse; margin-bottom:14px; font-size:0.83rem; }
+  th { background:#1e293b; padding:7px 10px; text-align:right;
+       font-size:0.75rem; color:#94a3b8; border-bottom:1px solid #334155; }
+  th:first-child { text-align:left; }
+  td { padding:6px 10px; text-align:right; border-bottom:1px solid #1e293b; }
+  td:first-child { text-align:left; font-weight:500; }
+  tr:hover td { background:#1e293b44; }
+  .section-title { font-size:0.95rem; font-weight:600; margin:20px 0 6px;
+                    color:#cbd5e1; border-bottom:1px solid #334155; padding-bottom:3px; }
+  .verdict { background:#1e293b; border:2px solid #22c55e; border-radius:10px;
+              padding:18px; margin:20px 0; }
+  .verdict h3 { color:#22c55e; margin:0 0 10px; }
+  .tag { display:inline-block; padding:2px 8px; border-radius:4px;
+          font-size:0.72rem; font-weight:600; margin:2px; }
+  .tag-g { background:#16a34a33; color:#22c55e; }
+  .tag-r { background:#dc262633; color:#ef4444; }
+  .tag-b { background:#2563eb33; color:#60a5fa; }
+  .tag-y { background:#ca8a0433; color:#f59e0b; }
+  .flex { display:flex; gap:14px; flex-wrap:wrap; }
+  .flex > * { flex:1; min-width:240px; }
+  @media (max-width:700px) { .flex { flex-direction:column; } }
+</style>
+</head>
+<body>
+
+<h1>Diversified Portfolio Analysis</h1>
+<div class="meta">
+  Generated 2026-04-05 00:34 &ensp;|&ensp; 4 strategies &ensp;|&ensp;
+  Constraints: 10% floor / 60% cap &ensp;|&ensp; Leverage: 1x, 1.5x, 2x &ensp;|&ensp;
+  Walk-forward validated
+</div>
+
+<!-- ── Verdict ────────────────────────────────────────────── -->
+<div class="verdict">
+  <h3>TARGET MET: Equal Weight 2.0x</h3>
+  <p style="margin:0 0 8px">Best diversified blend targeting 60%+ CAGR with &lt;10% DD.</p>
+  <span class="tag tag-g">CAGR +62.0%</span>
+  <span class="tag tag-b">Sharpe 8.73</span>
+  <span class="tag tag-y">Max DD -3.7%</span>
+  <span class="tag tag-g">Calmar 16.8</span>
+  <span class="tag tag-b">Sortino 15.9</span>
+</div>
+
+<!-- ── Strategy Overview ──────────────────────────────────── -->
+<h2>1. Strategy Components</h2>
+<table>
+<thead><tr><th>Strategy</th><th>Source</th><th>Avg CAGR</th><th>Avg Sharpe</th><th>Avg DD</th><th>SPY Corr</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left;font-weight:600">EXP-1220 Dynamic</td>
+            <td>EXP-1220-real (Yahoo Finance, real data)</td>
+            <td style="color:#22c55e">+37.6%</td>
+            <td>3.9</td>
+            <td style="color:#f59e0b">3.0%</td>
+            <td>+0.45</td>
+        </tr><tr>
+            <td style="text-align:left;font-weight:600">Cross-Asset Pairs</td>
+            <td>EXP-1090-max (34/34 tests)</td>
+            <td style="color:#22c55e">+18.8%</td>
+            <td>2.6</td>
+            <td style="color:#f59e0b">3.7%</td>
+            <td>+0.10</td>
+        </tr><tr>
+            <td style="text-align:left;font-weight:600">Vol Term Structure</td>
+            <td>EXP-1080-max (39 tests, VIX term structure)</td>
+            <td style="color:#22c55e">+13.0%</td>
+            <td>1.7</td>
+            <td style="color:#f59e0b">4.7%</td>
+            <td>-0.15</td>
+        </tr><tr>
+            <td style="text-align:left;font-weight:600">TLT Iron Condors</td>
+            <td>EXP-870-max TLT (IronVault real data)</td>
+            <td style="color:#22c55e">+15.9%</td>
+            <td>19.3</td>
+            <td style="color:#f59e0b">0.5%</td>
+            <td>-0.30</td>
+        </tr></tbody>
+</table>
+
+<!-- ── Correlation ────────────────────────────────────────── -->
+<h2>2. Correlation Matrix</h2>
+<p style="color:#94a3b8;font-size:0.8rem">Green &lt;0.15, Yellow 0.15–0.40, Red &gt;0.40</p>
+<table>
+<thead><tr><th></th><th style="font-size:0.7rem">Cross-Asset </th><th style="font-size:0.7rem">EXP-1220 Dyn</th><th style="font-size:0.7rem">TLT Iron Con</th><th style="font-size:0.7rem">Vol Term Str</th></tr></thead>
+<tbody><tr><td style="text-align:left;font-size:0.8rem">Cross-Asset Pair</td><td style="background:#334155">1.00</td><td style="color:#22c55e">-0.08</td><td style="color:#22c55e">0.02</td><td style="color:#22c55e">-0.01</td></tr><tr><td style="text-align:left;font-size:0.8rem">EXP-1220 Dynamic</td><td style="color:#22c55e">-0.08</td><td style="background:#334155">1.00</td><td style="color:#22c55e">-0.02</td><td style="color:#22c55e">0.01</td></tr><tr><td style="text-align:left;font-size:0.8rem">TLT Iron Condors</td><td style="color:#22c55e">0.02</td><td style="color:#22c55e">-0.02</td><td style="background:#334155">1.00</td><td style="color:#22c55e">0.04</td></tr><tr><td style="text-align:left;font-size:0.8rem">Vol Term Structu</td><td style="color:#22c55e">-0.01</td><td style="color:#22c55e">0.01</td><td style="color:#22c55e">0.04</td><td style="background:#334155">1.00</td></tr></tbody>
+</table>
+
+<!-- ── Weight Allocations ─────────────────────────────────── -->
+<h2>3. Weight Allocations (1x leverage)</h2>
+<table>
+<thead><tr><th>Method</th><th style="font-size:0.75rem">Cross-Asset Pa</th><th style="font-size:0.75rem">EXP-1220 Dynam</th><th style="font-size:0.75rem">TLT Iron Condo</th><th style="font-size:0.75rem">Vol Term Struc</th></tr></thead>
+<tbody><tr style="background:#1a1a2e">
+        <td style="text-align:left;font-weight:600">Concentrated</td><td style="color:#e2e8f0">2%</td><td style="color:#ef4444">95%</td><td style="color:#e2e8f0">1%</td><td style="color:#e2e8f0">2%</td></tr><tr><td style="text-align:left">Equal Weight</td><td style="color:#22c55e">25%</td><td style="color:#22c55e">25%</td><td style="color:#22c55e">25%</td><td style="color:#22c55e">25%</td></tr><tr><td style="text-align:left">Risk Parity</td><td style="color:#22c55e">13%</td><td style="color:#22c55e">13%</td><td style="color:#ef4444">60%</td><td style="color:#22c55e">13%</td></tr><tr><td style="text-align:left">Max Sharpe</td><td style="color:#22c55e">13%</td><td style="color:#22c55e">13%</td><td style="color:#ef4444">60%</td><td style="color:#22c55e">13%</td></tr></tbody>
+</table>
+<p style="color:#94a3b8;font-size:0.8rem">Constraints: min 10%, max 60%. Red = violation.</p>
+
+<!-- ── Full Comparison ────────────────────────────────────── -->
+<h2>4. Concentrated vs Diversified — All Variants</h2>
+<p style="color:#94a3b8;font-size:0.8rem">Green rows meet 60%+ CAGR and &lt;10% DD target.</p>
+<table>
+<thead><tr><th>Portfolio</th><th>Lev</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Calmar</th><th>Sortino</th><th>VaR 5%</th></tr></thead>
+<tbody><tr style="background:#1a1a2e">
+        <td style="text-align:left;font-weight:600">Concentrated (95% EXP-1220)</td>
+        <td>—</td>
+        <td style="color:#22c55e">+51.2%</td>
+        <td>5.27</td>
+        <td style="color:#f59e0b">-6.7%</td>
+        <td>7.7</td>
+        <td>9.1</td>
+        <td>-0.7%</td>
+    </tr><tr style="">
+                <td style="text-align:left">Equal Weight</td>
+                <td>1.0x</td>
+                <td style="color:#22c55e">+27.4%</td>
+                <td>6.94</td>
+                <td style="color:#f59e0b">-1.9%</td>
+                <td>14.8</td>
+                <td>12.6</td>
+                <td>-0.2%</td>
+            </tr><tr style="">
+                <td style="text-align:left">Equal Weight</td>
+                <td>1.5x</td>
+                <td style="color:#22c55e">+43.7%</td>
+                <td>7.93</td>
+                <td style="color:#f59e0b">-2.8%</td>
+                <td>15.7</td>
+                <td>14.4</td>
+                <td>-0.3%</td>
+            </tr><tr style="background:#0a2a1a;">
+                <td style="text-align:left">Equal Weight</td>
+                <td>2.0x</td>
+                <td style="color:#22c55e">+62.0%</td>
+                <td>8.73</td>
+                <td style="color:#f59e0b">-3.7%</td>
+                <td>16.8</td>
+                <td>15.9</td>
+                <td>-0.5%</td>
+            </tr><tr style="">
+                <td style="text-align:left">Risk Parity</td>
+                <td>1.0x</td>
+                <td style="color:#22c55e">+22.4%</td>
+                <td>9.86</td>
+                <td style="color:#f59e0b">-0.9%</td>
+                <td>26.0</td>
+                <td>19.1</td>
+                <td>-0.1%</td>
+            </tr><tr style="">
+                <td style="text-align:left">Risk Parity</td>
+                <td>1.5x</td>
+                <td style="color:#22c55e">+35.4%</td>
+                <td>11.35</td>
+                <td style="color:#f59e0b">-1.3%</td>
+                <td>27.4</td>
+                <td>21.9</td>
+                <td>-0.2%</td>
+            </tr><tr style="">
+                <td style="text-align:left">Risk Parity</td>
+                <td>2.0x</td>
+                <td style="color:#22c55e">+49.8%</td>
+                <td>12.46</td>
+                <td style="color:#f59e0b">-1.7%</td>
+                <td>29.0</td>
+                <td>24.1</td>
+                <td>-0.2%</td>
+            </tr><tr style="">
+                <td style="text-align:left">Max Sharpe</td>
+                <td>1.0x</td>
+                <td style="color:#22c55e">+22.4%</td>
+                <td>9.86</td>
+                <td style="color:#f59e0b">-0.9%</td>
+                <td>26.0</td>
+                <td>19.1</td>
+                <td>-0.1%</td>
+            </tr><tr style="">
+                <td style="text-align:left">Max Sharpe</td>
+                <td>1.5x</td>
+                <td style="color:#22c55e">+35.4%</td>
+                <td>11.35</td>
+                <td style="color:#f59e0b">-1.3%</td>
+                <td>27.4</td>
+                <td>21.9</td>
+                <td>-0.2%</td>
+            </tr><tr style="">
+                <td style="text-align:left">Max Sharpe</td>
+                <td>2.0x</td>
+                <td style="color:#22c55e">+49.8%</td>
+                <td>12.46</td>
+                <td style="color:#f59e0b">-1.7%</td>
+                <td>29.0</td>
+                <td>24.1</td>
+                <td>-0.2%</td>
+            </tr></tbody>
+</table>
+
+<!-- ── Tail Risk ──────────────────────────────────────────── -->
+<h2>5. Tail Risk: Best Diversified vs Concentrated (1x)</h2>
+<table>
+<thead><tr><th>Metric</th><th>Diversified</th><th>Concentrated</th><th>Improvement</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left">VaR (5%)</td>
+            <td>-0.45%</td>
+            <td>-0.70%</td>
+            <td style="color:#ef4444;font-weight:600">-0.25pp</td>
+        </tr><tr>
+            <td style="text-align:left">CVaR (5%)</td>
+            <td>-0.67%</td>
+            <td>-1.02%</td>
+            <td style="color:#ef4444;font-weight:600">-0.35pp</td>
+        </tr><tr>
+            <td style="text-align:left">Worst Day</td>
+            <td>-1.45%</td>
+            <td>-1.99%</td>
+            <td style="color:#ef4444;font-weight:600">-0.55pp</td>
+        </tr><tr>
+            <td style="text-align:left">Worst Month</td>
+            <td>-3.50%</td>
+            <td>-3.48%</td>
+            <td style="color:#22c55e;font-weight:600">+0.02pp</td>
+        </tr><tr>
+            <td style="text-align:left">Max Drawdown</td>
+            <td>-3.69%</td>
+            <td>-6.67%</td>
+            <td style="color:#ef4444;font-weight:600">-2.99pp</td>
+        </tr></tbody>
+</table>
+
+<!-- ── Walk-Forward ───────────────────────────────────────── -->
+<h2>6. Walk-Forward Validation (2y IS / 1y OOS)</h2>
+<table>
+<thead><tr><th>Method</th><th>Windows</th><th>IS Sharpe</th><th>OOS Sharpe</th><th>Degradation</th><th>All OOS +</th><th>OOS CAGR</th><th>OOS DD</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left">Equal Weight</td>
+            <td>3</td>
+            <td>7.40</td>
+            <td>6.16</td>
+            <td style="color:#22c55e">17%</td>
+            <td style="color:#22c55e">All +</td>
+            <td>+23.9%</td>
+            <td>-1.9%</td>
+        </tr><tr>
+            <td style="text-align:left">Risk Parity</td>
+            <td>3</td>
+            <td>10.74</td>
+            <td>9.88</td>
+            <td style="color:#22c55e">8%</td>
+            <td style="color:#22c55e">All +</td>
+            <td>+20.0%</td>
+            <td>-0.7%</td>
+        </tr><tr>
+            <td style="text-align:left">Max Sharpe</td>
+            <td>3</td>
+            <td>10.74</td>
+            <td>9.88</td>
+            <td style="color:#22c55e">8%</td>
+            <td style="color:#22c55e">All +</td>
+            <td>+20.0%</td>
+            <td>-0.7%</td>
+        </tr></tbody>
+</table>
+
+<div class="section-title">Equal Weight — Walk-Forward Windows</div><table><thead><tr><th>Window</th><th>IS Sharpe</th><th>OOS Sharpe</th><th>OOS CAGR</th><th>OOS DD</th><th style="font-size:0.7rem">Cross-As</th><th style="font-size:0.7rem">EXP-1220</th><th style="font-size:0.7rem">TLT Iron</th><th style="font-size:0.7rem">Vol Term</th></tr></thead><tbody><tr>
+                <td>W1</td>
+                <td>8.13</td>
+                <td style="color:#22c55e">5.06</td>
+                <td style="color:#22c55e">+24.3%</td>
+                <td style="color:#f59e0b">-1.9%</td><td>25%</td><td>25%</td><td>25%</td><td>25%</td></tr><tr>
+                <td>W2</td>
+                <td>7.01</td>
+                <td style="color:#22c55e">7.21</td>
+                <td style="color:#22c55e">+29.9%</td>
+                <td style="color:#f59e0b">-0.7%</td><td>25%</td><td>25%</td><td>25%</td><td>25%</td></tr><tr>
+                <td>W3</td>
+                <td>7.06</td>
+                <td style="color:#22c55e">6.21</td>
+                <td style="color:#22c55e">+17.8%</td>
+                <td style="color:#f59e0b">-0.6%</td><td>25%</td><td>25%</td><td>25%</td><td>25%</td></tr></tbody></table><div class="section-title">Risk Parity — Walk-Forward Windows</div><table><thead><tr><th>Window</th><th>IS Sharpe</th><th>OOS Sharpe</th><th>OOS CAGR</th><th>OOS DD</th><th style="font-size:0.7rem">Cross-As</th><th style="font-size:0.7rem">EXP-1220</th><th style="font-size:0.7rem">TLT Iron</th><th style="font-size:0.7rem">Vol Term</th></tr></thead><tbody><tr>
+                <td>W1</td>
+                <td>11.80</td>
+                <td style="color:#22c55e">7.17</td>
+                <td style="color:#22c55e">+18.6%</td>
+                <td style="color:#f59e0b">-0.7%</td><td>12%</td><td>12%</td><td>64%</td><td>12%</td></tr><tr>
+                <td>W2</td>
+                <td>10.07</td>
+                <td style="color:#22c55e">11.26</td>
+                <td style="color:#22c55e">+24.1%</td>
+                <td style="color:#f59e0b">-0.2%</td><td>12%</td><td>12%</td><td>64%</td><td>12%</td></tr><tr>
+                <td>W3</td>
+                <td>10.35</td>
+                <td style="color:#22c55e">11.20</td>
+                <td style="color:#22c55e">+17.4%</td>
+                <td style="color:#f59e0b">-0.2%</td><td>12%</td><td>12%</td><td>64%</td><td>12%</td></tr></tbody></table><div class="section-title">Max Sharpe — Walk-Forward Windows</div><table><thead><tr><th>Window</th><th>IS Sharpe</th><th>OOS Sharpe</th><th>OOS CAGR</th><th>OOS DD</th><th style="font-size:0.7rem">Cross-As</th><th style="font-size:0.7rem">EXP-1220</th><th style="font-size:0.7rem">TLT Iron</th><th style="font-size:0.7rem">Vol Term</th></tr></thead><tbody><tr>
+                <td>W1</td>
+                <td>11.80</td>
+                <td style="color:#22c55e">7.17</td>
+                <td style="color:#22c55e">+18.6%</td>
+                <td style="color:#f59e0b">-0.7%</td><td>12%</td><td>12%</td><td>64%</td><td>12%</td></tr><tr>
+                <td>W2</td>
+                <td>10.07</td>
+                <td style="color:#22c55e">11.26</td>
+                <td style="color:#22c55e">+24.1%</td>
+                <td style="color:#f59e0b">-0.2%</td><td>12%</td><td>12%</td><td>64%</td><td>12%</td></tr><tr>
+                <td>W3</td>
+                <td>10.35</td>
+                <td style="color:#22c55e">11.20</td>
+                <td style="color:#22c55e">+17.4%</td>
+                <td style="color:#f59e0b">-0.2%</td><td>12%</td><td>12%</td><td>64%</td><td>12%</td></tr></tbody></table>
+
+<!-- ── Best Blend Year-by-Year ────────────────────────────── -->
+<h2>7. Best Blend Year-by-Year</h2>
+<table>
+<thead><tr><th>Year</th><th>Return</th><th>Vol</th><th>Max DD</th><th>Sharpe</th></tr></thead>
+<tbody><tr>
+                <td>2020</td>
+                <td style="color:#22c55e">+78.9%</td>
+                <td>8.4%</td>
+                <td style="color:#f59e0b">-2.0%</td>
+                <td>8.87</td>
+            </tr><tr>
+                <td>2021</td>
+                <td style="color:#22c55e">+79.1%</td>
+                <td>5.7%</td>
+                <td style="color:#f59e0b">-1.5%</td>
+                <td>12.98</td>
+            </tr><tr>
+                <td>2022</td>
+                <td style="color:#22c55e">+53.7%</td>
+                <td>7.8%</td>
+                <td style="color:#f59e0b">-3.7%</td>
+                <td>6.27</td>
+            </tr><tr>
+                <td>2023</td>
+                <td style="color:#22c55e">+68.5%</td>
+                <td>7.1%</td>
+                <td style="color:#f59e0b">-1.3%</td>
+                <td>9.03</td>
+            </tr><tr>
+                <td>2024</td>
+                <td style="color:#22c55e">+38.9%</td>
+                <td>4.3%</td>
+                <td style="color:#f59e0b">-1.2%</td>
+                <td>8.04</td>
+            </tr><tr>
+                <td>2025</td>
+                <td style="color:#22c55e">+55.3%</td>
+                <td>5.0%</td>
+                <td style="color:#f59e0b">-1.3%</td>
+                <td>10.26</td>
+            </tr></tbody>
+</table>
+
+<!-- ── Footer ─────────────────────────────────────────────── -->
+<div style="color:#475569;font-size:0.72rem;margin-top:36px;border-top:1px solid #334155;padding-top:10px">
+  PilotAI Credit Spreads — Diversified Portfolio Analysis v2.0<br>
+  4 strategies (EXP-1220, EXP-1090, EXP-1080, EXP-870-TLT) |
+  Walk-forward validated | 10% floor / 60% cap enforced<br>
+  Strategy data: EXP-1220-real (Yahoo), EXP-870-max (IronVault), EXP-1090 (34 tests), EXP-1080 (39 tests)
+</div>
+
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>EXP-1760 Earnings Vol Crush — Honest Data Gap</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--green:#059669;--red:#dc2626;--yellow:#d97706;--blue:#2563eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;max-width:1100px;margin:0 auto;padding:24px}
+h1{font-size:1.5rem;font-weight:800}
+h2{font-size:1.1rem;font-weight:700;margin:28px 0 12px;border-bottom:2px solid var(--border);padding-bottom:6px}
+.subtitle{color:var(--muted);font-size:.85rem;margin-bottom:20px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:14px 0}
+.c{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.c .l{color:var(--muted);font-size:.68rem;font-weight:600;text-transform:uppercase}
+.c .v{font-size:1rem;font-weight:700;margin-top:2px}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.82rem}
+th,td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--border)}
+th{background:#f1f5f9;color:var(--muted);font-size:.68rem;font-weight:600;text-transform:uppercase}
+td:first-child,th:first-child{text-align:left}
+.callout{padding:14px;margin:14px 0;border-radius:8px;font-size:.88rem;line-height:1.7}
+.callout-red{background:#fef2f2;border-left:4px solid var(--red)}
+.callout-yellow{background:#fffbeb;border-left:4px solid var(--yellow)}
+.callout-green{background:#ecfdf5;border-left:4px solid var(--green)}
+.callout-blue{background:#eff6ff;border-left:4px solid var(--blue)}
+.footer{margin-top:36px;text-align:center;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);padding-top:14px}
+</style></head><body>
+
+<h1>EXP-1760: Earnings Volatility Crush via Index Options</h1>
+<div class="subtitle">2026-04-06 10:17 UTC &bull; SPY/QQQ iron condors around Magnificent 7 earnings &bull; Rule Zero: 100% IronVault real data</div>
+
+<div class="callout callout-blue">
+<strong>The data reality:</strong> IronVault contains options for only 9 ETFs/indices (SPY, QQQ, GLD,
+TLT, XLE, XLF, XLI, XLK, SOXX). It has <strong>zero single-name equity options</strong> — AAPL, MSFT,
+NVDA, AMZN, GOOGL, META, TSLA all return 0 contracts. The classic Gao-Xing 2020 "sell the single-name
+earnings straddle" strategy <strong>cannot be tested on our data</strong>.
+<br><br>
+<strong>What we can test:</strong> SPY/QQQ iron condors around the earnings dates of their largest
+constituents. The Magnificent 7 make up ~30% of SPY and ~45% of QQQ — their earnings materially move
+index IV. If index IV systematically overstates the index move on earnings days, we can harvest it.
+Earnings dates are historical public record (SEC 8-K filings), not synthetic data.
+</div>
+
+<div class="callout callout-red">
+<strong>Verdict: KILL — OOS Sharpe below threshold</strong><br>
+111 successful trades out of 168 earnings events.
+Sharpe (arith, daily): -2.09.
+OOS Sharpe (trade-level): -0.06.
+SPY correlation: -0.540.
+</div>
+
+<h2>Summary Metrics</h2>
+<div class="cards">
+  <div class="c"><div class="l">N Trades</div><div class="v">111</div></div>
+  <div class="c"><div class="l">Total PnL</div><div class="v">$5,456</div></div>
+  <div class="c"><div class="l">Win Rate</div><div class="v">59%</div></div>
+  <div class="c"><div class="l">Daily Sharpe</div><div class="v">-2.09</div></div>
+  <div class="c"><div class="l">Trade Sharpe</div><div class="v">0.79</div></div>
+  <div class="c"><div class="l">CAGR</div><div class="v">0.8%</div></div>
+  <div class="c"><div class="l">Max DD</div><div class="v">3.4%</div></div>
+  <div class="c"><div class="l">OOS Sharpe</div><div class="v">-0.06</div></div>
+  <div class="c"><div class="l">OOS N</div><div class="v">44</div></div>
+  <div class="c"><div class="l">OOS WR</div><div class="v">55%</div></div>
+  <div class="c"><div class="l">SPY Corr</div><div class="v">-0.540</div></div>
+  <div class="c"><div class="l">EXP-1220 Corr</div><div class="v">+0.000</div></div>
+</div>
+
+<h2>Per-Ticker Breakdown</h2>
+<table>
+<thead><tr><th>Earnings Ticker</th><th>Index Traded</th><th>N</th><th>PnL</th><th>WR</th><th>Avg/Trade</th></tr></thead>
+<tbody><tr><td><strong>AAPL</strong></td><td>SPY</td><td>20</td><td style="color:var(--red)">$-2,216</td><td>55%</td><td>$-111</td></tr>
+<tr><td><strong>AMZN</strong></td><td>QQQ</td><td>19</td><td style="color:var(--green)">$1,910</td><td>63%</td><td>$101</td></tr>
+<tr><td><strong>GOOGL</strong></td><td>QQQ</td><td>13</td><td style="color:var(--red)">$-278</td><td>54%</td><td>$-21</td></tr>
+<tr><td><strong>META</strong></td><td>QQQ</td><td>15</td><td style="color:var(--red)">$-930</td><td>47%</td><td>$-62</td></tr>
+<tr><td><strong>MSFT</strong></td><td>SPY</td><td>23</td><td style="color:var(--green)">$2,693</td><td>61%</td><td>$117</td></tr>
+<tr><td><strong>NVDA</strong></td><td>QQQ</td><td>11</td><td style="color:var(--green)">$2,437</td><td>55%</td><td>$222</td></tr>
+<tr><td><strong>TSLA</strong></td><td>QQQ</td><td>10</td><td style="color:var(--green)">$1,840</td><td>80%</td><td>$184</td></tr>
+</tbody></table>
+
+<h2>Year-by-Year (IS = 2020-2022, OOS = 2023+)</h2>
+<table>
+<thead><tr><th>Year</th><th>N</th><th>PnL</th><th>WR</th></tr></thead>
+<tbody><tr><td>2020 (IS)</td><td>25</td><td style="color:var(--green)">$5,107</td><td>68%</td></tr>
+<tr><td>2021 (IS)</td><td>22</td><td style="color:var(--green)">$388</td><td>73%</td></tr>
+<tr><td>2022 (IS)</td><td>20</td><td style="color:var(--green)">$133</td><td>40%</td></tr>
+<tr><td>2023 (OOS)</td><td>14</td><td style="color:var(--red)">$-492</td><td>43%</td></tr>
+<tr><td>2024 (OOS)</td><td>16</td><td style="color:var(--green)">$675</td><td>62%</td></tr>
+<tr><td>2025 (OOS)</td><td>14</td><td style="color:var(--red)">$-355</td><td>57%</td></tr>
+</tbody></table>
+
+<h2>Skip Reasons</h2>
+<table>
+<thead><tr><th>Reason</th><th>Count</th></tr></thead>
+<tbody><tr><td>no_expiration</td><td>39</td></tr>
+<tr><td>no_exit_prices</td><td>10</td></tr>
+<tr><td>no_entry_prices</td><td>6</td></tr>
+<tr><td>low_credit</td><td>2</td></tr>
+</tbody></table>
+
+<h2>Approach</h2>
+<ul style="padding-left:20px;line-height:1.7">
+<li><strong>Earnings universe:</strong> 7 Magnificent 7 names (AAPL, MSFT, NVDA, AMZN, GOOGL, META,
+TSLA). 24 quarterly earnings per name × 6 years ≈ 168 possible events.</li>
+<li><strong>Trade side:</strong> SPY iron condor for AAPL/MSFT (large SPY weight), QQQ for the
+Nasdaq-heavy names.</li>
+<li><strong>Entry:</strong> trading day before earnings (using close prices).</li>
+<li><strong>Exit:</strong> trading day after earnings (using close prices — proxy for opening gap).</li>
+<li><strong>Structure:</strong> iron condor at 15-delta shorts / 5-delta hedges, 7-14 DTE (fallback
+4-21 DTE if no short-dated available).</li>
+<li><strong>Size:</strong> 2% of capital per trade, max 5 contracts.</li>
+</ul>
+
+<h2>Data Sources</h2>
+<ul style="padding-left:20px;line-height:1.7">
+<li><strong>Earnings dates:</strong> Hardcoded from SEC 8-K filings and company press releases
+(public record, verified against StreetInsider and Nasdaq earnings calendar archives). This is not
+synthetic data — it's the same kind of static historical data as FOMC meeting dates.</li>
+<li><strong>Option prices:</strong> IronVault (options_cache.db) — real Polygon daily bars.</li>
+<li><strong>Index prices:</strong> Yahoo Finance chart API via backtest._yf_download_safe.</li>
+<li><strong>Sharpe:</strong> compass/metrics.py annualized_sharpe (arithmetic mean formula).</li>
+</ul>
+
+<div class="footer">
+  EXP-1760 Earnings Vol Crush &bull; Zero synthetic data &bull; 2026-04-06 10:17 UTC
+</div>
+</body></html>

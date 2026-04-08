@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>Iron Condor Optimization Report</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:1400px;margin:0 auto;padding:20px;background:#0d1117;color:#c9d1d9}
+h1,h2,h3{color:#58a6ff}
+.hero{background:#161b22;border:2px solid #3fb950;border-radius:12px;padding:24px;text-align:center;margin:20px 0}
+.hero .big{font-size:1.8em;font-weight:800;color:#3fb950}
+.hero .sub{color:#8b949e;margin-top:8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin:20px 0}
+.c{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px}
+.c .l{color:#8b949e;font-size:.8em}.c .v{color:#f0f6fc;font-weight:600;font-size:1em;margin-top:4px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.85em}
+th,td{padding:6px 10px;text-align:right;border-bottom:1px solid #21262d}
+th{color:#8b949e;background:#161b22;font-size:.8em;position:sticky;top:0}
+td:first-child,th:first-child{text-align:left}
+tr:hover td{background:#161b2280}
+.section{margin:32px 0}
+.note{color:#8b949e;font-size:.85em;margin:8px 0}
+.warn{background:#d2992220;border:1px solid #d29922;border-radius:8px;padding:12px;margin:16px 0;color:#d29922}
+</style></head><body>
+
+<h1>Iron Condor Optimization Report</h1>
+<p class="note">
+  Data: <strong>IronVault</strong> (real Polygon prices) &middot;
+  34 configurations tested &middot;
+  9 tickers &middot;
+  2020–2025
+</p>
+
+<div class="hero">
+  <div class="big">Best OOS Sharpe: 8.57</div>
+  <div class="sub">
+    XLI | sz=10% | w=$2 | dte=35 | moderate
+     | PnL=$150,650 | WR=92% | DD=10.3%
+  </div>
+</div>
+
+<div class="cards">
+  <div class='c'><div class='l'>Best OOS Sharpe</div><div class='v'>XLI sz=10% w=$2 dte=35 moderate</div><div style='color:#8b949e;font-size:.8em'>PnL=$150,650 | Sharpe=6.05 | OOS=8.57 | WR=92% | DD=10.3% | CAGR=18.8%</div></div>
+  <div class='c'><div class='l'>Best CAGR</div><div class='v'>XLI sz=10% w=$2 dte=35 moderate</div><div style='color:#8b949e;font-size:.8em'>PnL=$150,650 | Sharpe=6.05 | OOS=8.57 | WR=92% | DD=10.3% | CAGR=18.8%</div></div>
+  <div class='c'><div class='l'>Best Calmar</div><div class='v'>SPY sz=10% w=$2 dte=35 high_vol</div><div style='color:#8b949e;font-size:.8em'>PnL=$87,900 | Sharpe=4.78 | OOS=2.35 | WR=89% | DD=1.9% | CAGR=11.9%</div></div>
+</div>
+
+<div class="section">
+<h2>Ticker Comparison</h2>
+<p class="note">Which underlying works best for iron condors?</p>
+<table>
+<thead><tr><th>Ticker</th><th>Configs</th><th>Trades</th><th>Best OOS Sharpe</th><th>Best CAGR</th></tr></thead>
+<tbody><tr><td style='text-align:left'>XLI</td><td>5</td><td>192</td><td><strong>8.57</strong></td><td>18.8%</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>18</td><td>898</td><td><strong>5.56</strong></td><td>5.0%</td></tr>
+<tr><td style='text-align:left'>QQQ</td><td>1</td><td>16</td><td><strong>3.36</strong></td><td>6.7%</td></tr>
+<tr><td style='text-align:left'>SPY</td><td>5</td><td>151</td><td><strong>3.24</strong></td><td>13.7%</td></tr>
+<tr><td style='text-align:left'>TLT</td><td>1</td><td>43</td><td><strong>2.85</strong></td><td>10.2%</td></tr>
+<tr><td style='text-align:left'>GLD</td><td>1</td><td>40</td><td><strong>0.49</strong></td><td>2.1%</td></tr>
+<tr><td style='text-align:left'>XLE</td><td>1</td><td>0</td><td><strong>0.00</strong></td><td>0.0%</td></tr>
+<tr><td style='text-align:left'>XLK</td><td>1</td><td>0</td><td><strong>0.00</strong></td><td>0.0%</td></tr>
+<tr><td style='text-align:left'>SOXX</td><td>1</td><td>6</td><td><strong>0.00</strong></td><td>0.0%</td></tr>
+</tbody></table>
+</div>
+
+<div class="section">
+<h2>Position Sizing Impact (XLF)</h2>
+<p class="note">How does scaling from 1.5% to 20% per trade affect results?</p>
+<table>
+<thead><tr><th>Sizing</th><th>Configs</th><th>Best OOS Sharpe</th><th>Best PnL</th></tr></thead>
+<tbody><tr><td>10%</td><td>3</td><td>1.43</td><td>$30,250</td></tr>
+<tr><td>2%</td><td>11</td><td>5.56</td><td>$29,024</td></tr>
+<tr><td>20%</td><td>3</td><td>1.43</td><td>$30,250</td></tr>
+<tr><td>5%</td><td>1</td><td>1.43</td><td>$20,250</td></tr>
+</tbody></table>
+</div>
+
+<div class="section">
+<h2>Best Config: Year-by-Year</h2>
+<table>
+<thead><tr><th>Year</th><th>Trades</th><th>PnL</th><th>Win Rate</th><th>Max DD</th><th>Sharpe</th><th>Return</th></tr></thead>
+<tbody><tr><td>2020</td><td>6</td><td style='color:#22c55e'>$23,550</td><td>83%</td><td style='color:#f59e0b'>1.0%</td><td>2.75</td><td>23.55%</td></tr>
+<tr><td>2021</td><td>11</td><td style='color:#22c55e'>$54,750</td><td>91%</td><td style='color:#f59e0b'>12.4%</td><td>2.49</td><td>54.75%</td></tr>
+<tr><td>2022</td><td>5</td><td style='color:#22c55e'>$15,100</td><td>80%</td><td style='color:#f59e0b'>0.0%</td><td>2.20</td><td>15.10%</td></tr>
+<tr><td>2023</td><td>7</td><td style='color:#22c55e'>$30,900</td><td>100%</td><td style='color:#f59e0b'>0.0%</td><td>7.83</td><td>30.90%</td></tr>
+<tr><td>2024</td><td>4</td><td style='color:#22c55e'>$9,350</td><td>100%</td><td style='color:#f59e0b'>0.0%</td><td>7.21</td><td>9.35%</td></tr>
+<tr><td>2025</td><td>7</td><td style='color:#22c55e'>$17,000</td><td>100%</td><td style='color:#f59e0b'>0.0%</td><td>4.97</td><td>17.00%</td></tr>
+</tbody></table>
+</div>
+
+<div class="section">
+<h2>All Configurations (sorted by OOS Sharpe)</h2>
+<div style="overflow-x:auto">
+<table>
+<thead><tr>
+<th>Ticker</th><th>Sizing</th><th>Width</th><th>DTE</th><th>OTM P/C</th><th>Regime</th>
+<th>Trades</th><th>PnL</th><th>WR</th><th>DD</th><th>Sharpe</th><th>OOS Sharpe</th>
+<th>WF Ratio</th><th>CAGR</th><th>Calmar</th>
+</tr></thead>
+<tbody><tr><td style='text-align:left'>XLI</td><td>10%</td><td>$2</td><td>35d</td><td>7%/5%</td><td>moderate</td><td>40</td><td style='color:#22c55e'>$150,650</td><td>92%</td><td style='color:#f59e0b'>10.3%</td><td>6.05</td><td><strong>8.57</strong></td><td style='color:#22c55e'>2.21</td><td>18.8%</td><td>1.8</td></tr>
+<tr><td style='text-align:left'>XLI</td><td>20%</td><td>$2</td><td>35d</td><td>7%/5%</td><td>moderate</td><td>40</td><td style='color:#22c55e'>$150,650</td><td>92%</td><td style='color:#f59e0b'>10.3%</td><td>6.05</td><td><strong>8.57</strong></td><td style='color:#22c55e'>2.21</td><td>18.8%</td><td>1.8</td></tr>
+<tr><td style='text-align:left'>XLI</td><td>10%</td><td>$2</td><td>35d</td><td>7%/5%</td><td>high_vol</td><td>27</td><td style='color:#22c55e'>$86,950</td><td>85%</td><td style='color:#f59e0b'>9.4%</td><td>3.83</td><td><strong>6.70</strong></td><td style='color:#22c55e'>2.57</td><td>11.7%</td><td>1.2</td></tr>
+<tr><td style='text-align:left'>XLI</td><td>20%</td><td>$2</td><td>35d</td><td>7%/5%</td><td>high_vol</td><td>27</td><td style='color:#22c55e'>$86,950</td><td>85%</td><td style='color:#f59e0b'>9.4%</td><td>3.83</td><td><strong>6.70</strong></td><td style='color:#22c55e'>2.57</td><td>11.7%</td><td>1.2</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>2%</td><td>$5</td><td>35d</td><td>7%/5%</td><td>none</td><td>54</td><td style='color:#22c55e'>$27,602</td><td>89%</td><td style='color:#f59e0b'>1.1%</td><td>3.51</td><td><strong>5.56</strong></td><td style='color:#22c55e'>2.35</td><td>4.9%</td><td>4.6</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>2%</td><td>$3</td><td>35d</td><td>7%/5%</td><td>none</td><td>64</td><td style='color:#22c55e'>$19,452</td><td>77%</td><td style='color:#f59e0b'>2.1%</td><td>2.24</td><td><strong>5.32</strong></td><td style='color:#22c55e'>3.37</td><td>3.2%</td><td>1.5</td></tr>
+<tr><td style='text-align:left'>XLI</td><td>2%</td><td>$1</td><td>35d</td><td>7%/5%</td><td>none</td><td>58</td><td style='color:#22c55e'>$73,469</td><td>84%</td><td style='color:#f59e0b'>4.6%</td><td>5.19</td><td><strong>4.15</strong></td><td style='color:#22c55e'>1.02</td><td>10.2%</td><td>2.2</td></tr>
+<tr><td style='text-align:left'>QQQ</td><td>2%</td><td>$1</td><td>35d</td><td>7%/5%</td><td>none</td><td>16</td><td style='color:#22c55e'>$22,993</td><td>69%</td><td style='color:#f59e0b'>1.4%</td><td>2.58</td><td><strong>3.36</strong></td><td style='color:#22c55e'>1.60</td><td>6.7%</td><td>4.8</td></tr>
+<tr><td style='text-align:left'>SPY</td><td>2%</td><td>$1</td><td>35d</td><td>7%/5%</td><td>none</td><td>49</td><td style='color:#22c55e'>$7,827</td><td>78%</td><td style='color:#f59e0b'>29.1%</td><td>0.27</td><td><strong>3.24</strong></td><td style='color:#ef4444'>-4.28</td><td>1.3%</td><td>0.0</td></tr>
+<tr><td style='text-align:left'>TLT</td><td>2%</td><td>$1</td><td>35d</td><td>7%/5%</td><td>none</td><td>43</td><td style='color:#22c55e'>$52,809</td><td>77%</td><td style='color:#f59e0b'>1.7%</td><td>4.68</td><td><strong>2.85</strong></td><td style='color:#22c55e'>0.78</td><td>10.2%</td><td>6.1</td></tr>
+<tr><td style='text-align:left'>SPY</td><td>10%</td><td>$2</td><td>35d</td><td>7%/5%</td><td>moderate</td><td>33</td><td style='color:#22c55e'>$109,850</td><td>79%</td><td style='color:#f59e0b'>2.3%</td><td>4.62</td><td><strong>2.40</strong></td><td style='color:#22c55e'>0.53</td><td>13.7%</td><td>6.0</td></tr>
+<tr><td style='text-align:left'>SPY</td><td>20%</td><td>$2</td><td>35d</td><td>7%/5%</td><td>moderate</td><td>33</td><td style='color:#22c55e'>$109,850</td><td>79%</td><td style='color:#f59e0b'>2.3%</td><td>4.62</td><td><strong>2.40</strong></td><td style='color:#22c55e'>0.53</td><td>13.7%</td><td>6.0</td></tr>
+<tr><td style='text-align:left'>SPY</td><td>10%</td><td>$2</td><td>35d</td><td>7%/5%</td><td>high_vol</td><td>18</td><td style='color:#22c55e'>$87,900</td><td>89%</td><td style='color:#f59e0b'>1.9%</td><td>4.78</td><td><strong>2.35</strong></td><td style='color:#22c55e'>0.52</td><td>11.9%</td><td>6.1</td></tr>
+<tr><td style='text-align:left'>SPY</td><td>20%</td><td>$2</td><td>35d</td><td>7%/5%</td><td>high_vol</td><td>18</td><td style='color:#22c55e'>$87,900</td><td>89%</td><td style='color:#f59e0b'>1.9%</td><td>4.78</td><td><strong>2.35</strong></td><td style='color:#22c55e'>0.52</td><td>11.9%</td><td>6.1</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>2%</td><td>$1</td><td>35d</td><td>7%/5%</td><td>moderate</td><td>40</td><td style='color:#22c55e'>$18,758</td><td>65%</td><td style='color:#f59e0b'>1.7%</td><td>2.50</td><td><strong>1.68</strong></td><td style='color:#22c55e'>0.83</td><td>3.2%</td><td>2.0</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>2%</td><td>$1</td><td>35d</td><td>7%/5%</td><td>none</td><td>60</td><td style='color:#22c55e'>$17,478</td><td>63%</td><td style='color:#f59e0b'>3.9%</td><td>1.96</td><td><strong>1.55</strong></td><td style='color:#22c55e'>0.99</td><td>2.9%</td><td>0.8</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>2%</td><td>$1</td><td>45d</td><td>7%/5%</td><td>none</td><td>65</td><td style='color:#22c55e'>$29,024</td><td>63%</td><td style='color:#f59e0b'>2.7%</td><td>2.40</td><td><strong>1.54</strong></td><td style='color:#22c55e'>0.69</td><td>4.4%</td><td>1.6</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>5%</td><td>$1</td><td>35d</td><td>7%/5%</td><td>none</td><td>60</td><td style='color:#22c55e'>$20,250</td><td>63%</td><td style='color:#f59e0b'>5.9%</td><td>1.49</td><td><strong>1.43</strong></td><td style='color:#22c55e'>1.60</td><td>3.3%</td><td>0.6</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>10%</td><td>$1</td><td>35d</td><td>7%/5%</td><td>none</td><td>60</td><td style='color:#22c55e'>$20,250</td><td>63%</td><td style='color:#f59e0b'>5.9%</td><td>1.49</td><td><strong>1.43</strong></td><td style='color:#22c55e'>1.60</td><td>3.3%</td><td>0.6</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>20%</td><td>$1</td><td>35d</td><td>7%/5%</td><td>none</td><td>60</td><td style='color:#22c55e'>$20,250</td><td>63%</td><td style='color:#f59e0b'>5.9%</td><td>1.49</td><td><strong>1.43</strong></td><td style='color:#22c55e'>1.60</td><td>3.3%</td><td>0.6</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>2%</td><td>$2</td><td>35d</td><td>7%/5%</td><td>none</td><td>63</td><td style='color:#22c55e'>$18,656</td><td>67%</td><td style='color:#f59e0b'>2.3%</td><td>1.57</td><td><strong>1.28</strong></td><td style='color:#22c55e'>0.84</td><td>3.0%</td><td>1.3</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>2%</td><td>$1</td><td>35d</td><td>10%/7%</td><td>none</td><td>60</td><td style='color:#22c55e'>$12,310</td><td>72%</td><td style='color:#f59e0b'>3.0%</td><td>1.46</td><td><strong>1.28</strong></td><td style='color:#22c55e'>1.06</td><td>2.1%</td><td>0.7</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>2%</td><td>$1</td><td>35d</td><td>7%/5%</td><td>low_vol</td><td>35</td><td style='color:#22c55e'>$10,181</td><td>66%</td><td style='color:#f59e0b'>2.1%</td><td>1.83</td><td><strong>1.22</strong></td><td style='color:#22c55e'>0.87</td><td>2.0%</td><td>1.0</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>2%</td><td>$1</td><td>21d</td><td>7%/5%</td><td>none</td><td>56</td><td style='color:#22c55e'>$17,239</td><td>66%</td><td style='color:#f59e0b'>4.4%</td><td>1.89</td><td><strong>1.12</strong></td><td style='color:#22c55e'>0.66</td><td>2.8%</td><td>0.6</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>2%</td><td>$1</td><td>35d</td><td>7%/5%</td><td>high_vol</td><td>25</td><td style='color:#22c55e'>$7,297</td><td>60%</td><td style='color:#f59e0b'>3.9%</td><td>1.16</td><td><strong>0.93</strong></td><td style='color:#22c55e'>1.04</td><td>1.3%</td><td>0.3</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>10%</td><td>$2</td><td>35d</td><td>7%/5%</td><td>moderate</td><td>42</td><td style='color:#22c55e'>$30,250</td><td>69%</td><td style='color:#f59e0b'>7.5%</td><td>1.47</td><td><strong>0.65</strong></td><td style='color:#f59e0b'>0.49</td><td>5.0%</td><td>0.7</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>20%</td><td>$2</td><td>35d</td><td>7%/5%</td><td>moderate</td><td>42</td><td style='color:#22c55e'>$30,250</td><td>69%</td><td style='color:#f59e0b'>7.5%</td><td>1.47</td><td><strong>0.65</strong></td><td style='color:#f59e0b'>0.49</td><td>5.0%</td><td>0.7</td></tr>
+<tr><td style='text-align:left'>GLD</td><td>2%</td><td>$1</td><td>35d</td><td>7%/5%</td><td>none</td><td>40</td><td style='color:#22c55e'>$8,596</td><td>90%</td><td style='color:#f59e0b'>1.1%</td><td>2.89</td><td><strong>0.49</strong></td><td style='color:#f59e0b'>0.16</td><td>2.1%</td><td>1.9</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>2%</td><td>$1</td><td>35d</td><td>5%/3%</td><td>none</td><td>60</td><td style='color:#22c55e'>$8,462</td><td>50%</td><td style='color:#f59e0b'>4.2%</td><td>0.88</td><td><strong>0.43</strong></td><td style='color:#f59e0b'>0.50</td><td>1.4%</td><td>0.3</td></tr>
+<tr><td style='text-align:left'>XLE</td><td>2%</td><td>$1</td><td>35d</td><td>7%/5%</td><td>none</td><td>0</td><td style='color:#ef4444'>$0</td><td>0%</td><td style='color:#f59e0b'>0.0%</td><td>0.00</td><td><strong>0.00</strong></td><td style='color:#ef4444'>0.00</td><td>0.0%</td><td>0.0</td></tr>
+<tr><td style='text-align:left'>XLK</td><td>2%</td><td>$1</td><td>35d</td><td>7%/5%</td><td>none</td><td>0</td><td style='color:#ef4444'>$0</td><td>0%</td><td style='color:#f59e0b'>0.0%</td><td>0.00</td><td><strong>0.00</strong></td><td style='color:#ef4444'>0.00</td><td>0.0%</td><td>0.0</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>10%</td><td>$2</td><td>35d</td><td>7%/5%</td><td>high_vol</td><td>26</td><td style='color:#ef4444'>$-3,050</td><td>50%</td><td style='color:#f59e0b'>12.0%</td><td>-0.16</td><td><strong>-0.55</strong></td><td style='color:#ef4444'>-24.86</td><td>-0.6%</td><td>-0.0</td></tr>
+<tr><td style='text-align:left'>XLF</td><td>20%</td><td>$2</td><td>35d</td><td>7%/5%</td><td>high_vol</td><td>26</td><td style='color:#ef4444'>$-3,050</td><td>50%</td><td style='color:#f59e0b'>12.0%</td><td>-0.16</td><td><strong>-0.55</strong></td><td style='color:#ef4444'>-24.86</td><td>-0.6%</td><td>-0.0</td></tr>
+<tr><td style='text-align:left'>SOXX</td><td>2%</td><td>$1</td><td>35d</td><td>7%/5%</td><td>none</td><td>6</td><td style='color:#ef4444'>$-1,817</td><td>33%</td><td style='color:#f59e0b'>1.3%</td><td>-0.75</td><td><strong>-0.75</strong></td><td style='color:#ef4444'>0.00</td><td>-1.5%</td><td>-1.2</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<div class="warn">
+  <strong>Walk-Forward Validation</strong>: IS=2020-2022, OOS=2023-2025.
+  WF Ratio = OOS Sharpe / IS Sharpe. Values &gt; 0.5 suggest robustness.
+  Values &lt; 0 indicate overfitting.
+</div>
+
+<p class="note" style="margin-top:40px;text-align:center">
+  Iron Condor Optimization &middot; All prices from IronVault (options_cache.db) &middot;
+  Generated by PilotAI Compass
+</p>
+
+</body></html>

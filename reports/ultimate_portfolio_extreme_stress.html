@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ultimate Portfolio — Extreme Stress Test</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+         margin:0;padding:24px;background:#fff;color:#1e293b; }
+  h1 { font-size:1.5rem;margin-bottom:2px; }
+  h2 { font-size:1.1rem;color:#1d4ed8;margin:26px 0 8px;border-bottom:2px solid #e2e8f0;padding-bottom:4px; }
+  .meta { color:#64748b;font-size:0.82rem;margin-bottom:18px; }
+  .grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px; }
+  .card { background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px; }
+  .card-label { font-size:0.68rem;color:#64748b;text-transform:uppercase; }
+  .card-value { font-size:1.25rem;font-weight:700;margin-top:2px; }
+  table { width:100%;border-collapse:collapse;margin-bottom:12px;font-size:0.8rem; }
+  th { background:#f1f5f9;padding:5px 8px;text-align:right;font-size:0.72rem;color:#475569;border-bottom:2px solid #e2e8f0; }
+  th:first-child { text-align:left; }
+  td { padding:4px 8px;text-align:right;border-bottom:1px solid #f1f5f9; }
+  td:first-child { text-align:left;font-weight:500; }
+  tr:hover td { background:#f8fafc; }
+  .verdict { border:2px solid #16a34a;border-radius:10px;padding:14px;margin:16px 0;
+              background:#f0fdf4; }
+  .verdict h3 { color:#16a34a;margin:0 0 6px;font-size:1rem; }
+  .tag { display:inline-block;padding:2px 6px;border-radius:4px;font-size:0.68rem;font-weight:600;margin:1px; }
+  .tg { background:#dcfce7;color:#16a34a; }
+  .tr { background:#fef2f2;color:#dc2626; }
+  .tb { background:#dbeafe;color:#2563eb; }
+  .ty { background:#fef9c3;color:#ca8a04; }
+</style></head><body>
+
+<h1>Ultimate Portfolio — Extreme Stress Test</h1>
+<div class="meta">Generated 2026-04-05 10:17 | 4 strategies at 1.6x leverage | Scenarios worse than historical</div>
+
+<div class="verdict">
+  <h3>4/4 Scenarios Survived</h3>
+  <p style="margin:4px 0;font-size:0.85rem">
+    Portfolio tested under 4 extreme scenarios + 10K Monte Carlo paths.
+    All deterministic scenarios survived.
+  </p>
+  <span class="tag tg">MC Survival: 100.0%</span>
+  <span class="tag tg">Ruin Rate: 0.00%</span>
+  <span class="tag tb">P5 DD: -2.9%</span>
+  <span class="tag ty">Worst DD: -5.7%</span>
+</div>
+
+<h2>1. Scenario Results Summary</h2>
+<p style="color:#64748b;font-size:0.78rem">Each scenario is designed to be WORSE than the corresponding historical event. "Survived" = DD &gt; -50%.</p>
+<table><thead><tr><th>Scenario</th><th>Return</th><th>Max DD</th><th>Recovery</th><th>Final Value</th><th>Status</th></tr></thead>
+<tbody><tr style="">
+            <td style="text-align:left;font-weight:600">COVID x2 (-68% / 46d)</td>
+            <td style="color:#16a34a;font-weight:600">+80.8%</td>
+            <td style="color:#dc2626;font-weight:600">-9.5%</td>
+            <td>26d</td>
+            <td>$180,771</td>
+            <td><span style="color:#16a34a;font-weight:700">SURVIVED</span></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:600">Prolonged Bear (-50% / 400d)</td>
+            <td style="color:#16a34a;font-weight:600">+151.9%</td>
+            <td style="color:#dc2626;font-weight:600">-2.9%</td>
+            <td>9d</td>
+            <td>$251,894</td>
+            <td><span style="color:#16a34a;font-weight:700">SURVIVED</span></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:600">Flash Crash Cascade (-15%/d1)</td>
+            <td style="color:#16a34a;font-weight:600">+37.6%</td>
+            <td style="color:#dc2626;font-weight:600">-1.1%</td>
+            <td>2d</td>
+            <td>$137,570</td>
+            <td><span style="color:#16a34a;font-weight:700">SURVIVED</span></td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:600">Stagflation (12mo grind)</td>
+            <td style="color:#16a34a;font-weight:600">+74.1%</td>
+            <td style="color:#dc2626;font-weight:600">-5.6%</td>
+            <td>36d</td>
+            <td>$174,114</td>
+            <td><span style="color:#16a34a;font-weight:700">SURVIVED</span></td>
+        </tr></tbody></table>
+
+<h2>2. Strategy Attribution per Scenario</h2>
+<p style="color:#64748b;font-size:0.78rem">Which strategies protect, which fail? Positive return during crash = hedge payoff working.</p>
+
+        <div style="background:#f8fafc;border:1px solid #16a34a;border-radius:8px;padding:12px;margin:8px 0">
+            <strong>COVID x2 (-68% / 46d)</strong> — Portfolio DD: <span style="color:#dc2626;font-weight:700">-9.5%</span>,
+            Return: <span style="color:#16a34a">+80.8%</span>,
+            Recovery: 26d
+            <table style="margin-top:6px"><thead><tr><th>Strategy</th><th>Weight</th><th>Return</th><th>Max DD</th></tr></thead>
+            <tbody><tr>
+                <td style="text-align:left">Cross-Asset Pairs</td>
+                <td>3%</td>
+                <td style="color:#16a34a">+0.1%</td>
+                <td style="color:#dc2626">-0.1%</td>
+            </tr><tr>
+                <td style="text-align:left">EXP-1220 Tail Risk</td>
+                <td>90%</td>
+                <td style="color:#16a34a">+74.9%</td>
+                <td style="color:#dc2626">-10.6%</td>
+            </tr><tr>
+                <td style="text-align:left">TLT Iron Condors</td>
+                <td>3%</td>
+                <td style="color:#16a34a">+2.4%</td>
+                <td style="color:#dc2626">-0.2%</td>
+            </tr><tr>
+                <td style="text-align:left">Vol Term Structure</td>
+                <td>3%</td>
+                <td style="color:#16a34a">+0.7%</td>
+                <td style="color:#dc2626">-0.2%</td>
+            </tr></tbody></table>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #16a34a;border-radius:8px;padding:12px;margin:8px 0">
+            <strong>Prolonged Bear (-50% / 400d)</strong> — Portfolio DD: <span style="color:#dc2626;font-weight:700">-2.9%</span>,
+            Return: <span style="color:#16a34a">+151.9%</span>,
+            Recovery: 9d
+            <table style="margin-top:6px"><thead><tr><th>Strategy</th><th>Weight</th><th>Return</th><th>Max DD</th></tr></thead>
+            <tbody><tr>
+                <td style="text-align:left">Cross-Asset Pairs</td>
+                <td>3%</td>
+                <td style="color:#16a34a">+0.3%</td>
+                <td style="color:#dc2626">-0.0%</td>
+            </tr><tr>
+                <td style="text-align:left">EXP-1220 Tail Risk</td>
+                <td>90%</td>
+                <td style="color:#16a34a">+145.2%</td>
+                <td style="color:#dc2626">-3.2%</td>
+            </tr><tr>
+                <td style="text-align:left">TLT Iron Condors</td>
+                <td>3%</td>
+                <td style="color:#16a34a">+2.0%</td>
+                <td style="color:#dc2626">-0.1%</td>
+            </tr><tr>
+                <td style="text-align:left">Vol Term Structure</td>
+                <td>3%</td>
+                <td style="color:#16a34a">+0.4%</td>
+                <td style="color:#dc2626">-0.1%</td>
+            </tr></tbody></table>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #16a34a;border-radius:8px;padding:12px;margin:8px 0">
+            <strong>Flash Crash Cascade (-15%/d1)</strong> — Portfolio DD: <span style="color:#dc2626;font-weight:700">-1.1%</span>,
+            Return: <span style="color:#16a34a">+37.6%</span>,
+            Recovery: 2d
+            <table style="margin-top:6px"><thead><tr><th>Strategy</th><th>Weight</th><th>Return</th><th>Max DD</th></tr></thead>
+            <tbody><tr>
+                <td style="text-align:left">Cross-Asset Pairs</td>
+                <td>3%</td>
+                <td style="color:#16a34a">+0.0%</td>
+                <td style="color:#dc2626">-0.0%</td>
+            </tr><tr>
+                <td style="text-align:left">EXP-1220 Tail Risk</td>
+                <td>90%</td>
+                <td style="color:#16a34a">+36.6%</td>
+                <td style="color:#dc2626">-1.2%</td>
+            </tr><tr>
+                <td style="text-align:left">TLT Iron Condors</td>
+                <td>3%</td>
+                <td style="color:#16a34a">+0.6%</td>
+                <td style="color:#dc2626">-0.2%</td>
+            </tr><tr>
+                <td style="text-align:left">Vol Term Structure</td>
+                <td>3%</td>
+                <td style="color:#16a34a">+0.0%</td>
+                <td style="color:#dc2626">-0.1%</td>
+            </tr></tbody></table>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #16a34a;border-radius:8px;padding:12px;margin:8px 0">
+            <strong>Stagflation (12mo grind)</strong> — Portfolio DD: <span style="color:#dc2626;font-weight:700">-5.6%</span>,
+            Return: <span style="color:#16a34a">+74.1%</span>,
+            Recovery: 36d
+            <table style="margin-top:6px"><thead><tr><th>Strategy</th><th>Weight</th><th>Return</th><th>Max DD</th></tr></thead>
+            <tbody><tr>
+                <td style="text-align:left">Cross-Asset Pairs</td>
+                <td>3%</td>
+                <td style="color:#16a34a">+0.3%</td>
+                <td style="color:#dc2626">-0.0%</td>
+            </tr><tr>
+                <td style="text-align:left">EXP-1220 Tail Risk</td>
+                <td>90%</td>
+                <td style="color:#16a34a">+72.0%</td>
+                <td style="color:#dc2626">-6.0%</td>
+            </tr><tr>
+                <td style="text-align:left">TLT Iron Condors</td>
+                <td>3%</td>
+                <td style="color:#16a34a">+0.8%</td>
+                <td style="color:#dc2626">-0.2%</td>
+            </tr><tr>
+                <td style="text-align:left">Vol Term Structure</td>
+                <td>3%</td>
+                <td style="color:#dc2626">-0.0%</td>
+                <td style="color:#dc2626">-0.2%</td>
+            </tr></tbody></table>
+        </div>
+
+<h2>3. Monte Carlo Stress (10K paths, fat tails)</h2>
+<p style="color:#64748b;font-size:0.78rem">Student-t returns (df=4) for heavy tails. Each path is 1 year (252 days). VIX correlated with negative SPY.</p>
+
+    <div class="grid">
+      <div class="card"><div class="card-label">Survival Rate</div>
+        <div class="card-value" style="color:#16a34a">100.0%</div></div>
+      <div class="card"><div class="card-label">Ruin Rate (&lt;-90%)</div>
+        <div class="card-value" style="color:#16a34a">0.00%</div></div>
+      <div class="card"><div class="card-label">Median DD</div>
+        <div class="card-value">-1.9%</div></div>
+      <div class="card"><div class="card-label">P5 DD (worst 5%)</div>
+        <div class="card-value" style="color:#dc2626">-2.9%</div></div>
+      <div class="card"><div class="card-label">P1 DD (worst 1%)</div>
+        <div class="card-value" style="color:#dc2626">-3.6%</div></div>
+      <div class="card"><div class="card-label">Worst Single Path</div>
+        <div class="card-value" style="color:#dc2626">-5.7%</div></div>
+      <div class="card"><div class="card-label">Prob Positive Return</div>
+        <div class="card-value">100.0%</div></div>
+      <div class="card"><div class="card-label">Mean Recovery</div>
+        <div class="card-value">4d</div></div>
+    </div>
+
+<h2>4. Where It Breaks</h2>
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;margin:8px 0">
+  <table><thead><tr><th>Risk Factor</th><th>Threshold</th><th>Portfolio Response</th></tr></thead><tbody>
+    <tr><td style="text-align:left">Single-day crash</td><td>-15%</td>
+        <td style="color:#16a34a">DD -1.1%, survives</td></tr>
+    <tr><td style="text-align:left">Rapid crash (46d)</td><td>-68%</td>
+        <td style="color:#16a34a">DD -9.5%, survives</td></tr>
+    <tr><td style="text-align:left">Prolonged bear (400d)</td><td>-50%</td>
+        <td style="color:#16a34a">DD -2.9%, survives</td></tr>
+    <tr><td style="text-align:left">Stagflation (252d)</td><td>High vol + grind</td>
+        <td style="color:#16a34a">DD -5.6%, survives</td></tr>
+    <tr><td style="text-align:left">Fat-tail P1 (MC)</td><td>Worst 1% path</td>
+        <td style="color:#dc2626">DD -3.6%</td></tr>
+  </tbody></table>
+</div>
+
+<div style="color:#94a3b8;font-size:0.68rem;margin-top:28px;border-top:1px solid #e2e8f0;padding-top:8px">
+  PilotAI — Extreme Stress Test v1.0 | Ultimate Portfolio at 1.6x leverage |
+  Scenarios: COVID x2, Prolonged Bear, Flash Cascade, Stagflation + 10K Monte Carlo
+</div></body></html>

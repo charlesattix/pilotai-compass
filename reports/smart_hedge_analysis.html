@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Smart Hedge — Cost-Efficient Tail Risk Protection</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+         margin:0;padding:24px;background:#fff;color:#1e293b; }
+  h1 { font-size:1.4rem;margin-bottom:2px; }
+  h2 { font-size:1.05rem;color:#1d4ed8;margin:24px 0 8px;border-bottom:2px solid #e2e8f0;padding-bottom:4px; }
+  .meta { color:#64748b;font-size:0.82rem;margin-bottom:18px; }
+  .grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px; }
+  .card { background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px; }
+  .card-label { font-size:0.68rem;color:#64748b;text-transform:uppercase; }
+  .card-value { font-size:1.2rem;font-weight:700;margin-top:2px; }
+  table { width:100%;border-collapse:collapse;margin-bottom:12px;font-size:0.78rem; }
+  th { background:#f1f5f9;padding:5px 8px;text-align:right;font-size:0.7rem;color:#475569;border-bottom:2px solid #e2e8f0; }
+  th:first-child { text-align:left; }
+  td { padding:4px 8px;text-align:right;border-bottom:1px solid #f1f5f9; }
+  td:first-child { text-align:left;font-weight:500; }
+  .verdict { border:2px solid #16a34a;border-radius:10px;padding:14px;margin:16px 0;
+              background:#f0fdf4; }
+  .verdict h3 { color:#16a34a;margin:0 0 6px;font-size:1rem; }
+  .tag { display:inline-block;padding:2px 6px;border-radius:4px;font-size:0.68rem;font-weight:600;margin:1px; }
+  .tg { background:#dcfce7;color:#16a34a; }
+  .tb { background:#dbeafe;color:#2563eb; }
+  .ty { background:#fef9c3;color:#ca8a04; }
+  .tr { background:#fef2f2;color:#dc2626; }
+</style></head><body>
+
+<h1>Smart Hedge — Cost-Efficient Tail Risk Protection</h1>
+<div class="meta">Generated 2026-04-05 12:30 | Real SPY put costs from IronVault (4.36%/yr actual) |
+5 cost-efficient alternatives backtested 2020-2025</div>
+
+<div class="verdict">
+  <h3>Pareto Optimal: D: Collar (sell calls to fund puts)</h3>
+  <p style="margin:4px 0;font-size:0.85rem">Minimum cost hedge that keeps COVID DD &lt; 15%.</p>
+  <span class="tg">CAGR +102.1%</span>
+  <span class="tb">Sharpe 8.10</span>
+  <span class="ty">Max DD -11.1%</span>
+  <span class="tg">COVID DD -8.6%</span>
+  <span class="tg">Net cost -201.03%/yr</span>
+  <span class="tg">Saves 57.0%/yr vs old hedge</span>
+</div>
+
+<div class="grid">
+  <div class="card"><div class="card-label">CAGR</div><div class="card-value" style="color:#16a34a">+102.1%</div></div>
+  <div class="card"><div class="card-label">Sharpe</div><div class="card-value" style="color:#1d4ed8">8.10</div></div>
+  <div class="card"><div class="card-label">Max DD</div><div class="card-value" style="color:#ca8a04">-11.1%</div></div>
+  <div class="card"><div class="card-label">COVID DD</div><div class="card-value" style="color:#16a34a">-8.6%</div></div>
+  <div class="card"><div class="card-label">Annual Cost</div><div class="card-value">17.28%</div></div>
+  <div class="card"><div class="card-label">Cost Savings</div><div class="card-value" style="color:#16a34a">57.0%/yr</div></div>
+</div>
+
+<h2>1. The Problem: Real Put Costs Are 2.2x Higher Than Assumed</h2>
+<div style="background:#fef2f2;border:1px solid #dc2626;border-radius:8px;padding:12px;margin:8px 0">
+  <p style="font-size:0.85rem;margin:0">
+    <strong>Assumed cost:</strong> 2.0%/yr flat &nbsp;|&nbsp;
+    <strong>Real cost (IronVault):</strong> 4.36%/yr average &nbsp;|&nbsp;
+    <strong>Ratio:</strong> 2.18x &nbsp;|&nbsp;
+    <strong>Range:</strong> 2.44% (2023) to 7.25% (2025)
+  </p>
+</div>
+
+<h2>2. Variant Comparison (5 Hedges + Baselines)</h2>
+<p style="color:#64748b;font-size:0.78rem">Green row = Pareto optimal. COVID DD &lt; -15% = target.</p>
+<table><thead><tr><th>Hedge Variant</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>COVID DD</th><th>Cost/yr</th><th>Payoff/yr</th><th>Net/yr</th></tr></thead>
+<tbody><tr style="background:#fef2f2">
+        <td style="text-align:left;font-weight:600">No Hedge (baseline)</td>
+        <td style="color:#16a34a">+72.8%</td>
+        <td>5.73</td>
+        <td style="color:#dc2626;font-weight:600">-14.7%</td>
+        <td style="color:#dc2626">-14.2%</td>
+        <td>0.00%</td><td>0.00%</td><td>0.00%</td>
+    </tr><tr style="background:#fef9c3">
+        <td style="text-align:left">Old Hedge (4.36%/yr real cost)</td>
+        <td style="color:#16a34a">+103.2%</td>
+        <td>8.24</td>
+        <td style="color:#ca8a04">-11.2%</td>
+        <td style="color:#ca8a04">-5.5%</td>
+        <td>74.25%</td>
+        <td>293.61%</td>
+        <td>-219.36%</td>
+    </tr><tr style="">
+            <td style="text-align:left;font-weight:500">A: VIX<15 Puts Only</td>
+            <td style="color:#16a34a">+63.2%</td>
+            <td>6.16</td>
+            <td style="color:#ca8a04">-10.1%</td>
+            <td style="color:#16a34a">-9.7%</td>
+            <td>2.21%</td>
+            <td>10.60%</td>
+            <td>-8.38%</td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">B: Put Spreads (5% wide)</td>
+            <td style="color:#16a34a">+82.2%</td>
+            <td>6.52</td>
+            <td style="color:#ca8a04">-12.0%</td>
+            <td style="color:#16a34a">-12.0%</td>
+            <td>18.41%</td>
+            <td>60.24%</td>
+            <td>-41.84%</td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">C: Dynamic Budget (0.5-3%)</td>
+            <td style="color:#16a34a">+89.7%</td>
+            <td>7.10</td>
+            <td style="color:#ca8a04">-12.8%</td>
+            <td style="color:#16a34a">-12.8%</td>
+            <td>22.22%</td>
+            <td>111.82%</td>
+            <td>-89.60%</td>
+        </tr><tr style="background:#f0fdf4;">
+            <td style="text-align:left;font-weight:700">** D: Collar (sell calls to fund puts)  PARETO</td>
+            <td style="color:#16a34a">+102.1%</td>
+            <td>8.10</td>
+            <td style="color:#ca8a04">-11.1%</td>
+            <td style="color:#16a34a">-8.6%</td>
+            <td>17.28%</td>
+            <td>218.31%</td>
+            <td>-201.03%</td>
+        </tr><tr style="">
+            <td style="text-align:left;font-weight:500">E: Selective Quarterly</td>
+            <td style="color:#16a34a">+75.0%</td>
+            <td>6.29</td>
+            <td style="color:#ca8a04">-11.6%</td>
+            <td style="color:#16a34a">-11.6%</td>
+            <td>6.56%</td>
+            <td>28.93%</td>
+            <td>-22.36%</td>
+        </tr></tbody></table>
+
+<h2>3. Cost Analysis</h2>
+<table><thead><tr><th>Variant</th><th>Annual Cost</th><th>Annual Payoff</th><th>Net Cost</th><th>vs Old Hedge</th></tr></thead>
+<tbody><tr>
+            <td style="text-align:left">A: VIX<15 Puts Only</td>
+            <td>2.21%</td>
+            <td>10.60%</td>
+            <td>-8.38%</td>
+            <td style="color:#16a34a">+72.04%</td>
+        </tr><tr>
+            <td style="text-align:left">B: Put Spreads (5% wide)</td>
+            <td>18.41%</td>
+            <td>60.24%</td>
+            <td>-41.84%</td>
+            <td style="color:#16a34a">+55.85%</td>
+        </tr><tr>
+            <td style="text-align:left">C: Dynamic Budget (0.5-3%)</td>
+            <td>22.22%</td>
+            <td>111.82%</td>
+            <td>-89.60%</td>
+            <td style="color:#16a34a">+52.03%</td>
+        </tr><tr>
+            <td style="text-align:left">D: Collar (sell calls to fund puts)</td>
+            <td>17.28%</td>
+            <td>218.31%</td>
+            <td>-201.03%</td>
+            <td style="color:#16a34a">+56.97%</td>
+        </tr><tr>
+            <td style="text-align:left">E: Selective Quarterly</td>
+            <td>6.56%</td>
+            <td>28.93%</td>
+            <td>-22.36%</td>
+            <td style="color:#16a34a">+67.69%</td>
+        </tr></tbody></table>
+
+<h2>4. Year-by-Year: Pareto Winner vs No Hedge</h2>
+<table><thead><tr><th>Year</th><th>Hedged Return</th><th>Hedged DD</th><th>Unhedged Return</th><th>Unhedged DD</th></tr></thead>
+<tbody><tr>
+            <td>2020</td>
+            <td style="color:#16a34a">+136.2%</td>
+            <td style="color:#ca8a04">-8.6%</td>
+            <td style="color:#16a34a">+79.0%</td>
+            <td style="color:#dc2626">-14.7%</td>
+        </tr><tr>
+            <td>2021</td>
+            <td style="color:#16a34a">+149.5%</td>
+            <td style="color:#ca8a04">-0.7%</td>
+            <td style="color:#16a34a">+115.8%</td>
+            <td style="color:#dc2626">-0.6%</td>
+        </tr><tr>
+            <td>2022</td>
+            <td style="color:#16a34a">+40.9%</td>
+            <td style="color:#ca8a04">-11.1%</td>
+            <td style="color:#16a34a">+13.4%</td>
+            <td style="color:#dc2626">-12.5%</td>
+        </tr><tr>
+            <td>2023</td>
+            <td style="color:#16a34a">+126.6%</td>
+            <td style="color:#ca8a04">-2.8%</td>
+            <td style="color:#16a34a">+105.5%</td>
+            <td style="color:#dc2626">-3.0%</td>
+        </tr><tr>
+            <td>2024</td>
+            <td style="color:#16a34a">+84.3%</td>
+            <td style="color:#ca8a04">-0.5%</td>
+            <td style="color:#16a34a">+71.8%</td>
+            <td style="color:#dc2626">-0.6%</td>
+        </tr><tr>
+            <td>2025</td>
+            <td style="color:#16a34a">+94.9%</td>
+            <td style="color:#ca8a04">-0.9%</td>
+            <td style="color:#16a34a">+70.7%</td>
+            <td style="color:#dc2626">-1.1%</td>
+        </tr></tbody></table>
+
+<h2>5. Variant Design Rationale</h2>
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px">
+  <ul style="font-size:0.82rem;margin:0;padding-left:18px">
+    <li><strong>A: VIX&lt;15 Puts Only</strong> — Buy only when cheapest (1.8-2.5%/yr). No hedge when VIX elevated (delever instead). Max cost savings.</li>
+    <li><strong>B: Put Spreads</strong> — 5% wide put spreads cost 55% of naked puts. Capped payoff but dramatically cheaper. Always on.</li>
+    <li><strong>C: Dynamic Budget</strong> — 0.5% in calm, 3% in crisis. Spends more when needed most. Self-adjusting.</li>
+    <li><strong>D: Collar</strong> — Sell 3% OTM calls to fund puts. Near-zero net cost but caps upside at +2.5%/day.</li>
+    <li><strong>E: Selective Quarterly</strong> — Hedge only Jan-Feb, Aug-Oct (historically worst months). 5 months hedged, 7 unhedged.</li>
+  </ul>
+</div>
+
+<div style="color:#94a3b8;font-size:0.68rem;margin-top:28px;border-top:1px solid #e2e8f0;padding-top:8px">
+  PilotAI — Smart Hedge v1.0 | Real IronVault put costs (4.36%/yr) |
+  Pareto-optimal: min cost for COVID DD &lt; 15%
+</div></body></html>

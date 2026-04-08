@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Regime Performance Analysis</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin:0; padding:24px; background:#fff; color:#1e293b; }
+h1 { font-size:1.5rem; color:#0f172a; margin-bottom:4px; }
+h2 { font-size:1.1rem; color:#334155; }
+.meta { color:#64748b; font-size:0.85rem; margin-bottom:20px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:20px; }
+.card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px; }
+.card-label { font-size:0.7rem; color:#64748b; text-transform:uppercase; }
+.card-value { font-size:1.3rem; font-weight:700; margin-top:3px; }
+table { width:100%; border-collapse:collapse; margin-bottom:14px; font-size:0.85rem; }
+th { background:#f1f5f9; padding:7px 10px; text-align:right; font-size:0.72rem; color:#64748b; text-transform:uppercase; border-bottom:2px solid #e2e8f0; }
+th:first-child { text-align:left; }
+td { padding:6px 10px; text-align:right; border-bottom:1px solid #f1f5f9; }
+td:first-child { text-align:left; }
+tr:hover { background:#f8fafc; }
+.section { margin-bottom:2rem; }
+</style></head><body>
+<h1>Regime Performance Analysis</h1>
+<p class="meta">5 Strategies × 6 Regimes | Regime-Adaptive Weight Matrix | 2020-2025</p>
+
+<div class="grid">
+  <div class="card"><div class="card-label">Adaptive CAGR</div><div class="card-value" style="color:#16a34a">54.8%</div></div>
+  <div class="card"><div class="card-label">Adaptive Sharpe</div><div class="card-value" style="color:#16a34a">6.39</div></div>
+  <div class="card"><div class="card-label">Adaptive Max DD</div><div class="card-value" style="color:#16a34a">3.4%</div></div>
+  <div class="card"><div class="card-label">Calmar</div><div class="card-value">16.0</div></div>
+  <div class="card"><div class="card-label">Sortino</div><div class="card-value">11.8</div></div>
+  <div class="card"><div class="card-label">Vol</div><div class="card-value">6.9%</div></div>
+</div>
+
+<div class="section">
+<h2>Regime Distribution (2020-2025)</h2>
+<div style="display:inline-block;width:155.10000000000002px;height:28px;background:#22c55e;margin:2px;border-radius:4px;color:#fff;font-size:0.7rem;line-height:28px;text-align:center;padding:0 6px">Bull 51.7%</div><div style="display:inline-block;width:122.69999999999999px;height:28px;background:#ef4444;margin:2px;border-radius:4px;color:#fff;font-size:0.7rem;line-height:28px;text-align:center;padding:0 6px">Bear 40.9%</div><div style="display:inline-block;width:20px;height:28px;background:#f59e0b;margin:2px;border-radius:4px;color:#fff;font-size:0.7rem;line-height:28px;text-align:center;padding:0 6px">High Vol 4.2%</div><div style="display:inline-block;width:20px;height:28px;background:#3b82f6;margin:2px;border-radius:4px;color:#fff;font-size:0.7rem;line-height:28px;text-align:center;padding:0 6px">Low Vol 0.3%</div><div style="display:inline-block;width:20px;height:28px;background:#991b1b;margin:2px;border-radius:4px;color:#fff;font-size:0.7rem;line-height:28px;text-align:center;padding:0 6px">Crisis 2.1%</div><div style="display:inline-block;width:20px;height:28px;background:#06b6d4;margin:2px;border-radius:4px;color:#fff;font-size:0.7rem;line-height:28px;text-align:center;padding:0 6px">Recovery 0.9%</div>
+</div>
+
+<div class="section">
+<h2>Sharpe Ratio Heatmap (Strategy × Regime)</h2>
+<table style="width:auto"><tr><th></th><th>Bull</th><th>Bear</th><th>High Vol</th><th>Low Vol</th><th>Crisis</th><th>Recovery</th></tr><tr><td>EXP-1220 Dynamic Leverage</td><td style="background:#16a34a;color:#fff;text-align:center;font-weight:700">+10.9</td><td style="background:#fef9c3;color:#000;text-align:center;font-weight:700">+0.7</td><td style="background:#16a34a;color:#fff;text-align:center;font-weight:700">+3.6</td><td style="background:#fef9c3;color:#000;text-align:center;font-weight:700">+0.0</td><td style="background:#dc2626;color:#fff;text-align:center;font-weight:700">-2.1</td><td style="background:#16a34a;color:#fff;text-align:center;font-weight:700">+3.2</td></tr><tr><td>Cross-Asset Pairs (EXP-1630)</td><td style="background:#86efac;color:#000;text-align:center;font-weight:700">+2.0</td><td style="background:#86efac;color:#000;text-align:center;font-weight:700">+1.9</td><td style="background:#16a34a;color:#fff;text-align:center;font-weight:700">+4.2</td><td style="background:#fef9c3;color:#000;text-align:center;font-weight:700">+0.0</td><td style="background:#86efac;color:#000;text-align:center;font-weight:700">+2.0</td><td style="background:#16a34a;color:#fff;text-align:center;font-weight:700">+9.2</td></tr><tr><td>Vol Term Structure</td><td style="background:#86efac;color:#000;text-align:center;font-weight:700">+1.8</td><td style="background:#86efac;color:#000;text-align:center;font-weight:700">+1.3</td><td style="background:#dc2626;color:#fff;text-align:center;font-weight:700">-1.8</td><td style="background:#fef9c3;color:#000;text-align:center;font-weight:700">+0.0</td><td style="background:#16a34a;color:#fff;text-align:center;font-weight:700">+7.2</td><td style="background:#dc2626;color:#fff;text-align:center;font-weight:700">-1.4</td></tr><tr><td>TLT Iron Condors</td><td style="background:#86efac;color:#000;text-align:center;font-weight:700">+2.1</td><td style="background:#fef9c3;color:#000;text-align:center;font-weight:700">+0.1</td><td style="background:#dc2626;color:#fff;text-align:center;font-weight:700">-3.5</td><td style="background:#fef9c3;color:#000;text-align:center;font-weight:700">+0.0</td><td style="background:#16a34a;color:#fff;text-align:center;font-weight:700">+4.3</td><td style="background:#16a34a;color:#fff;text-align:center;font-weight:700">+3.6</td></tr><tr><td>Sector Momentum (XLI/XLF/XLE)</td><td style="background:#16a34a;color:#fff;text-align:center;font-weight:700">+3.4</td><td style="background:#fef9c3;color:#000;text-align:center;font-weight:700">+0.9</td><td style="background:#fca5a5;color:#000;text-align:center;font-weight:700">-0.4</td><td style="background:#fef9c3;color:#000;text-align:center;font-weight:700">+0.0</td><td style="background:#dc2626;color:#fff;text-align:center;font-weight:700">-1.3</td><td style="background:#86efac;color:#000;text-align:center;font-weight:700">+2.6</td></tr></table>
+</div>
+
+<div class="section">
+<h2>Strategy Failure Map</h2>
+<p style="color:#64748b;font-size:0.82rem">Strategies with negative CAGR or Sharpe in a regime — scale DOWN in these conditions.</p>
+<table style="width:auto"><tr><th>Strategy</th><th>Failing Regimes</th></tr><tr><td>EXP-1220 Dynamic Leverage</td><td><span style="color:#dc2626;font-weight:700">Crisis</span></td></tr><tr><td>Cross-Asset Pairs (EXP-1630)</td><td><span style="color:#16a34a">None</span></td></tr><tr><td>Vol Term Structure</td><td><span style="color:#dc2626;font-weight:700">High Vol</span>, <span style="color:#dc2626;font-weight:700">Recovery</span></td></tr><tr><td>TLT Iron Condors</td><td><span style="color:#dc2626;font-weight:700">Bear</span>, <span style="color:#dc2626;font-weight:700">High Vol</span></td></tr><tr><td>Sector Momentum (XLI/XLF/XLE)</td><td><span style="color:#dc2626;font-weight:700">High Vol</span>, <span style="color:#dc2626;font-weight:700">Crisis</span></td></tr></table>
+</div>
+
+<div class="section">
+<h2>Regime-Adaptive Weight Matrix</h2>
+<p style="color:#64748b;font-size:0.82rem">Optimal allocation per detected regime. Overweights strategies that excel, underweights those that fail.</p>
+<table><tr><th>Regime</th><th>EXP-1220 Dynamic Leverage</th><th>Cross-Asset Pairs (EXP-1630)</th><th>Vol Term Structure</th><th>TLT Iron Condors</th><th>Sector Momentum (XLI/XLF/XLE)</th></tr><tr><td style="border-left:4px solid #22c55e;padding-left:8px">Bull</td><td style="background:rgba(34,197,94,1.0384);text-align:center;font-weight:600">52%</td><td style="background:rgba(100,100,100,0.1);text-align:center;font-weight:600">10%</td><td style="background:rgba(100,100,100,0.1);text-align:center;font-weight:600">9%</td><td style="background:rgba(100,100,100,0.1);text-align:center;font-weight:600">11%</td><td style="background:rgba(34,197,94,0.3522);text-align:center;font-weight:600">18%</td></tr><tr><td style="border-left:4px solid #ef4444;padding-left:8px">Bear</td><td style="background:rgba(100,100,100,0.1);text-align:center;font-weight:600">14%</td><td style="background:rgba(34,197,94,0.7514);text-align:center;font-weight:600">38%</td><td style="background:rgba(34,197,94,0.5168);text-align:center;font-weight:600">26%</td><td style="background:rgba(100,100,100,0.1);text-align:center;font-weight:600">5%</td><td style="background:rgba(34,197,94,0.3538);text-align:center;font-weight:600">18%</td></tr><tr><td style="border-left:4px solid #f59e0b;padding-left:8px">High Vol</td><td style="background:rgba(34,197,94,0.8276);text-align:center;font-weight:600">41%</td><td style="background:rgba(34,197,94,0.9018);text-align:center;font-weight:600">45%</td><td style="background:rgba(100,100,100,0.1);text-align:center;font-weight:600">5%</td><td style="background:rgba(100,100,100,0.1);text-align:center;font-weight:600">5%</td><td style="background:rgba(100,100,100,0.1);text-align:center;font-weight:600">5%</td></tr><tr><td style="border-left:4px solid #3b82f6;padding-left:8px">Low Vol</td><td style="background:rgba(34,197,94,0.4);text-align:center;font-weight:600">20%</td><td style="background:rgba(34,197,94,0.4);text-align:center;font-weight:600">20%</td><td style="background:rgba(34,197,94,0.4);text-align:center;font-weight:600">20%</td><td style="background:rgba(34,197,94,0.4);text-align:center;font-weight:600">20%</td><td style="background:rgba(34,197,94,0.4);text-align:center;font-weight:600">20%</td></tr><tr><td style="border-left:4px solid #991b1b;padding-left:8px">Crisis</td><td style="background:rgba(100,100,100,0.1);text-align:center;font-weight:600">5%</td><td style="background:rgba(100,100,100,0.1);text-align:center;font-weight:600">14%</td><td style="background:rgba(34,197,94,0.9394);text-align:center;font-weight:600">47%</td><td style="background:rgba(34,197,94,0.5962);text-align:center;font-weight:600">30%</td><td style="background:rgba(100,100,100,0.1);text-align:center;font-weight:600">5%</td></tr><tr><td style="border-left:4px solid #06b6d4;padding-left:8px">Recovery</td><td style="background:rgba(34,197,94,0.326);text-align:center;font-weight:600">16%</td><td style="background:rgba(34,197,94,0.94);text-align:center;font-weight:600">47%</td><td style="background:rgba(100,100,100,0.1);text-align:center;font-weight:600">5%</td><td style="background:rgba(34,197,94,0.368);text-align:center;font-weight:600">18%</td><td style="background:rgba(100,100,100,0.1);text-align:center;font-weight:600">14%</td></tr></table>
+</div>
+
+
+        <h2 style="border-left:4px solid #22c55e;padding-left:10px;margin-top:2rem">Bull</h2>
+        <p style="color:#64748b;font-size:0.82rem;margin-top:-6px">SPY 20d trend > +0.5%, VIX < 22</p>
+        <table>
+        <tr><th>Strategy</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Vol</th><th>Win%</th><th>Avg Trade</th><th>Days</th><th>Status</th></tr>
+        <tr>
+              <td>EXP-1220 Dynamic Leverage</td>
+              <td style="color:#16a34a;font-weight:700">+179.8%</td>
+              <td style="color:#16a34a;font-weight:700">+10.89</td>
+              <td>1.8%</td>
+              <td>9.5%</td>
+              <td>85%</td>
+              <td>18d</td>
+              <td>782</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>Cross-Asset Pairs (EXP-1630)</td>
+              <td style="color:#16a34a;font-weight:700">+10.5%</td>
+              <td style="color:#16a34a;font-weight:700">+2.04</td>
+              <td>2.6%</td>
+              <td>4.9%</td>
+              <td>62%</td>
+              <td>12d</td>
+              <td>782</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>Vol Term Structure</td>
+              <td style="color:#16a34a;font-weight:700">+11.8%</td>
+              <td style="color:#16a34a;font-weight:700">+1.81</td>
+              <td>4.8%</td>
+              <td>6.3%</td>
+              <td>75%</td>
+              <td>20d</td>
+              <td>782</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>TLT Iron Condors</td>
+              <td style="color:#16a34a;font-weight:700">+17.1%</td>
+              <td style="color:#16a34a;font-weight:700">+2.10</td>
+              <td>4.5%</td>
+              <td>7.7%</td>
+              <td>78%</td>
+              <td>22d</td>
+              <td>782</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>Sector Momentum (XLI/XLF/XLE)</td>
+              <td style="color:#16a34a;font-weight:700">+30.0%</td>
+              <td style="color:#16a34a;font-weight:700">+3.44</td>
+              <td>4.1%</td>
+              <td>7.7%</td>
+              <td>82%</td>
+              <td>20d</td>
+              <td>782</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr>
+        </table>
+        <h2 style="border-left:4px solid #ef4444;padding-left:10px;margin-top:2rem">Bear</h2>
+        <p style="color:#64748b;font-size:0.82rem;margin-top:-6px">SPY 20d trend < -0.5%, VIX 22-35</p>
+        <table>
+        <tr><th>Strategy</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Vol</th><th>Win%</th><th>Avg Trade</th><th>Days</th><th>Status</th></tr>
+        <tr>
+              <td>EXP-1220 Dynamic Leverage</td>
+              <td style="color:#16a34a;font-weight:700">+16.4%</td>
+              <td style="color:#16a34a;font-weight:700">+0.71</td>
+              <td>25.7%</td>
+              <td>26.1%</td>
+              <td>55%</td>
+              <td>12d</td>
+              <td>618</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>Cross-Asset Pairs (EXP-1630)</td>
+              <td style="color:#16a34a;font-weight:700">+15.3%</td>
+              <td style="color:#16a34a;font-weight:700">+1.89</td>
+              <td>5.0%</td>
+              <td>7.7%</td>
+              <td>70%</td>
+              <td>8d</td>
+              <td>618</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>Vol Term Structure</td>
+              <td style="color:#16a34a;font-weight:700">+16.4%</td>
+              <td style="color:#16a34a;font-weight:700">+1.30</td>
+              <td>14.0%</td>
+              <td>12.2%</td>
+              <td>55%</td>
+              <td>14d</td>
+              <td>618</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>TLT Iron Condors</td>
+              <td style="color:#dc2626;font-weight:700">-0.2%</td>
+              <td style="color:#16a34a;font-weight:700">+0.05</td>
+              <td>26.2%</td>
+              <td>13.8%</td>
+              <td>60%</td>
+              <td>15d</td>
+              <td>618</td>
+              <td style="color:#dc2626;font-weight:700">FAIL</td>
+            </tr><tr>
+              <td>Sector Momentum (XLI/XLF/XLE)</td>
+              <td style="color:#16a34a;font-weight:700">+18.5%</td>
+              <td style="color:#16a34a;font-weight:700">+0.89</td>
+              <td>20.7%</td>
+              <td>21.8%</td>
+              <td>40%</td>
+              <td>10d</td>
+              <td>618</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr>
+        </table>
+        <h2 style="border-left:4px solid #f59e0b;padding-left:10px;margin-top:2rem">High Vol</h2>
+        <p style="color:#64748b;font-size:0.82rem;margin-top:-6px">VIX 28-40, any direction</p>
+        <table>
+        <tr><th>Strategy</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Vol</th><th>Win%</th><th>Avg Trade</th><th>Days</th><th>Status</th></tr>
+        <tr>
+              <td>EXP-1220 Dynamic Leverage</td>
+              <td style="color:#16a34a;font-weight:700">+158.9%</td>
+              <td style="color:#16a34a;font-weight:700">+3.63</td>
+              <td>8.5%</td>
+              <td>27.2%</td>
+              <td>60%</td>
+              <td>8d</td>
+              <td>64</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>Cross-Asset Pairs (EXP-1630)</td>
+              <td style="color:#16a34a;font-weight:700">+48.4%</td>
+              <td style="color:#16a34a;font-weight:700">+4.25</td>
+              <td>1.7%</td>
+              <td>9.4%</td>
+              <td>68%</td>
+              <td>6d</td>
+              <td>64</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>Vol Term Structure</td>
+              <td style="color:#dc2626;font-weight:700">-33.5%</td>
+              <td style="color:#dc2626;font-weight:700">-1.76</td>
+              <td>18.0%</td>
+              <td>21.8%</td>
+              <td>40%</td>
+              <td>7d</td>
+              <td>64</td>
+              <td style="color:#dc2626;font-weight:700">FAIL</td>
+            </tr><tr>
+              <td>TLT Iron Condors</td>
+              <td style="color:#dc2626;font-weight:700">-46.3%</td>
+              <td style="color:#dc2626;font-weight:700">-3.45</td>
+              <td>17.5%</td>
+              <td>17.6%</td>
+              <td>50%</td>
+              <td>10d</td>
+              <td>64</td>
+              <td style="color:#dc2626;font-weight:700">FAIL</td>
+            </tr><tr>
+              <td>Sector Momentum (XLI/XLF/XLE)</td>
+              <td style="color:#dc2626;font-weight:700">-9.7%</td>
+              <td style="color:#dc2626;font-weight:700">-0.36</td>
+              <td>7.4%</td>
+              <td>21.6%</td>
+              <td>48%</td>
+              <td>8d</td>
+              <td>64</td>
+              <td style="color:#dc2626;font-weight:700">FAIL</td>
+            </tr>
+        </table>
+        <h2 style="border-left:4px solid #3b82f6;padding-left:10px;margin-top:2rem">Low Vol</h2>
+        <p style="color:#64748b;font-size:0.82rem;margin-top:-6px">VIX < 15, SPY 20d vol < 10%</p>
+        <table>
+        <tr><th>Strategy</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Vol</th><th>Win%</th><th>Avg Trade</th><th>Days</th><th>Status</th></tr>
+        <tr>
+              <td>EXP-1220 Dynamic Leverage</td>
+              <td style="color:#16a34a;font-weight:700">+0.0%</td>
+              <td style="color:#16a34a;font-weight:700">+0.00</td>
+              <td>0.0%</td>
+              <td>0.0%</td>
+              <td>0%</td>
+              <td>0d</td>
+              <td>4</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>Cross-Asset Pairs (EXP-1630)</td>
+              <td style="color:#16a34a;font-weight:700">+0.0%</td>
+              <td style="color:#16a34a;font-weight:700">+0.00</td>
+              <td>0.0%</td>
+              <td>0.0%</td>
+              <td>0%</td>
+              <td>0d</td>
+              <td>4</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>Vol Term Structure</td>
+              <td style="color:#16a34a;font-weight:700">+0.0%</td>
+              <td style="color:#16a34a;font-weight:700">+0.00</td>
+              <td>0.0%</td>
+              <td>0.0%</td>
+              <td>0%</td>
+              <td>0d</td>
+              <td>4</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>TLT Iron Condors</td>
+              <td style="color:#16a34a;font-weight:700">+0.0%</td>
+              <td style="color:#16a34a;font-weight:700">+0.00</td>
+              <td>0.0%</td>
+              <td>0.0%</td>
+              <td>0%</td>
+              <td>0d</td>
+              <td>4</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>Sector Momentum (XLI/XLF/XLE)</td>
+              <td style="color:#16a34a;font-weight:700">+0.0%</td>
+              <td style="color:#16a34a;font-weight:700">+0.00</td>
+              <td>0.0%</td>
+              <td>0.0%</td>
+              <td>0%</td>
+              <td>0d</td>
+              <td>4</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr>
+        </table>
+        <h2 style="border-left:4px solid #991b1b;padding-left:10px;margin-top:2rem">Crisis</h2>
+        <p style="color:#64748b;font-size:0.82rem;margin-top:-6px">VIX > 35, SPY dropping sharply</p>
+        <table>
+        <tr><th>Strategy</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Vol</th><th>Win%</th><th>Avg Trade</th><th>Days</th><th>Status</th></tr>
+        <tr>
+              <td>EXP-1220 Dynamic Leverage</td>
+              <td style="color:#dc2626;font-weight:700">-73.9%</td>
+              <td style="color:#dc2626;font-weight:700">-2.12</td>
+              <td>22.7%</td>
+              <td>55.7%</td>
+              <td>25%</td>
+              <td>5d</td>
+              <td>31</td>
+              <td style="color:#dc2626;font-weight:700">FAIL</td>
+            </tr><tr>
+              <td>Cross-Asset Pairs (EXP-1630)</td>
+              <td style="color:#16a34a;font-weight:700">+28.6%</td>
+              <td style="color:#16a34a;font-weight:700">+1.99</td>
+              <td>3.3%</td>
+              <td>13.1%</td>
+              <td>72%</td>
+              <td>4d</td>
+              <td>31</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>Vol Term Structure</td>
+              <td style="color:#16a34a;font-weight:700">+548.7%</td>
+              <td style="color:#16a34a;font-weight:700">+7.22</td>
+              <td>2.1%</td>
+              <td>26.5%</td>
+              <td>20%</td>
+              <td>3d</td>
+              <td>31</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>TLT Iron Condors</td>
+              <td style="color:#16a34a;font-weight:700">+296.8%</td>
+              <td style="color:#16a34a;font-weight:700">+4.29</td>
+              <td>7.2%</td>
+              <td>33.6%</td>
+              <td>30%</td>
+              <td>6d</td>
+              <td>31</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>Sector Momentum (XLI/XLF/XLE)</td>
+              <td style="color:#dc2626;font-weight:700">-36.5%</td>
+              <td style="color:#dc2626;font-weight:700">-1.27</td>
+              <td>8.9%</td>
+              <td>31.9%</td>
+              <td>15%</td>
+              <td>4d</td>
+              <td>31</td>
+              <td style="color:#dc2626;font-weight:700">FAIL</td>
+            </tr>
+        </table>
+        <h2 style="border-left:4px solid #06b6d4;padding-left:10px;margin-top:2rem">Recovery</h2>
+        <p style="color:#64748b;font-size:0.82rem;margin-top:-6px">VIX declining from >30, SPY bouncing</p>
+        <table>
+        <tr><th>Strategy</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Vol</th><th>Win%</th><th>Avg Trade</th><th>Days</th><th>Status</th></tr>
+        <tr>
+              <td>EXP-1220 Dynamic Leverage</td>
+              <td style="color:#16a34a;font-weight:700">+99.3%</td>
+              <td style="color:#16a34a;font-weight:700">+3.18</td>
+              <td>3.8%</td>
+              <td>22.5%</td>
+              <td>80%</td>
+              <td>15d</td>
+              <td>13</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>Cross-Asset Pairs (EXP-1630)</td>
+              <td style="color:#16a34a;font-weight:700">+73.3%</td>
+              <td style="color:#16a34a;font-weight:700">+9.17</td>
+              <td>0.5%</td>
+              <td>6.0%</td>
+              <td>65%</td>
+              <td>10d</td>
+              <td>13</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>Vol Term Structure</td>
+              <td style="color:#dc2626;font-weight:700">-11.6%</td>
+              <td style="color:#dc2626;font-weight:700">-1.39</td>
+              <td>2.5%</td>
+              <td>8.6%</td>
+              <td>78%</td>
+              <td>16d</td>
+              <td>13</td>
+              <td style="color:#dc2626;font-weight:700">FAIL</td>
+            </tr><tr>
+              <td>TLT Iron Condors</td>
+              <td style="color:#16a34a;font-weight:700">+48.6%</td>
+              <td style="color:#16a34a;font-weight:700">+3.59</td>
+              <td>1.5%</td>
+              <td>11.2%</td>
+              <td>72%</td>
+              <td>18d</td>
+              <td>13</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr><tr>
+              <td>Sector Momentum (XLI/XLF/XLE)</td>
+              <td style="color:#16a34a;font-weight:700">+41.0%</td>
+              <td style="color:#16a34a;font-weight:700">+2.64</td>
+              <td>0.9%</td>
+              <td>13.4%</td>
+              <td>75%</td>
+              <td>14d</td>
+              <td>13</td>
+              <td style="color:#16a34a;font-weight:700"></td>
+            </tr>
+        </table>
+
+<div style="color:#94a3b8;font-size:0.78rem;margin-top:3rem;border-top:1px solid #e2e8f0;padding-top:1rem">
+<p>Regime Performance Analysis — compass/regime_performance.py<br>
+6 regimes: Bull, Bear, High Vol, Low Vol, Crisis, Recovery.<br>
+5 strategies: EXP-1220, Cross-Asset Pairs, Vol Term Structure, TLT ICs, Sector Momentum.<br>
+Weights: Sharpe-proportional allocation per regime with 5% floor and 50% cap.</p>
+</div></body></html>

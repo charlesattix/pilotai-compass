@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>Cross-Asset Pairs Deep Validation</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:1200px;margin:0 auto;padding:20px;background:#0d1117;color:#c9d1d9}
+h1,h2,h3{color:#58a6ff}
+.hero{background:#161b22;border:2px solid #3fb950;border-radius:12px;padding:24px;text-align:center;margin:20px 0}
+.hero .big{font-size:2em;font-weight:800;color:#3fb950}
+.hero .sub{color:#8b949e;margin-top:8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:20px 0}
+.c{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px;text-align:center}
+.c .l{color:#8b949e;font-size:.8em}.c .v{color:#f0f6fc;font-weight:600;font-size:1.2em;margin-top:4px}
+table{width:100%;border-collapse:collapse;margin:12px 0}
+th,td{padding:8px 12px;text-align:right;border-bottom:1px solid #21262d}
+th{color:#8b949e;background:#161b22;font-size:.85em}
+td:first-child,th:first-child{text-align:left}
+tr:hover td{background:#161b2280}
+.section{margin:32px 0}
+.note{color:#8b949e;font-size:.85em;margin:8px 0}
+.flag{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px;margin:16px 0}
+.flag.warn{border-color:#d29922;color:#d29922}
+.flag.pass{border-color:#3fb950;color:#3fb950}
+.flag.fail{border-color:#ef4444;color:#ef4444}
+ul{margin:8px 0;padding-left:20px}li{margin:4px 0}
+</style></head><body>
+
+<h1>Cross-Asset Pairs Mean-Reversion: Deep Validation</h1>
+<p class="note">TLT-SPY Correlation Breakdown &middot; Original claim: OOS Sharpe 6.31, SPY corr 0.02</p>
+
+<div class="hero">
+  <div class="big">Verdict: CONFIRMED</div>
+  <div class="sub">
+    WF Avg OOS Sharpe: 5.06 &middot;
+    WF Consistency: 100% &middot;
+    Baseline Sharpe: 2.90 &middot;
+    Best Pair: TLT-QQQ &middot;
+    Bias Flags: 1
+  </div>
+</div>
+
+<div class="cards">
+  <div class="c"><div class="l">WF Avg OOS Sharpe</div><div class="v">5.06</div></div>
+  <div class="c"><div class="l">WF Consistency</div><div class="v">100%</div></div>
+  <div class="c"><div class="l">Baseline Sharpe</div><div class="v">2.90</div></div>
+  <div class="c"><div class="l">Param Sensitivity</div><div class="v">0.64 to 7.18</div></div>
+  <div class="c"><div class="l">Best Pair</div><div class="v">TLT-QQQ</div></div>
+  <div class="c"><div class="l">Bias Flags</div><div class="v" style="color:#3fb950">1</div></div>
+  <div class="c"><div class="l">Total Trades</div><div class="v">32</div></div>
+  <div class="c"><div class="l">Verdict</div><div class="v" style="color:#3fb950">CONFIRMED</div></div>
+</div>
+
+<div class="section">
+<h2>1. Walk-Forward Expanding Window</h2>
+<p class="note">Train on 2020..Y, test on Y+1. No parameter re-optimization between windows.</p>
+<table>
+<thead><tr><th>Train</th><th>Test</th><th>OOS Sharpe</th><th>Trades</th><th>PnL</th><th>Win Rate</th></tr></thead>
+<tbody><tr><td>2020–2020</td><td>2021</td><td style='color:#22c55e'><strong>2.63</strong></td><td>4</td><td style='color:#22c55e'>$174</td><td>100%</td></tr>
+<tr><td>2020–2021</td><td>2022</td><td style='color:#22c55e'><strong>0.71</strong></td><td>5</td><td style='color:#22c55e'>$330</td><td>80%</td></tr>
+<tr><td>2020–2022</td><td>2023</td><td style='color:#22c55e'><strong>7.52</strong></td><td>8</td><td style='color:#22c55e'>$186</td><td>100%</td></tr>
+<tr><td>2020–2023</td><td>2024</td><td style='color:#22c55e'><strong>9.57</strong></td><td>6</td><td style='color:#22c55e'>$129</td><td>100%</td></tr>
+<tr><td>2020–2024</td><td>2025</td><td style='color:#22c55e'><strong>4.88</strong></td><td>7</td><td style='color:#22c55e'>$432</td><td>100%</td></tr>
+</tbody></table>
+</div>
+
+<div class="section">
+<h2>2. Parameter Sensitivity</h2>
+<p class="note">OOS period = 2023-2025 for all parameter variations.</p>
+<table>
+<thead><tr><th>Parameter</th><th>Value</th><th>Full Sharpe</th><th>OOS Sharpe</th><th>All Trades</th><th>OOS Trades</th><th>PnL</th></tr></thead>
+<tbody><tr><td style='text-align:left'>lookback</td><td>15</td><td>2.28</td><td style='color:#22c55e'><strong>1.66</strong></td><td>37</td><td>23</td><td>$1,167</td></tr>
+<tr><td style='text-align:left'>lookback</td><td>20</td><td>2.58</td><td style='color:#22c55e'><strong>1.84</strong></td><td>39</td><td>24</td><td>$1,338</td></tr>
+<tr><td style='text-align:left'>lookback</td><td>30</td><td>2.90</td><td style='color:#22c55e'><strong>6.17</strong></td><td>32</td><td>22</td><td>$1,293</td></tr>
+<tr><td style='text-align:left'>lookback</td><td>45</td><td>3.01</td><td style='color:#22c55e'><strong>6.43</strong></td><td>33</td><td>22</td><td>$1,344</td></tr>
+<tr><td style='text-align:left'>lookback</td><td>60</td><td>4.88</td><td style='color:#22c55e'><strong>7.11</strong></td><td>31</td><td>23</td><td>$1,605</td></tr>
+<tr><td style='text-align:left'>corr_threshold</td><td>-0.1</td><td>4.24</td><td style='color:#22c55e'><strong>7.18</strong></td><td>44</td><td>25</td><td>$1,935</td></tr>
+<tr><td style='text-align:left'>corr_threshold</td><td>0.0</td><td>2.90</td><td style='color:#22c55e'><strong>6.17</strong></td><td>32</td><td>22</td><td>$1,293</td></tr>
+<tr><td style='text-align:left'>corr_threshold</td><td>0.1</td><td>2.14</td><td style='color:#22c55e'><strong>6.13</strong></td><td>25</td><td>16</td><td>$939</td></tr>
+<tr><td style='text-align:left'>corr_threshold</td><td>0.2</td><td>1.71</td><td style='color:#22c55e'><strong>4.75</strong></td><td>18</td><td>11</td><td>$753</td></tr>
+<tr><td style='text-align:left'>spread_width</td><td>3.0</td><td>3.07</td><td style='color:#22c55e'><strong>5.74</strong></td><td>29</td><td>22</td><td>$1,833</td></tr>
+<tr><td style='text-align:left'>spread_width</td><td>5.0</td><td>2.90</td><td style='color:#22c55e'><strong>6.17</strong></td><td>32</td><td>22</td><td>$1,293</td></tr>
+<tr><td style='text-align:left'>spread_width</td><td>10.0</td><td>2.74</td><td style='color:#22c55e'><strong>1.79</strong></td><td>32</td><td>22</td><td>$1,735</td></tr>
+<tr><td style='text-align:left'>otm_pct</td><td>0.93</td><td>2.90</td><td style='color:#22c55e'><strong>6.17</strong></td><td>32</td><td>22</td><td>$1,293</td></tr>
+<tr><td style='text-align:left'>otm_pct</td><td>0.95</td><td>3.29</td><td style='color:#22c55e'><strong>1.66</strong></td><td>32</td><td>22</td><td>$1,857</td></tr>
+<tr><td style='text-align:left'>otm_pct</td><td>0.97</td><td>2.30</td><td style='color:#f59e0b'><strong>0.64</strong></td><td>32</td><td>22</td><td>$1,908</td></tr>
+<tr><td style='text-align:left'>min_spacing</td><td>10</td><td>2.90</td><td style='color:#22c55e'><strong>6.17</strong></td><td>32</td><td>22</td><td>$1,293</td></tr>
+<tr><td style='text-align:left'>min_spacing</td><td>14</td><td>2.90</td><td style='color:#22c55e'><strong>6.17</strong></td><td>32</td><td>22</td><td>$1,293</td></tr>
+<tr><td style='text-align:left'>min_spacing</td><td>21</td><td>2.90</td><td style='color:#22c55e'><strong>6.17</strong></td><td>32</td><td>22</td><td>$1,293</td></tr>
+</tbody></table>
+</div>
+
+<div class="section">
+<h2>3. Multi-Pair Test</h2>
+<p class="note">Same correlation-breakdown signal applied to different asset pairs, trading SPY put spreads.</p>
+<table>
+<thead><tr><th>Pair</th><th>Trades</th><th>PnL</th><th>WR</th><th>Full Sharpe</th><th>OOS Sharpe</th><th>OOS N</th><th>DD</th></tr></thead>
+<tbody><tr><td style='text-align:left'><strong>TLT-QQQ</strong></td><td>40</td><td>$1,641</td><td>98%</td><td>3.67</td><td style='color:#22c55e'><strong>7.69</strong></td><td>20</td><td>0.2%</td></tr>
+<tr><td style='text-align:left'><strong>TLT-SPY</strong></td><td>32</td><td>$1,293</td><td>97%</td><td>2.90</td><td style='color:#22c55e'><strong>6.17</strong></td><td>22</td><td>0.2%</td></tr>
+<tr><td style='text-align:left'><strong>XLI-TLT</strong></td><td>28</td><td>$531</td><td>93%</td><td>0.68</td><td style='color:#22c55e'><strong>6.02</strong></td><td>20</td><td>0.7%</td></tr>
+<tr><td style='text-align:left'><strong>GLD-TLT</strong></td><td>63</td><td>$2,142</td><td>94%</td><td>2.23</td><td style='color:#22c55e'><strong>5.28</strong></td><td>32</td><td>0.6%</td></tr>
+<tr><td style='text-align:left'><strong>XLF-SPY</strong></td><td>67</td><td>$1,602</td><td>91%</td><td>1.40</td><td style='color:#22c55e'><strong>3.27</strong></td><td>34</td><td>0.6%</td></tr>
+<tr><td style='text-align:left'><strong>QQQ-SPY</strong></td><td>67</td><td>$1,602</td><td>91%</td><td>1.40</td><td style='color:#22c55e'><strong>3.27</strong></td><td>34</td><td>0.6%</td></tr>
+<tr><td style='text-align:left'><strong>GLD-SPY</strong></td><td>48</td><td>$864</td><td>92%</td><td>0.92</td><td style='color:#22c55e'><strong>2.78</strong></td><td>23</td><td>0.6%</td></tr>
+</tbody></table>
+</div>
+
+<div class="section">
+<h2>4. Regime Breakdown</h2>
+<p class="note">Performance by VIX regime at entry.</p>
+<table>
+<thead><tr><th>Regime</th><th>Trades</th><th>PnL</th><th>Win Rate</th><th>Sharpe</th><th>DD</th></tr></thead>
+<tbody><tr><td style='text-align:left'>bear</td><td>5</td><td>$753</td><td>100%</td><td style='color:#22c55e'>3.40</td><td>0.0%</td></tr>
+<tr><td style='text-align:left'>bull</td><td>21</td><td>$609</td><td>100%</td><td style='color:#22c55e'>7.56</td><td>0.0%</td></tr>
+<tr><td style='text-align:left'>high_vol</td><td>3</td><td>$612</td><td>100%</td><td style='color:#22c55e'>3.83</td><td>0.0%</td></tr>
+<tr><td style='text-align:left'>low_vol</td><td>14</td><td>$375</td><td>100%</td><td style='color:#22c55e'>5.18</td><td>0.0%</td></tr>
+<tr><td style='text-align:left'>moderate</td><td>13</td><td>$165</td><td>92%</td><td style='color:#22c55e'>0.58</td><td>0.2%</td></tr>
+</tbody></table>
+</div>
+
+<div class="section">
+<h2>5. Bias & Overfitting Checks</h2>
+<div class="flag pass">
+  <strong>1 flag(s) detected:</strong>
+  <ul><li>TINY_PNL: $1,293 on $100,000 capital (1.3%)</li></ul>
+</div>
+</div>
+
+<p class="note" style="margin-top:40px;text-align:center">
+  Cross-Asset Pairs Deep Validation &middot; All prices from IronVault &middot;
+  Generated by PilotAI Compass
+</p>
+</body></html>

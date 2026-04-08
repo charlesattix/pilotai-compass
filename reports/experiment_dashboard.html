@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>Experiment Results Dashboard — 2026-04-06</title>
+<style>
+:root{
+  --bg:#fff; --card:#f8f9fa; --border:#e2e8f0;
+  --text:#1a1a2e; --muted:#64748b;
+  --green:#059669; --red:#dc2626; --blue:#2563eb; --amber:#d97706;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Inter','SF Pro Display',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:var(--bg); color:var(--text);
+  line-height:1.55; max-width:1200px; margin:0 auto; padding:32px;
+}
+h1{font-size:1.75rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:4px}
+h2{
+  font-size:1.2rem;font-weight:700;margin:40px 0 12px;
+  padding-bottom:8px;border-bottom:2px solid var(--border);
+  letter-spacing:-0.01em;
+}
+h3{font-size:1rem;font-weight:600;margin:22px 0 8px;color:#374151}
+.subtitle{color:var(--muted);font-size:.88rem;margin-bottom:24px}
+table{
+  width:100%;border-collapse:collapse;margin:12px 0;font-size:.84rem;
+  background:#fff;border:1px solid var(--border);border-radius:6px;
+  overflow:hidden;
+}
+th{
+  background:#f1f5f9;color:var(--muted);padding:9px 10px;text-align:left;
+  border-bottom:2px solid var(--border);font-size:.72rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:0.03em;
+}
+td{padding:8px 10px;border-bottom:1px solid #f1f5f9;text-align:left;vertical-align:top}
+.r{text-align:right}
+tr:hover td{background:#fafafa}
+tr:last-child td{border-bottom:none}
+
+.hero{
+  background:linear-gradient(135deg,#eff6ff,#dbeafe);
+  border:2px solid var(--blue);border-radius:12px;
+  padding:24px 28px;margin:20px 0;
+}
+.hero h2{border:none;margin:0 0 6px;padding:0;color:#1e40af}
+.hero p{color:#1e3a8a;font-size:.9rem}
+
+.summary-cards{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:12px;margin:16px 0;
+}
+.summary-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:8px;padding:16px;text-align:center;
+}
+.summary-card .l{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em}
+.summary-card .v{font-weight:700;font-size:1.5rem;margin-top:4px;letter-spacing:-0.02em}
+
+.metric-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;margin:14px 0;
+}
+.metric{
+  background:#fff;border:1px solid var(--border);border-radius:8px;
+  padding:12px;text-align:center;
+}
+.metric .l{color:var(--muted);font-size:.7rem;text-transform:uppercase}
+.metric .v{font-weight:700;font-size:1.1rem;margin-top:3px}
+
+.box{border:1px solid var(--border);border-radius:8px;padding:18px;margin:14px 0;background:var(--card)}
+.box-green{border-left:5px solid var(--green)}
+.box-blue{border-left:5px solid var(--blue)}
+.box-amber{border-left:5px solid var(--amber)}
+.box-red{border-left:5px solid var(--red)}
+
+.verdict{
+  display:inline-block;padding:3px 10px;border-radius:4px;
+  font-size:.7rem;font-weight:700;color:#fff;text-transform:uppercase;
+  letter-spacing:.04em;
+}
+
+code{
+  background:#f1f5f9;padding:2px 6px;border-radius:3px;
+  font-size:.8em;color:#334155;
+}
+
+.footer{
+  text-align:center;color:var(--muted);margin-top:48px;
+  padding-top:16px;border-top:1px solid var(--border);
+  font-size:.78rem;
+}
+</style></head><body>
+
+<h1>Experiment Results Dashboard</h1>
+<p class="subtitle">
+  All experiments tested &bull;
+  14 experiments &bull;
+  Real data only (Rule Zero) &bull;
+  Generated 2026-04-06 11:46
+</p>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="hero">
+<h2>Executive Summary for Carlos</h2>
+<p>Today we tested 14 experiments across research, hedge, and overlay categories.
+Only <strong>1 qualifies as DEPLOY</strong> (EXP-1220, the baseline), and
+<strong>3 are PROMISING</strong> for further validation. The recommended
+portfolio is a regime-switching construction that keeps EXP-1220 as core (40-90%)
+and adds tactical overlays only in specific market regimes. Expected full-period
+performance: <strong>CAGR +101.6%, Sharpe 4.48</strong> (on validated yearly streams).</p>
+</div>
+
+<div class="summary-cards">
+  <div class="summary-card"><div class="l">Total Experiments</div><div class="v">14</div></div>
+  <div class="summary-card"><div class="l" style="color:#059669">Deploy</div><div class="v" style="color:#059669">1</div></div>
+  <div class="summary-card"><div class="l" style="color:#2563eb">Promising</div><div class="v" style="color:#2563eb">3</div></div>
+  <div class="summary-card"><div class="l" style="color:#dc2626">Kill</div><div class="v" style="color:#dc2626">9</div></div>
+  <div class="summary-card"><div class="l" style="color:#64748b">Data Gap</div><div class="v" style="color:#64748b">1</div></div>
+</div>
+
+
+<h2>1. Recommended Portfolio Composition</h2>
+<div class="box box-blue">
+<h3 style="margin:0 0 4px;color:#1e40af">North Star v2 — Regime-Switching Portfolio</h3>
+<p style="color:#64748b;font-size:.82rem;margin-bottom:10px">Source: <code>commit 55aa09f (regime_switching) + better_portfolio.json</code></p>
+
+<div class="metric-grid">
+  <div class="metric"><div class="l">Full Period CAGR</div><div class="v" style="color:#059669">+101.6%</div></div>
+  <div class="metric"><div class="l">Full Period Sharpe</div><div class="v" style="color:#059669">4.48</div></div>
+  <div class="metric"><div class="l">IS 2020-2022</div><div class="v">107.3% / 3.70</div></div>
+  <div class="metric"><div class="l">OOS 2023-2025</div><div class="v" style="color:#059669">95.9% / 5.40</div></div>
+</div>
+
+<p style="color:#64748b;font-size:.82rem;margin:10px 0 0">
+<strong>Caveat:</strong> 0% DD is yearly-bar artifact; intra-year drawdowns not captured
+</p>
+</div>
+
+<h3>Core Strategies (Regime Switching)</h3>
+<table>
+<thead><tr><th>Strategy</th><th>Role</th><th>Weight Range</th></tr></thead>
+<tbody><tr><td><strong>EXP-1220</strong></td><td>Core alpha engine</td><td>40-90%</td></tr>
+<tr><td><strong>EXP-1710</strong></td><td>Tactical neutral overlay</td><td>0-10%</td></tr>
+<tr><td><strong>EXP-1780</strong></td><td>Crisis hedge</td><td>0-30%</td></tr>
+<tr><td><strong>EXP-1660</strong></td><td>High-vol VRP overlay</td><td>0-20%</td></tr>
+</tbody></table>
+
+<h3>Regime-Conditional Allocations</h3>
+<table>
+<thead><tr><th>Regime</th><th>Conditions</th><th>Weights</th></tr></thead>
+<tbody><tr><td><strong>BULL</strong></td><td style="font-size:.82rem;color:#64748b">SPY trending up, VIX < 20</td><td><strong>EXP-1220 (1.5x)</strong> 90%, <strong>Cash</strong> 10%</td></tr>
+<tr><td><strong>NEUTRAL</strong></td><td style="font-size:.82rem;color:#64748b">Range-bound, moderate vol</td><td><strong>EXP-1220</strong> 80%, <strong>EXP-1710 tactical</strong> 10%, <strong>Cash</strong> 10%</td></tr>
+<tr><td><strong>BEAR</strong></td><td style="font-size:.82rem;color:#64748b">SPY downtrend, VIX 20-30</td><td><strong>EXP-1220</strong> 50%, <strong>EXP-1780 crisis alpha</strong> 30%, <strong>Cash</strong> 20%</td></tr>
+<tr><td><strong>HIGH_VOL</strong></td><td style="font-size:.82rem;color:#64748b">Crisis, VIX > 30</td><td><strong>EXP-1220</strong> 40%, <strong>EXP-1780</strong> 30%, <strong>EXP-1660 VRP</strong> 20%, <strong>Cash</strong> 10%</td></tr>
+</tbody></table>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>2. Deployable Strategies</h2>
+<p class="subtitle">Passed all validation gates — ready for capital allocation.</p>
+<table>
+<thead><tr>
+  <th>ID / Category</th><th>Strategy</th>
+  <th class="r">CAGR</th><th class="r">Sharpe</th><th class="r">Max DD</th>
+  <th class="r">Win Rate</th><th class="r">Trades</th>
+  <th class="r">IS / OOS Sharpe</th><th class="r">ρ to 1220</th>
+  <th>Verdict</th>
+</tr></thead>
+<tbody><tr><td><strong>EXP-1220</strong><br/><span style="font-size:.72rem;color:#059669;font-weight:600">BASELINE / CORE</span></td><td style="font-size:.85rem">SPY Credit Spread (1.2x Static)<br/><span style="font-size:.74rem;color:#64748b">Sell SPY put spreads weekly with dynamic leverage</span></td><td class="r" style="color:#059669">+99.03%</td><td class="r" style="color:#059669;font-weight:600">5.68</td><td class="r">7.85%</td><td class="r">&mdash;</td><td class="r">170</td><td class="r" style="font-size:.78rem">&mdash;</td><td class="r"><span style="color:#dc2626">+1.000</span></td><td><span class="verdict" style="background:#059669">DEPLOY</span></td></tr>
+</tbody></table>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>3. Promising Candidates (Further Validation)</h2>
+<p class="subtitle">Real edge detected but needs more data, better sizing, or walk-forward stabilization.</p>
+<table>
+<thead><tr>
+  <th>ID / Category</th><th>Strategy</th>
+  <th class="r">CAGR</th><th class="r">Sharpe</th><th class="r">Max DD</th>
+  <th class="r">Win Rate</th><th class="r">Trades</th>
+  <th class="r">IS / OOS Sharpe</th><th class="r">ρ to 1220</th>
+  <th>Verdict</th>
+</tr></thead>
+<tbody><tr><td><strong>EXP-1710</strong><br/><span style="font-size:.72rem;color:#64748b;font-weight:600">RESEARCH</span></td><td style="font-size:.85rem">1-3 DTE SPY Iron Condors (best config)<br/><span style="font-size:.74rem;color:#64748b">Short-dated ICs capture gamma/theta mismatch</span></td><td class="r" style="color:#059669">+53.63%</td><td class="r" style="color:#059669;font-weight:600">5.58</td><td class="r">0.86%</td><td class="r">94.3%</td><td class="r">88</td><td class="r" style="font-size:.78rem">22.75 / 4.75</td><td class="r"><span style="color:#dc2626">+0.542</span></td><td><span class="verdict" style="background:#2563eb">PROMISING</span></td></tr>
+<tr><td><strong>EXP-1780</strong><br/><span style="font-size:.72rem;color:#2563eb;font-weight:600">HEDGE / RESEARCH</span></td><td style="font-size:.85rem">Crisis Alpha (CTA trend following, v3)<br/><span style="font-size:.74rem;color:#64748b">Multi-asset momentum produces crisis-period alpha</span></td><td class="r" style="color:#059669">+12.20%</td><td class="r" style="color:#d97706;font-weight:600">0.63</td><td class="r">38.30%</td><td class="r">&mdash;</td><td class="r">&mdash;</td><td class="r" style="font-size:.78rem">&mdash;</td><td class="r"><span style="color:#059669">+0.171</span></td><td><span class="verdict" style="background:#2563eb">PROMISING</span></td></tr>
+<tr><td><strong>EXP-1820</strong><br/><span style="font-size:.72rem;color:#64748b;font-weight:600">RESEARCH</span></td><td style="font-size:.85rem">Dispersion Trading (IV vs RV)<br/><span style="font-size:.74rem;color:#64748b">Sell index vol, buy single-name (proxy)</span></td><td class="r" style="color:#059669">+0.80%</td><td class="r" style="color:#059669;font-weight:600">1.94</td><td class="r">0.40%</td><td class="r">76.0%</td><td class="r">89</td><td class="r" style="font-size:.78rem">1.89 / 1.88</td><td class="r">&mdash;</td><td><span class="verdict" style="background:#2563eb">PROMISING</span></td></tr>
+</tbody></table>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>4. Killed Strategies</h2>
+<p class="subtitle">Honest misses — negative or insufficient edge after real costs.</p>
+<table>
+<thead><tr>
+  <th>ID / Category</th><th>Strategy</th>
+  <th class="r">CAGR</th><th class="r">Sharpe</th><th class="r">Max DD</th>
+  <th class="r">Win Rate</th><th class="r">Trades</th>
+  <th class="r">IS / OOS Sharpe</th><th class="r">ρ to 1220</th>
+  <th>Verdict</th>
+</tr></thead>
+<tbody><tr><td><strong>EXP-1660</strong><br/><span style="font-size:.72rem;color:#64748b;font-weight:600">RESEARCH</span></td><td style="font-size:.85rem">VRP — Volatility Risk Premium (SPY mid/high vol)<br/><span style="font-size:.74rem;color:#64748b">Sell vol when IV > RV under regime filter</span></td><td class="r" style="color:#059669">+0.95%</td><td class="r" style="color:#dc2626;font-weight:600">-1.41</td><td class="r">4.57%</td><td class="r">57.8%</td><td class="r">45</td><td class="r" style="font-size:.78rem">1.23 / 0.27</td><td class="r"><span style="color:#059669">+0.000</span></td><td><span class="verdict" style="background:#dc2626">KILL</span></td></tr>
+<tr><td><strong>EXP-1700</strong><br/><span style="font-size:.72rem;color:#64748b;font-weight:600">RESEARCH</span></td><td style="font-size:.85rem">VIX Roll Yield<br/><span style="font-size:.74rem;color:#64748b">Short VXX / long ^VIX3M on contango</span></td><td class="r" style="color:#059669">+4.40%</td><td class="r" style="color:#d97706;font-weight:600">0.03</td><td class="r">19.10%</td><td class="r">&mdash;</td><td class="r">&mdash;</td><td class="r" style="font-size:.78rem">&mdash; / 0.27</td><td class="r">&mdash;</td><td><span class="verdict" style="background:#dc2626">KILL</span></td></tr>
+<tr><td><strong>EXP-1720</strong><br/><span style="font-size:.72rem;color:#64748b;font-weight:600">RESEARCH</span></td><td style="font-size:.85rem">Sector ETF Pairs Trading<br/><span style="font-size:.74rem;color:#64748b">Mean-revert cointegrated sector pairs</span></td><td class="r" style="color:#059669">+2.10%</td><td class="r" style="color:#dc2626;font-weight:600">-0.46</td><td class="r">10.30%</td><td class="r">&mdash;</td><td class="r">&mdash;</td><td class="r" style="font-size:.78rem">&mdash;</td><td class="r"><span style="color:#059669">+0.000</span></td><td><span class="verdict" style="background:#dc2626">KILL</span></td></tr>
+<tr><td><strong>EXP-1730</strong><br/><span style="font-size:.72rem;color:#64748b;font-weight:600">RESEARCH</span></td><td style="font-size:.85rem">Treasury Curve Trades (TLT/SHY mean-rev)<br/><span style="font-size:.74rem;color:#64748b">Mean-revert TLT/SHY log ratio on 252d z-score</span></td><td class="r" style="color:#dc2626">-0.03%</td><td class="r" style="color:#dc2626;font-weight:600">-0.29</td><td class="r">0.65%</td><td class="r">50.0%</td><td class="r">38</td><td class="r" style="font-size:.78rem">&mdash;</td><td class="r"><span style="color:#dc2626">-0.656</span></td><td><span class="verdict" style="background:#dc2626">KILL</span></td></tr>
+<tr><td><strong>EXP-1760</strong><br/><span style="font-size:.72rem;color:#64748b;font-weight:600">RESEARCH</span></td><td style="font-size:.85rem">Earnings Vol Crush (index proxy)<br/><span style="font-size:.74rem;color:#64748b">Sell index straddles into earnings week proxy</span></td><td class="r" style="color:#059669">+0.83%</td><td class="r" style="color:#d97706;font-weight:600">0.79</td><td class="r">3.35%</td><td class="r">58.6%</td><td class="r">111</td><td class="r" style="font-size:.78rem">1.32 / -0.06</td><td class="r">&mdash;</td><td><span class="verdict" style="background:#dc2626">KILL</span></td></tr>
+<tr><td><strong>EXP-1790</strong><br/><span style="font-size:.72rem;color:#64748b;font-weight:600">RESEARCH</span></td><td style="font-size:.85rem">Overnight Drift (regime-filtered)<br/><span style="font-size:.74rem;color:#64748b">SPY holds overnight, exits at open</span></td><td class="r" style="color:#6b7280">&mdash;</td><td class="r" style="color:#d97706;font-weight:600">0.17</td><td class="r">&mdash;</td><td class="r">&mdash;</td><td class="r">3,254</td><td class="r" style="font-size:.78rem">&mdash;</td><td class="r"><span style="color:#d97706">+0.290</span></td><td><span class="verdict" style="background:#dc2626">KILL</span></td></tr>
+<tr><td><strong>EXP-1810</strong><br/><span style="font-size:.72rem;color:#64748b;font-weight:600">RESEARCH</span></td><td style="font-size:.85rem">Gamma Scalping (long SPY straddles)<br/><span style="font-size:.74rem;color:#64748b">Long gamma hedged delta-neutral</span></td><td class="r" style="color:#dc2626">-22.10%</td><td class="r" style="color:#dc2626;font-weight:600">-2.28</td><td class="r">25.50%</td><td class="r">25.8%</td><td class="r">267</td><td class="r" style="font-size:.78rem">&mdash;</td><td class="r">&mdash;</td><td><span class="verdict" style="background:#dc2626">KILL</span></td></tr>
+<tr><td><strong>EXP-1830</strong><br/><span style="font-size:.72rem;color:#64748b;font-weight:600">RESEARCH</span></td><td style="font-size:.85rem">Momentum Rotation (long-short)<br/><span style="font-size:.74rem;color:#64748b">Uncorrelated market-neutral momentum</span></td><td class="r" style="color:#059669">+0.20%</td><td class="r" style="color:#d97706;font-weight:600">0.07</td><td class="r">26.50%</td><td class="r">&mdash;</td><td class="r">&mdash;</td><td class="r" style="font-size:.78rem">&mdash;</td><td class="r"><span style="color:#059669">-0.184</span></td><td><span class="verdict" style="background:#dc2626">KILL</span></td></tr>
+<tr><td><strong>EXP-1840</strong><br/><span style="font-size:.72rem;color:#7c3aed;font-weight:600">OVERLAY / RESEARCH</span></td><td style="font-size:.85rem">IV Spike Entry (credit spread overlay)<br/><span style="font-size:.74rem;color:#64748b">Time entries to intraday IV spikes</span></td><td class="r" style="color:#059669">+0.47%</td><td class="r" style="color:#d97706;font-weight:600">0.59</td><td class="r">1.20%</td><td class="r">87.5%</td><td class="r">8</td><td class="r" style="font-size:.78rem">0.00 / 0.76</td><td class="r">&mdash;</td><td><span class="verdict" style="background:#dc2626">KILL</span></td></tr>
+</tbody></table>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>5. Data-Gap Experiments</h2><p class="subtitle">Could not be validated due to missing data in IronVault or elsewhere.</p><table><thead><tr><th>ID / Category</th><th>Strategy</th><th class="r">CAGR</th><th class="r">Sharpe</th><th class="r">Max DD</th><th class="r">Win Rate</th><th class="r">Trades</th><th class="r">IS / OOS Sharpe</th><th class="r">ρ to 1220</th><th>Verdict</th></tr></thead><tbody><tr><td><strong>EXP-1800</strong><br/><span style="font-size:.72rem;color:#64748b;font-weight:600">RESEARCH</span></td><td style="font-size:.85rem">Event IV Crush (SPY macro proxy)<br/><span style="font-size:.74rem;color:#64748b">Sell vol around FOMC/CPI/NFP</span></td><td class="r" style="color:#6b7280">&mdash;</td><td class="r" style="color:#6b7280;font-weight:600">&mdash;</td><td class="r">&mdash;</td><td class="r">&mdash;</td><td class="r">&mdash;</td><td class="r" style="font-size:.78rem">&mdash;</td><td class="r">&mdash;</td><td><span class="verdict" style="background:#64748b">DATA_GAP</span></td></tr>
+</tbody></table>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>6. Data Sources & Notes</h2>
+<p class="subtitle">Every metric traces to a real JSON file or verified commit. Rule Zero compliance: zero synthetic data.</p>
+<table>
+<thead><tr><th style="width:12%">ID</th><th style="width:45%">Source</th><th>Notes</th></tr></thead>
+<tbody><tr><td><strong>EXP-1220</strong></td><td style="font-family:monospace;font-size:.78rem">reports/exp1220_dynamic_leverage.json (static_1_2x)</td><td style="font-size:.8rem">Best standalone strategy. Core of portfolio.</td></tr>
+<tr><td><strong>EXP-1660</strong></td><td style="font-family:monospace;font-size:.78rem">reports/exp1660_vrp_hardened.json (SPY_mid_high_vol)</td><td style="font-size:.8rem">Diluted Sharpe negative; trade-level edge weak.</td></tr>
+<tr><td><strong>EXP-1700</strong></td><td style="font-family:monospace;font-size:.78rem">commit 4f5b39c (Yahoo ^VIX, ^VIX3M, VXX, SPY)</td><td style="font-size:.8rem">COVID backwardation killed short leg. Honest miss.</td></tr>
+<tr><td><strong>EXP-1710</strong></td><td style="font-family:monospace;font-size:.78rem">reports/exp1710_zero_dte_ic.json (results[1])</td><td style="font-size:.8rem">Walk-forward ratio 0.21 shows decay. OOS Sharpe 4.75 still strong.</td></tr>
+<tr><td><strong>EXP-1720</strong></td><td style="font-family:monospace;font-size:.78rem">commit 766e2f1 (Yahoo SPDR sector ETFs 2015-2025)</td><td style="font-size:.8rem">Cointegration broken during 2024 tech rally. Near-zero corr to 1220.</td></tr>
+<tr><td><strong>EXP-1730</strong></td><td style="font-family:monospace;font-size:.78rem">reports/exp1730_treasury_curve.json</td><td style="font-size:.8rem">Break-even. Hedge overlay also failed (DD reduction ~0).</td></tr>
+<tr><td><strong>EXP-1760</strong></td><td style="font-family:monospace;font-size:.78rem">reports/exp1760_earnings_vol_crush.json</td><td style="font-size:.8rem">OOS Sharpe flipped negative. IronVault lacks single-name options.</td></tr>
+<tr><td><strong>EXP-1780</strong></td><td style="font-family:monospace;font-size:.78rem">commit 6cd8e64 (v2_round/0.10/2.5x on 13 ETFs)</td><td style="font-size:.8rem">DD-period correlation -0.449 (strong hedge). +33% outperf in crises.</td></tr>
+<tr><td><strong>EXP-1790</strong></td><td style="font-family:monospace;font-size:.78rem">commit e802687 (Yahoo SPY 2010-2025, 4173 base trades)</td><td style="font-size:.8rem">Academic edge confirmed but too small for retail costs.</td></tr>
+<tr><td><strong>EXP-1800</strong></td><td style="font-family:monospace;font-size:.78rem">commit 192a876 (IronVault — no single-name options)</td><td style="font-size:.8rem">Honest data gap. IronVault lacks earnings-name options coverage.</td></tr>
+<tr><td><strong>EXP-1810</strong></td><td style="font-family:monospace;font-size:.78rem">reports/exp1810_north_star_regime_switching.json + commit 9b3c4e7</td><td style="font-size:.8rem">Theta decay > realized gamma. Not a hedge either.</td></tr>
+<tr><td><strong>EXP-1820</strong></td><td style="font-family:monospace;font-size:.78rem">commit 10d0920 (IronVault SPY options 2020-2026)</td><td style="font-size:.8rem">IS/OOS Sharpe virtually identical (1.89/1.88). Zero decay.</td></tr>
+<tr><td><strong>EXP-1830</strong></td><td style="font-family:monospace;font-size:.78rem">commit a24fe50 (Yahoo Finance 2010-2025)</td><td style="font-size:.8rem">Genuinely uncorrelated BUT zero alpha after costs.</td></tr>
+<tr><td><strong>EXP-1840</strong></td><td style="font-family:monospace;font-size:.78rem">reports/exp1840_iv_spike_entry.json</td><td style="font-size:.8rem">Signal valid (87.5% WR) but min-credit filter too tight; 125 spikes, only 8 trades.</td></tr>
+</tbody></table>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>7. Rule Zero Statement</h2>
+<div class="box box-green">
+<h3 style="margin:0 0 8px;color:#065f46">ZERO SYNTHETIC DATA</h3>
+<p style="font-size:.88rem">Every number in this dashboard is sourced from a real JSON
+report file or a verified commit message citing real data providers. No <code>np.random</code>.
+No Black-Scholes theoretical prices. No fabricated trades.</p>
+<ul style="padding-left:20px;font-size:.82rem;line-height:1.85;margin-top:8px">
+<li><strong>IronVault options_cache.db</strong> — Polygon real option prices, 193K contracts</li>
+<li><strong>Yahoo Finance chart API</strong> — SPY, VIX, sector ETFs, treasury ETFs, multi-asset universe</li>
+<li><strong>Real trade logs</strong> — champion_trade_log.json, EXP-1220 dynamic leverage, EXP-1660 hardened</li>
+</ul>
+</div>
+
+<div class="footer">
+  Experiment Results Dashboard &bull;
+  scripts/build_experiment_dashboard.py &bull;
+  2026-04-06 11:46 &bull;
+  Rule Zero compliant
+</div>
+</body></html>

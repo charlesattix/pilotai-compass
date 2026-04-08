@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>EXP-1220 Leverage Sweep Comparison</title>
+<style>
+:root{--bg:#fff;--card:#f8f9fa;--border:#e2e8f0;--text:#1a1a2e;--muted:#64748b;
+  --green:#059669;--red:#dc2626;--blue:#2563eb;--amber:#d97706;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','SF Pro Display',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.55;
+  max-width:1400px;margin:0 auto;padding:28px;}
+h1{font-size:1.65rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:4px}
+h2{font-size:1.15rem;font-weight:700;margin:36px 0 12px;
+  padding-bottom:6px;border-bottom:2px solid var(--border);}
+.subtitle{color:var(--muted);font-size:.86rem;margin-bottom:20px}
+
+.sweep-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:14px;margin:16px 0;
+}
+.instance-card{
+  background:#fff;border:1px solid var(--border);border-radius:10px;
+  padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04);
+}
+.inst-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:8px;
+}
+.lev-badge{
+  font-size:1.6rem;font-weight:800;color:var(--blue);letter-spacing:-0.03em;
+}
+.badge{
+  padding:3px 9px;border-radius:4px;font-size:.66rem;font-weight:700;
+  color:#fff;text-transform:uppercase;letter-spacing:.04em;
+}
+.inst-name{font-size:.78rem;color:var(--muted);margin-bottom:10px}
+.metric-rows{margin:10px 0}
+.metric-row{
+  display:flex;justify-content:space-between;margin:4px 0;
+}
+.metric-row > div{flex:1}
+.metric-row .l{color:var(--muted);font-size:.68rem;text-transform:uppercase;display:block}
+.metric-row .v{font-weight:600;font-size:.86rem;display:block;margin-top:1px}
+
+.config-params{
+  margin:10px 0;padding:8px 10px;background:#f1f5f9;border-radius:6px;
+  font-size:.72rem;color:#374151;
+}
+.config-params > div{margin:2px 0}
+.last-run{font-size:.68rem;color:var(--muted);margin-top:6px}
+
+table{
+  width:100%;border-collapse:collapse;margin:12px 0;font-size:.84rem;
+  background:#fff;border:1px solid var(--border);border-radius:6px;overflow:hidden;
+}
+th{background:#f1f5f9;color:var(--muted);padding:8px 10px;text-align:left;
+  border-bottom:2px solid var(--border);font-size:.7rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.03em;}
+td{padding:7px 10px;border-bottom:1px solid #f1f5f9;text-align:left}
+.r{text-align:right}
+tr:hover td{background:#fafafa}
+
+.live-box{
+  background:#eff6ff;border-left:4px solid var(--blue);
+  padding:12px 16px;margin:14px 0;border-radius:6px;font-size:.86rem;
+}
+.rule-zero{
+  background:#f0fdf4;border-left:4px solid var(--green);
+  padding:12px 16px;margin:20px 0;border-radius:6px;font-size:.82rem;
+}
+.footer{
+  text-align:center;color:var(--muted);margin-top:40px;
+  padding-top:16px;border-top:1px solid var(--border);font-size:.76rem;
+}
+code{background:#f1f5f9;padding:2px 5px;border-radius:3px;font-size:.82em}
+</style></head><body>
+
+<h1>EXP-1220 Leverage Sweep Comparison</h1>
+<p class="subtitle">Side-by-side tracking of 1.5x / 2x / 3x / 4x / 5x paper configs &bull;
+Generated 2026-04-06 13:49:46</p>
+
+
+
+<h2>Per-Instance Cards</h2>
+<div class="sweep-grid">
+    <div class="instance-card">
+      <div class="inst-header">
+        <span class="lev-badge">1.5x</span>
+        <span class="badge" style="background:#64748b">UNKNOWN</span>
+      </div>
+      <div class="inst-name">EXP-1220 Paper Trading — 1.5× Static Leverage</div>
+
+      <div class="metric-rows">
+        <div class="metric-row">
+          <div><span class="l">Equity</span><span class="v">$100,000</span></div>
+          <div><span class="l">Return</span><span class="v" style="color:#64748b">+0.00%</span></div>
+        </div>
+        <div class="metric-row">
+          <div><span class="l">Realized P&amp;L</span><span class="v" style="color:#64748b">$0</span></div>
+          <div><span class="l">Unrealized</span><span class="v">$0</span></div>
+        </div>
+        <div class="metric-row">
+          <div><span class="l">Trades</span><span class="v">0</span></div>
+          <div><span class="l">Open</span><span class="v">0</span></div>
+        </div>
+        <div class="metric-row">
+          <div><span class="l">Wins / Losses</span><span class="v">0 / 0</span></div>
+          <div><span class="l">Win Rate</span><span class="v">0%</span></div>
+        </div>
+      </div>
+
+      <div class="config-params">
+        <div><strong>Risk/trade:</strong> 1.5%</div>
+        <div><strong>DD halt:</strong> 10.0%</div>
+        <div><strong>Max concurrent:</strong> 5</div>
+        <div><strong>VIX max:</strong> 35.0</div>
+      </div>
+
+      <div class="last-run">Last run: <code>never</code></div>
+    </div>
+    
+    <div class="instance-card">
+      <div class="inst-header">
+        <span class="lev-badge">2.0x</span>
+        <span class="badge" style="background:#64748b">UNKNOWN</span>
+      </div>
+      <div class="inst-name">EXP-1220 Paper Trading — 2× Static Leverage</div>
+
+      <div class="metric-rows">
+        <div class="metric-row">
+          <div><span class="l">Equity</span><span class="v">$100,000</span></div>
+          <div><span class="l">Return</span><span class="v" style="color:#64748b">+0.00%</span></div>
+        </div>
+        <div class="metric-row">
+          <div><span class="l">Realized P&amp;L</span><span class="v" style="color:#64748b">$0</span></div>
+          <div><span class="l">Unrealized</span><span class="v">$0</span></div>
+        </div>
+        <div class="metric-row">
+          <div><span class="l">Trades</span><span class="v">0</span></div>
+          <div><span class="l">Open</span><span class="v">0</span></div>
+        </div>
+        <div class="metric-row">
+          <div><span class="l">Wins / Losses</span><span class="v">0 / 0</span></div>
+          <div><span class="l">Win Rate</span><span class="v">0%</span></div>
+        </div>
+      </div>
+
+      <div class="config-params">
+        <div><strong>Risk/trade:</strong> 2.0%</div>
+        <div><strong>DD halt:</strong> 13.0%</div>
+        <div><strong>Max concurrent:</strong> 5</div>
+        <div><strong>VIX max:</strong> 35.0</div>
+      </div>
+
+      <div class="last-run">Last run: <code>never</code></div>
+    </div>
+    
+    <div class="instance-card">
+      <div class="inst-header">
+        <span class="lev-badge">3.0x</span>
+        <span class="badge" style="background:#d97706">WARNING</span>
+      </div>
+      <div class="inst-name">EXP-1220 Paper Trading — 3× Static Leverage</div>
+
+      <div class="metric-rows">
+        <div class="metric-row">
+          <div><span class="l">Equity</span><span class="v">$100,000</span></div>
+          <div><span class="l">Return</span><span class="v" style="color:#64748b">+0.00%</span></div>
+        </div>
+        <div class="metric-row">
+          <div><span class="l">Realized P&amp;L</span><span class="v" style="color:#64748b">$0</span></div>
+          <div><span class="l">Unrealized</span><span class="v">$0</span></div>
+        </div>
+        <div class="metric-row">
+          <div><span class="l">Trades</span><span class="v">0</span></div>
+          <div><span class="l">Open</span><span class="v">0</span></div>
+        </div>
+        <div class="metric-row">
+          <div><span class="l">Wins / Losses</span><span class="v">0 / 0</span></div>
+          <div><span class="l">Win Rate</span><span class="v">0%</span></div>
+        </div>
+      </div>
+
+      <div class="config-params">
+        <div><strong>Risk/trade:</strong> 3.0%</div>
+        <div><strong>DD halt:</strong> 16.0%</div>
+        <div><strong>Max concurrent:</strong> 5</div>
+        <div><strong>VIX max:</strong> 32.0</div>
+      </div>
+
+      <div class="last-run">Last run: <code>2026-04-06T13:46:03</code></div>
+    </div>
+    
+    <div class="instance-card">
+      <div class="inst-header">
+        <span class="lev-badge">4.0x</span>
+        <span class="badge" style="background:#64748b">UNKNOWN</span>
+      </div>
+      <div class="inst-name">EXP-1220 Paper Trading — 4× Static Leverage</div>
+
+      <div class="metric-rows">
+        <div class="metric-row">
+          <div><span class="l">Equity</span><span class="v">$100,000</span></div>
+          <div><span class="l">Return</span><span class="v" style="color:#64748b">+0.00%</span></div>
+        </div>
+        <div class="metric-row">
+          <div><span class="l">Realized P&amp;L</span><span class="v" style="color:#64748b">$0</span></div>
+          <div><span class="l">Unrealized</span><span class="v">$0</span></div>
+        </div>
+        <div class="metric-row">
+          <div><span class="l">Trades</span><span class="v">0</span></div>
+          <div><span class="l">Open</span><span class="v">0</span></div>
+        </div>
+        <div class="metric-row">
+          <div><span class="l">Wins / Losses</span><span class="v">0 / 0</span></div>
+          <div><span class="l">Win Rate</span><span class="v">0%</span></div>
+        </div>
+      </div>
+
+      <div class="config-params">
+        <div><strong>Risk/trade:</strong> 4.0%</div>
+        <div><strong>DD halt:</strong> 18.0%</div>
+        <div><strong>Max concurrent:</strong> 4</div>
+        <div><strong>VIX max:</strong> 30.0</div>
+      </div>
+
+      <div class="last-run">Last run: <code>never</code></div>
+    </div>
+    
+    <div class="instance-card">
+      <div class="inst-header">
+        <span class="lev-badge">5.0x</span>
+        <span class="badge" style="background:#059669">OK</span>
+      </div>
+      <div class="inst-name">EXP-1220 Paper Trading — 5× Static Leverage (STRESS SWEEP)</div>
+
+      <div class="metric-rows">
+        <div class="metric-row">
+          <div><span class="l">Equity</span><span class="v">$100,000</span></div>
+          <div><span class="l">Return</span><span class="v" style="color:#64748b">+0.00%</span></div>
+        </div>
+        <div class="metric-row">
+          <div><span class="l">Realized P&amp;L</span><span class="v" style="color:#64748b">$0</span></div>
+          <div><span class="l">Unrealized</span><span class="v">$0</span></div>
+        </div>
+        <div class="metric-row">
+          <div><span class="l">Trades</span><span class="v">0</span></div>
+          <div><span class="l">Open</span><span class="v">0</span></div>
+        </div>
+        <div class="metric-row">
+          <div><span class="l">Wins / Losses</span><span class="v">0 / 0</span></div>
+          <div><span class="l">Win Rate</span><span class="v">0%</span></div>
+        </div>
+      </div>
+
+      <div class="config-params">
+        <div><strong>Risk/trade:</strong> 5.0%</div>
+        <div><strong>DD halt:</strong> 20.0%</div>
+        <div><strong>Max concurrent:</strong> 3</div>
+        <div><strong>VIX max:</strong> 28.0</div>
+      </div>
+
+      <div class="last-run">Last run: <code>2026-04-06T13:46:13</code></div>
+    </div>
+    </div>
+
+<h2>Summary Comparison Table</h2>
+<table>
+<thead><tr>
+  <th>Leverage</th><th>Risk/Trade</th>
+  <th class="r">Equity</th><th class="r">Return</th><th class="r">Total P&amp;L</th>
+  <th class="r">Trades</th><th class="r">Open</th><th class="r">Win Rate</th>
+  <th class="r">DD Halt</th>
+</tr></thead>
+<tbody><tr><td><strong>1.5x</strong></td><td>1.5%</td><td class="r">$100,000</td><td class="r" style="color:#64748b">+0.00%</td><td class="r" style="color:#64748b">$0</td><td class="r">0</td><td class="r">0</td><td class="r">0%</td><td class="r">10.0%</td></tr>
+<tr><td><strong>2.0x</strong></td><td>2.0%</td><td class="r">$100,000</td><td class="r" style="color:#64748b">+0.00%</td><td class="r" style="color:#64748b">$0</td><td class="r">0</td><td class="r">0</td><td class="r">0%</td><td class="r">13.0%</td></tr>
+<tr><td><strong>3.0x</strong></td><td>3.0%</td><td class="r">$100,000</td><td class="r" style="color:#64748b">+0.00%</td><td class="r" style="color:#64748b">$0</td><td class="r">0</td><td class="r">0</td><td class="r">0%</td><td class="r">16.0%</td></tr>
+<tr><td><strong>4.0x</strong></td><td>4.0%</td><td class="r">$100,000</td><td class="r" style="color:#64748b">+0.00%</td><td class="r" style="color:#64748b">$0</td><td class="r">0</td><td class="r">0</td><td class="r">0%</td><td class="r">18.0%</td></tr>
+<tr><td><strong>5.0x</strong></td><td>5.0%</td><td class="r">$100,000</td><td class="r" style="color:#64748b">+0.00%</td><td class="r" style="color:#64748b">$0</td><td class="r">0</td><td class="r">0</td><td class="r">0%</td><td class="r">20.0%</td></tr>
+</tbody></table>
+
+<h2>Projected vs Realized (Validation Check)</h2>
+<p class="subtitle">Projected CAGRs extrapolated linearly from 1.5x validated backtest (99.2%).
+Extrapolation is unreliable at high leverage — real paper results are the point of this sweep.</p>
+<table>
+<thead><tr>
+  <th>Leverage</th>
+  <th class="r">Projected CAGR (extrap.)</th>
+  <th class="r">Realized (paper)</th>
+  <th class="r">Delta</th>
+</tr></thead>
+<tbody><tr><td><strong>1.5x</strong></td><td class="r">99.2%</td><td class="r">+0.00%</td><td class="r" style="color:#dc2626">-99.20%</td></tr>
+<tr><td><strong>2x</strong></td><td class="r">130%</td><td class="r">+0.00%</td><td class="r" style="color:#dc2626">-130.00%</td></tr>
+<tr><td><strong>3x</strong></td><td class="r">195%</td><td class="r">+0.00%</td><td class="r" style="color:#dc2626">-195.00%</td></tr>
+<tr><td><strong>4x</strong></td><td class="r">260%</td><td class="r">+0.00%</td><td class="r" style="color:#dc2626">-260.00%</td></tr>
+<tr><td><strong>5x</strong></td><td class="r">325%</td><td class="r">+0.00%</td><td class="r" style="color:#dc2626">-325.00%</td></tr>
+</tbody></table>
+
+<div class="rule-zero">
+<strong>Rule Zero:</strong> All metrics are computed from real state files
+written by the runner, which itself uses Alpaca live quotes and Yahoo
+Finance VIX/SPY data. No synthetic trades. No np.random. No Black-Scholes
+theoretical prices. Source files:
+<code>logs/{instance}_state.json</code>, <code>logs/{instance}_health.json</code>,
+<code>logs/{instance}_trade_journal.csv</code>.
+</div>
+
+<div class="footer">
+Leverage Sweep Comparison &bull; scripts/compare_leverage_sweep.py &bull;
+2026-04-06 13:49:46
+</div>
+</body></html>

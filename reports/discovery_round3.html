@@ -1,0 +1,95 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Discovery Round 3</title>
+<style>
+body { font-family: -apple-system, sans-serif; max-width: 1100px; margin: 2em auto; padding: 0 1em; }
+h1 { border-bottom: 2px solid #444; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+td, th { border: 1px solid #ccc; padding: 8px 12px; }
+th { background: #f0f0f0; text-align: left; }
+small { color: #666; }
+</style></head>
+<body>
+<h1>Strategy Discovery Round 3</h1>
+<p>Goal: find a strategy with standalone CAGR &gt; 10%, OOS Sharpe &gt; 0.5,
+and yearly correlation to EXP-1220 below 0.2.</p>
+<p><b>Rule Zero:</b> 100% real data — Yahoo Finance + IronVault.</p>
+
+<h2>Survivors</h2>
+<p><i>No idea cleared the bar (CAGR &gt; 10%, OOS Sharpe &gt; 0.5, ρ&lt;0.2 to 1220).</i></p>
+
+<h2>All ideas tested</h2>
+<table>
+<tr><th>Idea</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>ρ(1220, yearly)</th><th>N days/trades</th><th>Verdict</th></tr>
+<tr>
+<td><b>1_earnings_crush</b><br><small>IronVault contains zero single-name options. Index proxy (EXP-1760) achieved Trade Sharpe 0.79 but OOS Sharpe -0.06 and SPY corr -0.54 — failed walk-forward.</small></td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td><span style="background:#dc2626;color:white;padding:3px 8px;border-radius:4px;font-weight:600;font-size:.85em">DEAD</span></td>
+</tr><tr>
+<td><b>2_putw</b><br><small>Yahoo PUTW (real ETF prices)</small></td>
+<td>+7.2%</td>
+<td>0.25</td>
+<td>+28.4%</td>
+<td>-0.48</td>
+<td>2072</td>
+<td><span style="background:#dc2626;color:white;padding:3px 8px;border-radius:4px;font-weight:600;font-size:.85em">KILL</span></td>
+</tr><tr>
+<td><b>3_calendar</b><br><small>IronVault SPY option_daily</small></td>
+<td>-14.2%</td>
+<td>-1.92</td>
+<td>+65.9%</td>
+<td>-0.26</td>
+<td>1571</td>
+<td><span style="background:#dc2626;color:white;padding:3px 8px;border-radius:4px;font-weight:600;font-size:.85em">KILL</span></td>
+</tr><tr>
+<td><b>4_overnight_intraday → overnight_only</b><br><small></small></td>
+<td>+7.8%</td>
+<td>0.30</td>
+<td>+29.4%</td>
+<td>-0.01</td>
+<td>2073</td>
+<td><span style="background:#64748b;color:white;padding:3px 8px;border-radius:4px;font-weight:600;font-size:.85em">?</span></td>
+</tr><tr>
+<td><b>4_overnight_intraday → intraday_only</b><br><small></small></td>
+<td>+3.5%</td>
+<td>-0.00</td>
+<td>+24.6%</td>
+<td>-0.26</td>
+<td>2074</td>
+<td><span style="background:#64748b;color:white;padding:3px 8px;border-radius:4px;font-weight:600;font-size:.85em">?</span></td>
+</tr><tr>
+<td><b>4_overnight_intraday → daily_mean_reversion</b><br><small></small></td>
+<td>+3.9%</td>
+<td>0.03</td>
+<td>+27.2%</td>
+<td>+0.96</td>
+<td>2073</td>
+<td><span style="background:#64748b;color:white;padding:3px 8px;border-radius:4px;font-weight:600;font-size:.85em">?</span></td>
+</tr><tr>
+<td><b>5_seasonal</b><br><small>Yahoo SPY daily</small></td>
+<td>+7.9%</td>
+<td>0.34</td>
+<td>+17.6%</td>
+<td>+0.73</td>
+<td>2073</td>
+<td><span style="background:#dc2626;color:white;padding:3px 8px;border-radius:4px;font-weight:600;font-size:.85em">KILL</span></td>
+</tr>
+</table>
+
+<h2>Notes</h2>
+<ul>
+<li>Idea 1 (Earnings IV crush) was already killed in Wave 1 as EXP-1760/1800.
+IronVault has zero single-name options, and the index proxy failed walk-forward.</li>
+<li>Idea 2 (PUTW) uses the actual WisdomTree CBOE PutWrite ETF — every input is a real
+fund close on Yahoo Finance.</li>
+<li>Idea 3 (calendar spread) constructs front/back week ATM call calendars from real
+IronVault SPY option_daily bars at the same strike. PnL is the change in the debit.</li>
+<li>Idea 4 (overnight/intraday) uses real Yahoo SPY OHLC. Intraday minute data is only
+available for the last 60 days, so we use the multi-year overnight/intraday split that
+IS available.</li>
+<li>Idea 5 (seasonality) is trained on 2018-2022 and tested on 2023-2025 to avoid lookahead.</li>
+</ul>
+</body></html>

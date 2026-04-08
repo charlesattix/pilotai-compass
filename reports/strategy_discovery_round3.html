@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Strategy Discovery Round 3</title>
+<style>
+body { font-family: -apple-system, sans-serif; margin:0; padding:24px; background:#0f172a; color:#e2e8f0; }
+h1 { font-size:1.5rem; color:#f8fafc; margin-bottom:4px; }
+h2 { font-size:1.1rem; color:#94a3b8; margin-top:2rem; border-bottom:1px solid #334155; padding-bottom:6px; }
+.meta { color:#64748b; font-size:0.85rem; margin-bottom:20px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:20px; }
+.card { background:#1e293b; border-radius:8px; padding:14px; }
+.card-label { font-size:0.7rem; color:#64748b; text-transform:uppercase; }
+.card-value { font-size:1.3rem; font-weight:700; margin-top:3px; }
+.positive { color:#22c55e; } .negative { color:#ef4444; } .warn { color:#f59e0b; }
+table { width:100%; border-collapse:collapse; margin-bottom:14px; font-size:0.85rem; }
+th { background:#1e293b; padding:6px 10px; text-align:right; font-size:0.72rem; color:#94a3b8; text-transform:uppercase; border-bottom:2px solid #334155; }
+th:first-child { text-align:left; }
+td { padding:5px 10px; text-align:right; border-bottom:1px solid #1e293b; }
+td:first-child { text-align:left; }
+tr:hover { background:#1e293b40; }
+</style></head><body>
+<h1>Strategy Discovery — Round 3</h1>
+<p class="meta">5 Novel Strategies | All Real IronVault Data | WF: IS=2020-2022, OOS=2023-2025</p>
+
+<div class="grid">
+  <div class="card"><div class="card-label">Strategies Tested</div><div class="card-value">5</div></div>
+  <div class="card"><div class="card-label">Live (Passed)</div><div class="card-value positive">2</div></div>
+  <div class="card"><div class="card-label">Killed</div><div class="card-value negative">3</div></div>
+  <div class="card"><div class="card-label">Best OOS Sharpe</div><div class="card-value positive">3.15</div></div>
+  <div class="card"><div class="card-label">Lowest SPY Corr</div><div class="card-value positive">0.152</div></div>
+  <div class="card"><div class="card-label">Lowest 1220 Corr</div><div class="card-value positive">0.141</div></div>
+</div>
+
+<h2>Strategy Summary — All Strategies</h2>
+<table>
+<tr><th style="text-align:left">Strategy</th><th>Trades</th><th>P&L</th><th>Win%</th>
+    <th>Sharpe</th><th>Max DD</th><th>CAGR</th><th>SPY ρ</th><th>1220 ρ</th>
+    <th>OOS N</th><th>OOS SR</th><th>OOS DD</th><th>Status</th></tr>
+<tr>
+          <td style="text-align:left">Options Skew Trading</td>
+          <td>11</td>
+          <td style="color:#22c55e">$1,203</td>
+          <td>91%</td>
+          <td>1.32</td>
+          <td>0.0%</td>
+          <td>1.6%</td>
+          <td style="color:#ef4444">-0.654</td>
+          <td style="color:#ef4444">-0.547</td>
+          <td>11</td>
+          <td>1.32</td>
+          <td>0.0%</td>
+          <td style="color:#ef4444;font-weight:700">KILLED — Only 11 OOS trades (<15)</td>
+        </tr><tr>
+          <td style="text-align:left">VIX Mean-Reversion</td>
+          <td>35</td>
+          <td style="color:#22c55e">$99</td>
+          <td>83%</td>
+          <td>0.06</td>
+          <td>1.2%</td>
+          <td>0.0%</td>
+          <td style="color:#22c55e">+0.156</td>
+          <td style="color:#22c55e">+0.177</td>
+          <td>14</td>
+          <td>2.24</td>
+          <td>0.2%</td>
+          <td style="color:#ef4444;font-weight:700">KILLED — Only 14 OOS trades (<15)</td>
+        </tr><tr>
+          <td style="text-align:left">Sector IV Rotation</td>
+          <td>21</td>
+          <td style="color:#22c55e">$691</td>
+          <td>90%</td>
+          <td>2.34</td>
+          <td>0.1%</td>
+          <td>0.2%</td>
+          <td style="color:#ef4444">+0.611</td>
+          <td style="color:#ef4444">+0.505</td>
+          <td>20</td>
+          <td>3.15</td>
+          <td>0.1%</td>
+          <td style="color:#22c55e;font-weight:700">LIVE</td>
+        </tr><tr>
+          <td style="text-align:left">Calendar Spread Carry</td>
+          <td>93</td>
+          <td style="color:#22c55e">$2,619</td>
+          <td>42%</td>
+          <td>0.36</td>
+          <td>4.6%</td>
+          <td>0.4%</td>
+          <td style="color:#ef4444">-0.597</td>
+          <td style="color:#ef4444">-0.538</td>
+          <td>53</td>
+          <td>0.65</td>
+          <td>4.2%</td>
+          <td style="color:#22c55e;font-weight:700">LIVE</td>
+        </tr><tr>
+          <td style="text-align:left">Correlation Breakout (XLF/XLI)</td>
+          <td>17</td>
+          <td style="color:#22c55e">$8</td>
+          <td>82%</td>
+          <td>0.01</td>
+          <td>0.8%</td>
+          <td>0.0%</td>
+          <td style="color:#22c55e">-0.152</td>
+          <td style="color:#22c55e">-0.141</td>
+          <td>16</td>
+          <td>-0.10</td>
+          <td>0.8%</td>
+          <td style="color:#ef4444;font-weight:700">KILLED — Negative OOS Sharpe (-0.11)</td>
+        </tr>
+</table>
+
+
+        <h2>Options Skew Trading</h2>
+        <p style="color:#94a3b8;font-size:0.85rem">Sell put spreads when put skew > 1.3 — harvest overpriced fear premium</p>
+        <table>
+        <tr><th>Year</th><th>Trades</th><th>P&L</th><th>Win%</th><th>Sharpe</th><th>Max DD</th><th>Return</th></tr>
+        <tr>
+              <td>2025 (OOS)</td><td>11</td>
+              <td style="color:#22c55e">$1,203</td>
+              <td>91%</td><td>1.32</td>
+              <td>0.0%</td><td>1.2%</td>
+            </tr>
+        </table>
+        <h2>VIX Mean-Reversion</h2>
+        <p style="color:#94a3b8;font-size:0.85rem">Sell SPY puts when VIX z-score > 1.5 — harvest decaying fear premium</p>
+        <table>
+        <tr><th>Year</th><th>Trades</th><th>P&L</th><th>Win%</th><th>Sharpe</th><th>Max DD</th><th>Return</th></tr>
+        <tr>
+              <td>2020</td><td>5</td>
+              <td style="color:#ef4444">$-1,008</td>
+              <td>80%</td><td>-0.77</td>
+              <td>1.2%</td><td>-1.0%</td>
+            </tr><tr>
+              <td>2021</td><td>8</td>
+              <td style="color:#ef4444">$-45</td>
+              <td>75%</td><td>-0.11</td>
+              <td>0.4%</td><td>-0.0%</td>
+            </tr><tr>
+              <td>2022</td><td>8</td>
+              <td style="color:#22c55e">$540</td>
+              <td>75%</td><td>0.58</td>
+              <td>0.5%</td><td>0.5%</td>
+            </tr><tr>
+              <td>2023 (OOS)</td><td>6</td>
+              <td style="color:#22c55e">$219</td>
+              <td>100%</td><td>6.45</td>
+              <td>0.0%</td><td>0.2%</td>
+            </tr><tr>
+              <td>2024 (OOS)</td><td>4</td>
+              <td style="color:#22c55e">$150</td>
+              <td>100%</td><td>3.41</td>
+              <td>0.0%</td><td>0.1%</td>
+            </tr><tr>
+              <td>2025 (OOS)</td><td>4</td>
+              <td style="color:#22c55e">$243</td>
+              <td>75%</td><td>0.82</td>
+              <td>0.0%</td><td>0.2%</td>
+            </tr>
+        </table>
+        <h2>Sector IV Rotation</h2>
+        <p style="color:#94a3b8;font-size:0.85rem">Trade calmest sector (lowest 20d vol) — XLF/XLI/XLE rotation</p>
+        <table>
+        <tr><th>Year</th><th>Trades</th><th>P&L</th><th>Win%</th><th>Sharpe</th><th>Max DD</th><th>Return</th></tr>
+        <tr>
+              <td>2022</td><td>1</td>
+              <td style="color:#ef4444">$-110</td>
+              <td>0%</td><td>-110.00</td>
+              <td>0.0%</td><td>-0.1%</td>
+            </tr><tr>
+              <td>2023 (OOS)</td><td>5</td>
+              <td style="color:#22c55e">$115</td>
+              <td>100%</td><td>5.28</td>
+              <td>0.0%</td><td>0.1%</td>
+            </tr><tr>
+              <td>2024 (OOS)</td><td>7</td>
+              <td style="color:#22c55e">$230</td>
+              <td>100%</td><td>3.99</td>
+              <td>0.0%</td><td>0.2%</td>
+            </tr><tr>
+              <td>2025 (OOS)</td><td>8</td>
+              <td style="color:#22c55e">$456</td>
+              <td>88%</td><td>1.83</td>
+              <td>0.0%</td><td>0.5%</td>
+            </tr>
+        </table>
+        <h2>Calendar Spread Carry</h2>
+        <p style="color:#94a3b8;font-size:0.85rem">Sell front-month, buy back-month at same strike — theta differential</p>
+        <table>
+        <tr><th>Year</th><th>Trades</th><th>P&L</th><th>Win%</th><th>Sharpe</th><th>Max DD</th><th>Return</th></tr>
+        <tr>
+              <td>2020</td><td>11</td>
+              <td style="color:#ef4444">$-1,989</td>
+              <td>18%</td><td>-1.49</td>
+              <td>2.4%</td><td>-2.0%</td>
+            </tr><tr>
+              <td>2021</td><td>17</td>
+              <td style="color:#ef4444">$-1,503</td>
+              <td>29%</td><td>-0.76</td>
+              <td>2.0%</td><td>-1.5%</td>
+            </tr><tr>
+              <td>2022</td><td>12</td>
+              <td style="color:#22c55e">$3,315</td>
+              <td>67%</td><td>1.36</td>
+              <td>1.2%</td><td>3.3%</td>
+            </tr><tr>
+              <td>2023 (OOS)</td><td>19</td>
+              <td style="color:#ef4444">$-477</td>
+              <td>47%</td><td>-0.25</td>
+              <td>1.4%</td><td>-0.5%</td>
+            </tr><tr>
+              <td>2024 (OOS)</td><td>19</td>
+              <td style="color:#ef4444">$-2,313</td>
+              <td>32%</td><td>-1.05</td>
+              <td>2.9%</td><td>-2.3%</td>
+            </tr><tr>
+              <td>2025 (OOS)</td><td>15</td>
+              <td style="color:#22c55e">$5,586</td>
+              <td>60%</td><td>1.97</td>
+              <td>1.0%</td><td>5.6%</td>
+            </tr>
+        </table>
+        <h2>Correlation Breakout (XLF/XLI)</h2>
+        <p style="color:#94a3b8;font-size:0.85rem">Trade XLF/XLI pair divergence — sell puts on underperformer when corr breaks down</p>
+        <table>
+        <tr><th>Year</th><th>Trades</th><th>P&L</th><th>Win%</th><th>Sharpe</th><th>Max DD</th><th>Return</th></tr>
+        <tr>
+              <td>2022</td><td>1</td>
+              <td style="color:#22c55e">$104</td>
+              <td>100%</td><td>104.00</td>
+              <td>0.0%</td><td>0.1%</td>
+            </tr><tr>
+              <td>2024 (OOS)</td><td>9</td>
+              <td style="color:#22c55e">$432</td>
+              <td>89%</td><td>3.65</td>
+              <td>0.0%</td><td>0.4%</td>
+            </tr><tr>
+              <td>2025 (OOS)</td><td>7</td>
+              <td style="color:#ef4444">$-528</td>
+              <td>71%</td><td>-0.58</td>
+              <td>0.0%</td><td>-0.5%</td>
+            </tr>
+        </table>
+
+<div style="color:#64748b;font-size:0.78rem;margin-top:3rem">
+<p>Strategy Discovery Round 3 — compass/strategy_discovery_r3.py<br>
+All option prices from IronVault (options_cache.db). Zero synthetic data.<br>
+ETF daily prices from yfinance. Walk-forward: IS 2020-2022, OOS 2023-2025.<br>
+Kill: &lt;15 OOS trades OR negative OOS Sharpe.</p>
+</div></body></html>

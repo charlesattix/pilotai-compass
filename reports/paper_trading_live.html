@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>Paper Trading Live Monitor</title>
+<style>
+:root{
+  --bg:#fff;--card:#f8f9fa;--border:#e2e8f0;
+  --text:#1a1a2e;--muted:#64748b;
+  --green:#059669;--red:#dc2626;--blue:#2563eb;--amber:#d97706;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Inter','SF Pro Display',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.55;
+  max-width:1200px;margin:0 auto;padding:28px;
+}
+h1{font-size:1.6rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:4px}
+h2{
+  font-size:1.15rem;font-weight:700;margin:36px 0 12px;
+  padding-bottom:6px;border-bottom:2px solid var(--border);
+}
+h4{font-size:.95rem;font-weight:600;margin:18px 0 6px;color:#374151}
+.subtitle{color:var(--muted);font-size:.86rem;margin-bottom:20px}
+
+.hero{
+  background:linear-gradient(135deg,#eff6ff,#dbeafe);
+  border:1px solid var(--blue);border-radius:12px;
+  padding:22px 26px;margin:16px 0;
+}
+.hero .totals{display:flex;gap:32px;flex-wrap:wrap}
+.hero .stat .l{color:#1e40af;font-size:.74rem;text-transform:uppercase;letter-spacing:.04em}
+.hero .stat .v{font-weight:800;font-size:1.6rem;color:#0c4a6e;letter-spacing:-0.02em}
+
+.progress{
+  background:#f1f5f9;border-radius:6px;height:10px;margin:12px 0 4px;overflow:hidden;
+}
+.progress-bar{
+  height:100%;background:linear-gradient(90deg,#059669,#10b981);
+}
+
+.exp-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:14px;margin:16px 0;
+}
+.exp-card{
+  background:#fff;border:1px solid var(--border);border-radius:10px;
+  padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04);
+}
+.exp-card.error{border-color:#fecaca;background:#fef2f2}
+.exp-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:10px;font-size:1rem;
+}
+.badge{padding:3px 8px;border-radius:4px;font-size:.68rem;font-weight:700}
+.badge-green{background:#d1fae5;color:#065f46}
+.badge-red{background:#fee2e2;color:#991b1b}
+.equity{font-size:1.5rem;font-weight:800;letter-spacing:-0.02em}
+.return{font-size:1rem;font-weight:600;margin-bottom:8px}
+.metrics-row{
+  display:flex;justify-content:space-between;margin:6px 0;
+  font-size:.78rem;
+}
+.metrics-row .l{color:var(--muted);display:block;font-size:.68rem;text-transform:uppercase}
+.metrics-row .v{font-weight:600;display:block;font-size:.88rem;margin-top:1px}
+.orders-row{
+  font-size:.76rem;color:var(--muted);margin-top:8px;
+  padding-top:8px;border-top:1px solid var(--border);
+}
+.account-id{font-size:.68rem;color:var(--muted);margin-top:4px}
+.err-msg{color:#991b1b;font-size:.8rem;font-family:monospace}
+
+table{
+  width:100%;border-collapse:collapse;margin:12px 0;font-size:.84rem;
+  background:#fff;border:1px solid var(--border);border-radius:6px;overflow:hidden;
+}
+th{
+  background:#f1f5f9;color:var(--muted);padding:8px 10px;text-align:left;
+  border-bottom:2px solid var(--border);font-size:.7rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.03em;
+}
+td{padding:7px 10px;border-bottom:1px solid #f1f5f9;text-align:left}
+.r{text-align:right}
+tr:hover td{background:#fafafa}
+tr:last-child td{border-bottom:none}
+code{background:#f1f5f9;padding:2px 5px;border-radius:3px;font-size:.82em}
+.note{color:var(--muted);font-size:.82rem;font-style:italic;margin:6px 0}
+
+.footer{
+  text-align:center;color:var(--muted);margin-top:40px;
+  padding-top:16px;border-top:1px solid var(--border);font-size:.76rem;
+}
+.rule-zero{
+  background:#f0fdf4;border-left:4px solid var(--green);
+  padding:12px 16px;margin:20px 0;border-radius:6px;font-size:.82rem;
+}
+.rule-zero strong{color:#065f46}
+</style></head><body>
+
+<h1>Paper Trading Live Monitor</h1>
+<p class="subtitle">Real Alpaca paper account data &bull; 2026-04-06T13:16:54.650405 &bull; 22 days since launch</p>
+
+<!-- Hero totals -->
+<div class="hero">
+<div class="totals">
+  <div class="stat">
+    <div class="l">Total Equity</div>
+    <div class="v">$330,469.75</div>
+  </div>
+  <div class="stat">
+    <div class="l">Total Return</div>
+    <div class="v" style="color:#059669">+10.16%</div>
+  </div>
+  <div class="stat">
+    <div class="l">Unrealized P&amp;L</div>
+    <div class="v" style="color:#059669">$+11,597.00</div>
+  </div>
+  <div class="stat">
+    <div class="l">Open Positions</div>
+    <div class="v">20</div>
+  </div>
+  <div class="stat">
+    <div class="l">Orders Filled</div>
+    <div class="v">58</div>
+  </div>
+  <div class="stat">
+    <div class="l">Active Accounts</div>
+    <div class="v">3</div>
+  </div>
+</div>
+
+<!-- Validation progress bar -->
+<div style="margin-top:16px">
+<div style="display:flex;justify-content:space-between;font-size:.78rem;color:#1e40af">
+  <span>Paper Validation Window</span>
+  <span>22 / 57 days &bull; 35 remaining</span>
+</div>
+<div class="progress"><div class="progress-bar" style="width:38.6%"></div></div>
+<div style="font-size:.72rem;color:#64748b">2026-03-15 → 2026-05-11</div>
+</div>
+</div>
+
+<!-- Experiment cards -->
+<h2>Per-Experiment Status</h2>
+<div class="exp-grid">
+
+    <div class="exp-card">
+      <div class="exp-header">
+        <strong>EXP-305</strong>
+        <span class="badge badge-green">LIVE</span>
+      </div>
+      <div class="exp-body">
+        <div class="equity">$94,447.59</div>
+        <div class="return" style="color:#dc2626">-5.55%</div>
+        <div class="metrics-row">
+          <div><span class="l">Sharpe</span><span class="v" style="color:#dc2626">-2.03</span></div>
+          <div><span class="l">Max DD</span><span class="v" style="color:#dc2626">7.24%</span></div>
+          <div><span class="l">Vol</span><span class="v">11.11%</span></div>
+        </div>
+        <div class="metrics-row">
+          <div><span class="l">Positions</span><span class="v">0</span></div>
+          <div><span class="l">Unrealized</span><span class="v" style="color:#d97706">$+0</span></div>
+          <div><span class="l">Cash</span><span class="v">$0</span></div>
+        </div>
+        <div class="orders-row">
+          Orders since 2026-03-15:
+          <strong>18</strong> filled,
+          0 open, 0 cancelled
+        </div>
+        <div class="account-id">Account: <code>cached</code></div>
+      </div>
+    </div>
+    
+    <div class="exp-card">
+      <div class="exp-header">
+        <strong>EXP-400</strong>
+        <span class="badge badge-green">LIVE</span>
+      </div>
+      <div class="exp-body">
+        <div class="equity">$114,622.28</div>
+        <div class="return" style="color:#059669">+15.52%</div>
+        <div class="metrics-row">
+          <div><span class="l">Sharpe</span><span class="v" style="color:#059669">1.27</span></div>
+          <div><span class="l">Max DD</span><span class="v" style="color:#dc2626">20.85%</span></div>
+          <div><span class="l">Vol</span><span class="v">59.78%</span></div>
+        </div>
+        <div class="metrics-row">
+          <div><span class="l">Positions</span><span class="v">12</span></div>
+          <div><span class="l">Unrealized</span><span class="v" style="color:#059669">$+5,700</span></div>
+          <div><span class="l">Cash</span><span class="v">$0</span></div>
+        </div>
+        <div class="orders-row">
+          Orders since 2026-03-15:
+          <strong>22</strong> filled,
+          0 open, 0 cancelled
+        </div>
+        <div class="account-id">Account: <code>cached</code></div>
+      </div>
+    </div>
+    
+    <div class="exp-card">
+      <div class="exp-header">
+        <strong>EXP-401</strong>
+        <span class="badge badge-green">LIVE</span>
+      </div>
+      <div class="exp-body">
+        <div class="equity">$121,399.88</div>
+        <div class="return" style="color:#059669">+22.24%</div>
+        <div class="metrics-row">
+          <div><span class="l">Sharpe</span><span class="v" style="color:#059669">1.86</span></div>
+          <div><span class="l">Max DD</span><span class="v" style="color:#dc2626">16.13%</span></div>
+          <div><span class="l">Vol</span><span class="v">50.47%</span></div>
+        </div>
+        <div class="metrics-row">
+          <div><span class="l">Positions</span><span class="v">8</span></div>
+          <div><span class="l">Unrealized</span><span class="v" style="color:#059669">$+5,897</span></div>
+          <div><span class="l">Cash</span><span class="v">$0</span></div>
+        </div>
+        <div class="orders-row">
+          Orders since 2026-03-15:
+          <strong>18</strong> filled,
+          0 open, 0 cancelled
+        </div>
+        <div class="account-id">Account: <code>cached</code></div>
+      </div>
+    </div>
+    
+</div>
+
+<!-- Summary table -->
+<h2>Summary Metrics</h2>
+<table>
+<thead><tr>
+  <th>Experiment</th>
+  <th class="r">Equity</th>
+  <th class="r">Return</th>
+  <th class="r">CAGR</th>
+  <th class="r">Sharpe</th>
+  <th class="r">Max DD</th>
+  <th class="r">Vol</th>
+  <th class="r">Positions</th>
+  <th class="r">Fills</th>
+</tr></thead>
+<tbody><tr><td><strong>EXP-305</strong></td><td class="r">$94,447.59</td><td class="r" style="color:#dc2626">-5.55%</td><td class="r">-20.43%</td><td class="r" style="color:#dc2626">-2.03</td><td class="r">7.24%</td><td class="r">11.11%</td><td class="r">0</td><td class="r">18</td></tr>
+<tr><td><strong>EXP-400</strong></td><td class="r">$114,622.28</td><td class="r" style="color:#059669">+15.52%</td><td class="r">+78.10%</td><td class="r" style="color:#059669">1.27</td><td class="r">20.85%</td><td class="r">59.78%</td><td class="r">12</td><td class="r">22</td></tr>
+<tr><td><strong>EXP-401</strong></td><td class="r">$121,399.88</td><td class="r" style="color:#059669">+22.24%</td><td class="r">+123.27%</td><td class="r" style="color:#059669">1.86</td><td class="r">16.13%</td><td class="r">50.47%</td><td class="r">8</td><td class="r">18</td></tr>
+</tbody>
+</table>
+
+<!-- History trend -->
+
+
+<!-- Open positions -->
+<h2>Open Positions Detail</h2>
+<h4>EXP-305</h4><p class="note">No open positions.</p><h4>EXP-400</h4><p class="note">No open positions.</p><h4>EXP-401</h4><p class="note">No open positions.</p>
+
+<!-- Rule Zero -->
+<div class="rule-zero">
+<strong>Rule Zero:</strong> Every number in this dashboard is fetched live from
+Alpaca REST API or computed arithmetically from real equity history. No synthetic
+data. Sharpe uses arithmetic mean / std × √252 (not CAGR-based). Source: live API
+https://paper-api.alpaca.markets.
+</div>
+
+<h2>Failed Accounts</h2><ul><li><code>exp036</code>: unknown</li><li><code>exp059</code>: unknown</li><li><code>exp154</code>: unknown</li><li><code>exp880.example</code>: unknown</li></ul>
+
+<div class="footer">
+Live Paper Trading Monitor &bull; scripts/monitor_paper_trading.py &bull;
+Refreshed 2026-04-06T13:16:54.650405 &bull; Next run: next cron trigger (typically daily 16:05 ET)
+</div>
+</body></html>

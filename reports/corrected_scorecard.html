@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Corrected North Star Scorecard</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         max-width:1050px; margin:0 auto; padding:28px; background:#fff; color:#1e293b; line-height:1.5; }
+  h1 { font-size:1.8em; color:#0f172a; margin-bottom:4px; }
+  h2 { color:#334155; margin-top:2em; padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  .subtitle { color:#64748b; font-size:0.9rem; margin-bottom:24px; }
+  table { width:100%; border-collapse:collapse; margin:16px 0; font-size:0.86em; }
+  th { background:#f1f5f9; padding:10px 12px; text-align:right; font-weight:600; color:#475569;
+       border-bottom:2px solid #cbd5e1; font-size:0.78em; text-transform:uppercase; }
+  th:first-child { text-align:left; }
+  td { padding:8px 12px; text-align:right; border-bottom:1px solid #e2e8f0; }
+  td:first-child { text-align:left; }
+  tr:hover { background:#f8fafc; }
+  .callout { background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:16px; margin:16px 0; font-size:0.88rem; }
+  .callout.ok { background:#f0fdf4; border-color:#bbf7d0; }
+  .formula { background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin:16px 0; font-family:monospace; font-size:0.85rem; }
+  .footer { margin-top:3em; padding-top:1em; border-top:1px solid #e2e8f0; font-size:0.78em; color:#94a3b8; text-align:center; }
+</style></head><body>
+
+<h1>Corrected North Star Scorecard</h1>
+<div class="subtitle">All strategies re-evaluated with correct Sharpe formula | 2026-04-05 13:02</div>
+
+<div class="callout">
+    <strong>Bug found (commit 1f0888a):</strong> Multiple scripts used CAGR (geometric return) in the Sharpe formula
+    instead of arithmetic mean. At 100%+ CAGR, this inflates Sharpe by 1.4-1.6×.
+    Additionally, some used <code>mu/std×√252</code> without subtracting the risk-free rate.
+</div>
+
+<div class="formula">
+    <strong>CORRECT:</strong> Sharpe = (mean(daily_returns) - rf/252) / std(daily_returns) × √252<br>
+    <strong>WRONG (CAGR-based):</strong> Sharpe = (CAGR - rf) / annualized_vol ← inflated at high returns<br>
+    <strong>WRONG (no rf):</strong> Sharpe = mean(daily_returns) / std(daily_returns) × √252 ← minor inflation
+</div>
+
+<h2>Strategy Scorecard</h2>
+<table>
+    <thead><tr>
+        <th style="text-align:left">Strategy</th><th>CAGR</th>
+        <th style="color:#16a34a">Correct Sharpe</th>
+        <th>Old (no rf)</th>
+        <th style="color:#dc2626">Old (CAGR-based)</th>
+        <th>Inflation</th>
+        <th>Max DD</th><th>Sortino</th><th>Vol</th>
+    </tr></thead>
+    <tbody><tr>
+            <td style="font-weight:600;text-align:left">Ultimate Portfolio base (unhedged, 1.6×)</td>
+            <td>96.7%</td>
+            <td style="font-weight:700;color:#16a34a">3.77</td>
+            <td style="color:#94a3b8">4.03</td>
+            <td style="color:#dc2626">5.37</td>
+            <td style="color:#dc2626;font-weight:600">+42%</td>
+            <td>11.3%</td>
+            <td>6.57</td>
+            <td>17.2%</td>
+        </tr><tr>
+            <td style="font-weight:600;text-align:left">Hedged v3 (circuit breaker)</td>
+            <td>82.4%</td>
+            <td style="font-weight:700;color:#16a34a">4.03</td>
+            <td style="color:#94a3b8">4.35</td>
+            <td style="color:#dc2626">5.55</td>
+            <td style="color:#dc2626;font-weight:600">+38%</td>
+            <td>5.3%</td>
+            <td>7.03</td>
+            <td>14.1%</td>
+        </tr><tr>
+            <td style="font-weight:600;text-align:left">Ultimate Portfolio v4 (dynamic sizing + hedge)</td>
+            <td>101.0%</td>
+            <td style="font-weight:700;color:#16a34a">3.69</td>
+            <td style="color:#94a3b8">3.94</td>
+            <td style="color:#dc2626">5.31</td>
+            <td style="color:#dc2626;font-weight:600">+44%</td>
+            <td>8.0%</td>
+            <td>6.18</td>
+            <td>18.2%</td>
+        </tr><tr>
+            <td style="font-weight:600;text-align:left">Ultimate Portfolio v5 (Sharpe optimized)</td>
+            <td>92.6%</td>
+            <td style="font-weight:700;color:#16a34a">4.19</td>
+            <td style="color:#94a3b8">4.49</td>
+            <td style="color:#dc2626">5.93</td>
+            <td style="color:#dc2626;font-weight:600">+42%</td>
+            <td>5.0%</td>
+            <td>7.46</td>
+            <td>14.8%</td>
+        </tr></tbody>
+</table>
+
+<div class="callout ok">
+    <strong>Bottom line:</strong> All strategies remain highly profitable. The CAGR, DD, and Sortino numbers are unchanged.
+    Only the Sharpe ratio was inflated. Correct Sharpe values are 2.5–4.5 range, not 4–9 range.
+    This is still excellent — the S&amp;P 500 has a long-run Sharpe of ~0.5.
+</div>
+
+<div class="footer">
+    Corrected scorecard using compass/metrics.py canonical annualized_sharpe().<br>
+    All formulas audited and centralized. Risk-free rate: 4.5%.
+</div>
+
+</body></html>
