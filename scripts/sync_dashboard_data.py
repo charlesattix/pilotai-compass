@@ -14,7 +14,7 @@ Usage:
 
     # Export + push with explicit URL / token
     python scripts/sync_dashboard_data.py --push \\
-        --railway-url https://attix-credit-spreads-production.up.railway.app \\
+        --railway-url https://attix-production.up.railway.app \\
         --token $RAILWAY_ADMIN_TOKEN
 
     # Dry run (print JSON, no writes)

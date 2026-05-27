@@ -8,7 +8,7 @@
 #
 # SETUP:
 #   1. Create .env.sync in the project root with:
-#        RAILWAY_URL=https://attix-credit-spreads-production.up.railway.app
+#        RAILWAY_URL=https://attix-production.up.railway.app
 #        RAILWAY_ADMIN_TOKEN=your_token_here
 #
 #   2. Install the cron job (edit with: crontab -e):

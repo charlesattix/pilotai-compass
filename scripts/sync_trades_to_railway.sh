@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-BASE_URL="${RAILWAY_URL:-https://pilotai-credit-spreads-production.up.railway.app}"
+BASE_URL="${RAILWAY_URL:-https://attix-production.up.railway.app}"
 DB_PATH="${PILOTAI_DB:-data/pilotai.db}"
 
 echo "Extracting trades from local database..."
